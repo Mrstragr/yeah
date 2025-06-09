@@ -7,9 +7,32 @@ import { MobileNav } from "@/components/mobile-nav";
 import TashanWinHome from "@/pages/tashanwin-home";
 import CategoryPage from "@/pages/category";
 import WalletPage from "@/pages/wallet";
+import Login from "@/pages/auth/login";
+import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
+import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-[#ffd700] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/auth/login" component={Login} />
+        <Route path="/auth/register" component={Register} />
+        <Route component={Login} />
+      </Switch>
+    );
+  }
+
   return (
     <div className="pb-20">
       <Switch>

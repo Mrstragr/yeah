@@ -22,9 +22,11 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: number, newBalance: string): Promise<User | undefined>;
   updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined>;
+  updateUserLastLogin(userId: number): Promise<User | undefined>;
 
   // Game methods
   getAllGames(): Promise<Game[]>;
@@ -187,6 +189,13 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.phone === phone) return user;
+    }
+    return undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
       id: this.currentUserId++,
@@ -321,6 +330,17 @@ export class MemStorage implements IStorage {
     const user = this.users.get(userId);
     if (user) {
       user.walletBalance = newBalance;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      return user;
+    }
+    return undefined;
+  }
+
+  async updateUserLastLogin(userId: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.lastLoginAt = new Date();
       user.updatedAt = new Date();
       this.users.set(userId, user);
       return user;
