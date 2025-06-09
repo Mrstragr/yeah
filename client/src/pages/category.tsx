@@ -1,13 +1,20 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/game-card";
+import { GamePlayModal } from "@/components/game-play-modal";
+import { JackpotModal } from "@/components/jackpot-modal";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GameCategory, Game } from "@shared/schema";
 
 export default function CategoryPage() {
   const [, params] = useRoute("/category/:slug");
   const slug = params?.slug;
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [showJackpotModal, setShowJackpotModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [winAmount, setWinAmount] = useState<string>("0");
 
   const { data: category, isLoading: categoryLoading } = useQuery<GameCategory>({
     queryKey: [`/api/categories/${slug}`],
@@ -19,9 +26,17 @@ export default function CategoryPage() {
     enabled: !!slug,
   });
 
-  const handlePlayGame = (gameId: number) => {
-    console.log("Playing game:", gameId);
-    alert(`Launching game ${gameId}... (Demo mode)`);
+  const handlePlayGame = (game: Game) => {
+    setSelectedGame(game);
+    setShowGameModal(true);
+  };
+
+  const handleGameWin = (amount: string) => {
+    setWinAmount(amount);
+    setShowGameModal(false);
+    if (parseFloat(amount) > 10000) {
+      setShowJackpotModal(true);
+    }
   };
 
   if (categoryLoading) {
@@ -105,8 +120,10 @@ export default function CategoryPage() {
             </div>
           ) : games && games.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {games.map((game) => (
-                <GameCard key={game.id} game={game} onPlay={handlePlayGame} />
+              {games.map((game, index) => (
+                <div key={game.id} className="animate-slide-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <GameCard game={game} onPlay={handlePlayGame} />
+                </div>
               ))}
             </div>
           ) : (
@@ -162,6 +179,19 @@ export default function CategoryPage() {
           </div>
         </div>
       </section>
+
+      <GamePlayModal
+        isOpen={showGameModal}
+        onClose={() => setShowGameModal(false)}
+        game={selectedGame}
+        onWin={handleGameWin}
+      />
+
+      <JackpotModal 
+        isOpen={showJackpotModal} 
+        onClose={() => setShowJackpotModal(false)}
+        winAmount={parseFloat(winAmount).toLocaleString()}
+      />
     </div>
   );
 }

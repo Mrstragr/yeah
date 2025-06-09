@@ -71,13 +71,13 @@ export default function Home() {
             </p>
             
             {/* Jackpot Display */}
-            <div className="bg-gradient-to-r from-gaming-gold to-gaming-amber text-black rounded-2xl p-6 mb-8 max-w-md mx-auto animate-pulse-gold">
+            <div className="bg-gradient-to-r from-gaming-gold to-gaming-amber text-black rounded-2xl p-6 mb-8 max-w-md mx-auto animate-jackpot-pulse">
               <div className="flex items-center justify-center space-x-3">
-                <i className="fas fa-trophy text-2xl"></i>
+                <i className="fas fa-trophy text-2xl animate-bounce"></i>
                 <div>
                   <p className="font-semibold text-sm">MEGA JACKPOT</p>
                   <p className="font-orbitron font-black text-2xl">
-                    ${jackpotStats ? parseFloat(jackpotStats.totalJackpot).toLocaleString() : "2,847,392"}
+                    ${jackpotStats ? parseFloat(jackpotStats.totalJackpot).toLocaleString() : "7,731,392"}
                   </p>
                 </div>
               </div>
@@ -102,25 +102,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Winning Information */}
+      {/* Live Ticker */}
       <section className="bg-gradient-to-r from-gaming-charcoal to-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-amber-900/30 to-yellow-900/30 rounded-xl p-6 border border-gaming-gold/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="bg-gaming-gold rounded-full p-3">
-                  <i className="fas fa-trophy text-black text-xl"></i>
-                </div>
-                <div>
-                  <h3 className="font-orbitron font-bold text-gaming-gold text-lg">Latest Winning Information</h3>
-                  <p className="text-gray-300">Congratulations to our recent winners!</p>
-                </div>
-              </div>
-              <Button className="bg-gaming-gold hover:bg-gaming-amber text-black font-semibold">
-                View Details
-              </Button>
-            </div>
-          </div>
+          <LiveTicker />
         </div>
       </section>
 
@@ -197,8 +182,10 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {recommendedGames?.map((game) => (
-                <GameCard key={game.id} game={game} onPlay={handlePlayGame} />
+              {recommendedGames?.map((game, index) => (
+                <div key={game.id} className="animate-slide-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <GameCard game={game} onPlay={handlePlayGame} />
+                </div>
               ))}
             </div>
           )}
@@ -316,7 +303,14 @@ export default function Home() {
       <JackpotModal 
         isOpen={showJackpotModal} 
         onClose={() => setShowJackpotModal(false)}
-        winAmount="125,000"
+        winAmount={parseFloat(winAmount).toLocaleString()}
+      />
+
+      <GamePlayModal
+        isOpen={showGameModal}
+        onClose={() => setShowGameModal(false)}
+        game={selectedGame}
+        onWin={handleGameWin}
       />
     </div>
   );

@@ -22,12 +22,13 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
   const playGameMutation = useMutation({
     mutationFn: async (data: { gameId: number; userId: number; betAmount: string }) => {
-      const response = await apiRequest(`/api/games/${data.gameId}/play`, {
+      const response = await fetch(`/api/games/${data.gameId}/play`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: data.userId, betAmount: data.betAmount }),
       });
-      return response as GamePlayResult;
+      if (!response.ok) throw new Error('Failed to play game');
+      return response.json() as Promise<GamePlayResult>;
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/leaderboard"] });
