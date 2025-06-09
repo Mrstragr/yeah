@@ -61,13 +61,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate referral code
       const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      // Normalize phone number (ensure it starts with +91)
-      const normalizedPhone = data.phone.startsWith('+91') ? data.phone : `+91${data.phone}`;
-      
-      // Create user with welcome bonus
+      // Create user with welcome bonus (store phone as provided)
       const user = await storage.createUser({
         username: data.username,
-        phone: normalizedPhone,
+        phone: data.phone,
         email: data.email,
         password: hashedPassword,
         walletBalance: "500.00", // Welcome bonus
@@ -126,9 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user = await storage.getUserByPhone(data.phone.substring(3));
       }
       
-      console.log('Login attempt for phone:', data.phone);
-      console.log('User found:', user ? 'Yes' : 'No');
-      
+
       if (!user) {
         return res.status(401).json({ message: "Invalid phone number or password" });
       }
