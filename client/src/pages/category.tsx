@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/game-card";
 import { GamePlayModal } from "@/components/game-play-modal";
 import { JackpotModal } from "@/components/jackpot-modal";
+import { LiveCasino } from "@/components/live-casino";
+import { SportsBetting } from "@/components/sports-betting";
+import { LotteryGames } from "@/components/lottery-games";
+import { SlotMachines } from "@/components/slot-machines";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GameCategory, Game } from "@shared/schema";
 
@@ -39,12 +43,41 @@ export default function CategoryPage() {
     }
   };
 
+  // Handle specialized gambling categories
+  const renderSpecializedCategory = () => {
+    switch (slug?.toLowerCase()) {
+      case 'casino':
+      case 'live-casino':
+        return <LiveCasino />;
+      case 'sports':
+      case 'sports-betting':
+        return <SportsBetting />;
+      case 'lottery':
+        return <LotteryGames />;
+      case 'slots':
+        return <SlotMachines />;
+      default:
+        return null;
+    }
+  };
+
+  const specializedContent = renderSpecializedCategory();
+  if (specializedContent) {
+    return (
+      <div className="min-h-screen bg-casino-primary">
+        <div className="container mx-auto px-4 py-6">
+          {specializedContent}
+        </div>
+      </div>
+    );
+  }
+
   if (categoryLoading) {
     return (
-      <div className="min-h-screen bg-gaming-dark text-white flex items-center justify-center">
+      <div className="min-h-screen bg-casino-primary text-white flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-gaming-gold text-4xl mb-4"></i>
-          <p className="text-gray-400">Loading category...</p>
+          <div className="w-8 h-8 border-4 border-casino-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-casino-text-muted">Loading category...</p>
         </div>
       </div>
     );
@@ -52,11 +85,11 @@ export default function CategoryPage() {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gaming-dark text-white flex items-center justify-center">
+      <div className="min-h-screen bg-casino-primary text-white flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-exclamation-triangle text-gaming-gold text-4xl mb-4"></i>
-          <h1 className="font-orbitron font-bold text-2xl mb-2">Category Not Found</h1>
-          <p className="text-gray-400">The requested game category could not be found.</p>
+          <div className="text-casino-gold text-4xl mb-4">⚠️</div>
+          <h1 className="font-casino font-bold text-2xl mb-2 text-casino-gold">Category Not Found</h1>
+          <p className="text-casino-text-muted">The requested game category could not be found.</p>
         </div>
       </div>
     );
