@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GameCard } from "@/components/game-card";
 import { JackpotModal } from "@/components/jackpot-modal";
+import { GamePlayModal } from "@/components/game-play-modal";
+import { LiveTicker } from "@/components/live-ticker";
 import type { GameCategory, Game } from "@shared/schema";
 import type { TopEarner, JackpotStats } from "@/lib/types";
 
 export default function Home() {
   const [showJackpotModal, setShowJackpotModal] = useState(false);
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [winAmount, setWinAmount] = useState<string>("0");
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<GameCategory[]>({
     queryKey: ["/api/categories"],
@@ -27,10 +32,16 @@ export default function Home() {
     queryKey: ["/api/stats/jackpot"],
   });
 
-  const handlePlayGame = (gameId: number) => {
-    console.log("Playing game:", gameId);
-    // Simulate jackpot win chance
-    if (Math.random() < 0.1) {
+  const handlePlayGame = (game: Game) => {
+    setSelectedGame(game);
+    setShowGameModal(true);
+  };
+
+  const handleGameWin = (amount: string) => {
+    setWinAmount(amount);
+    setShowGameModal(false);
+    // Large wins trigger jackpot modal
+    if (parseFloat(amount) > 10000) {
       setShowJackpotModal(true);
     }
   };

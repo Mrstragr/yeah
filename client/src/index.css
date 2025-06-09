@@ -1,8 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
 
 :root {
   --background: hsl(0, 0%, 5%);
@@ -161,5 +162,48 @@
     to {
       text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
     }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes jackpotPulse {
+    0%, 100% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+    50% {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+  }
+
+  @keyframes winnerFlash {
+    0%, 100% {
+      background: linear-gradient(135deg, #ffd700, #ffb700);
+    }
+    50% {
+      background: linear-gradient(135deg, #fff700, #ffd700);
+    }
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 0.8s ease-out;
+  }
+
+  .animate-jackpot-pulse {
+    animation: jackpotPulse 3s ease-in-out infinite;
+  }
+
+  .animate-winner-flash {
+    animation: winnerFlash 2s ease-in-out infinite;
   }
 }
