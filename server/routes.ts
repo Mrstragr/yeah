@@ -70,10 +70,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletBalance: "500.00", // Welcome bonus
         bonusBalance: data.referralCode ? "700.00" : "500.00", // Extra for referral
         referralCode,
-        referredBy: data.referralCode,
-        firstName: "",
-        lastName: "",
+        referredBy: data.referralCode || null,
+        firstName: null,
+        lastName: null,
         kycStatus: "pending",
+        balance: "0.00",
+        avatar: null,
+        vipLevel: 0,
+        totalDeposit: "0.00",
+        totalWithdraw: "0.00",
+        totalBet: "0.00",
+        totalWin: "0.00",
+        loginBonus: false,
+        lastLoginAt: null,
       });
 
       // Generate JWT token
@@ -737,6 +746,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch live stats" });
+    }
+  });
+
+  // Wallet routes
+  app.post("/api/wallet/deposit", authenticateToken, async (req: any, res) => {
+    try {
+      const { amount, paymentMethod } = req.body;
+      const userId = req.user.userId;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      // Create wallet transaction
+      const transaction = await storage.createWalletTransaction({
+        userId,
+        type: "deposit",
+        amount: amount.toString(),
+        status: "pending",
+        paymentMethod: paymentMethod || "upi",
+        description: `Deposit of ₹${amount}`,
+      });
+
+      // Simulate successful payment after 2 seconds
+      setTimeout(async () => {
+        await storage.updateWalletTransactionStatus(transaction.id, "completed");
+        const currentUser = await storage.getUser(userId);
+        if (currentUser) {
+          const newBalance = (parseFloat(currentUser.walletBalance) + parseFloat(amount.toString())).toFixed(2);
+          await storage.updateUserWalletBalance(userId, newBalance);
+        }
+      }, 2000);
+
+      res.json({
+        transactionId: transaction.id,
+        status: "pending",
+        amount: transaction.amount,
+        message: "Deposit initiated successfully"
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Deposit failed" });
+    }
+  });
+
+  app.post("/api/wallet/withdraw", authenticateToken, async (req: any, res) => {
+    try {
+      const { amount, bankAccount } = req.body;
+      const userId = req.user.userId;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (parseFloat(user.walletBalance) < parseFloat(amount.toString())) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      if (user.kycStatus !== "verified") {
+        return res.status(400).json({ message: "KYC verification required for withdrawals" });
+      }
+
+      // Create wallet transaction
+      const transaction = await storage.createWalletTransaction({
+        userId,
+        type: "withdraw",
+        amount: amount.toString(),
+        status: "pending",
+        paymentMethod: "bank_transfer",
+        description: `Withdrawal of ₹${amount} to ${bankAccount}`,
+      });
+
+      // Deduct amount from wallet
+      const newBalance = (parseFloat(user.walletBalance) - parseFloat(amount.toString())).toFixed(2);
+      await storage.updateUserWalletBalance(userId, newBalance);
+
+      res.json({
+        transactionId: transaction.id,
+        status: "pending",
+        amount: transaction.amount,
+        message: "Withdrawal request submitted successfully"
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Withdrawal failed" });
+    }
+  });
+
+  app.get("/api/wallet/transactions", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user.userId;
+      const transactions = await storage.getUserWalletTransactions(userId);
+      res.json(transactions);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to fetch transactions" });
+    }
+  });
+
+  // Game play route
+  app.post("/api/games/:id/play", authenticateToken, async (req: any, res) => {
+    try {
+      const { betAmount } = req.body;
+      const gameId = parseInt(req.params.id);
+      const userId = req.user.userId;
+      
+      if (!betAmount || betAmount <= 0) {
+        return res.status(400).json({ message: "Invalid bet amount" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (parseFloat(user.walletBalance) < parseFloat(betAmount.toString())) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Simulate game result (30% win chance)
+      const isWin = Math.random() < 0.3;
+      const winAmount = isWin ? (parseFloat(betAmount.toString()) * 2).toFixed(2) : "0.00";
+      
+      // Create game history
+      await storage.addGameHistory({
+        userId,
+        gameId,
+        betAmount: betAmount.toString(),
+        winAmount,
+      });
+
+      // Update wallet balance
+      const betAmountFloat = parseFloat(betAmount.toString());
+      const winAmountFloat = parseFloat(winAmount);
+      const newBalance = (parseFloat(user.walletBalance) - betAmountFloat + winAmountFloat).toFixed(2);
+      await storage.updateUserWalletBalance(userId, newBalance);
+
+      res.json({
+        result: isWin ? "win" : "lose",
+        betAmount: betAmount.toString(),
+        winAmount,
+        newBalance,
+        message: isWin ? `Congratulations! You won ₹${winAmount}` : "Better luck next time!"
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Game play failed" });
     }
   });
 

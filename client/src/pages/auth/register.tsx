@@ -48,7 +48,7 @@ export default function Register() {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       localStorage.setItem('token', data.token);
       toast({
         title: "Registration Successful",
