@@ -3,8 +3,179 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertGameSchema, insertGameCategorySchema, insertUserGameHistorySchema } from "@shared/schema";
 import { z } from "zod";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "tashanwin-secret-key-2025";
+
+// Authentication middleware
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// Validation schemas
+const loginSchema = z.object({
+  phone: z.string().min(10),
+  password: z.string().min(6),
+});
+
+const registerSchema = z.object({
+  username: z.string().min(3),
+  phone: z.string().min(10),
+  email: z.string().email(),
+  password: z.string().min(6),
+  referralCode: z.string().optional(),
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const data = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByPhone(data.phone);
+      if (existingUser) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+
+      const existingEmail = await storage.getUserByEmail(data.email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      // Generate referral code
+      const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      // Create user with welcome bonus
+      const user = await storage.createUser({
+        username: data.username,
+        phone: data.phone,
+        email: data.email,
+        password: hashedPassword,
+        walletBalance: "500.00", // Welcome bonus
+        bonusBalance: data.referralCode ? "700.00" : "500.00", // Extra for referral
+        referralCode,
+        referredBy: data.referralCode,
+        firstName: "",
+        lastName: "",
+        kycStatus: "pending",
+      });
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: user.id, phone: user.phone },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          phone: user.phone,
+          email: user.email,
+          walletBalance: user.walletBalance,
+          bonusBalance: user.bonusBalance,
+          kycStatus: user.kycStatus,
+          referralCode: user.referralCode,
+        },
+        token,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Registration failed" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const data = loginSchema.parse(req.body);
+      
+      // Find user by phone
+      const user = await storage.getUserByPhone(data.phone);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid phone number or password" });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(data.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid phone number or password" });
+      }
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: user.id, phone: user.phone },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          phone: user.phone,
+          email: user.email,
+          walletBalance: user.walletBalance,
+          bonusBalance: user.bonusBalance,
+          kycStatus: user.kycStatus,
+          referralCode: user.referralCode,
+          vipLevel: user.vipLevel,
+        },
+        token,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Login failed" });
+    }
+  });
+
+  app.get("/api/auth/user", authenticateToken, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        phone: user.phone,
+        email: user.email,
+        walletBalance: user.walletBalance,
+        bonusBalance: user.bonusBalance,
+        kycStatus: user.kycStatus,
+        referralCode: user.referralCode,
+        vipLevel: user.vipLevel,
+        totalDeposit: user.totalDeposit,
+        totalWithdraw: user.totalWithdraw,
+        totalBet: user.totalBet,
+        totalWin: user.totalWin,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.post("/api/auth/logout", authenticateToken, (req, res) => {
+    res.json({ message: "Logged out successfully" });
+  });
   // Game categories routes
   app.get("/api/categories", async (req, res) => {
     try {
