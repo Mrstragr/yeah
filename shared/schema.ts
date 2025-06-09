@@ -1,5 +1,6 @@
 import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 import { z } from "zod";
 
 export const users = pgTable("users", {
@@ -91,6 +92,26 @@ export const insertPromotionSchema = createInsertSchema(promotions).pick({
   startDate: true,
   endDate: true,
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  gameHistory: many(userGameHistory),
+}));
+
+export const gamesRelations = relations(games, ({ many }) => ({
+  gameHistory: many(userGameHistory),
+}));
+
+export const userGameHistoryRelations = relations(userGameHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [userGameHistory.userId],
+    references: [users.id],
+  }),
+  game: one(games, {
+    fields: [userGameHistory.gameId],
+    references: [games.id],
+  }),
+}));
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;

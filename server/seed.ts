@@ -1,71 +1,18 @@
-import { 
-  users, games, gameCategories, userGameHistory, promotions,
-  type User, type InsertUser, type Game, type InsertGame, 
-  type GameCategory, type InsertGameCategory, type UserGameHistory, 
-  type InsertUserGameHistory, type Promotion, type InsertPromotion 
-} from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, desc } from "drizzle-orm";
+import { users, games, gameCategories, userGameHistory, promotions } from "@shared/schema";
+import type { InsertUser, InsertGame, InsertGameCategory, InsertUserGameHistory, InsertPromotion } from "@shared/schema";
 
-export interface IStorage {
-  // User methods
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserBalance(userId: number, newBalance: string): Promise<User | undefined>;
+async function seedDatabase() {
+  try {
+    console.log("Starting database seeding...");
 
-  // Game methods
-  getAllGames(): Promise<Game[]>;
-  getGamesByCategory(category: string): Promise<Game[]>;
-  getGame(id: number): Promise<Game | undefined>;
-  getRecommendedGames(limit?: number): Promise<Game[]>;
-  createGame(game: InsertGame): Promise<Game>;
+    // Clear existing data
+    await db.delete(userGameHistory);
+    await db.delete(promotions);
+    await db.delete(games);
+    await db.delete(gameCategories);
+    await db.delete(users);
 
-  // Game category methods
-  getAllGameCategories(): Promise<GameCategory[]>;
-  getGameCategory(slug: string): Promise<GameCategory | undefined>;
-  createGameCategory(category: InsertGameCategory): Promise<GameCategory>;
-
-  // User game history methods
-  getUserGameHistory(userId: number): Promise<UserGameHistory[]>;
-  getTodaysTopEarners(limit?: number): Promise<(UserGameHistory & { username: string, gameTitle: string })[]>;
-  addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory>;
-
-  // Promotion methods
-  getActivePromotions(): Promise<Promotion[]>;
-  getPromotion(id: number): Promise<Promotion | undefined>;
-  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
-}
-
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private games: Map<number, Game>;
-  private gameCategories: Map<number, GameCategory>;
-  private userGameHistory: Map<number, UserGameHistory>;
-  private promotions: Map<number, Promotion>;
-  private currentUserId: number;
-  private currentGameId: number;
-  private currentCategoryId: number;
-  private currentHistoryId: number;
-  private currentPromotionId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.games = new Map();
-    this.gameCategories = new Map();
-    this.userGameHistory = new Map();
-    this.promotions = new Map();
-    this.currentUserId = 1;
-    this.currentGameId = 1;
-    this.currentCategoryId = 1;
-    this.currentHistoryId = 1;
-    this.currentPromotionId = 1;
-
-    this.initializeData();
-  }
-
-  private initializeData() {
     // Initialize game categories
     const categories: InsertGameCategory[] = [
       { name: "Lobby", slug: "lobby", description: "Main Hub", icon: "fas fa-home", color: "from-gaming-gold to-gaming-amber" },
@@ -79,7 +26,8 @@ export class MemStorage implements IStorage {
       { name: "Fishing", slug: "fishing", description: "Arcade", icon: "fas fa-fish", color: "from-cyan-500 to-blue-600" },
     ];
 
-    categories.forEach(category => this.createGameCategory(category));
+    await db.insert(gameCategories).values(categories);
+    console.log("Categories seeded successfully");
 
     // Initialize games
     const initialGames: InsertGame[] = [
@@ -404,7 +352,28 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    initialGames.forEach(game => this.createGame(game));
+    await db.insert(games).values(initialGames);
+    console.log("Games seeded successfully");
+
+    // Initialize users
+    const demoUsers: InsertUser[] = [
+      { username: "Player_7849", email: "player7849@example.com", password: "hashed_password" },
+      { username: "LuckyWinner23", email: "lucky@example.com", password: "hashed_password" },
+      { username: "GamerQueen", email: "gamerqueen@example.com", password: "hashed_password" }
+    ];
+
+    await db.insert(users).values(demoUsers);
+    console.log("Users seeded successfully");
+
+    // Add some game history for leaderboard
+    const gameHistory: InsertUserGameHistory[] = [
+      { userId: 1, gameId: 1, betAmount: "1000.00", winAmount: "42850.00" },
+      { userId: 2, gameId: 2, betAmount: "500.00", winAmount: "28320.00" },
+      { userId: 3, gameId: 3, betAmount: "750.00", winAmount: "19450.00" }
+    ];
+
+    await db.insert(userGameHistory).values(gameHistory);
+    console.log("Game history seeded successfully");
 
     // Initialize promotions
     const initialPromotions: InsertPromotion[] = [
@@ -418,334 +387,26 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    initialPromotions.forEach(promotion => this.createPromotion(promotion));
+    await db.insert(promotions).values(initialPromotions);
+    console.log("Promotions seeded successfully");
 
-    // Initialize demo users and game history
-    const demoUsers: InsertUser[] = [
-      { username: "Player_7849", email: "player7849@example.com", password: "hashed_password" },
-      { username: "LuckyWinner23", email: "lucky@example.com", password: "hashed_password" },
-      { username: "GamerQueen", email: "gamerqueen@example.com", password: "hashed_password" }
-    ];
-
-    demoUsers.forEach(user => this.createUser(user));
-
-    // Add some game history for leaderboard
-    const gameHistory: InsertUserGameHistory[] = [
-      { userId: 1, gameId: 1, betAmount: "1000.00", winAmount: "42850.00" },
-      { userId: 2, gameId: 2, betAmount: "500.00", winAmount: "28320.00" },
-      { userId: 3, gameId: 3, betAmount: "750.00", winAmount: "19450.00" }
-    ];
-
-    gameHistory.forEach(history => this.addGameHistory(history));
+    console.log("Database seeding completed successfully!");
+  } catch (error) {
+    console.error("Error seeding database:", error);
+    throw error;
   }
+}
 
-  // User methods
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = {
-      ...insertUser,
-      id,
-      balance: "0.00",
-      isActive: true,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.balance = newBalance;
-      this.users.set(userId, user);
-      return user;
-    }
-    return undefined;
-  }
-
-  // Game methods
-  async getAllGames(): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(game => game.isActive);
-  }
-
-  async getGamesByCategory(category: string): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(game => 
-      game.isActive && game.category === category
-    );
-  }
-
-  async getGame(id: number): Promise<Game | undefined> {
-    return this.games.get(id);
-  }
-
-  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
-    const allGames = Array.from(this.games.values()).filter(game => game.isActive);
-    return allGames.slice(0, limit);
-  }
-
-  async createGame(insertGame: InsertGame): Promise<Game> {
-    const id = this.currentGameId++;
-    const game: Game = {
-      ...insertGame,
-      id,
-      isActive: true
-    };
-    this.games.set(id, game);
-    return game;
-  }
-
-  // Game category methods
-  async getAllGameCategories(): Promise<GameCategory[]> {
-    return Array.from(this.gameCategories.values()).filter(category => category.isActive);
-  }
-
-  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
-    return Array.from(this.gameCategories.values()).find(category => 
-      category.slug === slug && category.isActive
-    );
-  }
-
-  async createGameCategory(insertCategory: InsertGameCategory): Promise<GameCategory> {
-    const id = this.currentCategoryId++;
-    const category: GameCategory = {
-      ...insertCategory,
-      id,
-      isActive: true
-    };
-    this.gameCategories.set(id, category);
-    return category;
-  }
-
-  // User game history methods
-  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
-    return Array.from(this.userGameHistory.values()).filter(history => 
-      history.userId === userId
-    );
-  }
-
-  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const todaysHistory = Array.from(this.userGameHistory.values())
-      .filter(history => history.playedAt >= today)
-      .sort((a, b) => parseFloat(b.winAmount) - parseFloat(a.winAmount))
-      .slice(0, limit);
-
-    return todaysHistory.map(history => {
-      const user = this.users.get(history.userId);
-      const game = this.games.get(history.gameId);
-      return {
-        ...history,
-        username: user?.username || "Unknown",
-        gameTitle: game?.title || "Unknown Game"
-      };
+if (require.main === module) {
+  seedDatabase()
+    .then(() => {
+      console.log("Seeding finished");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("Seeding failed:", error);
+      process.exit(1);
     });
-  }
-
-  async addGameHistory(insertHistory: InsertUserGameHistory): Promise<UserGameHistory> {
-    const id = this.currentHistoryId++;
-    const history: UserGameHistory = {
-      ...insertHistory,
-      id,
-      playedAt: new Date()
-    };
-    this.userGameHistory.set(id, history);
-    return history;
-  }
-
-  // Promotion methods
-  async getActivePromotions(): Promise<Promotion[]> {
-    const now = new Date();
-    return Array.from(this.promotions.values()).filter(promotion => 
-      promotion.isActive && 
-      promotion.startDate <= now && 
-      promotion.endDate >= now
-    );
-  }
-
-  async getPromotion(id: number): Promise<Promotion | undefined> {
-    return this.promotions.get(id);
-  }
-
-  async createPromotion(insertPromotion: InsertPromotion): Promise<Promotion> {
-    const id = this.currentPromotionId++;
-    const promotion: Promotion = {
-      ...insertPromotion,
-      id,
-      isActive: true
-    };
-    this.promotions.set(id, promotion);
-    return promotion;
-  }
 }
 
-export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    const [user] = await db
-      .update(users)
-      .set({ balance: newBalance })
-      .where(eq(users.id, userId))
-      .returning();
-    return user || undefined;
-  }
-
-  async getAllGames(): Promise<Game[]> {
-    return await db.select().from(games).where(eq(games.isActive, true));
-  }
-
-  async getGamesByCategory(category: string): Promise<Game[]> {
-    return await db
-      .select()
-      .from(games)
-      .where(and(eq(games.category, category), eq(games.isActive, true)));
-  }
-
-  async getGame(id: number): Promise<Game | undefined> {
-    const [game] = await db.select().from(games).where(eq(games.id, id));
-    return game || undefined;
-  }
-
-  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
-    return await db
-      .select()
-      .from(games)
-      .where(eq(games.isActive, true))
-      .limit(limit);
-  }
-
-  async createGame(game: InsertGame): Promise<Game> {
-    const [newGame] = await db
-      .insert(games)
-      .values(game)
-      .returning();
-    return newGame;
-  }
-
-  async getAllGameCategories(): Promise<GameCategory[]> {
-    return await db.select().from(gameCategories).where(eq(gameCategories.isActive, true));
-  }
-
-  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
-    const [category] = await db
-      .select()
-      .from(gameCategories)
-      .where(and(eq(gameCategories.slug, slug), eq(gameCategories.isActive, true)));
-    return category || undefined;
-  }
-
-  async createGameCategory(category: InsertGameCategory): Promise<GameCategory> {
-    const [newCategory] = await db
-      .insert(gameCategories)
-      .values(category)
-      .returning();
-    return newCategory;
-  }
-
-  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
-    return await db
-      .select()
-      .from(userGameHistory)
-      .where(eq(userGameHistory.userId, userId));
-  }
-
-  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const results = await db
-      .select({
-        id: userGameHistory.id,
-        userId: userGameHistory.userId,
-        gameId: userGameHistory.gameId,
-        betAmount: userGameHistory.betAmount,
-        winAmount: userGameHistory.winAmount,
-        playedAt: userGameHistory.playedAt,
-        username: users.username,
-        gameTitle: games.title,
-      })
-      .from(userGameHistory)
-      .leftJoin(users, eq(userGameHistory.userId, users.id))
-      .leftJoin(games, eq(userGameHistory.gameId, games.id))
-      .where(gte(userGameHistory.playedAt, today))
-      .orderBy(desc(userGameHistory.winAmount))
-      .limit(limit);
-
-    return results.map(result => ({
-      ...result,
-      username: result.username || "Unknown",
-      gameTitle: result.gameTitle || "Unknown Game"
-    }));
-  }
-
-  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
-    const [newHistory] = await db
-      .insert(userGameHistory)
-      .values(history)
-      .returning();
-    return newHistory;
-  }
-
-  async getActivePromotions(): Promise<Promotion[]> {
-    const now = new Date();
-    return await db
-      .select()
-      .from(promotions)
-      .where(
-        and(
-          eq(promotions.isActive, true),
-          gte(promotions.endDate, now)
-        )
-      );
-  }
-
-  async getPromotion(id: number): Promise<Promotion | undefined> {
-    const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
-    return promotion || undefined;
-  }
-
-  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
-    const [newPromotion] = await db
-      .insert(promotions)
-      .values(promotion)
-      .returning();
-    return newPromotion;
-  }
-}
-
-export const storage = new DatabaseStorage();
+export { seedDatabase };
