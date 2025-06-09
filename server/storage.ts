@@ -1,8 +1,9 @@
 import { 
-  users, games, gameCategories, userGameHistory, promotions,
+  users, games, gameCategories, userGameHistory, promotions, walletTransactions, kycDocuments,
   type User, type InsertUser, type Game, type InsertGame, 
   type GameCategory, type InsertGameCategory, type UserGameHistory, 
-  type InsertUserGameHistory, type Promotion, type InsertPromotion 
+  type InsertUserGameHistory, type Promotion, type InsertPromotion,
+  type WalletTransaction, type InsertWalletTransaction, type KycDocument, type InsertKycDocument
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, desc } from "drizzle-orm";
@@ -14,6 +15,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: number, newBalance: string): Promise<User | undefined>;
+  updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined>;
 
   // Game methods
   getAllGames(): Promise<Game[]>;
@@ -36,6 +38,16 @@ export interface IStorage {
   getActivePromotions(): Promise<Promotion[]>;
   getPromotion(id: number): Promise<Promotion | undefined>;
   createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+
+  // Wallet methods
+  getUserWalletTransactions(userId: number, limit?: number): Promise<WalletTransaction[]>;
+  createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction>;
+  updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined>;
+  
+  // KYC methods
+  getUserKycDocuments(userId: number): Promise<KycDocument[]>;
+  createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
+  updateKycStatus(userId: number, status: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -745,6 +757,71 @@ export class DatabaseStorage implements IStorage {
       .values(promotion)
       .returning();
     return newPromotion;
+  }
+
+  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ walletBalance: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser || undefined;
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 20): Promise<WalletTransaction[]> {
+    return await db
+      .select()
+      .from(walletTransactions)
+      .where(eq(walletTransactions.userId, userId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    const [newTransaction] = await db
+      .insert(walletTransactions)
+      .values(transaction)
+      .returning();
+    return newTransaction;
+  }
+
+  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
+    const updateData: any = { status, updatedAt: new Date() };
+    if (paymentId) {
+      updateData.razorpayPaymentId = paymentId;
+    }
+    
+    const [updatedTransaction] = await db
+      .update(walletTransactions)
+      .set(updateData)
+      .where(eq(walletTransactions.id, transactionId))
+      .returning();
+    return updatedTransaction || undefined;
+  }
+
+  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
+    return await db
+      .select()
+      .from(kycDocuments)
+      .where(eq(kycDocuments.userId, userId))
+      .orderBy(desc(kycDocuments.createdAt));
+  }
+
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    const [newDocument] = await db
+      .insert(kycDocuments)
+      .values(document)
+      .returning();
+    return newDocument;
+  }
+
+  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ kycStatus: status, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser || undefined;
   }
 }
 

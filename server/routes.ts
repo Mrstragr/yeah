@@ -116,6 +116,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auth endpoint for wallet demo
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      const user = await storage.getUser(1); // Demo user
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't return password
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Game history routes
   app.get("/api/leaderboard", async (req, res) => {
     try {
@@ -216,6 +232,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch jackpot stats" });
+    }
+  });
+
+  // Wallet API endpoints for real cash transactions
+  app.get("/api/wallet/transactions", async (req, res) => {
+    try {
+      const userId = 1; // Demo user ID - in production this would come from auth
+      const transactions = await storage.getUserWalletTransactions(userId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching wallet transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.post("/api/wallet/deposit", async (req, res) => {
+    try {
+      const { amount, paymentMethod } = req.body;
+      const userId = 1; // Demo user ID
+      
+      if (!amount || parseFloat(amount) < 10) {
+        return res.status(400).json({ message: "Minimum deposit amount is ₹10" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create wallet transaction record
+      const transaction = await storage.createWalletTransaction({
+        userId,
+        type: "deposit",
+        amount,
+        currency: "INR",
+        status: "pending",
+        paymentMethod,
+        description: `Deposit via ${paymentMethod}`,
+        balanceBefore: user.walletBalance,
+        balanceAfter: (parseFloat(user.walletBalance) + parseFloat(amount)).toString(),
+      });
+
+      // In production, integrate with Razorpay/UPI payment gateway
+      // For demo, simulate successful payment after 2 seconds
+      setTimeout(async () => {
+        await storage.updateWalletTransactionStatus(transaction.id, "completed", `pay_${Date.now()}`);
+        await storage.updateUserWalletBalance(userId, transaction.balanceAfter!);
+      }, 2000);
+
+      res.json({
+        success: true,
+        transactionId: transaction.id,
+        message: "Deposit initiated successfully",
+        // In production, return Razorpay payment URL
+        paymentUrl: `/wallet?status=processing&txn=${transaction.id}`
+      });
+    } catch (error) {
+      console.error("Error processing deposit:", error);
+      res.status(500).json({ message: "Failed to process deposit" });
+    }
+  });
+
+  app.post("/api/wallet/withdraw", async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const userId = 1; // Demo user ID
+      
+      if (!amount || parseFloat(amount) < 100) {
+        return res.status(400).json({ message: "Minimum withdrawal amount is ₹100" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.kycStatus !== "verified") {
+        return res.status(400).json({ message: "KYC verification required for withdrawals" });
+      }
+
+      if (parseFloat(user.walletBalance) < parseFloat(amount)) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Create withdrawal transaction
+      const transaction = await storage.createWalletTransaction({
+        userId,
+        type: "withdrawal",
+        amount,
+        currency: "INR",
+        status: "pending",
+        description: "Withdrawal to bank account",
+        balanceBefore: user.walletBalance,
+        balanceAfter: (parseFloat(user.walletBalance) - parseFloat(amount)).toString(),
+      });
+
+      // Update user balance immediately for withdrawal
+      await storage.updateUserWalletBalance(userId, transaction.balanceAfter!);
+
+      res.json({
+        success: true,
+        transactionId: transaction.id,
+        message: "Withdrawal request submitted. Processing time: 24-48 hours"
+      });
+    } catch (error) {
+      console.error("Error processing withdrawal:", error);
+      res.status(500).json({ message: "Failed to process withdrawal" });
+    }
+  });
+
+  // Updated game play with real money transactions
+  app.post("/api/games/:gameId/play", async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      const { userId, betAmount } = req.body;
+      
+      const user = await storage.getUser(userId);
+      const game = await storage.getGame(gameId);
+      
+      if (!user || !game) {
+        return res.status(404).json({ message: "User or game not found" });
+      }
+
+      const betAmountFloat = parseFloat(betAmount);
+      const userBalance = parseFloat(user.walletBalance);
+
+      if (userBalance < betAmountFloat) {
+        return res.status(400).json({ message: "Insufficient wallet balance" });
+      }
+
+      // Generate realistic game result
+      const winChance = 0.35; // 35% win chance
+      const isWin = Math.random() < winChance;
+      const multiplier = isWin ? (1 + Math.random() * 4) : 0; // 1x to 5x multiplier
+      const winAmount = isWin ? (betAmountFloat * multiplier).toFixed(2) : "0";
+      
+      const newBalance = isWin 
+        ? (userBalance - betAmountFloat + parseFloat(winAmount)).toFixed(2)
+        : (userBalance - betAmountFloat).toFixed(2);
+
+      // Create bet transaction
+      await storage.createWalletTransaction({
+        userId,
+        gameId,
+        type: "bet",
+        amount: betAmount,
+        currency: "INR",
+        status: "completed",
+        description: `Bet on ${game.title}`,
+        balanceBefore: user.walletBalance,
+        balanceAfter: newBalance,
+      });
+
+      // Create win transaction if applicable
+      if (isWin && parseFloat(winAmount) > 0) {
+        await storage.createWalletTransaction({
+          userId,
+          gameId,
+          type: "win",
+          amount: winAmount,
+          currency: "INR",
+          status: "completed",
+          description: `Win from ${game.title}`,
+          balanceBefore: (userBalance - betAmountFloat).toFixed(2),
+          balanceAfter: newBalance,
+        });
+      }
+
+      // Update user balance and game history
+      await storage.updateUserWalletBalance(userId, newBalance);
+      await storage.addGameHistory({
+        userId,
+        gameId,
+        betAmount,
+        winAmount,
+      });
+
+      res.json({
+        result: isWin ? "win" : "lose",
+        winAmount,
+        newBalance,
+        multiplier: isWin ? multiplier.toFixed(2) : "0",
+        message: isWin ? `Congratulations! You won ₹${winAmount}` : "Better luck next time!"
+      });
+
+    } catch (error) {
+      console.error("Error processing game play:", error);
+      res.status(500).json({ message: "Failed to process game play" });
     }
   });
 
