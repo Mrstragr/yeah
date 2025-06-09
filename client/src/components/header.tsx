@@ -43,6 +43,14 @@ export function Header() {
             >
               Games
             </Link>
+            <Link 
+              href="/wallet" 
+              className={`text-gray-300 hover:text-gaming-gold transition-colors duration-200 ${
+                location === "/wallet" ? "text-gaming-gold" : ""
+              }`}
+            >
+              Wallet
+            </Link>
             <a href="#promotions" className="text-gray-300 hover:text-gaming-gold transition-colors duration-200">
               Promotions
             </a>

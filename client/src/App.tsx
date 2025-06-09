@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer";
 import { MobileNav } from "@/components/mobile-nav";
 import Home from "@/pages/home";
 import CategoryPage from "@/pages/category";
+import WalletPage from "@/pages/wallet";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/category/:slug" component={CategoryPage} />
+      <Route path="/wallet" component={WalletPage} />
       <Route component={NotFound} />
     </Switch>
   );
