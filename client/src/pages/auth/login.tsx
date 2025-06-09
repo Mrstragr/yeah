@@ -36,12 +36,13 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      localStorage.setItem('token', data.token);
       toast({
         title: "Login Successful",
         description: "Welcome back to TashanWin!",
       });
-      setLocation("/");
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({

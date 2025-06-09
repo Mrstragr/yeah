@@ -48,12 +48,13 @@ export default function Register() {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      localStorage.setItem('token', data.token);
       toast({
         title: "Registration Successful",
         description: "Welcome to TashanWin! You've received ₹500 welcome bonus!",
       });
-      setLocation("/");
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({

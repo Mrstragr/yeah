@@ -102,10 +102,10 @@ export const promotions = pgTable("promotions", {
   endDate: timestamp("end_date").notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  email: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertGameSchema = createInsertSchema(games).pick({

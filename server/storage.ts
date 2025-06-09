@@ -199,10 +199,29 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
       id: this.currentUserId++,
+      username: insertUser.username,
+      email: insertUser.email,
+      password: insertUser.password,
+      phone: insertUser.phone,
+      firstName: insertUser.firstName ?? null,
+      lastName: insertUser.lastName ?? null,
+      balance: insertUser.balance || "0.00",
+      walletBalance: insertUser.walletBalance || "0.00",
+      bonusBalance: insertUser.bonusBalance || "0.00",
+      kycStatus: insertUser.kycStatus || "pending",
+      avatar: insertUser.avatar || null,
+      referralCode: insertUser.referralCode || null,
+      referredBy: insertUser.referredBy || null,
+      vipLevel: insertUser.vipLevel || 0,
+      totalDeposit: insertUser.totalDeposit || "0.00",
+      totalWithdraw: insertUser.totalWithdraw || "0.00",
+      totalBet: insertUser.totalBet || "0.00",
+      totalWin: insertUser.totalWin || "0.00",
+      loginBonus: insertUser.loginBonus || false,
+      lastLoginAt: insertUser.lastLoginAt || null,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...insertUser,
     };
     this.users.set(user.id, user);
     return user;
