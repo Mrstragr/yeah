@@ -15,6 +15,7 @@ import type {
   InsertKycDocument,
 } from "@shared/schema";
 import { tashanwinGames } from "./tashanwin-games";
+import bcrypt from "bcrypt";
 
 // Interface for storage operations
 export interface IStorage {
@@ -156,19 +157,6 @@ export class MemStorage implements IStorage {
 
     initialPromotions.forEach(promotion => this.createPromotion(promotion));
 
-    // Initialize sample user
-    this.createUser({
-      username: "player123",
-      email: "player@example.com",
-      password: "password123",
-      balance: "10000.00",
-      walletBalance: "10000.00",
-      bonusBalance: "0.00",
-      firstName: "John",
-      lastName: "Player",
-      phone: "+919876543210",
-      kycStatus: "pending"
-    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
