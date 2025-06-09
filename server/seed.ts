@@ -397,16 +397,15 @@ async function seedDatabase() {
   }
 }
 
-if (require.main === module) {
-  seedDatabase()
-    .then(() => {
-      console.log("Seeding finished");
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("Seeding failed:", error);
-      process.exit(1);
-    });
-}
+// Run seeding if this file is executed directly
+seedDatabase()
+  .then(() => {
+    console.log("Seeding finished");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Seeding failed:", error);
+    process.exit(1);
+  });
 
 export { seedDatabase };
