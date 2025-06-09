@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Wallet, Trophy, AlertCircle } from "lucide-react";
 import type { Game } from "@shared/schema";
 import type { GamePlayResult } from "@/lib/types";
 
@@ -16,36 +19,53 @@ interface GamePlayModalProps {
 }
 
 export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalProps) {
-  const [betAmount, setBetAmount] = useState("100");
+  const [betAmount, setBetAmount] = useState("50");
   const [isPlaying, setIsPlaying] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
 
   const playGameMutation = useMutation({
-    mutationFn: async (data: { gameId: number; userId: number; betAmount: string }) => {
-      const response = await fetch(`/api/games/${data.gameId}/play`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: data.userId, betAmount: data.betAmount }),
+    mutationFn: async (data: { gameId: number; userId: number; betAmount: string }): Promise<GamePlayResult> => {
+      const response = await apiRequest("POST", `/api/games/${data.gameId}/play`, {
+        userId: data.userId,
+        betAmount: data.betAmount,
       });
-      if (!response.ok) throw new Error('Failed to play game');
-      return response.json() as Promise<GamePlayResult>;
+      return response as GamePlayResult;
     },
-    onSuccess: (result) => {
+    onSuccess: (result: GamePlayResult) => {
       queryClient.invalidateQueries({ queryKey: ["/api/leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats/jackpot"] });
       
       if (result.result === "win") {
         onWin(result.winAmount);
-      }
-      
-      setTimeout(() => {
-        setIsPlaying(false);
-        onClose();
-      }, 2000);
-    },
-    onError: () => {
+        toast({
+          title: "Congratulations!",
+          description: `You won ₹${result.winAmount}! New balance: ₹${result.newBalance}`,
+        });
+      } else {
+        toast({
+          title: "Better luck next time!",
+          description: `You lost ₹${betAmount}. New balance: ₹${result.newBalance}`,
+          variant: "destructive",
+        });
       setIsPlaying(false);
-    }
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Game Error",
+        description: error.message || "Failed to play game",
+        variant: "destructive",
+      });
+      setIsPlaying(false);
+    },
   });
 
   const handlePlay = () => {

@@ -1,51 +1,60 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import type { User, WalletTransaction } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Wallet, CreditCard, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle } from "lucide-react";
+
+interface WalletTransaction {
+  id: number;
+  type: string;
+  amount: string;
+  currency: string;
+  status: string;
+  description: string;
+  createdAt: string;
+  paymentMethod?: string;
+}
 
 export function WalletDashboard() {
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: user } = useQuery<User>({
+  const { data: user } = useQuery({
     queryKey: ["/api/auth/user"],
+    retry: false,
   });
 
-  const { data: transactions = [] } = useQuery<WalletTransaction[]>({
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/wallet/transactions"],
-    enabled: !!user,
+    retry: false,
   });
 
   const depositMutation = useMutation({
     mutationFn: async (data: { amount: string; paymentMethod: string }) => {
-      const response = await fetch("/api/wallet/deposit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+      return apiRequest("POST", "/api/wallet/deposit", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Deposit Initiated",
+        description: "Your deposit is being processed. Funds will be available shortly.",
       });
-      if (!response.ok) throw new Error('Failed to create deposit');
-      return response.json();
+      setDepositAmount("");
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
-    onSuccess: (data) => {
-      // Redirect to Razorpay payment page
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      }
-    },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Deposit Failed",
-        description: error.message,
+        description: error.message || "Please try again",
         variant: "destructive",
       });
     },
@@ -53,34 +62,32 @@ export function WalletDashboard() {
 
   const withdrawMutation = useMutation({
     mutationFn: async (data: { amount: string }) => {
-      const response = await fetch("/api/wallet/withdraw", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to process withdrawal');
-      return response.json();
+      return apiRequest("POST", "/api/wallet/withdraw", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
-      setWithdrawAmount("");
       toast({
         title: "Withdrawal Requested",
-        description: "Your withdrawal request has been submitted for processing.",
+        description: "Your withdrawal request is being processed. Funds will be transferred to your bank account.",
       });
+      setWithdrawAmount("");
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Withdrawal Failed",
-        description: error.message,
+        description: error.message || "Please try again",
         variant: "destructive",
       });
     },
   });
 
-  const handleDeposit = () => {
-    if (!depositAmount || parseFloat(depositAmount) < 10) {
+  const handleDeposit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!depositAmount || !paymentMethod) return;
+    
+    const amount = parseFloat(depositAmount);
+    if (amount < 10) {
       toast({
         title: "Invalid Amount",
         description: "Minimum deposit amount is ₹10",
@@ -89,14 +96,15 @@ export function WalletDashboard() {
       return;
     }
 
-    depositMutation.mutate({
-      amount: depositAmount,
-      paymentMethod: selectedPaymentMethod,
-    });
+    depositMutation.mutate({ amount: depositAmount, paymentMethod });
   };
 
-  const handleWithdraw = () => {
-    if (!withdrawAmount || parseFloat(withdrawAmount) < 100) {
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!withdrawAmount) return;
+    
+    const amount = parseFloat(withdrawAmount);
+    if (amount < 100) {
       toast({
         title: "Invalid Amount",
         description: "Minimum withdrawal amount is ₹100",
@@ -105,10 +113,10 @@ export function WalletDashboard() {
       return;
     }
 
-    if (parseFloat(withdrawAmount) > parseFloat(user?.walletBalance || "0")) {
+    if (user && parseFloat(user.walletBalance) < amount) {
       toast({
         title: "Insufficient Balance",
-        description: "You don't have enough balance for this withdrawal",
+        description: "You don't have enough funds for this withdrawal",
         variant: "destructive",
       });
       return;
@@ -117,95 +125,91 @@ export function WalletDashboard() {
     withdrawMutation.mutate({ amount: withdrawAmount });
   };
 
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-    }).format(parseFloat(amount));
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case "failed":
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />;
+    }
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { variant: "outline" as const, text: "Pending" },
-      completed: { variant: "default" as const, text: "Completed" },
-      failed: { variant: "destructive" as const, text: "Failed" },
-      cancelled: { variant: "secondary" as const, text: "Cancelled" },
-    };
+    const variants = {
+      completed: "default",
+      pending: "secondary",
+      failed: "destructive",
+    } as const;
     
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
-    return <Badge variant={config.variant}>{config.text}</Badge>;
-  };
-
-  if (!user) {
     return (
-      <Card className="game-card">
-        <CardContent className="p-6 text-center">
-          <p className="text-gray-400">Please log in to access your wallet</p>
-        </CardContent>
-      </Card>
+      <Badge variant={variants[status as keyof typeof variants] || "secondary"} className="capitalize">
+        {status}
+      </Badge>
     );
-  }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Wallet Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="game-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-gaming text-gray-400">Main Balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-gaming font-bold text-gaming-gold">
-              {formatCurrency(user.walletBalance || "0")}
-            </div>
-            <p className="text-xs text-gray-400 mt-1">Available for games</p>
-          </CardContent>
-        </Card>
-
-        <Card className="game-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-gaming text-gray-400">Bonus Balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-gaming font-bold text-gaming-blue">
-              {formatCurrency(user.bonusBalance || "0")}
-            </div>
-            <p className="text-xs text-gray-400 mt-1">Promotional credits</p>
-          </CardContent>
-        </Card>
-
-        <Card className="game-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-gaming text-gray-400">KYC Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              {getStatusBadge(user.kycStatus || "pending")}
-              {user.kycStatus === "verified" && (
-                <i className="fas fa-check-circle text-gaming-green"></i>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mt-1">Verification status</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Deposit/Withdraw Tabs */}
-      <Card className="game-card">
+      {/* Wallet Balance Card */}
+      <Card className="game-card bg-gradient-to-r from-gaming-accent to-gaming-accent/80">
         <CardHeader>
-          <CardTitle className="font-gaming text-gaming-gold">Wallet Operations</CardTitle>
+          <CardTitle className="flex items-center font-gaming text-gaming-gold">
+            <Wallet className="w-6 h-6 mr-2" />
+            My Wallet
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="deposit" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gaming-accent">
-              <TabsTrigger value="deposit" className="font-gaming">Add Money</TabsTrigger>
-              <TabsTrigger value="withdraw" className="font-gaming">Withdraw</TabsTrigger>
-            </TabsList>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-400 font-exo">Main Balance</p>
+              <p className="text-3xl font-gaming font-bold text-gaming-gold">
+                ₹{user?.walletBalance || "0.00"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-400 font-exo">Bonus Balance</p>
+              <p className="text-2xl font-gaming font-semibold text-green-400">
+                ₹{user?.bonusBalance || "0.00"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-400 font-exo">KYC Status</p>
+              <Badge variant={user?.kycStatus === "verified" ? "default" : "secondary"} className="mt-1">
+                {user?.kycStatus || "pending"}
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <TabsContent value="deposit" className="space-y-4">
-              <div className="space-y-4">
+      {/* Transaction Actions */}
+      <Tabs defaultValue="deposit" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="deposit" className="font-gaming">
+            <ArrowDownLeft className="w-4 h-4 mr-2" />
+            Deposit
+          </TabsTrigger>
+          <TabsTrigger value="withdraw" className="font-gaming">
+            <ArrowUpRight className="w-4 h-4 mr-2" />
+            Withdraw
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="deposit">
+          <Card className="game-card">
+            <CardHeader>
+              <CardTitle className="font-gaming text-gaming-gold">Add Money to Wallet</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleDeposit} className="space-y-4">
                 <div>
-                  <Label htmlFor="deposit-amount" className="font-gaming text-gray-300">Amount (INR)</Label>
+                  <Label htmlFor="deposit-amount" className="font-gaming text-gray-300">
+                    Amount (₹)
+                  </Label>
                   <Input
                     id="deposit-amount"
                     type="number"
@@ -213,155 +217,182 @@ export function WalletDashboard() {
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     className="bg-gaming-accent border-gaming-border-light text-white"
+                    min="10"
+                    required
                   />
                 </div>
 
                 <div>
                   <Label className="font-gaming text-gray-300">Payment Method</Label>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    {[
-                      { id: "upi", name: "UPI", icon: "fas fa-mobile-alt" },
-                      { id: "netbanking", name: "Net Banking", icon: "fas fa-university" },
-                      { id: "card", name: "Debit/Credit Card", icon: "fas fa-credit-card" },
-                      { id: "wallet", name: "Digital Wallet", icon: "fas fa-wallet" },
-                    ].map((method) => (
-                      <button
-                        key={method.id}
-                        onClick={() => setSelectedPaymentMethod(method.id)}
-                        className={`p-3 rounded-lg border text-left transition-all ${
-                          selectedPaymentMethod === method.id
-                            ? "border-gaming-gold bg-gaming-gold/10"
-                            : "border-gaming-border bg-gaming-accent hover:border-gaming-border-light"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <i className={`${method.icon} text-gaming-gold`}></i>
-                          <span className="text-sm font-exo text-white">{method.name}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <SelectTrigger className="bg-gaming-accent border-gaming-border-light text-white">
+                      <SelectValue placeholder="Select payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="upi">UPI</SelectItem>
+                      <SelectItem value="netbanking">Net Banking</SelectItem>
+                      <SelectItem value="card">Credit/Debit Card</SelectItem>
+                      <SelectItem value="paytm">Paytm Wallet</SelectItem>
+                      <SelectItem value="phonepe">PhonePe</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  {["100", "500", "1000", "2000", "5000"].map((amount) => (
+                    <Button
+                      key={amount}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDepositAmount(amount)}
+                      className="border-gaming-border-light text-gaming-gold hover:bg-gaming-accent"
+                    >
+                      ₹{amount}
+                    </Button>
+                  ))}
                 </div>
 
                 <Button
-                  onClick={handleDeposit}
-                  disabled={depositMutation.isPending}
+                  type="submit"
+                  disabled={depositMutation.isPending || !depositAmount || !paymentMethod}
                   className="btn-gaming-primary w-full font-gaming"
                 >
                   {depositMutation.isPending ? (
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                  ) : (
-                    <i className="fas fa-plus mr-2"></i>
-                  )}
-                  Add Money
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="withdraw" className="space-y-4">
-              {user.kycStatus !== "verified" ? (
-                <div className="text-center p-6 bg-gaming-accent/50 rounded-lg">
-                  <i className="fas fa-exclamation-triangle text-gaming-gold text-2xl mb-3"></i>
-                  <p className="text-gray-300 font-exo">
-                    Complete KYC verification to enable withdrawals
-                  </p>
-                  <Button className="btn-gaming-secondary mt-3 font-gaming">
-                    Complete KYC
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="withdraw-amount" className="font-gaming text-gray-300">Amount (INR)</Label>
-                    <Input
-                      id="withdraw-amount"
-                      type="number"
-                      placeholder="Enter amount (min ₹100)"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      className="bg-gaming-accent border-gaming-border-light text-white"
-                    />
-                    <p className="text-xs text-gray-400 mt-1">
-                      Available: {formatCurrency(user.walletBalance || "0")}
-                    </p>
-                  </div>
-
-                  <div className="bg-gaming-accent/50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-400 font-exo">
-                      • Withdrawals are processed within 24-48 hours
-                      • Minimum withdrawal: ₹100
-                      • Bank details from KYC will be used
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleWithdraw}
-                    disabled={withdrawMutation.isPending}
-                    className="btn-gaming-primary w-full font-gaming"
-                  >
-                    {withdrawMutation.isPending ? (
+                    <>
                       <i className="fas fa-spinner fa-spin mr-2"></i>
-                    ) : (
-                      <i className="fas fa-money-bill-wave mr-2"></i>
-                    )}
-                    Request Withdrawal
-                  </Button>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Add Money
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="withdraw">
+          <Card className="game-card">
+            <CardHeader>
+              <CardTitle className="font-gaming text-gaming-gold">Withdraw Money</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {user?.kycStatus !== "verified" ? (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
+                  <p className="text-yellow-400 font-exo">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    KYC verification required for withdrawals. Complete your verification in the profile section.
+                  </p>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              ) : null}
+
+              <form onSubmit={handleWithdraw} className="space-y-4">
+                <div>
+                  <Label htmlFor="withdraw-amount" className="font-gaming text-gray-300">
+                    Amount (₹)
+                  </Label>
+                  <Input
+                    id="withdraw-amount"
+                    type="number"
+                    placeholder="Enter amount (min ₹100)"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    className="bg-gaming-accent border-gaming-border-light text-white"
+                    min="100"
+                    max={user?.walletBalance || "0"}
+                    required
+                  />
+                  <p className="text-sm text-gray-400 mt-1 font-exo">
+                    Available: ₹{user?.walletBalance || "0.00"}
+                  </p>
+                </div>
+
+                <div className="bg-gaming-accent/30 p-3 rounded-lg">
+                  <p className="text-sm text-gray-400 font-exo">
+                    <i className="fas fa-info-circle mr-2"></i>
+                    Withdrawals are processed within 24-48 hours to your verified bank account.
+                  </p>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={
+                    withdrawMutation.isPending || 
+                    !withdrawAmount || 
+                    user?.kycStatus !== "verified"
+                  }
+                  className="btn-gaming-primary w-full font-gaming"
+                >
+                  {withdrawMutation.isPending ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpRight className="w-4 h-4 mr-2" />
+                      Withdraw Money
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Transaction History */}
       <Card className="game-card">
         <CardHeader>
-          <CardTitle className="font-gaming text-gaming-gold">Transaction History</CardTitle>
+          <CardTitle className="font-gaming text-gaming-gold">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
-          {transactions.length === 0 ? (
+          {transactionsLoading ? (
             <div className="text-center py-8">
-              <i className="fas fa-receipt text-gray-400 text-3xl mb-3"></i>
+              <i className="fas fa-spinner fa-spin text-gaming-gold text-2xl"></i>
+              <p className="text-gray-400 mt-2 font-exo">Loading transactions...</p>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8">
+              <Wallet className="w-12 h-12 text-gray-500 mx-auto mb-2" />
               <p className="text-gray-400 font-exo">No transactions yet</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {transactions.slice(0, 10).map((transaction) => (
+              {transactions.map((transaction: WalletTransaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-3 bg-gaming-accent/30 rounded-lg"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      transaction.type === "deposit" ? "bg-gaming-green/20" :
-                      transaction.type === "withdrawal" ? "bg-gaming-red/20" :
-                      transaction.type === "win" ? "bg-gaming-gold/20" :
-                      "bg-gaming-blue/20"
-                    }`}>
-                      <i className={`fas ${
-                        transaction.type === "deposit" ? "fa-arrow-down text-gaming-green" :
-                        transaction.type === "withdrawal" ? "fa-arrow-up text-gaming-red" :
-                        transaction.type === "win" ? "fa-trophy text-gaming-gold" :
-                        "fa-gamepad text-gaming-blue"
-                      } text-xs`}></i>
-                    </div>
+                    {getStatusIcon(transaction.status)}
                     <div>
-                      <p className="font-gaming text-white text-sm capitalize">
-                        {transaction.type}
+                      <p className="font-exo font-medium text-white capitalize">
+                        {transaction.type} - {transaction.description}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(transaction.createdAt).toLocaleDateString('en-IN')}
+                      <p className="text-sm text-gray-400 font-exo">
+                        {new Date(transaction.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-gaming font-bold ${
+                    <p className={`font-gaming font-semibold ${
                       transaction.type === "deposit" || transaction.type === "win" 
-                        ? "text-gaming-green" 
-                        : "text-gaming-red"
+                        ? "text-green-400" 
+                        : "text-red-400"
                     }`}>
                       {transaction.type === "deposit" || transaction.type === "win" ? "+" : "-"}
-                      {formatCurrency(transaction.amount)}
+                      ₹{transaction.amount}
                     </p>
                     {getStatusBadge(transaction.status)}
                   </div>
