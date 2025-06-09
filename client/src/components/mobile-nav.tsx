@@ -1,34 +1,68 @@
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
+import { 
+  Home, 
+  Wallet, 
+  User, 
+  Gift, 
+  Gamepad2,
+  Crown
+} from "lucide-react";
+
+const navItems = [
+  { 
+    icon: Home, 
+    label: "Home", 
+    path: "/",
+    color: "text-casino-gold"
+  },
+  { 
+    icon: Gamepad2, 
+    label: "Games", 
+    path: "/category/lobby",
+    color: "text-casino-blue"
+  },
+  { 
+    icon: Crown, 
+    label: "Promotion", 
+    path: "/promotions",
+    color: "text-casino-purple"
+  },
+  { 
+    icon: Wallet, 
+    label: "Wallet", 
+    path: "/wallet",
+    color: "text-casino-green"
+  },
+  { 
+    icon: User, 
+    label: "Account", 
+    path: "/account",
+    color: "text-casino-orange"
+  }
+];
 
 export function MobileNav() {
-  const [location, navigate] = useLocation();
-
-  const navItems = [
-    { icon: "fas fa-home", label: "Home", path: "/" },
-    { icon: "fas fa-gift", label: "Promotion", path: "/promotions" },
-    { icon: "fas fa-calendar-alt", label: "Activity", path: "/activity" },
-    { icon: "fas fa-wallet", label: "Wallet", path: "/wallet" },
-    { icon: "fas fa-user", label: "Account", path: "/account" },
-  ];
+  const [location] = useLocation();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gaming-charcoal border-t border-gray-800 z-40">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-casino-secondary border-t border-casino-border">
       <div className="flex justify-around items-center py-2">
-        {navItems.map((item) => (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center p-2 transition-colors duration-200 ${
-              location === item.path
-                ? "text-gaming-gold"
-                : "text-gray-400 hover:text-gaming-gold"
-            }`}
-          >
-            <i className={`${item.icon} text-xl mb-1`}></i>
-            <span className="text-xs">{item.label}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const isActive = location === item.path;
+          const IconComponent = item.icon;
+          
+          return (
+            <Link key={item.path} href={item.path}>
+              <div className={`nav-item ${isActive ? 'active' : ''} min-w-0 flex-1`}>
+                <IconComponent className={`w-6 h-6 mx-auto ${isActive ? item.color : 'text-casino-text-muted'}`} />
+                <span className={`text-xs mt-1 truncate ${isActive ? item.color : 'text-casino-text-muted'}`}>
+                  {item.label}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
-    </nav>
+    </div>
   );
 }
