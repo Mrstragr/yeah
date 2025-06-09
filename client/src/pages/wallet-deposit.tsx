@@ -21,7 +21,7 @@ export default function WalletDeposit() {
       const response = await apiRequest("POST", "/api/wallet/deposit", { amount, paymentMethod });
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Deposit Initiated",
         description: `₹${amount} deposit is being processed. Transaction ID: ${data.transactionId}`,

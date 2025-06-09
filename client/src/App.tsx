@@ -7,10 +7,52 @@ import { MobileNav } from "@/components/mobile-nav";
 import TashanWinHome from "@/pages/tashanwin-home";
 import CategoryPage from "@/pages/category";
 import WalletPage from "@/pages/wallet";
+import WalletDeposit from "@/pages/wallet-deposit";
+import WalletWithdraw from "@/pages/wallet-withdraw";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+
+function useAuth() {
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ["/api/auth/user"],
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+      
+      try {
+        const response = await fetch('/api/auth/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('token');
+            return null;
+          }
+          throw new Error('Failed to fetch user');
+        }
+        
+        return response.json();
+      } catch (error) {
+        localStorage.removeItem('token');
+        return null;
+      }
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    error,
+  };
+}
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +81,8 @@ function Router() {
         <Route path="/" component={TashanWinHome} />
         <Route path="/category/:slug" component={CategoryPage} />
         <Route path="/wallet" component={WalletPage} />
+        <Route path="/wallet/deposit" component={WalletDeposit} />
+        <Route path="/wallet/withdraw" component={WalletWithdraw} />
         <Route path="/promotion" component={() => (
           <div className="min-h-screen bg-[#1a1a1a] p-4">
             <div className="max-w-md mx-auto pt-8">
