@@ -122,7 +122,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user && data.phone.startsWith('+91')) {
         user = await storage.getUserByPhone(data.phone.substring(3));
       }
-      
 
       if (!user) {
         return res.status(401).json({ message: "Invalid phone number or password" });
