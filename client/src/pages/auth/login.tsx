@@ -36,8 +36,9 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response;
     },
-    onSuccess: (data: any) => {
-      localStorage.setItem('token', data.token);
+    onSuccess: async (response: any) => {
+      const data = await response.json();
+      localStorage.setItem('authToken', data.token);
       toast({
         title: "Login Successful",
         description: "Welcome back to TashanWin!",

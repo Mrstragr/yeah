@@ -18,7 +18,7 @@ function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       if (!token) return null;
       
       try {
@@ -30,7 +30,7 @@ function useAuth() {
         
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             return null;
           }
           throw new Error('Failed to fetch user');
