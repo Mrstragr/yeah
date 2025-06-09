@@ -34,6 +34,8 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
       const response = await apiRequest("POST", `/api/games/${data.gameId}/play`, {
         userId: data.userId,
         betAmount: data.betAmount,
+        gameType: game?.category?.toLowerCase(),
+        gameData: {}
       });
       return response as GamePlayResult;
     },
