@@ -477,9 +477,20 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
-      balance: "0.00",
+      phoneNumber: null,
+      balance: "1000.00",
+      walletBalance: "5000.00",
+      bonusBalance: "500.00",
+      kycStatus: "verified",
+      razorpayCustomerId: null,
+      panNumber: null,
+      aadharNumber: null,
+      bankAccountNumber: null,
+      bankIfscCode: null,
+      bankAccountHolderName: null,
       isActive: true,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.users.set(id, user);
     return user;
@@ -609,6 +620,80 @@ export class MemStorage implements IStorage {
     };
     this.promotions.set(id, promotion);
     return promotion;
+  }
+
+  // Wallet transaction methods
+  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.walletBalance = newBalance;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      return user;
+    }
+    return undefined;
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 20): Promise<WalletTransaction[]> {
+    return Array.from(this.walletTransactions.values())
+      .filter(transaction => transaction.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
+  }
+
+  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    const id = this.currentTransactionId++;
+    const walletTransaction: WalletTransaction = {
+      ...transaction,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.walletTransactions.set(id, walletTransaction);
+    return walletTransaction;
+  }
+
+  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
+    const transaction = this.walletTransactions.get(transactionId);
+    if (transaction) {
+      transaction.status = status;
+      transaction.updatedAt = new Date();
+      if (paymentId) {
+        transaction.paymentId = paymentId;
+      }
+      this.walletTransactions.set(transactionId, transaction);
+      return transaction;
+    }
+    return undefined;
+  }
+
+  // KYC methods
+  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
+    return Array.from(this.kycDocuments.values())
+      .filter(doc => doc.userId === userId);
+  }
+
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    const id = this.currentKycDocumentId++;
+    const kycDocument: KycDocument = {
+      ...document,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.kycDocuments.set(id, kycDocument);
+    return kycDocument;
+  }
+
+  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.kycStatus = status;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      return user;
+    }
+    return undefined;
   }
 }
 
