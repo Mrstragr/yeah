@@ -137,24 +137,26 @@ function GameCategories() {
         const IconComponent = categoryIcons[category.name as keyof typeof categoryIcons] || Gamepad2;
         
         return (
-          <Card key={category.slug} className="casino-card cursor-pointer group">
-            <CardContent className="p-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-3 mx-auto`}>
-                <IconComponent className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-casino font-bold text-center text-white mb-1">
-                {category.name}
-              </h3>
-              <p className="text-xs text-casino-text-muted text-center">
-                {category.games} Games
-              </p>
-              <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button size="sm" className="btn-casino-secondary w-full text-xs">
-                  Play Now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <Link key={category.slug} href={`/category/${category.slug}`}>
+            <Card className="casino-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-3 mx-auto`}>
+                  <IconComponent className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-casino font-bold text-center text-white mb-1">
+                  {category.name}
+                </h3>
+                <p className="text-xs text-casino-text-muted text-center">
+                  {category.games} Games
+                </p>
+                <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button size="sm" className="btn-casino-secondary w-full text-xs">
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         );
       })}
     </div>
