@@ -1,21 +1,30 @@
-import type {
-  User,
-  InsertUser,
-  Game,
-  InsertGame,
-  GameCategory,
-  InsertGameCategory,
-  UserGameHistory,
-  InsertUserGameHistory,
-  Promotion,
-  InsertPromotion,
-  WalletTransaction,
-  InsertWalletTransaction,
-  KycDocument,
-  InsertKycDocument,
+import {
+  users,
+  games,
+  gameCategories,
+  userGameHistory,
+  walletTransactions,
+  kycDocuments,
+  promotions,
+  type User,
+  type InsertUser,
+  type Game,
+  type InsertGame,
+  type GameCategory,
+  type InsertGameCategory,
+  type UserGameHistory,
+  type InsertUserGameHistory,
+  type Promotion,
+  type InsertPromotion,
+  type WalletTransaction,
+  type InsertWalletTransaction,
+  type KycDocument,
+  type InsertKycDocument,
 } from "@shared/schema";
 import { tashanwinGames } from "./tashanwin-games";
 import bcrypt from "bcrypt";
+import { db } from "./db";
+import { eq, and, gte, lte, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -427,4 +436,187 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ walletBalance: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user || undefined;
+  }
+
+  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ walletBalance: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user || undefined;
+  }
+
+  async updateUserLastLogin(userId: number): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ lastLogin: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user || undefined;
+  }
+
+  async getAllGames(): Promise<Game[]> {
+    return await db.select().from(games).where(eq(games.isActive, true));
+  }
+
+  async getGamesByCategory(category: string): Promise<Game[]> {
+    return await db.select().from(games).where(eq(games.category, category));
+  }
+
+  async getGame(id: number): Promise<Game | undefined> {
+    const [game] = await db.select().from(games).where(eq(games.id, id));
+    return game || undefined;
+  }
+
+  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
+    return await db.select().from(games).where(eq(games.isActive, true)).limit(limit);
+  }
+
+  async createGame(game: InsertGame): Promise<Game> {
+    const [newGame] = await db.insert(games).values(game).returning();
+    return newGame;
+  }
+
+  async getAllGameCategories(): Promise<GameCategory[]> {
+    return await db.select().from(gameCategories).where(eq(gameCategories.isActive, true));
+  }
+
+  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
+    const [category] = await db.select().from(gameCategories).where(eq(gameCategories.slug, slug));
+    return category || undefined;
+  }
+
+  async createGameCategory(category: InsertGameCategory): Promise<GameCategory> {
+    const [newCategory] = await db.insert(gameCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
+    return await db.select().from(userGameHistory).where(eq(userGameHistory.userId, userId));
+  }
+
+  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return await db.select({
+      id: userGameHistory.id,
+      userId: userGameHistory.userId,
+      gameId: userGameHistory.gameId,
+      betAmount: userGameHistory.betAmount,
+      winAmount: userGameHistory.winAmount,
+      playedAt: userGameHistory.playedAt,
+      username: users.username,
+      gameTitle: games.title
+    })
+    .from(userGameHistory)
+    .innerJoin(users, eq(userGameHistory.userId, users.id))
+    .innerJoin(games, eq(userGameHistory.gameId, games.id))
+    .where(gte(userGameHistory.playedAt, today))
+    .orderBy(desc(userGameHistory.winAmount))
+    .limit(limit);
+  }
+
+  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
+    const [newHistory] = await db.insert(userGameHistory).values(history).returning();
+    return newHistory;
+  }
+
+  async getActivePromotions(): Promise<Promotion[]> {
+    const now = new Date();
+    return await db.select().from(promotions)
+      .where(and(
+        eq(promotions.isActive, true),
+        lte(promotions.startDate, now),
+        gte(promotions.endDate, now)
+      ));
+  }
+
+  async getPromotion(id: number): Promise<Promotion | undefined> {
+    const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
+    return promotion || undefined;
+  }
+
+  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
+    const [newPromotion] = await db.insert(promotions).values(promotion).returning();
+    return newPromotion;
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 20): Promise<WalletTransaction[]> {
+    return await db.select().from(walletTransactions)
+      .where(eq(walletTransactions.userId, userId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    const [newTransaction] = await db.insert(walletTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
+    const updateData: any = { 
+      status, 
+      updatedAt: new Date() 
+    };
+    if (paymentId) {
+      updateData.paymentId = paymentId;
+    }
+    
+    const [transaction] = await db.update(walletTransactions)
+      .set(updateData)
+      .where(eq(walletTransactions.id, transactionId))
+      .returning();
+    return transaction || undefined;
+  }
+
+  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
+    return await db.select().from(kycDocuments).where(eq(kycDocuments.userId, userId));
+  }
+
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    const [newDocument] = await db.insert(kycDocuments).values(document).returning();
+    return newDocument;
+  }
+
+  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ kycStatus: status, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
