@@ -55,8 +55,10 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
           description: `You lost ₹${betAmount}. New balance: ₹${result.newBalance}`,
           variant: "destructive",
         });
+      }
+      
       setIsPlaying(false);
-      onClose();
+      setTimeout(() => onClose(), 2000);
     },
     onError: (error: any) => {
       toast({
@@ -65,135 +67,157 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
         variant: "destructive",
       });
       setIsPlaying(false);
-    },
+    }
   });
 
   const handlePlay = () => {
     if (!game || !betAmount) return;
     
+    const amount = parseFloat(betAmount);
+    if (amount < 10) {
+      toast({
+        title: "Invalid Bet",
+        description: "Minimum bet amount is ₹10",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (user && parseFloat(user.walletBalance || "0") < amount) {
+      toast({
+        title: "Insufficient Balance",
+        description: "Please add money to your wallet to continue playing",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsPlaying(true);
     playGameMutation.mutate({
       gameId: game.id,
       userId: 1, // Demo user ID
-      betAmount: betAmount
+      betAmount: betAmount,
     });
   };
 
-  const handleClose = () => {
-    if (!isPlaying) {
-      onClose();
-      setBetAmount("100");
-    }
-  };
-
-  if (!game) return null;
+  if (!isOpen || !game) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-gaming-secondary border border-gaming-border-light max-w-md shadow-2xl backdrop-blur-sm">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="game-card max-w-md">
         <DialogHeader>
-          <div className="text-center mb-4">
-            <img 
-              src={game.imageUrl} 
-              alt={game.title}
-              className="w-20 h-20 rounded-lg mx-auto mb-4 object-cover shadow-lg border border-gaming-border"
-            />
-            <DialogTitle className="font-gaming font-bold text-2xl text-gaming-gold tracking-wide">
-              {game.title}
-            </DialogTitle>
-            <DialogDescription className="text-gray-300 font-exo">
-              {game.description}
-            </DialogDescription>
-          </div>
+          <DialogTitle className="font-gaming text-gaming-gold flex items-center">
+            <Trophy className="w-5 h-5 mr-2" />
+            {game.title}
+          </DialogTitle>
+          <DialogDescription className="text-gray-400 font-exo">
+            Place your bet and test your luck with real Indian currency
+          </DialogDescription>
         </DialogHeader>
 
-        {!isPlaying ? (
-          <div className="space-y-6">
-            <div className="bg-gaming-dark rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400">Current Jackpot:</span>
-                <span className="text-gaming-gold font-bold">
-                  ${parseFloat(game.jackpot).toLocaleString()}
+        <div className="space-y-4">
+          {/* Wallet Balance Display */}
+          <div className="bg-gaming-accent/30 p-3 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400 font-exo">Wallet Balance</span>
+              <div className="flex items-center">
+                <Wallet className="w-4 h-4 mr-1 text-gaming-gold" />
+                <span className="font-gaming font-semibold text-gaming-gold">
+                  ₹{user?.walletBalance || "0.00"}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400">Rating:</span>
-                <div className="flex items-center">
-                  <i className="fas fa-star text-gaming-gold mr-1"></i>
-                  <span className="text-white">{game.rating}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bet-amount" className="text-white">Bet Amount ($)</Label>
-              <Input
-                id="bet-amount"
-                type="number"
-                value={betAmount}
-                onChange={(e) => setBetAmount(e.target.value)}
-                className="bg-gaming-dark border-gray-700 text-white"
-                min="1"
-                max="10000"
-              />
-            </div>
-
-            <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3">
-              <p className="text-yellow-400 text-sm text-center">
-                <i className="fas fa-exclamation-triangle mr-2"></i>
-                Gambling can be addictive. Please play responsibly.
-              </p>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="animate-spin text-gaming-gold text-4xl mb-4">
-              <i className="fas fa-dice"></i>
+
+          {/* Bet Amount Input */}
+          <div>
+            <Label htmlFor="bet-amount" className="font-gaming text-gray-300">
+              Bet Amount (₹)
+            </Label>
+            <Input
+              id="bet-amount"
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              placeholder="Enter bet amount"
+              className="bg-gaming-accent border-gaming-border-light text-white"
+              min="10"
+              max={user?.walletBalance || "0"}
+              disabled={isPlaying}
+            />
+            <p className="text-xs text-gray-400 mt-1 font-exo">
+              Min: ₹10 | Max: ₹{user?.walletBalance || "0"}
+            </p>
+          </div>
+
+          {/* Quick Bet Buttons */}
+          <div className="flex gap-2 flex-wrap">
+            {["50", "100", "200", "500"].map((amount) => (
+              <Button
+                key={amount}
+                variant="outline"
+                size="sm"
+                onClick={() => setBetAmount(amount)}
+                disabled={isPlaying || parseFloat(user?.walletBalance || "0") < parseFloat(amount)}
+                className="border-gaming-border-light text-gaming-gold hover:bg-gaming-accent"
+              >
+                ₹{amount}
+              </Button>
+            ))}
+          </div>
+
+          {/* Game Info */}
+          <div className="bg-gaming-accent/20 p-3 rounded-lg">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400 font-exo">Win Chance:</span>
+              <span className="text-green-400 font-gaming">35%</span>
             </div>
-            <h3 className="font-orbitron font-bold text-xl text-white mb-2">
-              Playing {game.title}...
-            </h3>
-            <p className="text-gray-400">Good luck!</p>
-            
-            {playGameMutation.data && (
-              <div className="mt-6 animate-slide-in-up">
-                {playGameMutation.data.result === "win" ? (
-                  <div className="bg-green-900/30 border border-green-500 rounded-lg p-4">
-                    <i className="fas fa-trophy text-gaming-gold text-3xl mb-2"></i>
-                    <h4 className="font-bold text-gaming-gold text-lg">Congratulations!</h4>
-                    <p className="text-white">You won ${parseFloat(playGameMutation.data.winAmount).toLocaleString()}!</p>
-                  </div>
-                ) : (
-                  <div className="bg-red-900/30 border border-red-500 rounded-lg p-4">
-                    <i className="fas fa-heart-broken text-red-400 text-3xl mb-2"></i>
-                    <h4 className="font-bold text-red-400 text-lg">Better luck next time!</h4>
-                    <p className="text-white">Try again with a different strategy.</p>
-                  </div>
-                )}
+            <div className="flex justify-between text-sm mt-1">
+              <span className="text-gray-400 font-exo">Max Multiplier:</span>
+              <span className="text-gaming-gold font-gaming">5x</span>
+            </div>
+          </div>
+
+          {/* Insufficient Balance Warning */}
+          {user && parseFloat(user.walletBalance || "0") < parseFloat(betAmount) && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+              <div className="flex items-center">
+                <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
+                <p className="text-red-400 text-sm font-exo">
+                  Insufficient wallet balance. Please add money to continue.
+                </p>
               </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isPlaying}
+            className="border-gaming-border-light text-gray-300 hover:bg-gaming-accent"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handlePlay}
+            disabled={isPlaying || !betAmount || parseFloat(betAmount) < 10}
+            className="btn-gaming-primary font-gaming"
+          >
+            {isPlaying ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Playing...
+              </>
+            ) : (
+              <>
+                <Trophy className="w-4 h-4 mr-2" />
+                Play for ₹{betAmount}
+              </>
             )}
-          </div>
-        )}
-
-        {!isPlaying && (
-          <DialogFooter className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleClose}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handlePlay}
-              className="bg-gaming-gold hover:bg-gaming-amber text-black font-bold"
-              disabled={!betAmount || parseFloat(betAmount) <= 0}
-            >
-              <i className="fas fa-play mr-2"></i>
-              Play Now - ${betAmount}
-            </Button>
-          </DialogFooter>
-        )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -56,11 +56,15 @@ export class MemStorage implements IStorage {
   private gameCategories: Map<number, GameCategory>;
   private userGameHistory: Map<number, UserGameHistory>;
   private promotions: Map<number, Promotion>;
+  private walletTransactions: Map<number, WalletTransaction>;
+  private kycDocuments: Map<number, KycDocument>;
   private currentUserId: number;
   private currentGameId: number;
   private currentCategoryId: number;
   private currentHistoryId: number;
   private currentPromotionId: number;
+  private currentTransactionId: number;
+  private currentKycDocumentId: number;
 
   constructor() {
     this.users = new Map();
@@ -68,11 +72,15 @@ export class MemStorage implements IStorage {
     this.gameCategories = new Map();
     this.userGameHistory = new Map();
     this.promotions = new Map();
+    this.walletTransactions = new Map();
+    this.kycDocuments = new Map();
     this.currentUserId = 1;
     this.currentGameId = 1;
     this.currentCategoryId = 1;
     this.currentHistoryId = 1;
     this.currentPromotionId = 1;
+    this.currentTransactionId = 1;
+    this.currentKycDocumentId = 1;
 
     this.initializeData();
   }
@@ -825,4 +833,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
