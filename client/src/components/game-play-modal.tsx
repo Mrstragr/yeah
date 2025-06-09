@@ -70,18 +70,18 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-gaming-charcoal border-gaming-gold max-w-md">
+      <DialogContent className="bg-gaming-secondary border border-gaming-border-light max-w-md shadow-2xl backdrop-blur-sm">
         <DialogHeader>
           <div className="text-center mb-4">
             <img 
               src={game.imageUrl} 
               alt={game.title}
-              className="w-20 h-20 rounded-lg mx-auto mb-4 object-cover"
+              className="w-20 h-20 rounded-lg mx-auto mb-4 object-cover shadow-lg border border-gaming-border"
             />
-            <DialogTitle className="font-orbitron font-bold text-2xl text-gaming-gold">
+            <DialogTitle className="font-gaming font-bold text-2xl text-gaming-gold tracking-wide">
               {game.title}
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-gray-300 font-exo">
               {game.description}
             </DialogDescription>
           </div>

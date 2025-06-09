@@ -47,55 +47,62 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gaming-dark text-white">
+    <div className="min-h-screen bg-gaming-primary text-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gaming-charcoal via-gray-900 to-gaming-dark"></div>
-        <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent"></div>
+        <div className="absolute inset-0 opacity-30">
           <div className="absolute top-10 left-10 w-2 h-2 bg-gaming-gold rounded-full animate-pulse"></div>
-          <div className="absolute top-32 right-20 w-1 h-1 bg-gaming-amber rounded-full animate-pulse delay-75"></div>
-          <div className="absolute bottom-20 left-1/4 w-1.5 h-1.5 bg-gaming-emerald rounded-full animate-pulse delay-150"></div>
-          <div className="absolute bottom-32 right-1/3 w-2 h-2 bg-gaming-gold rounded-full animate-pulse delay-300"></div>
+          <div className="absolute top-32 right-20 w-1 h-1 bg-gaming-blue rounded-full animate-pulse delay-75"></div>
+          <div className="absolute bottom-20 left-1/4 w-1.5 h-1.5 bg-gaming-green rounded-full animate-pulse delay-150"></div>
+          <div className="absolute bottom-32 right-1/3 w-2 h-2 bg-gaming-purple rounded-full animate-pulse delay-300"></div>
+          <div className="absolute top-1/2 left-1/5 w-1 h-1 bg-gaming-gold rounded-full animate-pulse delay-500"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
-            <h1 className="font-orbitron font-black text-4xl md:text-6xl lg:text-7xl mb-6">
-              <span className="text-white">Welcome to the</span>
-              <span className="text-gaming-gold animate-glow block">Ultimate Gaming</span>
-              <span className="text-white">Experience</span>
+            <h1 className="font-gaming font-black text-5xl md:text-7xl lg:text-8xl mb-6 tracking-wider">
+              <span className="text-white">TASHA</span>
+              <span className="text-gaming-gold block">WIN</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Join thousands of players in the most exciting online gaming platform. 
-              Win big with our premium games and exclusive tournaments.
+            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto font-exo leading-relaxed">
+              Experience professional gaming with real-time competitions and instant rewards
             </p>
             
-            {/* Jackpot Display */}
-            <div className="bg-gradient-to-r from-gaming-gold to-gaming-amber text-black rounded-2xl p-6 mb-8 max-w-md mx-auto animate-jackpot-pulse">
-              <div className="flex items-center justify-center space-x-3">
-                <i className="fas fa-trophy text-2xl animate-bounce"></i>
-                <div>
-                  <p className="font-semibold text-sm">MEGA JACKPOT</p>
-                  <p className="font-orbitron font-black text-2xl">
+            {/* Professional Jackpot Display */}
+            <div className="relative bg-gradient-to-r from-gaming-secondary via-gaming-accent to-gaming-secondary border border-gaming-gold/30 rounded-xl p-8 mb-8 max-w-lg mx-auto shadow-2xl backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-gaming-gold/5 via-gaming-gold/10 to-gaming-gold/5 rounded-xl"></div>
+              <div className="relative flex items-center justify-center space-x-4">
+                <div className="text-gaming-gold">
+                  <i className="fas fa-trophy text-3xl drop-shadow-lg"></i>
+                </div>
+                <div className="text-center">
+                  <p className="font-gaming font-semibold text-sm text-gaming-gold tracking-widest mb-1 uppercase">Live Jackpot</p>
+                  <p className="font-gaming font-black text-3xl text-white">
                     ${jackpotStats ? parseFloat(jackpotStats.totalJackpot).toLocaleString() : "7,731,392"}
                   </p>
+                  <div className="flex items-center justify-center mt-2 space-x-2">
+                    <div className="w-2 h-2 bg-gaming-green rounded-full animate-pulse"></div>
+                    <span className="text-xs text-gray-400 font-medium tracking-wide">UPDATING LIVE</span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button 
-                className="bg-gaming-gold hover:bg-gaming-amber text-black font-bold py-4 px-8 rounded-xl"
+                className="btn-gaming-primary font-gaming font-bold py-4 px-8 rounded-xl text-lg tracking-wide shadow-2xl"
                 size="lg"
               >
-                <i className="fas fa-play mr-2"></i>Start Playing Now
+                <i className="fas fa-play mr-3"></i>
+                START PLAYING
               </Button>
               <Button 
-                variant="outline" 
-                className="border-2 border-gaming-gold text-gaming-gold hover:bg-gaming-gold hover:text-black font-bold py-4 px-8 rounded-xl"
+                className="btn-gaming-secondary font-gaming font-bold py-4 px-8 rounded-xl text-lg tracking-wide"
                 size="lg"
               >
-                <i className="fas fa-gamepad mr-2"></i>Explore Games
+                <i className="fas fa-gamepad mr-3"></i>
+                EXPLORE GAMES
               </Button>
             </div>
           </div>

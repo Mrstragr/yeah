@@ -25,21 +25,26 @@ export function LiveTicker() {
   const currentWinner = topEarners[currentIndex];
 
   return (
-    <div className="bg-gradient-to-r from-gaming-gold/20 to-gaming-amber/20 border border-gaming-gold/50 rounded-lg p-4 mb-6">
+    <div className="bg-gaming-secondary/80 backdrop-blur-sm border border-gaming-border-light rounded-lg p-4 mb-6 shadow-lg">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="animate-pulse">
-            <i className="fas fa-trophy text-gaming-gold text-xl"></i>
+        <div className="flex items-center space-x-4">
+          <div className="text-gaming-gold">
+            <i className="fas fa-trophy text-xl animate-pulse"></i>
           </div>
           <div>
-            <p className="text-gaming-gold font-semibold text-sm">LATEST WINNER</p>
-            <p className="text-white font-bold">
-              {currentWinner.username} won ${parseFloat(currentWinner.winAmount).toLocaleString()} 
-              <span className="text-gray-400 ml-2 font-normal">playing {currentWinner.gameTitle}</span>
+            <p className="text-gaming-gold font-gaming font-bold text-sm tracking-widest uppercase">Latest Winner</p>
+            <p className="text-white font-gaming font-bold text-lg">
+              {currentWinner.username}
+              <span className="text-gaming-gold mx-2">won</span>
+              ${parseFloat(currentWinner.winAmount).toLocaleString()}
+            </p>
+            <p className="text-gray-400 font-exo text-sm">
+              {currentWinner.gameTitle}
             </p>
           </div>
         </div>
-        <div className="bg-gaming-gold text-black px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+        <div className="bg-gradient-to-r from-gaming-red to-red-500 text-white px-4 py-2 rounded-full text-xs font-gaming font-bold tracking-wide shadow-lg animate-pulse">
+          <span className="inline-block w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
           LIVE
         </div>
       </div>
