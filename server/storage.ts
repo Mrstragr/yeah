@@ -101,328 +101,519 @@ export class MemStorage implements IStorage {
 
     categories.forEach(category => this.createGameCategory(category));
 
-    // Initialize games
-    const initialGames: InsertGame[] = [
+    // Add PVC category for TashanWin games
+    this.createGameCategory({
+      name: "PVC",
+      slug: "pvc", 
+      description: "Premium Live Casino",
+      icon: "fas fa-video",
+      color: "from-pink-500 to-purple-600"
+    });
+
+    // Initialize authentic TashanWin games
+    const tashanwinGames = [
+      // Lobby Games (Featured)
+      {
+        title: "Super Jackpot",
+        description: "Get Super Jackpot rewards - Visit the Super Jackpot page to claim",
+        category: "lobby",
+        imageUrl: "/images/superjackpot.png",
+        rating: "4.9",
+        jackpot: "5000000.00"
+      },
+      {
+        title: "Daily Check-in",
+        description: "Login daily for increasing bonus rewards",
+        category: "lobby", 
+        imageUrl: "/images/checkin.png",
+        rating: "4.8",
+        jackpot: "100000.00"
+      },
+      {
+        title: "VIP Bonus",
+        description: "Exclusive VIP member bonuses and privileges",
+        category: "lobby",
+        imageUrl: "/images/vip.png", 
+        rating: "4.7",
+        jackpot: "2500000.00"
+      },
+
       // Lottery Games
       {
-        title: "Mega Lottery Draw",
-        description: "Weekly lottery with massive prizes",
+        title: "Win Go 1Min",
+        description: "Predict the next number in 1-minute lottery draws",
         category: "lottery",
-        imageUrl: "https://images.unsplash.com/photo-1434873740857-1bc5653afda8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "2847392.00"
+        imageUrl: "/images/wingo1.png",
+        rating: "4.8",
+        jackpot: "500000.00"
       },
       {
-        title: "Daily Lucky Numbers",
-        description: "Quick pick lottery with daily draws",
+        title: "Win Go 3Min", 
+        description: "3-minute lottery with higher multipliers and bigger wins",
         category: "lottery",
-        imageUrl: "https://images.unsplash.com/photo-1611095564141-d8f2c3eb8f90?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.3",
-        jackpot: "150000.00"
+        imageUrl: "/images/wingo3.png",
+        rating: "4.7",
+        jackpot: "750000.00"
       },
       {
-        title: "Power Ball Jackpot",
-        description: "Multi-state lottery with record payouts",
+        title: "Win Go 5Min",
+        description: "5-minute draws with mega jackpots and bonus rounds",
         category: "lottery",
-        imageUrl: "https://images.unsplash.com/photo-1511193311914-0346f16efe90?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/wingo5.png",
+        rating: "4.9",
+        jackpot: "1000000.00"
+      },
+      {
+        title: "Win Go 10Min",
+        description: "10-minute lottery with maximum payouts and special features",
+        category: "lottery",
+        imageUrl: "/images/wingo10.png",
+        rating: "4.8",
+        jackpot: "1500000.00"
+      },
+      {
+        title: "K3 Lottery",
+        description: "3-dice sum prediction game with instant results",
+        category: "lottery",
+        imageUrl: "/images/k3.png",
         rating: "4.6",
-        jackpot: "1890000.00"
+        jackpot: "200000.00"
       },
       {
-        title: "Scratch Card Bonanza",
-        description: "Instant win scratch cards with big prizes",
+        title: "5D Lottery",
+        description: "5-digit number prediction with massive multipliers",
         category: "lottery",
-        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.2",
-        jackpot: "75000.00"
+        imageUrl: "/images/5d.png",
+        rating: "4.7",
+        jackpot: "2000000.00"
+      },
+      {
+        title: "Trx Win Go",
+        description: "TRON-based lottery with cryptocurrency rewards",
+        category: "lottery",
+        imageUrl: "/images/trx.png",
+        rating: "4.5",
+        jackpot: "800000.00"
       },
 
       // Popular Games
       {
-        title: "Golden Fortune Slots",
-        description: "Classic slot machine with massive jackpots",
+        title: "Aviator",
+        description: "Fly high and cash out before the plane crashes",
         category: "popular",
-        imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.8",
-        jackpot: "125000.00"
-      },
-      {
-        title: "Texas Hold'em Poker",
-        description: "Most popular poker variant with tournaments",
-        category: "popular",
-        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/aviator.png",
         rating: "4.9",
-        jackpot: "95000.00"
+        jackpot: "1000000.00"
       },
       {
-        title: "Lightning Roulette",
-        description: "Enhanced roulette with multiplied payouts",
+        title: "JetX",
+        description: "Rocket multiplier game with instant cashouts",
+        category: "popular", 
+        imageUrl: "/images/jetx.png",
+        rating: "4.8",
+        jackpot: "800000.00"
+      },
+      {
+        title: "Lucky Jet",
+        description: "Lucky character flies with growing multipliers",
         category: "popular",
-        imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/luckyjet.png",
         rating: "4.7",
-        jackpot: "180000.00"
+        jackpot: "600000.00"
       },
       {
-        title: "Dragon Tiger",
-        description: "Fast-paced card game with simple rules",
+        title: "Spaceman",
+        description: "Space adventure with astronomical multipliers",
         category: "popular",
-        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "65000.00"
+        imageUrl: "/images/spaceman.png", 
+        rating: "4.8",
+        jackpot: "900000.00"
+      },
+      {
+        title: "Crash",
+        description: "Classic crash game with multiplying rewards",
+        category: "popular",
+        imageUrl: "/images/crash.png",
+        rating: "4.6",
+        jackpot: "700000.00"
       },
 
       // Mini Games
       {
-        title: "Crash Rocket",
-        description: "Multiplier game - cash out before the crash",
+        title: "Mines",
+        description: "Find diamonds while avoiding explosive mines",
         category: "minigames",
-        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.4",
-        jackpot: "50000.00"
-      },
-      {
-        title: "Plinko Drop",
-        description: "Drop balls and watch them bounce to prizes",
-        category: "minigames",
-        imageUrl: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.3",
-        jackpot: "25000.00"
-      },
-      {
-        title: "Mines Sweeper",
-        description: "Reveal gems while avoiding mines",
-        category: "minigames",
-        imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "40000.00"
-      },
-      {
-        title: "Coin Flip Pro",
-        description: "Double or nothing coin flipping game",
-        category: "minigames",
-        imageUrl: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.2",
-        jackpot: "15000.00"
-      },
-      {
-        title: "Wheel of Fortune",
-        description: "Spin the wheel for instant prizes",
-        category: "minigames",
-        imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/mines.png",
         rating: "4.6",
-        jackpot: "35000.00"
+        jackpot: "250000.00"
+      },
+      {
+        title: "Plinko",
+        description: "Drop balls through pegs for multiplied winnings",
+        category: "minigames",
+        imageUrl: "/images/plinko.png",
+        rating: "4.5",
+        jackpot: "300000.00"
+      },
+      {
+        title: "Keno",
+        description: "Pick numbers and win based on matches drawn",
+        category: "minigames",
+        imageUrl: "/images/keno.png",
+        rating: "4.4",
+        jackpot: "150000.00"
+      },
+      {
+        title: "Wheel",
+        description: "Spin the wheel for instant cash prizes",
+        category: "minigames",
+        imageUrl: "/images/wheel.png",
+        rating: "4.7",
+        jackpot: "400000.00"
+      },
+      {
+        title: "Dice",
+        description: "Roll dice and predict high/low outcomes", 
+        category: "minigames",
+        imageUrl: "/images/dice.png",
+        rating: "4.3",
+        jackpot: "100000.00"
+      },
+      {
+        title: "Tower",
+        description: "Climb the tower while avoiding falling blocks",
+        category: "minigames",
+        imageUrl: "/images/tower.png",
+        rating: "4.5",
+        jackpot: "200000.00"
+      },
+      {
+        title: "Limbo",
+        description: "Set your multiplier and beat the house edge",
+        category: "minigames",
+        imageUrl: "/images/limbo.png",
+        rating: "4.4",
+        jackpot: "180000.00"
       },
 
       // Casino Games
       {
-        title: "Royal Poker Championship",
-        description: "High-stakes poker with professional dealers",
+        title: "Teen Patti",
+        description: "Indian 3-card poker with live dealers and real players",
         category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/teenpatti.png",
         rating: "4.9",
-        jackpot: "85000.00"
+        jackpot: "2000000.00"
       },
       {
-        title: "European Roulette Pro",
-        description: "Premium roulette with live dealers",
+        title: "Andar Bahar", 
+        description: "Traditional Indian card game with live action",
         category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.7",
-        jackpot: "65000.00"
-      },
-      {
-        title: "Blackjack Master",
-        description: "Classic blackjack with perfect strategy guide",
-        category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1541278107931-e006523892df?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.6",
-        jackpot: "45000.00"
-      },
-      {
-        title: "Baccarat Elite",
-        description: "High-end baccarat with VIP tables",
-        category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/andarbahar.png",
         rating: "4.8",
-        jackpot: "120000.00"
+        jackpot: "1500000.00"
       },
       {
-        title: "Live Casino Hold'em",
-        description: "Play against the dealer in this poker variant",
+        title: "Dragon Tiger",
+        description: "Simple card comparison game with high payouts",
         category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/dragontiger.png",
+        rating: "4.7",
+        jackpot: "1200000.00"
+      },
+      {
+        title: "Baccarat",
+        description: "Classic baccarat with professional live dealers",
+        category: "casino",
+        imageUrl: "/images/baccarat.png",
+        rating: "4.8",
+        jackpot: "1800000.00"
+      },
+      {
+        title: "Roulette",
+        description: "European roulette with live wheel spins",
+        category: "casino",
+        imageUrl: "/images/roulette.png",
+        rating: "4.6",
+        jackpot: "1000000.00"
+      },
+      {
+        title: "Blackjack",
+        description: "21 card game with perfect strategy payouts",
+        category: "casino", 
+        imageUrl: "/images/blackjack.png",
         rating: "4.5",
-        jackpot: "55000.00"
+        jackpot: "800000.00"
       },
       {
-        title: "Three Card Poker",
-        description: "Fast-paced poker with ante and play bets",
+        title: "Sic Bo",
+        description: "Traditional dice game with multiple betting options",
         category: "casino",
-        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/sicbo.png",
         rating: "4.4",
-        jackpot: "38000.00"
+        jackpot: "600000.00"
+      },
+      {
+        title: "Poker",
+        description: "Texas Hold'em poker tournaments and cash games",
+        category: "casino",
+        imageUrl: "/images/poker.png",
+        rating: "4.7",
+        jackpot: "1500000.00"
       },
 
       // Slots Games
       {
-        title: "Diamond Dynasty",
-        description: "Luxury themed slot with progressive jackpot",
+        title: "Gates of Olympus",
+        description: "Divine slot with tumbling reels and multipliers",
         category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.8",
-        jackpot: "285000.00"
+        imageUrl: "/images/gates.png",
+        rating: "4.9",
+        jackpot: "5000000.00"
       },
       {
-        title: "Pharaoh's Gold",
-        description: "Ancient Egypt themed adventure slot",
+        title: "Sweet Bonanza",
+        description: "Candy-themed slot with explosive wins",
         category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/bonanza.png",
+        rating: "4.8", 
+        jackpot: "3000000.00"
+      },
+      {
+        title: "Wolf Gold",
+        description: "Wildlife slot with money symbol features",
+        category: "slots",
+        imageUrl: "/images/wolf.png",
         rating: "4.7",
-        jackpot: "195000.00"
+        jackpot: "2500000.00"
       },
       {
-        title: "Mega Fruit Machine",
-        description: "Classic fruit slot with modern features",
+        title: "Book of Dead",
+        description: "Egyptian adventure with expanding symbols",
         category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "145000.00"
-      },
-      {
-        title: "Dragon's Fire",
-        description: "Fantasy themed slot with expanding wilds",
-        category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/bookdead.png",
         rating: "4.6",
-        jackpot: "165000.00"
+        jackpot: "2000000.00"
       },
       {
-        title: "Lucky 777 Classic",
-        description: "Traditional slot machine experience",
+        title: "Starburst",
+        description: "Classic gem slot with expanding wilds",
         category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.4",
-        jackpot: "95000.00"
+        imageUrl: "/images/starburst.png",
+        rating: "4.5",
+        jackpot: "1500000.00"
       },
       {
-        title: "Wild West Gold",
-        description: "Western themed slot with bonus rounds",
+        title: "Mega Moolah",
+        description: "Progressive jackpot slot with African safari theme",
         category: "slots",
-        imageUrl: "https://images.unsplash.com/photo-1511193311914-0346f16efe90?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/moolah.png",
+        rating: "4.8",
+        jackpot: "10000000.00"
+      },
+      {
+        title: "Bonanza",
+        description: "Mining-themed megaways slot with cascading reels",
+        category: "slots",
+        imageUrl: "/images/bonanza2.png", 
         rating: "4.7",
-        jackpot: "175000.00"
+        jackpot: "4000000.00"
+      },
+      {
+        title: "Reactoonz",
+        description: "Alien-themed cluster pays slot with quantum features",
+        category: "slots",
+        imageUrl: "/images/reactoonz.png",
+        rating: "4.6",
+        jackpot: "3500000.00"
       },
 
       // Sports Games
       {
-        title: "Football Champions League",
-        description: "Bet on live football matches worldwide",
+        title: "Cricket Live",
+        description: "Live cricket betting with real-time odds and statistics",
         category: "sports",
-        imageUrl: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/cricket.png",
+        rating: "4.8",
+        jackpot: "1000000.00"
+      },
+      {
+        title: "Football Live",
+        description: "Global football leagues with live betting options",
+        category: "sports",
+        imageUrl: "/images/football.png",
+        rating: "4.7",
+        jackpot: "800000.00"
+      },
+      {
+        title: "Tennis Live",
+        description: "Professional tennis tournaments with live betting",
+        category: "sports",
+        imageUrl: "/images/tennis.png",
         rating: "4.6",
-        jackpot: "75000.00"
+        jackpot: "600000.00"
       },
       {
-        title: "Basketball Pro League",
-        description: "Live basketball betting with real-time odds",
+        title: "Basketball Live",
+        description: "NBA and international basketball with live odds",
         category: "sports",
-        imageUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/basketball.png",
         rating: "4.5",
-        jackpot: "65000.00"
+        jackpot: "500000.00"
       },
       {
-        title: "Tennis Grand Slam",
-        description: "Bet on major tennis tournaments",
+        title: "Virtual Sports",
+        description: "24/7 virtual sports with instant results",
         category: "sports",
-        imageUrl: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/virtual.png",
         rating: "4.4",
-        jackpot: "45000.00"
+        jackpot: "300000.00"
       },
       {
-        title: "Horse Racing Derby",
-        description: "Track betting on live horse races",
+        title: "Kabaddi Live",
+        description: "Pro Kabaddi League betting with live updates",
         category: "sports",
-        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/kabaddi.png",
         rating: "4.3",
-        jackpot: "85000.00"
+        jackpot: "250000.00"
+      },
+
+      // PVC Games (Premium Live Casino)
+      {
+        title: "Live Dealer Studios",
+        description: "Premium live dealer games with HD streaming",
+        category: "pvc",
+        imageUrl: "/images/live.png",
+        rating: "4.9",
+        jackpot: "3000000.00"
       },
       {
-        title: "Virtual Sports Arena",
-        description: "24/7 virtual sports betting action",
-        category: "sports",
-        imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.2",
-        jackpot: "35000.00"
+        title: "VIP Salon Privé",
+        description: "Exclusive high-limit tables for VIP members",
+        category: "pvc",
+        imageUrl: "/images/vipsalon.png",
+        rating: "4.8",
+        jackpot: "5000000.00"
+      },
+      {
+        title: "Speed Baccarat",
+        description: "Fast-paced baccarat with 27-second rounds",
+        category: "pvc",
+        imageUrl: "/images/speedbac.png",
+        rating: "4.7",
+        jackpot: "2000000.00"
+      },
+      {
+        title: "Lightning Roulette",
+        description: "Electrified roulette with random multipliers up to 500x",
+        category: "pvc",
+        imageUrl: "/images/lightning.png",
+        rating: "4.8",
+        jackpot: "2500000.00"
+      },
+      {
+        title: "Dream Catcher",
+        description: "Money wheel game with live host and multipliers",
+        category: "pvc",
+        imageUrl: "/images/dreamcatcher.png",
+        rating: "4.6",
+        jackpot: "1500000.00"
+      },
+      {
+        title: "Monopoly Live",
+        description: "Board game-inspired wheel with 3D bonus rounds",
+        category: "pvc",
+        imageUrl: "/images/monopoly.png",
+        rating: "4.7",
+        jackpot: "2200000.00"
       },
 
       // Rummy Games
       {
-        title: "Indian Rummy Classic",
-        description: "Traditional 13-card rummy with tournaments",
+        title: "Points Rummy",
+        description: "Fast points-based rummy tournaments with instant results",
         category: "rummy",
-        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/pointsrummy.png",
         rating: "4.7",
-        jackpot: "55000.00"
+        jackpot: "500000.00"
       },
       {
-        title: "Gin Rummy Masters",
-        description: "Fast-paced gin rummy with cash prizes",
+        title: "Pool Rummy",
+        description: "101 and 201 pool rummy with elimination rounds",
         category: "rummy",
-        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "42000.00"
-      },
-      {
-        title: "Rummy 500 Championship",
-        description: "Multi-player rummy with big tournaments",
-        category: "rummy",
-        imageUrl: "https://images.unsplash.com/photo-1541278107931-e006523892df?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/poolrummy.png",
         rating: "4.6",
-        jackpot: "68000.00"
+        jackpot: "750000.00"
       },
       {
-        title: "Points Rummy Rush",
-        description: "Quick rummy games with instant payouts",
+        title: "Deals Rummy",
+        description: "Fixed deals rummy with predetermined chip distribution",
         category: "rummy",
-        imageUrl: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/dealsrummy.png",
+        rating: "4.5",
+        jackpot: "400000.00"
+      },
+      {
+        title: "Gin Rummy",
+        description: "Classic gin rummy with cash prizes and tournaments",
+        category: "rummy",
+        imageUrl: "/images/ginrummy.png",
         rating: "4.4",
-        jackpot: "28000.00"
+        jackpot: "300000.00"
+      },
+      {
+        title: "Indian Rummy",
+        description: "Traditional 13-card Indian rummy with multiple variants",
+        category: "rummy",
+        imageUrl: "/images/indianrummy.png",
+        rating: "4.8",
+        jackpot: "600000.00"
       },
 
       // Fishing Games
       {
-        title: "Ocean Treasure Hunt",
-        description: "Underwater adventure fishing game",
+        title: "Ocean King",
+        description: "Underwater fishing adventure with powerful cannons",
         category: "fishing",
-        imageUrl: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.4",
-        jackpot: "35000.00"
+        imageUrl: "/images/oceanking.png",
+        rating: "4.8",
+        jackpot: "1500000.00"
       },
       {
-        title: "Deep Sea Fortune",
-        description: "Hunt for rare fish and underwater treasures",
+        title: "Fish Hunter",
+        description: "Hunt rare fish species for mega multipliers and bonuses",
         category: "fishing",
-        imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.5",
-        jackpot: "48000.00"
+        imageUrl: "/images/fishhunter.png",
+        rating: "4.7",
+        jackpot: "1200000.00"
       },
       {
-        title: "Golden Fish Casino",
-        description: "Arcade fishing with multiplayer action",
+        title: "Golden Toad",
+        description: "Mythical fishing adventure with special bonus features",
         category: "fishing",
-        imageUrl: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
-        rating: "4.3",
-        jackpot: "32000.00"
-      },
-      {
-        title: "Mega Fish Shooter",
-        description: "Shoot fish for coins and special rewards",
-        category: "fishing",
-        imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        imageUrl: "/images/goldentoad.png",
         rating: "4.6",
-        jackpot: "58000.00"
+        jackpot: "1000000.00"
+      },
+      {
+        title: "Fish Shooting",
+        description: "Arcade-style fish shooting with multiplayer action",
+        category: "fishing",
+        imageUrl: "/images/fishshooting.png",
+        rating: "4.5",
+        jackpot: "800000.00"
+      },
+      {
+        title: "Deep Sea Treasure",
+        description: "Explore the ocean depths for hidden treasures",
+        category: "fishing",
+        imageUrl: "/images/deepsea.png",
+        rating: "4.4",
+        jackpot: "600000.00"
       }
     ];
+
+    const initialGames: InsertGame[] = tashanwinGames;
 
     initialGames.forEach(game => this.createGame(game));
 
