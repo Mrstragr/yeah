@@ -21,3 +21,19 @@ export interface GamePlayResult {
   newBalance: string;
   history: any;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  phone: string;
+  email: string;
+  walletBalance: string;
+  bonusBalance: string;
+  kycStatus: string;
+  referralCode: string | null;
+  vipLevel: number;
+  totalDeposit: string;
+  totalWithdraw: string;
+  totalBet: string;
+  totalWin: string;
+}
