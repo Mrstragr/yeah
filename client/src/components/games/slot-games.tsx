@@ -6,6 +6,99 @@ interface SlotGameProps {
   onClose: () => void;
 }
 
+const SlotReel = ({ symbols, isSpinning, reelIndex }: { symbols: string[]; isSpinning: boolean; reelIndex: number }) => {
+  return (
+    <div className="relative bg-gradient-to-br from-gray-100 via-white to-gray-200 rounded-2xl p-2 shadow-2xl border-4 border-gray-300 overflow-hidden">
+      {/* 3D effect overlays */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent rounded-2xl"></div>
+      <div className="absolute inset-2 bg-gradient-to-br from-transparent to-black/10 rounded-xl"></div>
+      
+      {/* Spinning particles */}
+      {isSpinning && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(15)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-yellow-400 rounded-full opacity-60 animate-particle-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${1.5 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+      
+      <div className={`relative z-10 transition-all duration-200 ${isSpinning ? 'animate-slot-spin' : ''}`}>
+        {symbols.map((symbol, symbolIndex) => (
+          <div 
+            key={symbolIndex} 
+            className={`
+              text-5xl text-center py-4 transition-all duration-300 relative
+              ${symbolIndex === 1 ? 'bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 rounded-xl shadow-xl transform scale-110 border-2 border-yellow-600' : 'hover:scale-105'}
+              ${isSpinning ? 'blur-sm' : 'filter-none'}
+            `}
+            style={{
+              animationDelay: `${reelIndex * 100 + symbolIndex * 50}ms`,
+              textShadow: symbolIndex === 1 ? '0 0 20px rgba(255, 215, 0, 0.8)' : '0 2px 4px rgba(0,0,0,0.3)'
+            }}
+          >
+            <span className="relative z-10 drop-shadow-lg">{symbol}</span>
+            {symbolIndex === 1 && !isSpinning && (
+              <div className="absolute inset-0 bg-yellow-400 opacity-20 rounded-xl animate-pulse"></div>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* Glow effect when spinning */}
+      {isSpinning && (
+        <div className="absolute inset-0 rounded-2xl border-2 border-yellow-400 animate-ping opacity-40"></div>
+      )}
+    </div>
+  );
+};
+
+const WinCelebration = ({ winAmount, isJackpot }: { winAmount: number; isJackpot: boolean }) => {
+  if (winAmount <= 0) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 pointer-events-none">
+      <div className="text-center">
+        {/* Particle explosion */}
+        <div className="absolute inset-0">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-3 h-3 bg-yellow-400 rounded-full animate-particle-float"
+              style={{
+                left: `${50 + (Math.random() - 0.5) * 100}%`,
+                top: `${50 + (Math.random() - 0.5) * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="relative z-10">
+          <div className="text-8xl mb-4 animate-bounce">
+            {isJackpot ? '💎🏆💎' : '🎰✨🎰'}
+          </div>
+          <div className={`text-6xl font-bold animate-pulse mb-4 ${isJackpot ? 'text-yellow-300' : 'text-green-400'}`}>
+            {isJackpot ? 'MEGA JACKPOT!' : 'BIG WIN!'}
+          </div>
+          <div className="text-4xl font-bold text-white">
+            ₹{winAmount.toLocaleString()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function SlotMachineGame({ title, onPlay, onClose }: SlotGameProps) {
   const [reels, setReels] = useState([['🍒', '🍋', '🍊'], ['🍒', '🍋', '🍊'], ['🍒', '🍋', '🍊']]);
   const [spinning, setSpinning] = useState(false);
@@ -14,6 +107,7 @@ export function SlotMachineGame({ title, onPlay, onClose }: SlotGameProps) {
   const [lastWin, setLastWin] = useState(0);
   const [autoPlay, setAutoPlay] = useState(false);
   const [spinsRemaining, setSpinsRemaining] = useState(0);
+  const [showWinCelebration, setShowWinCelebration] = useState(false);
 
   const symbols = ['🍒', '🍋', '🍊', '🍇', '⭐', '💎', '7️⃣', '🔔'];
   const payouts = {
@@ -82,7 +176,9 @@ export function SlotMachineGame({ title, onPlay, onClose }: SlotGameProps) {
     setLastWin(winAmount);
     if (winAmount > 0) {
       setBalance(prev => prev + winAmount);
+      setShowWinCelebration(true);
       onPlay(winAmount);
+      setTimeout(() => setShowWinCelebration(false), 4000);
     }
     
     setSpinning(false);
@@ -103,34 +199,46 @@ export function SlotMachineGame({ title, onPlay, onClose }: SlotGameProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      <div className="bg-[#1e1e1e] p-3 flex items-center justify-between">
-        <button onClick={onClose} className="text-white text-lg">←</button>
-        <h1 className="text-white font-medium">{title}</h1>
-        <div className="text-white text-sm">₹{balance}</div>
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#2a1a3a] to-[#1a0a2a] z-50 flex flex-col">
+      {/* Enhanced Background */}
+      <div className="fixed inset-0 pointer-events-none opacity-20">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-purple-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-yellow-400 rounded-full blur-2xl animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-pink-400 rounded-full blur-xl animate-ping"></div>
       </div>
 
-      <div className="flex-1 bg-gradient-to-b from-purple-900 to-purple-700 p-4">
-        {/* Slot Machine */}
-        <div className="bg-[#2a2a2a] rounded-lg p-4 mb-4">
-          <div className="grid grid-cols-3 gap-2 mb-4">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-[#1e1e1e] via-[#3a2a4a] to-[#1e1e1e] p-4 flex items-center justify-between shadow-2xl border-b border-purple-500/20">
+        <button 
+          onClick={onClose} 
+          className="text-white text-xl hover:text-purple-400 transition-all duration-300 hover:scale-110 transform"
+        >
+          ←
+        </button>
+        <h1 className="text-white font-bold text-lg bg-gradient-to-r from-white via-purple-400 to-white bg-clip-text text-transparent">
+          {title}
+        </h1>
+        <div className="text-yellow-400 text-lg font-bold">₹{balance}</div>
+      </div>
+
+      <div className="flex-1 bg-transparent p-4">
+        {/* Enhanced Slot Machine */}
+        <div className="bg-gradient-to-br from-[#2a2a2a] via-[#3a3a3a] to-[#2a2a2a] rounded-2xl p-6 mb-6 shadow-2xl border border-gray-700">
+          <div className="grid grid-cols-3 gap-4 mb-6">
             {reels.map((reel, reelIndex) => (
-              <div key={reelIndex} className="bg-white rounded p-2">
-                {reel.map((symbol, symbolIndex) => (
-                  <div key={symbolIndex} className={`text-3xl text-center py-2 ${
-                    symbolIndex === 1 ? 'bg-yellow-200 rounded' : ''
-                  }`}>
-                    {symbol}
-                  </div>
-                ))}
-              </div>
+              <SlotReel
+                key={reelIndex}
+                symbols={reel}
+                isSpinning={spinning}
+                reelIndex={reelIndex}
+              />
             ))}
           </div>
 
-          {lastWin > 0 && (
-            <div className="text-center mb-4">
-              <div className="text-2xl font-bold text-[#D4AF37]">
-                WIN! ₹{lastWin}
+          {lastWin > 0 && !showWinCelebration && (
+            <div className="text-center mb-6">
+              <div className="text-4xl font-bold text-[#D4AF37] animate-pulse drop-shadow-lg">
+                💰 WIN! ₹{lastWin.toLocaleString()} 💰
               </div>
             </div>
           )}
@@ -206,6 +314,11 @@ export function SlotMachineGame({ title, onPlay, onClose }: SlotGameProps) {
             )}
           </div>
         </div>
+
+        {/* Win Celebration Overlay */}
+        {showWinCelebration && (
+          <WinCelebration winAmount={lastWin} isJackpot={lastWin >= 1000} />
+        )}
       </div>
     </div>
   );

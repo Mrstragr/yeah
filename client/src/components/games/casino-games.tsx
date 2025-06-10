@@ -6,6 +6,125 @@ interface CasinoGameProps {
   onClose: () => void;
 }
 
+const Card3D = ({ card, isRevealed, isDealing, dealDelay = 0 }: { 
+  card: string; 
+  isRevealed: boolean; 
+  isDealing: boolean; 
+  dealDelay?: number;
+}) => {
+  const suit = card.slice(-1);
+  const rank = card.slice(0, -1);
+  const isRed = ['♥', '♦'].includes(suit);
+  
+  return (
+    <div className="relative perspective-1000">
+      <div 
+        className={`
+          w-16 h-24 md:w-20 md:h-28 rounded-xl transition-all duration-700 transform-gpu preserve-3d
+          ${isDealing ? 'animate-card-flip' : isRevealed ? '' : 'rotateY-180'}
+          ${isRevealed ? 'hover:scale-110 hover:rotate-3' : ''}
+        `}
+        style={{ 
+          animationDelay: `${dealDelay}ms`,
+          transformStyle: 'preserve-3d'
+        }}
+      >
+        {/* Card Front */}
+        <div className={`
+          absolute inset-0 w-full h-full bg-gradient-to-br from-white via-gray-50 to-gray-100 
+          rounded-xl border-2 border-gray-300 backface-hidden shadow-2xl
+          flex flex-col justify-between p-2
+          ${isRevealed ? 'rotateY-0' : 'rotateY-180'}
+        `}>
+          <div className={`text-sm font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
+            <div>{rank}</div>
+            <div className="text-lg leading-none">{suit}</div>
+          </div>
+          <div className={`text-3xl self-center ${isRed ? 'text-red-600' : 'text-black'}`}>
+            {suit}
+          </div>
+          <div className={`text-sm font-bold transform rotate-180 self-end ${isRed ? 'text-red-600' : 'text-black'}`}>
+            <div>{rank}</div>
+            <div className="text-lg leading-none">{suit}</div>
+          </div>
+        </div>
+        
+        {/* Card Back */}
+        <div className={`
+          absolute inset-0 w-full h-full bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 
+          rounded-xl border-2 border-blue-700 backface-hidden shadow-2xl
+          flex items-center justify-center
+          ${isRevealed ? 'rotateY-180' : 'rotateY-0'}
+        `}>
+          <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 m-1 rounded-lg flex items-center justify-center">
+            <div className="text-white text-xs font-bold opacity-50">🎰</div>
+          </div>
+        </div>
+      </div>
+      
+      {isDealing && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-yellow-400 rounded-full opacity-60 animate-particle-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 1}s`,
+                animationDuration: `${1 + Math.random()}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const WinCelebration = ({ winner, betType, winAmount }: { 
+  winner: string | null; 
+  betType: string | null; 
+  winAmount: number;
+}) => {
+  if (!winner || winAmount <= 0) return null;
+  
+  const isWin = betType === winner;
+  
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 pointer-events-none">
+      <div className="text-center">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-particle-float"
+            style={{
+              left: `${50 + (Math.random() - 0.5) * 100}%`,
+              top: `${50 + (Math.random() - 0.5) * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        
+        <div className="relative z-10">
+          <div className="text-8xl mb-4 animate-bounce">
+            {isWin ? '🏆' : '🎲'}
+          </div>
+          <div className={`text-6xl font-bold animate-pulse mb-4 ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+            {isWin ? 'YOU WIN!' : 'GAME OVER'}
+          </div>
+          {isWin && (
+            <div className="text-4xl font-bold text-yellow-400">
+              ₹{winAmount.toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
   const [gamePhase, setGamePhase] = useState<'betting' | 'dealing' | 'result'>('betting');
   const [betSide, setBetSide] = useState<'andar' | 'bahar' | null>(null);
