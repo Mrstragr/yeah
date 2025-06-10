@@ -447,6 +447,57 @@ export default function TashanWinMain() {
           </button>
         </div>
 
+        {/* Quick Games */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 flex items-center justify-center">
+              <span className="text-[#D4AF37] text-sm">⚡</span>
+            </div>
+            <span className="text-white text-sm font-medium">Quick Games</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
+            <span className="text-gray-500 text-xs">{"<"}</span>
+            <span className="text-gray-500 text-xs">{">"}</span>
+          </div>
+        </div>
+        
+        {/* Quick Games Grid */}
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+          <button
+            onClick={() => openGame('coinflip')}
+            className="bg-gradient-to-br from-yellow-900 to-yellow-700 p-3 rounded-lg text-left border border-yellow-600 hover:scale-105 transition-all duration-300"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🪙 Coin Flip</div>
+            <div className="text-white text-xs">Heads or Tails</div>
+            <div className="text-green-400 text-xs mt-1">1.95x payout</div>
+          </button>
+          <button
+            onClick={() => openGame('diceroll')}
+            className="bg-gradient-to-br from-green-900 to-green-700 p-3 rounded-lg text-left border border-green-600 hover:scale-105 transition-all duration-300"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🎲 Dice Roll</div>
+            <div className="text-white text-xs">Big/Small & Numbers</div>
+            <div className="text-green-400 text-xs mt-1">Up to 3x payout</div>
+          </button>
+          <button
+            onClick={() => openGame('highlow')}
+            className="bg-gradient-to-br from-red-900 to-red-700 p-3 rounded-lg text-left border border-red-600 hover:scale-105 transition-all duration-300"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🃏 High Low</div>
+            <div className="text-white text-xs">Card prediction game</div>
+            <div className="text-green-400 text-xs mt-1">Streak multiplier</div>
+          </button>
+          <button
+            onClick={() => openGame('bigsmall')}
+            className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-3 rounded-lg text-left border border-indigo-600 hover:scale-105 transition-all duration-300"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🔢 Big Small</div>
+            <div className="text-white text-xs">Number prediction</div>
+            <div className="text-green-400 text-xs mt-1">2x payout</div>
+          </button>
+        </div>
+
         {/* Slots */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -466,17 +517,19 @@ export default function TashanWinMain() {
         <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
           <button
             onClick={() => openGame('slots')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+            className="bg-gradient-to-br from-orange-900 to-orange-700 p-3 rounded-lg text-left border border-orange-600 hover:scale-105 transition-all duration-300"
           >
-            <div className="text-[#D4AF37] text-xs mb-1">Classic Slots</div>
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🎰 Classic Slots</div>
             <div className="text-white text-xs">Traditional slot machine</div>
+            <div className="text-green-400 text-xs mt-1">Auto-play available</div>
           </button>
           <button
             onClick={() => openGame('megajackpot')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+            className="bg-gradient-to-br from-pink-900 to-pink-700 p-3 rounded-lg text-left border border-pink-600 hover:scale-105 transition-all duration-300"
           >
-            <div className="text-[#D4AF37] text-xs mb-1">Mega Jackpot</div>
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">💎 Mega Jackpot</div>
             <div className="text-white text-xs">Progressive jackpot</div>
+            <div className="text-green-400 text-xs mt-1">₹1,250,000 jackpot</div>
           </button>
         </div>
 
@@ -673,6 +726,18 @@ export default function TashanWinMain() {
       )}
       {currentGame === 'megajackpot' && (
         <MegaJackpotSlot title="Mega Jackpot" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'coinflip' && (
+        <CoinFlipGame title="Coin Flip" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'diceroll' && (
+        <DiceRollGame title="Dice Roll" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'highlow' && (
+        <HighLowCardGame title="High Low Cards" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'bigsmall' && (
+        <DiceRollGame title="Big Small" onPlay={handleGameWin} onClose={closeGame} />
       )}
     </div>
   );
