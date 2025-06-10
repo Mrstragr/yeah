@@ -9,6 +9,8 @@ import { BalanceDisplay } from "@/components/balance-display";
 import { CoinFlipGame } from "@/components/games/coin-flip";
 import { DiceRollGame } from "@/components/games/dice-roll";
 import { HighLowCardGame } from "@/components/games/card-games";
+import { EnhancedHeader } from "@/components/enhanced-header";
+import { ModernDashboard } from "@/components/modern-dashboard";
 
 interface User {
   id: number;
@@ -184,29 +186,30 @@ export default function TashanWinMain() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white relative">
-      {/* Header - exactly like original */}
-      <div className="flex justify-end items-center p-3 bg-[#1e1e1e]">
-        <div className="flex gap-1">
-          <button 
-            onClick={logout}
-            className="px-3 py-1 bg-[#8B5A2B] text-white rounded-sm text-xs"
-          >
-            Log in
-          </button>
-          <button className="px-3 py-1 bg-[#D4AF37] text-black rounded-sm text-xs">
-            Register
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] text-white relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none opacity-5">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-[#D4AF37] rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-purple-500 rounded-full blur-2xl animate-bounce"></div>
+        <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-blue-500 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-40 right-1/3 w-20 h-20 bg-green-500 rounded-full blur-xl animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-pink-500 rounded-full blur-xl animate-ping"></div>
       </div>
 
-      {/* Detail Banner - exact match */}
-      <div className="bg-[#D4AF37] text-black py-1 px-3">
-        <div className="flex items-center justify-center">
-          <span className="bg-[#8B5A2B] text-white px-2 py-1 rounded-sm text-xs mr-2">🔊</span>
-          <span className="bg-[#8B5A2B] text-white px-3 py-1 rounded-sm text-xs">Detail</span>
-        </div>
-      </div>
+      {/* Enhanced Header */}
+      <EnhancedHeader 
+        user={user} 
+        userBalance={userBalance} 
+        onLogout={logout} 
+        refreshBalance={refreshBalance}
+      />
+
+      {/* Modern Dashboard */}
+      <ModernDashboard 
+        games={games} 
+        categories={categories} 
+        onGameSelect={openGame}
+      />
 
       {/* Winning Information Section - exact replica */}
       {showWinningInfo && (
