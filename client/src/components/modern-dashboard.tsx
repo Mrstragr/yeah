@@ -140,15 +140,15 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
             <div className="bg-[#2a2a2a] rounded-xl p-3">
               <div className="text-[#D4AF37] font-bold text-lg">₹1.2M</div>
-              <div className="text-gray-400 text-xs">Today's Payouts</div>
+              <div className="text-casino-text-muted text-xs">Today's Payouts</div>
             </div>
             <div className="bg-[#2a2a2a] rounded-xl p-3">
               <div className="text-green-500 font-bold text-lg">1,247</div>
-              <div className="text-gray-400 text-xs">Players Online</div>
+              <div className="text-casino-text-muted text-xs">Players Online</div>
             </div>
             <div className="bg-[#2a2a2a] rounded-xl p-3">
               <div className="text-purple-500 font-bold text-lg">₹5.8M</div>
-              <div className="text-gray-400 text-xs">Total Jackpot</div>
+              <div className="text-casino-text-muted text-xs">Total Jackpot</div>
             </div>
           </div>
         </div>

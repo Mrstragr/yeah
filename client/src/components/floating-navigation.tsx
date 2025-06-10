@@ -35,10 +35,10 @@ export function FloatingNavigation({ activeSection, onSectionChange }: FloatingN
                   }
                 `}
               >
-                <span className={`text-lg ${activeSection === item.id ? 'text-white' : 'text-gray-400'}`}>
+                <span className={`text-lg ${activeSection === item.id ? 'text-white' : 'text-casino-text-muted'}`}>
                   {item.icon}
                 </span>
-                <span className={`text-xs font-medium ${activeSection === item.id ? 'text-white' : 'text-gray-400'}`}>
+                <span className={`text-xs font-medium ${activeSection === item.id ? 'text-white' : 'text-casino-text-muted'}`}>
                   {item.label}
                 </span>
                 {activeSection === item.id && (

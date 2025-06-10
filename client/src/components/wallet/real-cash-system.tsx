@@ -170,7 +170,7 @@ export function RealCashSystem() {
           <form onSubmit={handleDeposit} className="space-y-6">
             {/* Quick Amount Buttons */}
             <div>
-              <Label className="font-gaming text-gray-300 mb-3 block">Quick Amounts</Label>
+              <Label className="font-gaming text-casino-text-secondary mb-3 block">Quick Amounts</Label>
               <div className="grid grid-cols-4 gap-3">
                 {[100, 500, 1000, 2500].map((amount) => (
                   <Button
@@ -188,7 +188,7 @@ export function RealCashSystem() {
 
             {/* Custom Amount */}
             <div>
-              <Label htmlFor="deposit-amount" className="font-gaming text-gray-300">
+              <Label htmlFor="deposit-amount" className="font-gaming text-casino-text-secondary">
                 Custom Amount (₹)
               </Label>
               <Input
@@ -204,7 +204,7 @@ export function RealCashSystem() {
 
             {/* Payment Methods */}
             <div>
-              <Label className="font-gaming text-gray-300 mb-3 block">Payment Method</Label>
+              <Label className="font-gaming text-casino-text-secondary mb-3 block">Payment Method</Label>
               <div className="grid grid-cols-2 gap-3">
                 {paymentMethods.map((method) => (
                   <div
@@ -218,7 +218,7 @@ export function RealCashSystem() {
                   >
                     <div className="text-2xl mb-2">{method.icon}</div>
                     <div className="font-gaming font-bold text-white">{method.name}</div>
-                    <div className="text-sm text-gray-400">{method.description}</div>
+                    <div className="text-sm text-casino-text-muted">{method.description}</div>
                   </div>
                 ))}
               </div>

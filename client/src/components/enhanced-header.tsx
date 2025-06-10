@@ -22,7 +22,7 @@ export function EnhancedHeader({ user, userBalance, onLogout, refreshBalance }: 
     <div className="bg-gradient-to-r from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] p-4 shadow-2xl border-b border-[#D4AF37]/30 relative z-20">
       {/* Top Status Bar */}
       <div className="flex items-center justify-between mb-3 text-xs">
-        <div className="flex items-center gap-4 text-gray-400">
+        <div className="flex items-center gap-4 text-casino-text-muted">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span>Live</span>
@@ -35,7 +35,7 @@ export function EnhancedHeader({ user, userBalance, onLogout, refreshBalance }: 
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <button className="text-gray-400 hover:text-[#D4AF37] transition-colors">
+            <button className="text-casino-text-muted hover:text-[#D4AF37] transition-colors">
               🔔
             </button>
             {notifications > 0 && (
@@ -44,7 +44,7 @@ export function EnhancedHeader({ user, userBalance, onLogout, refreshBalance }: 
               </div>
             )}
           </div>
-          <button className="text-gray-400 hover:text-[#D4AF37] transition-colors">⚙️</button>
+          <button className="text-casino-text-muted hover:text-[#D4AF37] transition-colors">⚙️</button>
         </div>
       </div>
 
