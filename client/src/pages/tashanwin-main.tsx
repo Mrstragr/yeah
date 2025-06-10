@@ -11,6 +11,7 @@ import { DiceRollGame } from "@/components/games/dice-roll";
 import { HighLowCardGame } from "@/components/games/card-games";
 import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
+import { FloatingNavigation } from "@/components/floating-navigation";
 
 interface User {
   id: number;
@@ -205,131 +206,22 @@ export default function TashanWinMain() {
       />
 
       {/* Modern Dashboard */}
-      <ModernDashboard 
-        games={games} 
-        categories={categories} 
-        onGameSelect={openGame}
-      />
-
-      {/* Winning Information Section - exact replica */}
-      {showWinningInfo && (
-        <div className="bg-gradient-to-r from-[#8B5A2B] to-[#B8860B] p-3 m-3 rounded-lg relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-[#D4AF37] rounded-full flex items-center justify-center">
-                <span className="text-[#8B5A2B] text-sm">💰</span>
-              </div>
-              <span className="text-white text-sm font-medium">Winning information</span>
-              <div className="w-6 h-6 bg-[#D4AF37] rounded-full flex items-center justify-center">
-                <span className="text-[#8B5A2B] text-sm">💰</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Game Categories Grid - exact 4x2 layout */}
-      <div className="grid grid-cols-4 gap-2 p-3">
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'lobby' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('lobby')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">🏠</span>
-          </div>
-          <span className="text-xs text-center text-white">Lobby</span>
-        </div>
-        
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'lottery' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('lottery')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">🎲</span>
-          </div>
-          <span className="text-xs text-center text-white">Lottery</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'popular' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('popular')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">⭐</span>
-          </div>
-          <span className="text-xs text-center text-white">Popular</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'minigame' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('minigame')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">🎮</span>
-          </div>
-          <span className="text-xs text-center text-white">Mini Game</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'casino' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('casino')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">♠️</span>
-          </div>
-          <span className="text-xs text-center text-white">Casino</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'slots' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('slots')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">🎰</span>
-          </div>
-          <span className="text-xs text-center text-white">Slots</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'sports' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('sports')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">⚽</span>
-          </div>
-          <span className="text-xs text-center text-white">Sports</span>
-        </div>
-
-        <div 
-          className={`flex flex-col items-center p-2 rounded ${activeSection === 'fishing' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-          onClick={() => setActiveSection('fishing')}
-        >
-          <div className="w-8 h-8 mb-1 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-lg">🎣</span>
-          </div>
-          <span className="text-xs text-center text-white">Fishing</span>
-        </div>
+      <div className="pb-20">
+        <ModernDashboard 
+          games={games} 
+          categories={categories} 
+          onGameSelect={openGame}
+        />
       </div>
 
-      {/* Game Sections - exact match to original */}
-      <div className="px-3 space-y-3">
-        {/* Lottery Section */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-sm">🎲</span>
-          </div>
-          <span className="text-white text-sm font-medium">Lottery</span>
-        </div>
-        
-        {/* Lottery Games */}
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
-          <button
-            onClick={() => openGame('wingo1')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Win Go 1Min</div>
-            <div className="text-white text-xs">Fast lottery game</div>
-          </button>
+      {/* Toast Notifications */}
+      <ToastManager toasts={toasts} removeToast={removeToast} />
+
+      {/* Floating Navigation */}
+      <FloatingNavigation 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection}
+      />
           <button
             onClick={() => openGame('wingo3')}
             className="bg-[#2a2a2a] p-3 rounded-lg text-left"
