@@ -1140,6 +1140,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Leaderboard API endpoint
+  app.get('/api/leaderboard', async (req, res) => {
+    try {
+      const { timeFrame = 'daily', gameType } = req.query;
+      
+      // Generate mock leaderboard data for now
+      const mockLeaderboard = [
+        {
+          id: 1,
+          username: "Winner123",
+          winnings: 25000,
+          gamesPlayed: 45,
+          winRate: 68.9,
+          currentStreak: 5,
+          rank: 1
+        },
+        {
+          id: 2,
+          username: "LuckyPlayer",
+          winnings: 18500,
+          gamesPlayed: 32,
+          winRate: 62.5,
+          currentStreak: 3,
+          rank: 2
+        },
+        {
+          id: 3,
+          username: "GameMaster",
+          winnings: 15200,
+          gamesPlayed: 28,
+          winRate: 71.4,
+          currentStreak: 7,
+          rank: 3
+        },
+        {
+          id: 4,
+          username: "BetKing",
+          winnings: 12800,
+          gamesPlayed: 38,
+          winRate: 55.3,
+          currentStreak: 2,
+          rank: 4
+        },
+        {
+          id: 5,
+          username: "ProGamer",
+          winnings: 9500,
+          gamesPlayed: 25,
+          winRate: 64.0,
+          currentStreak: 4,
+          rank: 5
+        }
+      ];
+
+      res.json(mockLeaderboard);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      res.status(500).json({ message: 'Failed to fetch leaderboard' });
+    }
+  });
+
+  // Game statistics endpoint
+  app.get('/api/game-stats/:gameId', async (req, res) => {
+    try {
+      const { gameId } = req.params;
+      
+      const mockStats = {
+        totalPlayers: Math.floor(Math.random() * 1000) + 500,
+        totalBets: Math.floor(Math.random() * 50000) + 10000,
+        totalWinnings: Math.floor(Math.random() * 500000) + 100000,
+        averageBet: Math.floor(Math.random() * 500) + 50,
+        winRate: (Math.random() * 30 + 45).toFixed(1),
+        lastHourBets: Math.floor(Math.random() * 100) + 20
+      };
+      
+      res.json(mockStats);
+    } catch (error) {
+      console.error('Error fetching game stats:', error);
+      res.status(500).json({ message: 'Failed to fetch game statistics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
