@@ -106,6 +106,33 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
   if (!isOpen || !game) return null;
 
+  // Handle specific games with custom components
+  if (game.title === "Dice Roll") {
+    return (
+      <DiceRollGame 
+        title={game.title}
+        onPlay={(winAmount) => {
+          onWin(winAmount.toString());
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        }}
+        onClose={onClose}
+      />
+    );
+  }
+
+  if (game.title === "Coin Flip") {
+    return (
+      <CoinFlipGame 
+        title={game.title}
+        onPlay={(winAmount) => {
+          onWin(winAmount.toString());
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        }}
+        onClose={onClose}
+      />
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="game-card max-w-md">
