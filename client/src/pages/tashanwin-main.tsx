@@ -1,13 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { WinGoGame } from "@/components/games/lottery-games";
-import { AviatorGame, JetXGame } from "@/components/games/crash-games";
-import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/games/casino-games";
-import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
+import WinGoGame from "@/components/games/win-go-game";
+import CrashGame from "@/components/games/crash-game";
+import DiceGame from "@/components/games/dice-game";
 import { ToastManager } from "@/components/toast-notification";
-import { CoinFlipGame } from "@/components/games/coin-flip";
-import { DiceRollGame } from "@/components/games/dice-roll";
-import { HighLowCardGame } from "@/components/games/card-games";
 import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
 import { FloatingNavigation } from "@/components/floating-navigation";
@@ -87,6 +83,44 @@ export default function TashanWinMain() {
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const handleGameBet = async (amount: number, gameData?: any) => {
+    if (!user) {
+      addToast("Please login to place bets", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/game/bet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({
+          gameId: currentGame,
+          betAmount: Math.abs(amount),
+          gameData: gameData
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setUserBalance(result.newBalance);
+        
+        if (amount > 0) {
+          addToast(`Won ₹${amount}!`, "success");
+        } else {
+          addToast(`Bet placed: ₹${Math.abs(amount)}`, "info");
+        }
+      } else {
+        const error = await response.json();
+        addToast(error.message || "Bet failed", "error");
+      }
+    } catch (error) {
+      addToast("Network error occurred", "error");
+    }
   };
 
   const refreshBalance = async () => {
