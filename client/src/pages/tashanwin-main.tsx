@@ -123,6 +123,8 @@ export default function TashanWinMain() {
     }
   };
 
+
+
   const refreshBalance = async () => {
     if (!user) return;
     
@@ -175,33 +177,7 @@ export default function TashanWinMain() {
     }
   };
 
-  const handleGameWin = async (winAmount: number) => {
-    if (!user || winAmount <= 0) return;
 
-    try {
-      const response = await fetch('/api/wallet/credit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({ 
-          amount: winAmount,
-          description: "Game winnings"
-        })
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUserBalance(data.newBalance);
-        addToast(`🎉 You won ₹${winAmount}!`, "success");
-      }
-    } catch (error) {
-      console.error("Error crediting winnings:", error);
-      addToast("Failed to credit winnings", "error");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] text-white relative overflow-hidden">
@@ -439,62 +415,35 @@ export default function TashanWinMain() {
       />
 
       {/* Game Renderers */}
-      {currentGame === 'wingo1' && (
-        <WinGoGame title="Win Go 1Min" onPlay={handleGameWin} onClose={closeGame} />
+      {(currentGame === 'wingo1' || currentGame === 'wingo3' || currentGame === '5d' || currentGame === 'k3' || currentGame === 'wingo5' || currentGame === 'trx') && (
+        <WinGoGame 
+          gameId={1} 
+          gameTitle={
+            currentGame === 'wingo1' ? "Win Go 1Min" :
+            currentGame === 'wingo3' ? "Win Go 3Min" :
+            currentGame === '5d' ? "5D Lottery" :
+            currentGame === 'k3' ? "K3 Lottery" :
+            currentGame === 'wingo5' ? "Win Go 5Min" : "Trx Win Go"
+          }
+          onBet={handleGameBet} 
+          onClose={closeGame} 
+        />
       )}
-      {currentGame === 'wingo3' && (
-        <WinGoGame title="Win Go 3Min" onPlay={handleGameWin} onClose={closeGame} />
+      {(currentGame === 'aviator' || currentGame === 'jetx') && (
+        <CrashGame 
+          gameId={2} 
+          gameTitle={currentGame === 'aviator' ? "Aviator" : "JetX"}
+          onBet={handleGameBet} 
+          onClose={closeGame} 
+        />
       )}
-      {currentGame === '5d' && (
-        <WinGoGame title="5D Lottery" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'k3' && (
-        <WinGoGame title="K3 Lottery" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'aviator' && (
-        <AviatorGame title="Aviator" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'jetx' && (
-        <JetXGame title="JetX" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'andarbahar' && (
-        <AndarBaharGame title="Andar Bahar" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'teenpatti' && (
-        <TeenPattiGame title="Teen Patti" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'dragontiger' && (
-        <DragonTigerGame title="Dragon Tiger" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'baccarat' && (
-        <DragonTigerGame title="Baccarat" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'slots' && (
-        <SlotMachineGame title="Classic Slots" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'megajackpot' && (
-        <MegaJackpotSlot title="Mega Jackpot" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'coinflip' && (
-        <CoinFlipGame title="Coin Flip" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'diceroll' && (
-        <DiceRollGame title="Dice Roll" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'highlow' && (
-        <HighLowCardGame title="High Low Cards" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'bigsmall' && (
-        <DiceRollGame title="Big Small" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'wingo5' && (
-        <WinGoGame title="Win Go 5Min" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'k3' && (
-        <WinGoGame title="K3 Lottery" onPlay={handleGameWin} onClose={closeGame} />
-      )}
-      {currentGame === 'trx' && (
-        <WinGoGame title="Trx Win Go" onPlay={handleGameWin} onClose={closeGame} />
+      {(currentGame === 'diceroll' || currentGame === 'bigsmall') && (
+        <DiceGame 
+          gameId={3} 
+          gameTitle={currentGame === 'diceroll' ? "Dice Roll" : "Big Small"}
+          onBet={handleGameBet} 
+          onClose={closeGame} 
+        />
       )}
     </div>
   );
