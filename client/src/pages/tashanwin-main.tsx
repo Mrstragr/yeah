@@ -217,6 +217,38 @@ export default function TashanWinMain() {
           </div>
           <span className="text-white text-sm font-medium">Lottery</span>
         </div>
+        
+        {/* Lottery Games */}
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+          <button
+            onClick={() => openGame('wingo1')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Win Go 1Min</div>
+            <div className="text-white text-xs">Fast lottery game</div>
+          </button>
+          <button
+            onClick={() => openGame('wingo3')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Win Go 3Min</div>
+            <div className="text-white text-xs">Strategic lottery</div>
+          </button>
+          <button
+            onClick={() => openGame('5d')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">5D Lottery</div>
+            <div className="text-white text-xs">Multi-dimensional</div>
+          </button>
+          <button
+            onClick={() => openGame('k3')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">K3 Lottery</div>
+            <div className="text-white text-xs">Dice based lottery</div>
+          </button>
+        </div>
 
         {/* Recommended Games */}
         <div className="flex items-center justify-between">
@@ -231,6 +263,24 @@ export default function TashanWinMain() {
             <span className="text-gray-500 text-xs">{"<"}</span>
             <span className="text-gray-500 text-xs">{">"}</span>
           </div>
+        </div>
+        
+        {/* Crash Games */}
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+          <button
+            onClick={() => openGame('aviator')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Aviator</div>
+            <div className="text-white text-xs">Crash multiplier game</div>
+          </button>
+          <button
+            onClick={() => openGame('jetx')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">JetX</div>
+            <div className="text-white text-xs">High-flying adventure</div>
+          </button>
         </div>
 
         {/* Mini games */}
@@ -262,6 +312,38 @@ export default function TashanWinMain() {
             <span className="text-gray-500 text-xs">{">"}</span>
           </div>
         </div>
+        
+        {/* Casino Games */}
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+          <button
+            onClick={() => openGame('andarbahar')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Andar Bahar</div>
+            <div className="text-white text-xs">Traditional card game</div>
+          </button>
+          <button
+            onClick={() => openGame('teenpatti')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Teen Patti</div>
+            <div className="text-white text-xs">3-card poker</div>
+          </button>
+          <button
+            onClick={() => openGame('dragontiger')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Dragon Tiger</div>
+            <div className="text-white text-xs">Card battle game</div>
+          </button>
+          <button
+            onClick={() => openGame('baccarat')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Baccarat</div>
+            <div className="text-white text-xs">Classic casino card</div>
+          </button>
+        </div>
 
         {/* Slots */}
         <div className="flex items-center justify-between">
@@ -276,6 +358,24 @@ export default function TashanWinMain() {
             <span className="text-gray-500 text-xs">{"<"}</span>
             <span className="text-gray-500 text-xs">{">"}</span>
           </div>
+        </div>
+        
+        {/* Slot Games */}
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+          <button
+            onClick={() => openGame('slots')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Classic Slots</div>
+            <div className="text-white text-xs">Traditional slot machine</div>
+          </button>
+          <button
+            onClick={() => openGame('megajackpot')}
+            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+          >
+            <div className="text-[#D4AF37] text-xs mb-1">Mega Jackpot</div>
+            <div className="text-white text-xs">Progressive jackpot</div>
+          </button>
         </div>
 
         {/* Sports */}
@@ -431,6 +531,44 @@ export default function TashanWinMain() {
       <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs">
         loading...
       </div>
+
+      {/* Game Renderers */}
+      {currentGame === 'wingo1' && (
+        <WinGoGame title="Win Go 1Min" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'wingo3' && (
+        <WinGoGame title="Win Go 3Min" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === '5d' && (
+        <WinGoGame title="5D Lottery" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'k3' && (
+        <WinGoGame title="K3 Lottery" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'aviator' && (
+        <AviatorGame title="Aviator" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'jetx' && (
+        <JetXGame title="JetX" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'andarbahar' && (
+        <AndarBaharGame title="Andar Bahar" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'teenpatti' && (
+        <TeenPattiGame title="Teen Patti" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'dragontiger' && (
+        <DragonTigerGame title="Dragon Tiger" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'baccarat' && (
+        <DragonTigerGame title="Baccarat" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'slots' && (
+        <SlotMachineGame title="Classic Slots" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
+      {currentGame === 'megajackpot' && (
+        <MegaJackpotSlot title="Mega Jackpot" onPlay={handleGamePlay} onClose={closeGame} />
+      )}
     </div>
   );
 }
