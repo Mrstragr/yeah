@@ -5,6 +5,7 @@ import { AviatorGame, JetXGame } from "@/components/games/crash-games";
 import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/games/casino-games";
 import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
 import { ToastManager } from "@/components/toast-notification";
+import { BalanceDisplay } from "@/components/balance-display";
 
 interface User {
   id: number;
@@ -41,10 +42,19 @@ export default function TashanWinMain() {
   const [showJackpotModal, setShowJackpotModal] = useState(false);
   const [activeSection, setActiveSection] = useState("lobby");
   const [currentGame, setCurrentGame] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<Array<{id: string, message: string, type: "success" | "error" | "info"}>>([]);
+  const [userBalance, setUserBalance] = useState<string>("0.00");
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
+
+  // Update local balance when user data changes
+  useEffect(() => {
+    if (user) {
+      setUserBalance(user.walletBalance);
+    }
+  }, [user]);
 
   const { data: games = [] } = useQuery<Game[]>({
     queryKey: ["/api/games"],
@@ -79,13 +89,41 @@ export default function TashanWinMain() {
     setCurrentGame(null);
   };
 
+  const addToast = (message: string, type: "success" | "error" | "info") => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const refreshBalance = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch('/api/auth/user', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        setUserBalance(userData.walletBalance);
+      }
+    } catch (error) {
+      console.error("Error refreshing balance:", error);
+    }
+  };
+
   const handleGamePlay = async (betAmount: number) => {
     if (!user) return;
     
     // Check if user has sufficient balance
-    const currentBalance = parseFloat(user.walletBalance);
+    const currentBalance = parseFloat(userBalance);
     if (currentBalance < betAmount) {
-      alert("Insufficient balance! Please deposit money to continue playing.");
+      addToast("Insufficient balance! Please deposit money to continue.", "error");
       return;
     }
 
@@ -100,16 +138,17 @@ export default function TashanWinMain() {
         body: JSON.stringify({ amount: betAmount })
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
-        console.log(`Bet placed: ₹${betAmount}`);
-        // Refresh user data to show updated balance
-        window.location.reload();
+        setUserBalance(data.newBalance);
+        addToast(`Bet placed: ₹${betAmount}`, "info");
       } else {
-        alert("Failed to place bet. Please try again.");
+        addToast(data.message || "Failed to place bet", "error");
       }
     } catch (error) {
       console.error("Error placing bet:", error);
-      alert("Network error. Please check your connection.");
+      addToast("Network error. Please check your connection.", "error");
     }
   };
 
@@ -129,13 +168,15 @@ export default function TashanWinMain() {
         })
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
-        console.log(`Winnings credited: ₹${winAmount}`);
-        // Refresh user data to show updated balance
-        setTimeout(() => window.location.reload(), 1000);
+        setUserBalance(data.newBalance);
+        addToast(`🎉 You won ₹${winAmount}!`, "success");
       }
     } catch (error) {
       console.error("Error crediting winnings:", error);
+      addToast("Failed to credit winnings", "error");
     }
   };
 
@@ -582,6 +623,9 @@ export default function TashanWinMain() {
           </div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <ToastManager toasts={toasts} removeToast={removeToast} />
 
       {/* Loading text - exact position */}
       <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs">
