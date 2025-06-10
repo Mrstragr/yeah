@@ -6,6 +6,138 @@ interface CoinFlipProps {
   onClose: () => void;
 }
 
+const EnhancedCoin3D = ({ isFlipping, result, flipCount }: { 
+  isFlipping: boolean; 
+  result: 'heads' | 'tails' | null; 
+  flipCount: number; 
+}) => {
+  const isHeads = isFlipping ? flipCount % 2 === 0 : result === 'heads';
+  
+  return (
+    <div className="relative flex items-center justify-center perspective-1000">
+      {/* Enhanced particle system */}
+      {isFlipping && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(40)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-80 animate-particle-float"
+              style={{
+                left: `${50 + (Math.random() - 0.5) * 300}%`,
+                top: `${50 + (Math.random() - 0.5) * 300}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${1.5 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+          {/* Energy rings */}
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={`ring-${i}`}
+              className="absolute rounded-full border-2 border-yellow-400 opacity-30 animate-ping"
+              style={{
+                width: `${120 + i * 40}px`,
+                height: `${120 + i * 40}px`,
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                animationDelay: `${i * 0.3}s`,
+                animationDuration: '2s'
+              }}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Enhanced 3D coin */}
+      <div 
+        className={`
+          relative w-48 h-48 rounded-full transform-gpu preserve-3d
+          transition-all duration-300 
+          ${isFlipping ? 'animate-coin-flip' : 'hover:scale-110 hover:rotate-6'}
+          ${isHeads ? 'bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600' : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500'}
+        `}
+        style={{
+          transform: isFlipping ? `rotateY(${flipCount * 180}deg) rotateX(${Math.sin(flipCount) * 20}deg)` : 'rotateY(0deg)',
+          boxShadow: isFlipping 
+            ? '0 0 80px rgba(255, 215, 0, 0.8), inset 0 0 40px rgba(255, 255, 255, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5)' 
+            : '0 0 50px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.3), 0 15px 40px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        {/* Outer rim with detailed styling */}
+        <div className="absolute inset-0 rounded-full border-8 border-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 shadow-inner"></div>
+        
+        {/* Inner coin face */}
+        <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/20 to-black/20 flex items-center justify-center">
+          <div className="relative z-10 text-center transform transition-all duration-300">
+            <div className={`text-8xl mb-2 drop-shadow-2xl filter ${isFlipping ? 'blur-sm scale-90' : 'blur-none scale-100'}`}>
+              {isHeads ? '👑' : '🦅'}
+            </div>
+            <div className={`text-lg font-bold text-white drop-shadow-lg ${isFlipping ? 'opacity-50' : 'opacity-100'}`}>
+              {isHeads ? 'HEADS' : 'TAILS'}
+            </div>
+          </div>
+        </div>
+        
+        {/* Multiple glow layers */}
+        {isFlipping && (
+          <>
+            <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-ping opacity-40"></div>
+            <div className="absolute inset-2 rounded-full border-3 border-yellow-300 animate-pulse opacity-50"></div>
+            <div className="absolute inset-4 rounded-full border-2 border-white animate-ping opacity-30"></div>
+          </>
+        )}
+        
+        {/* Enhanced lighting effects */}
+        <div className="absolute inset-1 rounded-full bg-gradient-to-tr from-white/40 via-transparent to-transparent"></div>
+        <div className="absolute inset-6 rounded-full bg-gradient-to-br from-transparent via-transparent to-black/30"></div>
+      </div>
+      
+      {/* Dynamic ground shadow */}
+      <div 
+        className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black/30 rounded-full blur-lg transition-all duration-300"
+        style={{
+          width: isFlipping ? '160px' : '120px',
+          height: isFlipping ? '20px' : '15px',
+        }}
+      ></div>
+    </div>
+  );
+};
+
+const WinCelebration = ({ isVisible, winAmount }: { isVisible: boolean; winAmount: number }) => {
+  if (!isVisible) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 pointer-events-none">
+      <div className="text-center">
+        {[...Array(60)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-particle-float"
+            style={{
+              left: `${50 + (Math.random() - 0.5) * 100}%`,
+              top: `${50 + (Math.random() - 0.5) * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}
+          />
+        ))}
+        
+        <div className="relative z-10">
+          <div className="text-9xl mb-6 animate-bounce">🏆</div>
+          <div className="text-7xl font-bold animate-pulse mb-6 text-green-400">
+            BIG WIN!
+          </div>
+          <div className="text-5xl font-bold text-yellow-400">
+            ₹{winAmount.toLocaleString()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
   const [gamePhase, setGamePhase] = useState<'betting' | 'flipping' | 'result'>('betting');
   const [betSide, setBetSide] = useState<'heads' | 'tails' | null>(null);
@@ -14,6 +146,7 @@ export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
   const [isFlipping, setIsFlipping] = useState(false);
   const [winAmount, setWinAmount] = useState(0);
   const [flipCount, setFlipCount] = useState(0);
+  const [showWinCelebration, setShowWinCelebration] = useState(false);
 
   const flipCoin = async () => {
     if (!betSide) return;

@@ -134,6 +134,8 @@ export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
   const [baharCards, setBaharCards] = useState<string[]>([]);
   const [winner, setWinner] = useState<'andar' | 'bahar' | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [showWinCelebration, setShowWinCelebration] = useState(false);
+  const [dealingCards, setDealingCards] = useState(false);
 
   const suits = ['♠', '♥', '♦', '♣'];
   const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -169,6 +171,7 @@ export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
 
   const startGame = () => {
     setGamePhase('dealing');
+    setDealingCards(true);
     const joker = generateCard();
     setJokerCard(joker);
     const jokerValue = getCardValue(joker);
@@ -200,9 +203,13 @@ export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
 
       if (gameEnded) {
         clearInterval(dealingInterval);
+        setDealingCards(false);
         setGamePhase('result');
-        if (betSide && betSide === (isAndarTurn ? 'andar' : 'bahar')) {
-          onPlay(betAmount * 2);
+        const winAmount = betSide && betSide === (isAndarTurn ? 'andar' : 'bahar') ? betAmount * 2 : 0;
+        if (winAmount > 0) {
+          setShowWinCelebration(true);
+          onPlay(winAmount);
+          setTimeout(() => setShowWinCelebration(false), 4000);
         }
         setTimeout(() => {
           resetGame();
@@ -230,96 +237,143 @@ export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      <div className="bg-[#1e1e1e] p-3 flex items-center justify-between">
-        <button onClick={onClose} className="text-white text-lg">←</button>
-        <h1 className="text-white font-medium">{title}</h1>
-        <div className="w-6"></div>
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a2a1a] to-[#0a1a0a] z-50 flex flex-col">
+      {/* Enhanced Background */}
+      <div className="fixed inset-0 pointer-events-none opacity-15">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-green-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-32 w-32 h-32 bg-yellow-400 rounded-full blur-2xl animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-red-400 rounded-full blur-xl animate-ping"></div>
       </div>
 
-      <div className="flex-1 bg-green-800 p-4">
-        {gamePhase === 'betting' && (
-          <div className="text-center text-white mb-4">
-            <div className="text-2xl font-bold mb-2">Place Your Bet</div>
-            <div className="text-xl">Time: {timeLeft}s</div>
-          </div>
-        )}
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-[#1e1e1e] via-[#2a3a2a] to-[#1e1e1e] p-4 flex items-center justify-between shadow-2xl border-b border-green-500/20">
+        <button 
+          onClick={onClose} 
+          className="text-white text-xl hover:text-green-400 transition-all duration-300 hover:scale-110 transform"
+        >
+          ←
+        </button>
+        <h1 className="text-white font-bold text-lg bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
+          {title}
+        </h1>
+        <div className="text-yellow-400 text-lg font-bold">₹{betAmount * 2}</div>
+      </div>
 
-        {jokerCard && (
-          <div className="text-center mb-4">
-            <div className="text-white text-sm mb-2">Joker Card</div>
-            <div className="bg-white text-black p-3 rounded mx-auto w-16 h-20 flex items-center justify-center text-xl font-bold">
-              {jokerCard}
+      <div className="flex-1 casino-table p-6">
+        {gamePhase === 'betting' && (
+          <div className="text-center text-white mb-6">
+            <div className="text-3xl font-bold mb-4 win-glow">Place Your Bet</div>
+            <div className="text-2xl bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold">
+              Time: {timeLeft}s
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {jokerCard && (
+          <div className="text-center mb-6">
+            <div className="text-white text-lg mb-4 font-bold">🃏 Joker Card 🃏</div>
+            <div className="flex justify-center">
+              <Card3D 
+                card={jokerCard} 
+                isRevealed={true} 
+                isDealing={false}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="text-center">
-            <div className={`p-4 rounded-lg mb-2 ${betSide === 'andar' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}>
-              <div className="text-white font-bold text-lg mb-2">ANDAR</div>
-              <div className="text-white text-sm">1:1 Payout</div>
+            <div className={`p-6 rounded-2xl mb-4 transition-all duration-300 ${
+              betSide === 'andar' 
+                ? 'bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-600 shadow-2xl card-glow transform scale-105' 
+                : 'bg-gradient-to-br from-[#2a2a2a] via-[#3a3a3a] to-[#2a2a2a] hover:bg-gradient-to-br hover:from-[#3a3a3a] hover:via-[#4a4a4a] hover:to-[#3a3a3a]'
+            }`}>
+              <div className={`font-bold text-2xl mb-3 ${betSide === 'andar' ? 'text-black' : 'text-white'}`}>
+                🔵 ANDAR
+              </div>
+              <div className={`text-lg mb-4 ${betSide === 'andar' ? 'text-black' : 'text-white'}`}>
+                1:1 Payout
+              </div>
               {gamePhase === 'betting' && (
                 <button
                   onClick={() => placeBet('andar')}
-                  className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 shadow-lg"
                 >
                   Bet Andar
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-1 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center">
               {andarCards.map((card, index) => (
-                <div key={index} className="bg-white text-black p-1 rounded text-xs w-10 h-12 flex items-center justify-center">
-                  {card}
-                </div>
+                <Card3D
+                  key={index}
+                  card={card}
+                  isRevealed={gamePhase !== 'betting'}
+                  isDealing={dealingCards}
+                  dealDelay={index * 200}
+                />
               ))}
             </div>
           </div>
 
           <div className="text-center">
-            <div className={`p-4 rounded-lg mb-2 ${betSide === 'bahar' ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}>
-              <div className="text-white font-bold text-lg mb-2">BAHAR</div>
-              <div className="text-white text-sm">1:1 Payout</div>
+            <div className={`p-6 rounded-2xl mb-4 transition-all duration-300 ${
+              betSide === 'bahar' 
+                ? 'bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-600 shadow-2xl card-glow transform scale-105' 
+                : 'bg-gradient-to-br from-[#2a2a2a] via-[#3a3a3a] to-[#2a2a2a] hover:bg-gradient-to-br hover:from-[#3a3a3a] hover:via-[#4a4a4a] hover:to-[#3a3a3a]'
+            }`}>
+              <div className={`font-bold text-2xl mb-3 ${betSide === 'bahar' ? 'text-black' : 'text-white'}`}>
+                🔴 BAHAR
+              </div>
+              <div className={`text-lg mb-4 ${betSide === 'bahar' ? 'text-black' : 'text-white'}`}>
+                1:1 Payout
+              </div>
               {gamePhase === 'betting' && (
                 <button
                   onClick={() => placeBet('bahar')}
-                  className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300 hover:scale-105 shadow-lg"
                 >
                   Bet Bahar
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-1 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center">
               {baharCards.map((card, index) => (
-                <div key={index} className="bg-white text-black p-1 rounded text-xs w-10 h-12 flex items-center justify-center">
-                  {card}
-                </div>
+                <Card3D
+                  key={index}
+                  card={card}
+                  isRevealed={gamePhase !== 'betting'}
+                  isDealing={dealingCards}
+                  dealDelay={index * 200}
+                />
               ))}
             </div>
           </div>
         </div>
 
-        {winner && (
-          <div className="text-center">
-            <div className="text-2xl font-bold text-[#D4AF37] mb-2">
-              {winner.toUpperCase()} WINS!
+        {winner && !showWinCelebration && (
+          <div className="text-center mb-6">
+            <div className="text-4xl font-bold text-[#D4AF37] mb-4 win-glow animate-pulse">
+              🏆 {winner.toUpperCase()} WINS! 🏆
             </div>
             {betSide === winner && (
-              <div className="text-green-400 text-lg">You Won! ₹{betAmount * 2}</div>
+              <div className="text-green-400 text-2xl font-bold">You Won! ₹{betAmount * 2}</div>
             )}
           </div>
         )}
 
-        <div className="bg-[#1e1e1e] rounded-lg p-3 mt-4">
-          <div className="text-white text-sm mb-3">Bet Amount</div>
-          <div className="grid grid-cols-4 gap-2">
+        <div className="bg-gradient-to-br from-[#1e1e1e] via-[#2a2a2a] to-[#1e1e1e] rounded-2xl p-6 border border-gray-700 shadow-2xl">
+          <div className="text-white text-lg mb-4 font-bold text-center">💰 Bet Amount 💰</div>
+          <div className="grid grid-cols-4 gap-3">
             {[10, 50, 100, 500].map((amount) => (
               <button
                 key={amount}
                 onClick={() => setBetAmount(amount)}
-                className={`p-2 rounded text-center ${
-                  betAmount === amount ? 'bg-[#D4AF37] text-black' : 'bg-[#2a2a2a] text-white'
+                className={`p-3 rounded-xl text-center font-bold transition-all duration-300 ${
+                  betAmount === amount 
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#DAA520] text-black shadow-lg transform scale-105 card-glow' 
+                    : 'bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] text-white hover:from-[#3a3a3a] hover:to-[#4a4a4a] hover:scale-105'
                 }`}
                 disabled={gamePhase !== 'betting'}
               >
@@ -328,6 +382,15 @@ export function AndarBaharGame({ title, onPlay, onClose }: CasinoGameProps) {
             ))}
           </div>
         </div>
+
+        {/* Win Celebration Overlay */}
+        {showWinCelebration && (
+          <WinCelebration 
+            winner={winner} 
+            betType={betSide} 
+            winAmount={betSide === winner ? betAmount * 2 : 0} 
+          />
+        )}
       </div>
     </div>
   );
