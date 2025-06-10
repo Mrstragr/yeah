@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { WalletDashboard } from "@/components/wallet/wallet-dashboard";
 import { KycVerification } from "@/components/wallet/kyc-verification";
+import { RealCashSystem } from "@/components/wallet/real-cash-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wallet, Shield } from "lucide-react";
 
@@ -20,10 +21,16 @@ export default function WalletPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="wallet" className="font-gaming">
               <Wallet className="w-4 h-4 mr-2" />
               Wallet
+            </TabsTrigger>
+            <TabsTrigger value="promotions" className="font-gaming">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Promotions
             </TabsTrigger>
             <TabsTrigger value="kyc" className="font-gaming">
               <Shield className="w-4 h-4 mr-2" />
@@ -33,6 +40,10 @@ export default function WalletPage() {
 
           <TabsContent value="wallet">
             <WalletDashboard />
+          </TabsContent>
+
+          <TabsContent value="promotions">
+            <RealCashSystem />
           </TabsContent>
 
           <TabsContent value="kyc">

@@ -70,11 +70,7 @@ export interface IStorage {
   createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
   updateKycStatus(userId: number, status: string): Promise<User | undefined>;
 
-  // Promotional wallet methods
-  getUserPromoTransactions(userId: number, limit?: number): Promise<PromoTransaction[]>;
-  createPromoTransaction(transaction: InsertPromoTransaction): Promise<PromoTransaction>;
-  getPromotionByCode(code: string): Promise<Promotion | undefined>;
-  updatePromotionUsage(promotionId: number): Promise<void>;
+  // Bonus balance methods
   updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined>;
 }
 

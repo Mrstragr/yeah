@@ -9,29 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Gift, TrendingUp, Clock, Star, Award, Zap } from "lucide-react";
 
-interface Promotion {
-  id: number;
-  title: string;
-  description: string;
-  bonusPercentage: number;
-  minAmount: number;
-  maxAmount: number;
-  isActive: boolean;
-  validUntil: string;
-  remainingUses: number;
-  totalUses: number;
-}
-
-interface PromoTransaction {
-  id: number;
-  promotionId: number;
-  amount: string;
-  bonusAmount: string;
-  status: string;
-  createdAt: string;
-  promotion: Promotion;
-}
-
 export function PromotionWallet() {
   const [selectedPromotion, setSelectedPromotion] = useState<number | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
