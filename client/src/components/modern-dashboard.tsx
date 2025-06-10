@@ -16,9 +16,34 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Map game titles to component identifiers
+  const getGameIdentifier = (gameTitle: string) => {
+    const gameMap: { [key: string]: string } = {
+      'Win Go 1Min': 'wingo1',
+      'Win Go 3Min': 'wingo3', 
+      'Win Go 5Min': 'wingo5',
+      '5D Lottery': '5d',
+      'K3 Lottery': 'k3',
+      'Trx Win Go': 'trx',
+      'Aviator': 'aviator',
+      'JetX': 'jetx',
+      'Andar Bahar': 'andarbahar',
+      'Teen Patti': 'teenpatti',
+      'Dragon Tiger': 'dragontiger',
+      'Baccarat': 'baccarat',
+      'Classic Slots': 'slots',
+      'Mega Jackpot': 'megajackpot',
+      'Coin Flip': 'coinflip',
+      'Dice Roll': 'diceroll',
+      'High Low Cards': 'highlow',
+      'Big Small': 'bigsmall'
+    };
+    return gameMap[gameTitle] || gameTitle.toLowerCase().replace(/\s+/g, '');
+  };
+
   const GameCard = ({ game, featured = false }: { game: any; featured?: boolean }) => (
     <div 
-      onClick={() => onGameSelect(game.id)}
+      onClick={() => onGameSelect(getGameIdentifier(game.title))}
       className={`
         group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500
         ${featured ? 'col-span-2 row-span-2' : ''}

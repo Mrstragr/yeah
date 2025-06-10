@@ -255,6 +255,15 @@ export default function TashanWinMain() {
       {currentGame === 'bigsmall' && (
         <DiceRollGame title="Big Small" onPlay={handleGameWin} onClose={closeGame} />
       )}
+      {currentGame === 'wingo5' && (
+        <WinGoGame title="Win Go 5Min" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'k3' && (
+        <WinGoGame title="K3 Lottery" onPlay={handleGameWin} onClose={closeGame} />
+      )}
+      {currentGame === 'trx' && (
+        <WinGoGame title="Trx Win Go" onPlay={handleGameWin} onClose={closeGame} />
+      )}
     </div>
   );
 }
