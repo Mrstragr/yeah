@@ -9,6 +9,7 @@ import CategoryPage from "@/pages/category";
 import WalletPage from "@/pages/wallet";
 import WalletDeposit from "@/pages/wallet-deposit";
 import WalletWithdraw from "@/pages/wallet-withdraw";
+import AccountPage from "@/pages/account";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
@@ -103,16 +104,7 @@ function Router() {
             </div>
           </div>
         )} />
-        <Route path="/account" component={() => (
-          <div className="min-h-screen bg-[#1a1a1a] p-4">
-            <div className="max-w-md mx-auto pt-8">
-              <div className="bg-[#2a2a2a] border border-[#444] rounded-lg p-8 text-center">
-                <h1 className="text-2xl font-bold text-[#ffd700] mb-4">Account</h1>
-                <p className="text-gray-400">Account settings coming soon!</p>
-              </div>
-            </div>
-          </div>
-        )} />
+        <Route path="/account" component={AccountPage} />
         <Route component={NotFound} />
       </Switch>
       <MobileNav />
