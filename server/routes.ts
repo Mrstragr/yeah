@@ -1222,6 +1222,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Razorpay Payment Integration
+  app.post('/api/payment/create-order', async (req, res) => {
+    try {
+      const { amount, currency } = req.body;
+      
+      // Mock order creation for now - in production this would use actual Razorpay
+      const orderId = 'order_' + Math.random().toString(36).substr(2, 9);
+      
+      res.json({
+        id: orderId,
+        amount: amount,
+        currency: currency || 'INR',
+        status: 'created'
+      });
+    } catch (error) {
+      console.error('Error creating payment order:', error);
+      res.status(500).json({ message: 'Failed to create payment order' });
+    }
+  });
+
+  app.post('/api/payment/verify', async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      
+      // Mock verification - in production this would verify with Razorpay
+      const isValid = true; // Simulated verification
+      
+      if (isValid) {
+        // Credit amount to user wallet
+        const userId = 1; // Demo user
+        const amount = "100.00"; // Demo amount
+        
+        await storage.createWalletTransaction({
+          userId,
+          type: "deposit",
+          amount,
+          currency: "INR",
+          status: "completed",
+          description: "Razorpay deposit",
+          paymentMethod: "razorpay",
+          paymentId: razorpay_payment_id
+        });
+        
+        res.json({
+          success: true,
+          message: 'Payment verified and wallet credited',
+          paymentId: razorpay_payment_id
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: 'Payment verification failed'
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      res.status(500).json({ message: 'Payment verification failed' });
+    }
+  });
+
+  // KYC Submission
+  app.post('/api/kyc/submit', async (req, res) => {
+    try {
+      const userId = 1; // Demo user - in production get from auth
+      
+      // In production, this would process uploaded files and store KYC data
+      await storage.createKycDocument({
+        userId,
+        documentType: req.body.documentType || 'aadhar',
+        documentNumber: req.body.aadharNumber || req.body.panNumber,
+        status: 'pending',
+        submittedAt: new Date()
+      });
+      
+      res.json({
+        success: true,
+        message: 'KYC documents submitted successfully'
+      });
+    } catch (error) {
+      console.error('Error submitting KYC:', error);
+      res.status(500).json({ message: 'KYC submission failed' });
+    }
+  });
+
+  // Withdrawal Request
+  app.post('/api/wallet/withdraw', async (req, res) => {
+    try {
+      const { amount, bankDetails } = req.body;
+      const userId = 1; // Demo user
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const currentBalance = parseFloat(user.walletBalance);
+      if (currentBalance < parseFloat(amount)) {
+        return res.status(400).json({ message: 'Insufficient balance' });
+      }
+      
+      // Create withdrawal transaction
+      await storage.createWalletTransaction({
+        userId,
+        type: "withdrawal",
+        amount,
+        currency: "INR",
+        status: "pending",
+        description: "Withdrawal request",
+        paymentMethod: "bank_transfer",
+        bankDetails: JSON.stringify(bankDetails)
+      });
+      
+      res.json({
+        success: true,
+        message: 'Withdrawal request submitted. Processing time: 1-3 business days'
+      });
+    } catch (error) {
+      console.error('Error processing withdrawal:', error);
+      res.status(500).json({ message: 'Withdrawal request failed' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
