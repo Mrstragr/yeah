@@ -5,7 +5,6 @@ import { AviatorGame, JetXGame } from "@/components/games/crash-games";
 import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/games/casino-games";
 import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
 import { ToastManager } from "@/components/toast-notification";
-import { BalanceDisplay } from "@/components/balance-display";
 import { CoinFlipGame } from "@/components/games/coin-flip";
 import { DiceRollGame } from "@/components/games/dice-roll";
 import { HighLowCardGame } from "@/components/games/card-games";
@@ -44,9 +43,7 @@ interface GameCategory {
 }
 
 export default function TashanWinMain() {
-  const [showWinningInfo, setShowWinningInfo] = useState(true);
-  const [showJackpotModal, setShowJackpotModal] = useState(false);
-  const [activeSection, setActiveSection] = useState("lobby");
+  const [activeSection, setActiveSection] = useState("home");
   const [currentGame, setCurrentGame] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: "success" | "error" | "info"}>>([]);
   const [userBalance, setUserBalance] = useState<string>("0.00");
@@ -54,13 +51,6 @@ export default function TashanWinMain() {
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
-
-  // Update local balance when user data changes
-  useEffect(() => {
-    if (user) {
-      setUserBalance(user.walletBalance);
-    }
-  }, [user]);
 
   const { data: games = [] } = useQuery<Game[]>({
     queryKey: ["/api/games"],
@@ -70,17 +60,12 @@ export default function TashanWinMain() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: leaderboard = [] } = useQuery({
-    queryKey: ["/api/leaderboard"],
-  });
-
+  // Update local balance when user data changes
   useEffect(() => {
-    // Show jackpot modal after 3 seconds like original
-    const timer = setTimeout(() => {
-      setShowJackpotModal(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (user) {
+      setUserBalance(user.walletBalance);
+    }
+  }, [user]);
 
   const logout = () => {
     localStorage.removeItem('authToken');
@@ -126,7 +111,6 @@ export default function TashanWinMain() {
   const handleGamePlay = async (betAmount: number) => {
     if (!user) return;
     
-    // Check if user has sufficient balance
     const currentBalance = parseFloat(userBalance);
     if (currentBalance < betAmount) {
       addToast("Insufficient balance! Please deposit money to continue.", "error");
@@ -134,7 +118,6 @@ export default function TashanWinMain() {
     }
 
     try {
-      // Deduct bet amount from user's wallet
       const response = await fetch('/api/wallet/deduct', {
         method: 'POST',
         headers: {
@@ -222,368 +205,6 @@ export default function TashanWinMain() {
         activeSection={activeSection} 
         onSectionChange={setActiveSection}
       />
-          <button
-            onClick={() => openGame('wingo3')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Win Go 3Min</div>
-            <div className="text-white text-xs">Strategic lottery</div>
-          </button>
-          <button
-            onClick={() => openGame('5d')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">5D Lottery</div>
-            <div className="text-white text-xs">Multi-dimensional</div>
-          </button>
-          <button
-            onClick={() => openGame('k3')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">K3 Lottery</div>
-            <div className="text-white text-xs">Dice based lottery</div>
-          </button>
-        </div>
-
-        {/* Recommended Games */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">👑</span>
-            </div>
-            <span className="text-white text-sm font-medium">Recommended Games</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-        
-        {/* Crash Games */}
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
-          <button
-            onClick={() => openGame('aviator')}
-            className="bg-gradient-to-br from-blue-900 to-blue-700 p-3 rounded-lg text-left border border-blue-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">✈️ Aviator</div>
-            <div className="text-white text-xs">Crash multiplier game</div>
-            <div className="text-green-400 text-xs mt-1">Live players: 234</div>
-          </button>
-          <button
-            onClick={() => openGame('jetx')}
-            className="bg-gradient-to-br from-purple-900 to-purple-700 p-3 rounded-lg text-left border border-purple-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🚀 JetX</div>
-            <div className="text-white text-xs">High-flying adventure</div>
-            <div className="text-green-400 text-xs mt-1">Live players: 156</div>
-          </button>
-        </div>
-
-        {/* Mini games */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">🎯</span>
-            </div>
-            <span className="text-white text-sm font-medium">Mini games</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-
-        {/* Casino */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">♠️</span>
-            </div>
-            <span className="text-white text-sm font-medium">Casino</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-        
-        {/* Casino Games */}
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
-          <button
-            onClick={() => openGame('andarbahar')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Andar Bahar</div>
-            <div className="text-white text-xs">Traditional card game</div>
-          </button>
-          <button
-            onClick={() => openGame('teenpatti')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Teen Patti</div>
-            <div className="text-white text-xs">3-card poker</div>
-          </button>
-          <button
-            onClick={() => openGame('dragontiger')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Dragon Tiger</div>
-            <div className="text-white text-xs">Card battle game</div>
-          </button>
-          <button
-            onClick={() => openGame('baccarat')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1">Baccarat</div>
-            <div className="text-white text-xs">Classic casino card</div>
-          </button>
-        </div>
-
-        {/* Quick Games */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">⚡</span>
-            </div>
-            <span className="text-white text-sm font-medium">Quick Games</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-        
-        {/* Quick Games Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
-          <button
-            onClick={() => openGame('coinflip')}
-            className="bg-gradient-to-br from-yellow-900 to-yellow-700 p-3 rounded-lg text-left border border-yellow-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🪙 Coin Flip</div>
-            <div className="text-white text-xs">Heads or Tails</div>
-            <div className="text-green-400 text-xs mt-1">1.95x payout</div>
-          </button>
-          <button
-            onClick={() => openGame('diceroll')}
-            className="bg-gradient-to-br from-green-900 to-green-700 p-3 rounded-lg text-left border border-green-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🎲 Dice Roll</div>
-            <div className="text-white text-xs">Big/Small & Numbers</div>
-            <div className="text-green-400 text-xs mt-1">Up to 3x payout</div>
-          </button>
-          <button
-            onClick={() => openGame('highlow')}
-            className="bg-gradient-to-br from-red-900 to-red-700 p-3 rounded-lg text-left border border-red-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🃏 High Low</div>
-            <div className="text-white text-xs">Card prediction game</div>
-            <div className="text-green-400 text-xs mt-1">Streak multiplier</div>
-          </button>
-          <button
-            onClick={() => openGame('bigsmall')}
-            className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-3 rounded-lg text-left border border-indigo-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🔢 Big Small</div>
-            <div className="text-white text-xs">Number prediction</div>
-            <div className="text-green-400 text-xs mt-1">2x payout</div>
-          </button>
-        </div>
-
-        {/* Slots */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">🎰</span>
-            </div>
-            <span className="text-white text-sm font-medium">Slots</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-        
-        {/* Slot Games */}
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
-          <button
-            onClick={() => openGame('slots')}
-            className="bg-gradient-to-br from-orange-900 to-orange-700 p-3 rounded-lg text-left border border-orange-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🎰 Classic Slots</div>
-            <div className="text-white text-xs">Traditional slot machine</div>
-            <div className="text-green-400 text-xs mt-1">Auto-play available</div>
-          </button>
-          <button
-            onClick={() => openGame('megajackpot')}
-            className="bg-gradient-to-br from-pink-900 to-pink-700 p-3 rounded-lg text-left border border-pink-600 hover:scale-105 transition-all duration-300"
-          >
-            <div className="text-[#D4AF37] text-xs mb-1 font-bold">💎 Mega Jackpot</div>
-            <div className="text-white text-xs">Progressive jackpot</div>
-            <div className="text-green-400 text-xs mt-1">₹1,250,000 jackpot</div>
-          </button>
-        </div>
-
-        {/* Sports */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">⚽</span>
-            </div>
-            <span className="text-white text-sm font-medium">Sports</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-
-        {/* Rummy */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">🃏</span>
-            </div>
-            <span className="text-white text-sm font-medium">Rummy</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-
-        {/* Fishing */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-sm">🎣</span>
-            </div>
-            <span className="text-white text-sm font-medium">Fishing</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[#D4AF37] text-xs bg-[#2a2a2a] px-2 py-1 rounded">Detail</span>
-            <span className="text-gray-500 text-xs">{"<"}</span>
-            <span className="text-gray-500 text-xs">{">"}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Today's Earnings Chart - exact match */}
-      <div className="p-3 mt-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-5 h-5 flex items-center justify-center">
-            <span className="text-[#D4AF37] text-sm">📊</span>
-          </div>
-          <span className="text-white text-sm font-medium">Today's earnings chart</span>
-        </div>
-        
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-3 bg-[#2a2a2a] p-2 rounded">
-              <div className="w-8 h-8 bg-[#444] rounded-full flex items-center justify-center">
-                <span className="text-gray-500 text-xs">👤</span>
-              </div>
-              <div className="flex-1">
-                <div className="text-xs text-gray-400">No ***ata</div>
-                <div className="text-[#D4AF37] text-sm">0.00</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Platform Description */}
-      <div className="p-4 text-sm text-gray-400 leading-relaxed">
-        <p className="mb-3">
-          The platform advocates fairness, justice, and openness. We mainly operate fair lottery, 
-          blockchain games, live casinos, and slot machine games.
-        </p>
-        <p className="mb-3">
-          ar079 works with more than 10,000 online live game dealers and slot games, 
-          all of which are verified fair games.
-        </p>
-        <p className="mb-3">
-          ar079 supports fast deposit and withdrawal, and looks forward to your visit.
-        </p>
-        <p className="mb-3 text-red-400">
-          Gambling can be addictive, please play rationally.
-        </p>
-        <p className="text-yellow-500">
-          ar079 only accepts customers above the age of 18.
-        </p>
-      </div>
-
-      {/* Bottom Navigation - exact TashanWin layout */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-[#333]">
-        <div className="grid grid-cols-5 py-1">
-          <div className="flex flex-col items-center py-2">
-            <div className="w-5 h-5 flex items-center justify-center mb-1">
-              <span className="text-[#D4AF37] text-sm">🎁</span>
-            </div>
-            <span className="text-[#D4AF37] text-xs">Promotion</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <div className="w-5 h-5 flex items-center justify-center mb-1">
-              <span className="text-gray-500 text-sm">📅</span>
-            </div>
-            <span className="text-gray-500 text-xs">Activity</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <div className="w-5 h-5 flex items-center justify-center mb-1">
-              <span className="text-gray-500 text-sm">🏠</span>
-            </div>
-            <span className="text-gray-500 text-xs">Home</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <div className="w-5 h-5 flex items-center justify-center mb-1">
-              <span className="text-gray-500 text-sm">💰</span>
-            </div>
-            <span className="text-gray-500 text-xs">Wallet</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <div className="w-5 h-5 flex items-center justify-center mb-1">
-              <span className="text-gray-500 text-sm">👤</span>
-            </div>
-            <span className="text-gray-500 text-xs">Account</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Super Jackpot Modal - exact TashanWin style */}
-      {showJackpotModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-[#D4AF37] text-black p-4 rounded-lg text-center max-w-xs mx-4">
-            <div className="w-12 h-12 bg-[#8B5A2B] rounded-full mx-auto mb-3 flex items-center justify-center">
-              <span className="text-[#D4AF37] text-lg">🎰</span>
-            </div>
-            <h2 className="text-lg font-bold mb-2">Congratulation</h2>
-            <p className="text-sm mb-4">
-              Get 【Super Jackpot】!<br />
-              Visit the [Super Jackpot] page to claim your reward
-            </p>
-            <button 
-              onClick={() => setShowJackpotModal(false)}
-              className="bg-[#8B5A2B] text-white px-6 py-2 rounded text-sm font-medium"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notifications */}
-      <ToastManager toasts={toasts} removeToast={removeToast} />
-
-      {/* Loading text - exact position */}
-      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs">
-        loading...
-      </div>
 
       {/* Game Renderers */}
       {currentGame === 'wingo1' && (
