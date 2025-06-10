@@ -216,3 +216,26 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 export type KycDocument = typeof kycDocuments.$inferSelect;
 export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
+
+// Promotional transaction table
+export const promoTransactions = pgTable("promo_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  promotionId: integer("promotion_id"),
+  amount: text("amount").notNull(),
+  bonusAmount: text("bonus_amount").notNull(),
+  status: text("status").notNull().default("pending"),
+  paymentMethod: text("payment_method"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPromoTransactionSchema = createInsertSchema(promoTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PromoTransaction = typeof promoTransactions.$inferSelect;
+export type InsertPromoTransaction = z.infer<typeof insertPromoTransactionSchema>;

@@ -448,6 +448,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/promotions/active", async (req, res) => {
+    try {
+      const promotions = await storage.getActivePromotions();
+      res.json(promotions);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching promotions: " + error.message });
+    }
+  });
+
+  app.get("/api/wallet/promo-transactions", async (req, res) => {
+    try {
+      const userId = 1; // Demo user ID - in production from auth
+      const transactions = await storage.getUserPromoTransactions(userId, 20);
+      res.json(transactions);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching promo transactions: " + error.message });
+    }
+  });
+
+  app.post("/api/wallet/promo-deposit", async (req, res) => {
+    try {
+      const { amount, promotionId, promoCode } = req.body;
+      const userId = 1; // Demo user ID
+      
+      if (!amount || parseFloat(amount) < 10) {
+        return res.status(400).json({ message: "Minimum deposit is ₹10" });
+      }
+
+      let promotion = null;
+      if (promotionId) {
+        promotion = await storage.getPromotion(promotionId);
+        if (!promotion || !promotion.isActive) {
+          return res.status(400).json({ message: "Invalid or inactive promotion" });
+        }
+      } else if (promoCode) {
+        promotion = await storage.getPromotionByCode(promoCode);
+        if (!promotion || !promotion.isActive) {
+          return res.status(400).json({ message: "Invalid or expired promo code" });
+        }
+      }
+
+      const depositAmount = parseFloat(amount);
+      let bonusAmount = 0;
+
+      if (promotion) {
+        if (depositAmount < promotion.minAmount) {
+          return res.status(400).json({ 
+            message: `Minimum deposit for this promotion is ₹${promotion.minAmount}` 
+          });
+        }
+        
+        bonusAmount = Math.min(
+          (depositAmount * promotion.bonusPercentage) / 100,
+          promotion.maxAmount
+        );
+
+        if (promotion.remainingUses <= 0) {
+          return res.status(400).json({ message: "Promotion usage limit reached" });
+        }
+
+        await storage.updatePromotionUsage(promotion.id);
+      }
+
+      // Create promotional transaction
+      const transaction = await storage.createPromoTransaction({
+        userId,
+        promotionId: promotion?.id || null,
+        amount: amount,
+        bonusAmount: bonusAmount.toFixed(2),
+        status: "completed",
+        paymentMethod: "upi",
+        description: `Promotional deposit ${promotion ? `with ${promotion.title}` : ""}`
+      });
+
+      // Update user balances
+      const user = await storage.getUser(userId);
+      if (user) {
+        const newWalletBalance = parseFloat(user.walletBalance) + depositAmount;
+        const newBonusBalance = parseFloat(user.bonusBalance || "0") + bonusAmount;
+        
+        await storage.updateUserWalletBalance(userId, newWalletBalance.toString());
+        if (bonusAmount > 0) {
+          await storage.updateUserBonusBalance(userId, newBonusBalance.toString());
+        }
+      }
+
+      res.json({
+        success: true,
+        transaction,
+        bonusAmount: bonusAmount.toFixed(2),
+        message: "Promotional deposit successful"
+      });
+
+    } catch (error: any) {
+      res.status(500).json({ message: "Error processing promotional deposit: " + error.message });
+    }
+  });
+
+  app.post("/api/wallet/daily-bonus", async (req, res) => {
+    try {
+      const userId = 1; // Demo user ID
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if daily bonus already claimed today
+      const today = new Date().toDateString();
+      const lastClaim = user.lastDailyBonus ? new Date(user.lastDailyBonus).toDateString() : null;
+      
+      if (lastClaim === today) {
+        return res.status(400).json({ message: "Daily bonus already claimed today" });
+      }
+
+      // Calculate daily bonus (base 50 + VIP level bonus)
+      const baseBonus = 50;
+      const vipBonus = (user.vipLevel || 0) * 10;
+      const totalBonus = baseBonus + vipBonus;
+
+      // Update user bonus balance and last claim date
+      const currentBonusBalance = parseFloat(user.bonusBalance || "0");
+      const newBonusBalance = currentBonusBalance + totalBonus;
+      
+      await storage.updateUserBonusBalance(userId, newBonusBalance.toString());
+      await storage.updateUserLastLogin(userId);
+
+      // Create transaction record
+      await storage.createWalletTransaction({
+        userId,
+        type: "bonus",
+        amount: totalBonus.toFixed(2),
+        currency: "INR",
+        status: "completed",
+        description: "Daily login bonus",
+        paymentMethod: "system"
+      });
+
+      res.json({
+        success: true,
+        amount: totalBonus.toFixed(2),
+        message: "Daily bonus claimed successfully"
+      });
+
+    } catch (error: any) {
+      res.status(500).json({ message: "Error claiming daily bonus: " + error.message });
+    }
+  });
+
   // Game play simulation
   app.post("/api/games/:id/play", async (req, res) => {
     try {

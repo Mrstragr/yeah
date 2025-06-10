@@ -69,6 +69,13 @@ export interface IStorage {
   getUserKycDocuments(userId: number): Promise<KycDocument[]>;
   createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
   updateKycStatus(userId: number, status: string): Promise<User | undefined>;
+
+  // Promotional wallet methods
+  getUserPromoTransactions(userId: number, limit?: number): Promise<PromoTransaction[]>;
+  createPromoTransaction(transaction: InsertPromoTransaction): Promise<PromoTransaction>;
+  getPromotionByCode(code: string): Promise<Promotion | undefined>;
+  updatePromotionUsage(promotionId: number): Promise<void>;
+  updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
