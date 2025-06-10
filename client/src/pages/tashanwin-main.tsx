@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { WinGoGame } from "@/components/games/lottery-games";
+import { AviatorGame, JetXGame } from "@/components/games/crash-games";
+import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/games/casino-games";
+import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
 
 interface User {
   id: number;
@@ -35,6 +39,7 @@ export default function TashanWinMain() {
   const [showWinningInfo, setShowWinningInfo] = useState(true);
   const [showJackpotModal, setShowJackpotModal] = useState(false);
   const [activeSection, setActiveSection] = useState("lobby");
+  const [currentGame, setCurrentGame] = useState<string | null>(null);
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -63,6 +68,19 @@ export default function TashanWinMain() {
   const logout = () => {
     localStorage.removeItem('authToken');
     window.location.href = "/login";
+  };
+
+  const openGame = (gameName: string) => {
+    setCurrentGame(gameName);
+  };
+
+  const closeGame = () => {
+    setCurrentGame(null);
+  };
+
+  const handleGamePlay = (betAmount: number) => {
+    console.log(`Bet placed: ₹${betAmount}`);
+    // Here you would integrate with real cash system
   };
 
   return (
