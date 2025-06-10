@@ -117,39 +117,42 @@
 
 @layer base {
   :root {
-    --background: 220 13% 6%;
-    --foreground: 0 0% 95%;
-    --card: 220 13% 9%;
-    --card-foreground: 0 0% 95%;
-    --popover: 220 13% 9%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 45 100% 51%;
-    --primary-foreground: 220 13% 6%;
-    --secondary: 220 13% 12%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 220 13% 12%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 220 13% 15%;
-    --accent-foreground: 0 0% 95%;
+    --background: 220 13% 8%;
+    --foreground: 0 0% 98%;
+    --card: 220 13% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 220 13% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 45 100% 55%;
+    --primary-foreground: 220 13% 8%;
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 0 0% 75%;
+    --accent: 220 13% 18%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 18%;
-    --input: 220 13% 12%;
-    --ring: 45 100% 51%;
+    --border: 220 13% 25%;
+    --input: 220 13% 15%;
+    --ring: 45 100% 55%;
 
-    /* Casino Brand Colors */
-    --casino-primary: 220 13% 6%;
-    --casino-secondary: 220 13% 9%;
-    --casino-accent: 220 13% 12%;
-    --casino-gold: 45 100% 51%;
-    --casino-orange: 25 95% 53%;
-    --casino-red: 0 84% 60%;
-    --casino-green: 142 76% 36%;
-    --casino-blue: 217 91% 60%;
-    --casino-purple: 271 91% 65%;
-    --casino-border: 220 13% 18%;
-    --casino-text: 0 0% 95%;
-    --casino-text-muted: 0 0% 65%;
+    /* Casino Brand Colors - Enhanced Contrast */
+    --casino-primary: 220 13% 8%;
+    --casino-secondary: 220 13% 12%;
+    --casino-accent: 220 13% 15%;
+    --casino-gold: 45 100% 55%;
+    --casino-orange: 25 95% 58%;
+    --casino-red: 0 84% 65%;
+    --casino-green: 142 76% 45%;
+    --casino-blue: 217 91% 65%;
+    --casino-purple: 271 91% 70%;
+    --casino-border: 220 13% 25%;
+    --casino-border-light: 220 13% 35%;
+    --casino-text: 0 0% 98%;
+    --casino-text-secondary: 0 0% 85%;
+    --casino-text-muted: 0 0% 75%;
+    --casino-text-dark: 220 13% 15%;
   }
 }
 
@@ -194,6 +197,22 @@
 
 .text-casino-blue {
   color: hsl(var(--casino-blue));
+}
+
+.text-casino-text {
+  color: hsl(var(--casino-text));
+}
+
+.text-casino-text-secondary {
+  color: hsl(var(--casino-text-secondary));
+}
+
+.text-casino-text-muted {
+  color: hsl(var(--casino-text-muted));
+}
+
+.text-casino-text-dark {
+  color: hsl(var(--casino-text-dark));
 }
 
 .bg-casino-primary {

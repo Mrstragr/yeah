@@ -76,10 +76,10 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
         {/* Game Info */}
         <div className="flex-1 flex flex-col justify-between">
           <div>
-            <h3 className={`text-white font-bold group-hover:text-[#D4AF37] transition-colors ${featured ? 'text-lg mb-2' : 'text-sm mb-1'}`}>
+            <h3 className={`text-casino-text font-bold group-hover:text-casino-gold transition-colors ${featured ? 'text-lg mb-2' : 'text-sm mb-1'}`}>
               {game.title}
             </h3>
-            <p className={`text-gray-400 ${featured ? 'text-sm' : 'text-xs'}`}>
+            <p className={`text-casino-text-muted ${featured ? 'text-sm' : 'text-xs'}`}>
               {game.description}
             </p>
           </div>
@@ -89,7 +89,7 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-casino-text-muted">
                   {Math.floor(Math.random() * 200 + 50)} playing
                 </span>
               </div>
@@ -112,8 +112,8 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
       className={`
         px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300
         ${isActive 
-          ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black shadow-lg scale-105' 
-          : 'bg-[#2a2a2a] text-gray-400 hover:text-white hover:bg-[#3a3a3a]'
+          ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-casino-text-dark shadow-lg scale-105' 
+          : 'bg-[#2a2a2a] text-casino-text-muted hover:text-casino-text hover:bg-[#3a3a3a]'
         }
       `}
     >
@@ -134,7 +134,7 @@ export function ModernDashboard({ games, categories, onGameSelect }: ModernDashb
           <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-[#D4AF37] to-white bg-clip-text text-transparent mb-2">
             Welcome to Premium Gaming
           </h2>
-          <p className="text-gray-400 mb-4">Experience the thrill of authentic casino games with real cash rewards</p>
+          <p className="text-casino-text-muted mb-4">Experience the thrill of authentic casino games with real cash rewards</p>
           
           {/* Live Stats */}
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
