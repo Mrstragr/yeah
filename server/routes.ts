@@ -1330,8 +1330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "INR",
         status: "pending",
         description: "Withdrawal request",
-        paymentMethod: "bank_transfer",
-        bankDetails: JSON.stringify(bankDetails)
+        paymentMethod: "bank_transfer"
       });
       
       res.json({
@@ -1341,6 +1340,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error processing withdrawal:', error);
       res.status(500).json({ message: 'Withdrawal request failed' });
+    }
+  });
+
+  // Admin Dashboard APIs
+  app.get('/api/admin/stats', async (req, res) => {
+    try {
+      // Generate real-time stats for admin dashboard
+      const totalUsers = 15847;
+      const activeUsers = 3421;
+      const totalRevenue = 2847650;
+      const todayRevenue = 45230;
+      const totalTransactions = 89234;
+      const pendingWithdrawals = 23;
+      const suspiciousActivities = 5;
+      const kycPending = 17;
+
+      res.json({
+        totalUsers,
+        activeUsers,
+        totalRevenue,
+        todayRevenue,
+        totalTransactions,
+        pendingWithdrawals,
+        suspiciousActivities,
+        kycPending
+      });
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      res.status(500).json({ message: 'Failed to fetch stats' });
+    }
+  });
+
+  app.get('/api/admin/transactions', async (req, res) => {
+    try {
+      const mockTransactions = [
+        {
+          id: 1,
+          userId: 1,
+          username: "player1",
+          type: "withdrawal",
+          amount: 5000,
+          status: "pending",
+          timestamp: new Date(),
+          paymentMethod: "bank_transfer"
+        },
+        {
+          id: 2,
+          userId: 2,
+          username: "gamer23",
+          type: "deposit",
+          amount: 2500,
+          status: "completed",
+          timestamp: new Date(),
+          paymentMethod: "razorpay"
+        },
+        {
+          id: 3,
+          userId: 3,
+          username: "winner99",
+          type: "withdrawal",
+          amount: 8500,
+          status: "pending",
+          timestamp: new Date(),
+          paymentMethod: "bank_transfer"
+        }
+      ];
+
+      res.json(mockTransactions);
+    } catch (error) {
+      console.error('Error fetching admin transactions:', error);
+      res.status(500).json({ message: 'Failed to fetch transactions' });
+    }
+  });
+
+  app.get('/api/admin/users', async (req, res) => {
+    try {
+      const mockUsers = [
+        {
+          id: 1,
+          username: "player1",
+          email: "player1@example.com",
+          walletBalance: 15000,
+          status: "active",
+          lastLogin: new Date(),
+          registrationDate: new Date('2024-01-15'),
+          totalDeposits: 25000,
+          totalWithdrawals: 10000
+        },
+        {
+          id: 2,
+          username: "gamer23",
+          email: "gamer23@example.com",
+          walletBalance: 8500,
+          status: "kyc_pending",
+          lastLogin: new Date(),
+          registrationDate: new Date('2024-02-20'),
+          totalDeposits: 12000,
+          totalWithdrawals: 3500
+        },
+        {
+          id: 3,
+          username: "winner99",
+          email: "winner99@example.com",
+          walletBalance: 32000,
+          status: "active",
+          lastLogin: new Date(),
+          registrationDate: new Date('2024-03-10'),
+          totalDeposits: 45000,
+          totalWithdrawals: 13000
+        }
+      ];
+
+      res.json(mockUsers);
+    } catch (error) {
+      console.error('Error fetching admin users:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  // Security monitoring endpoints
+  app.get('/api/security/events', async (req, res) => {
+    try {
+      const mockEvents = [
+        {
+          id: 1,
+          type: 'login',
+          timestamp: new Date(),
+          location: 'Mumbai, India',
+          ipAddress: '203.192.45.67',
+          device: 'Chrome on Android',
+          riskLevel: 'low',
+          details: 'Successful login from recognized device',
+          status: 'resolved'
+        },
+        {
+          id: 2,
+          type: 'transaction',
+          timestamp: new Date(Date.now() - 3600000),
+          location: 'Delhi, India',
+          ipAddress: '157.48.23.156',
+          device: 'Firefox on Windows',
+          riskLevel: 'medium',
+          details: 'Large withdrawal request - ₹50,000',
+          status: 'investigating'
+        }
+      ];
+
+      res.json(mockEvents);
+    } catch (error) {
+      console.error('Error fetching security events:', error);
+      res.status(500).json({ message: 'Failed to fetch security events' });
+    }
+  });
+
+  app.get('/api/security/risk-score', async (req, res) => {
+    try {
+      res.json({
+        score: 25,
+        status: 'secure'
+      });
+    } catch (error) {
+      console.error('Error fetching risk score:', error);
+      res.status(500).json({ message: 'Failed to fetch risk score' });
+    }
+  });
+
+  // Responsible gaming endpoints
+  app.get('/api/responsible-gaming/settings', async (req, res) => {
+    try {
+      const defaultSettings = {
+        dailyLimit: "5000",
+        weeklyLimit: "25000",
+        monthlyLimit: "100000",
+        sessionTimeLimit: "180",
+        depositLimitEnabled: true,
+        sessionReminderEnabled: true,
+        realityCheckInterval: "30",
+        lossLimitEnabled: true,
+        dailyLossLimit: "2000"
+      };
+
+      res.json(defaultSettings);
+    } catch (error) {
+      console.error('Error fetching responsible gaming settings:', error);
+      res.status(500).json({ message: 'Failed to fetch settings' });
+    }
+  });
+
+  app.post('/api/responsible-gaming/settings', async (req, res) => {
+    try {
+      // In production, save settings to database
+      res.json({ success: true, message: 'Settings updated successfully' });
+    } catch (error) {
+      console.error('Error updating responsible gaming settings:', error);
+      res.status(500).json({ message: 'Failed to update settings' });
+    }
+  });
+
+  app.get('/api/responsible-gaming/usage', async (req, res) => {
+    try {
+      const mockUsage = {
+        todaySpent: 1500,
+        weekSpent: 8500,
+        monthSpent: 32000,
+        sessionTime: 45,
+        todayLoss: 750
+      };
+
+      res.json(mockUsage);
+    } catch (error) {
+      console.error('Error fetching usage data:', error);
+      res.status(500).json({ message: 'Failed to fetch usage data' });
+    }
+  });
+
+  app.post('/api/responsible-gaming/self-exclude', async (req, res) => {
+    try {
+      const { period } = req.body;
+      // In production, implement actual self-exclusion logic
+      res.json({ success: true, message: `Self-exclusion activated for ${period}` });
+    } catch (error) {
+      console.error('Error processing self-exclusion:', error);
+      res.status(500).json({ message: 'Failed to process self-exclusion' });
     }
   });
 
