@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Wallet, Trophy, AlertCircle } from "lucide-react";
 import type { Game } from "@shared/schema";
 import type { GamePlayResult } from "@/lib/types";
+import { DiceRollGame } from "@/components/games/dice-roll";
+import { CoinFlipGame } from "@/components/games/coin-flip";
 
 interface GamePlayModalProps {
   isOpen: boolean;

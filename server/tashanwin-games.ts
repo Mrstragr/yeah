@@ -162,12 +162,20 @@ export const tashanwinGames: InsertGame[] = [
     jackpot: "400000.00"
   },
   {
-    title: "Dice",
-    description: "Roll dice and predict high/low outcomes", 
+    title: "Dice Roll",
+    description: "Roll three dice and bet on big/small or specific numbers", 
     category: "minigames",
     imageUrl: "/images/dice.png",
-    rating: "4.3",
-    jackpot: "100000.00"
+    rating: "4.6",
+    jackpot: "350000.00"
+  },
+  {
+    title: "Coin Flip",
+    description: "Classic heads or tails game with instant results",
+    category: "minigames", 
+    imageUrl: "/images/coinflip.png",
+    rating: "4.5",
+    jackpot: "250000.00"
   },
   {
     title: "Tower",
