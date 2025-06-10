@@ -620,6 +620,24 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user || undefined;
   }
+
+  async updateUserBonusBalance(userId: number, amount: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (user) {
+      const currentBonus = parseFloat(user.bonusBalance || "0");
+      const newBonus = currentBonus + parseFloat(amount);
+      
+      const [updatedUser] = await db.update(users)
+        .set({ 
+          bonusBalance: newBonus.toFixed(2),
+          updatedAt: new Date() 
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return updatedUser || undefined;
+    }
+    return undefined;
+  }
 }
 
 export const storage = new DatabaseStorage();
