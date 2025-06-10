@@ -7,6 +7,7 @@ import { ToastManager } from "@/components/toast-notification";
 import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
 import { FloatingNavigation } from "@/components/floating-navigation";
+import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
 
 interface User {
   id: number;
@@ -201,29 +202,15 @@ export default function TashanWinMain() {
       {/* Content Based on Active Section */}
       <div className="pb-20">
         {activeSection === 'home' && (
-          <ModernDashboard 
-            games={games} 
-            categories={categories} 
-            onGameSelect={openGame}
+          <TashanWinGameLobby 
+            onGameSelect={(gameId, gameTitle) => openGame(gameTitle)}
           />
         )}
         
         {activeSection === 'games' && (
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-              <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
-                All Games
-              </h1>
-              <p className="text-casino-text-secondary font-exo">
-                Choose from our collection of exciting games
-              </p>
-            </div>
-            <ModernDashboard 
-              games={games} 
-              categories={categories} 
-              onGameSelect={openGame}
-            />
-          </div>
+          <TashanWinGameLobby 
+            onGameSelect={(gameId, gameTitle) => openGame(gameTitle)}
+          />
         )}
         
         {activeSection === 'promotions' && (
