@@ -4,6 +4,7 @@ import { WinGoGame } from "@/components/games/lottery-games";
 import { AviatorGame, JetXGame } from "@/components/games/crash-games";
 import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/games/casino-games";
 import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
+import { ToastManager } from "@/components/toast-notification";
 
 interface User {
   id: number;
@@ -78,9 +79,64 @@ export default function TashanWinMain() {
     setCurrentGame(null);
   };
 
-  const handleGamePlay = (betAmount: number) => {
-    console.log(`Bet placed: ₹${betAmount}`);
-    // Here you would integrate with real cash system
+  const handleGamePlay = async (betAmount: number) => {
+    if (!user) return;
+    
+    // Check if user has sufficient balance
+    const currentBalance = parseFloat(user.walletBalance);
+    if (currentBalance < betAmount) {
+      alert("Insufficient balance! Please deposit money to continue playing.");
+      return;
+    }
+
+    try {
+      // Deduct bet amount from user's wallet
+      const response = await fetch('/api/wallet/deduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({ amount: betAmount })
+      });
+
+      if (response.ok) {
+        console.log(`Bet placed: ₹${betAmount}`);
+        // Refresh user data to show updated balance
+        window.location.reload();
+      } else {
+        alert("Failed to place bet. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error placing bet:", error);
+      alert("Network error. Please check your connection.");
+    }
+  };
+
+  const handleGameWin = async (winAmount: number) => {
+    if (!user || winAmount <= 0) return;
+
+    try {
+      const response = await fetch('/api/wallet/credit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({ 
+          amount: winAmount,
+          description: "Game winnings"
+        })
+      });
+
+      if (response.ok) {
+        console.log(`Winnings credited: ₹${winAmount}`);
+        // Refresh user data to show updated balance
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error("Error crediting winnings:", error);
+    }
   };
 
   return (
@@ -534,40 +590,40 @@ export default function TashanWinMain() {
 
       {/* Game Renderers */}
       {currentGame === 'wingo1' && (
-        <WinGoGame title="Win Go 1Min" onPlay={handleGamePlay} onClose={closeGame} />
+        <WinGoGame title="Win Go 1Min" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'wingo3' && (
-        <WinGoGame title="Win Go 3Min" onPlay={handleGamePlay} onClose={closeGame} />
+        <WinGoGame title="Win Go 3Min" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === '5d' && (
-        <WinGoGame title="5D Lottery" onPlay={handleGamePlay} onClose={closeGame} />
+        <WinGoGame title="5D Lottery" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'k3' && (
-        <WinGoGame title="K3 Lottery" onPlay={handleGamePlay} onClose={closeGame} />
+        <WinGoGame title="K3 Lottery" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'aviator' && (
-        <AviatorGame title="Aviator" onPlay={handleGamePlay} onClose={closeGame} />
+        <AviatorGame title="Aviator" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'jetx' && (
-        <JetXGame title="JetX" onPlay={handleGamePlay} onClose={closeGame} />
+        <JetXGame title="JetX" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'andarbahar' && (
-        <AndarBaharGame title="Andar Bahar" onPlay={handleGamePlay} onClose={closeGame} />
+        <AndarBaharGame title="Andar Bahar" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'teenpatti' && (
-        <TeenPattiGame title="Teen Patti" onPlay={handleGamePlay} onClose={closeGame} />
+        <TeenPattiGame title="Teen Patti" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'dragontiger' && (
-        <DragonTigerGame title="Dragon Tiger" onPlay={handleGamePlay} onClose={closeGame} />
+        <DragonTigerGame title="Dragon Tiger" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'baccarat' && (
-        <DragonTigerGame title="Baccarat" onPlay={handleGamePlay} onClose={closeGame} />
+        <DragonTigerGame title="Baccarat" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'slots' && (
-        <SlotMachineGame title="Classic Slots" onPlay={handleGamePlay} onClose={closeGame} />
+        <SlotMachineGame title="Classic Slots" onPlay={handleGameWin} onClose={closeGame} />
       )}
       {currentGame === 'megajackpot' && (
-        <MegaJackpotSlot title="Mega Jackpot" onPlay={handleGamePlay} onClose={closeGame} />
+        <MegaJackpotSlot title="Mega Jackpot" onPlay={handleGameWin} onClose={closeGame} />
       )}
     </div>
   );

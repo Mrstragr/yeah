@@ -192,6 +192,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/logout", authenticateToken, (req, res) => {
     res.json({ message: "Logged out successfully" });
   });
+
+  // Wallet operations
+  app.post("/api/wallet/deduct", authenticateToken, async (req: any, res) => {
+    try {
+      const { amount } = req.body;
+      const userId = req.userId;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentBalance = parseFloat(user.walletBalance);
+      if (currentBalance < amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      const newBalance = (currentBalance - amount).toFixed(2);
+      const updatedUser = await storage.updateUserWalletBalance(userId, newBalance);
+
+      // Record transaction and game history
+      await storage.createWalletTransaction({
+        userId,
+        type: "debit",
+        amount: amount.toString(),
+        status: "completed",
+        description: "Game bet placed"
+      });
+
+      // Update user's total bet amount
+      const currentTotalBet = parseFloat(user.totalBet || "0");
+      await storage.updateUserStats(userId, {
+        totalBet: (currentTotalBet + amount).toFixed(2)
+      });
+
+      res.json({ 
+        success: true, 
+        newBalance: updatedUser?.walletBalance,
+        message: "Bet placed successfully"
+      });
+    } catch (error) {
+      console.error("Error deducting wallet balance:", error);
+      res.status(500).json({ message: "Failed to process bet" });
+    }
+  });
+
+  app.post("/api/wallet/credit", authenticateToken, async (req: any, res) => {
+    try {
+      const { amount, description } = req.body;
+      const userId = req.userId;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentBalance = parseFloat(user.walletBalance);
+      const newBalance = (currentBalance + amount).toFixed(2);
+      const updatedUser = await storage.updateUserWalletBalance(userId, newBalance);
+
+      // Record transaction
+      await storage.createWalletTransaction({
+        userId,
+        type: "credit",
+        amount: amount.toString(),
+        status: "completed",
+        description: description || "Game winnings"
+      });
+
+      res.json({ 
+        success: true, 
+        newBalance: updatedUser?.walletBalance,
+        message: "Winnings credited successfully"
+      });
+    } catch (error) {
+      console.error("Error crediting wallet balance:", error);
+      res.status(500).json({ message: "Failed to credit winnings" });
+    }
+  });
   // Game categories routes
   app.get("/api/categories", async (req, res) => {
     try {
