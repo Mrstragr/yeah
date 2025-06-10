@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MobileNav } from "@/components/mobile-nav";
-import TashanWinHome from "@/pages/tashanwin-home";
+import TashanWinMain from "@/pages/tashanwin-main";
 import CategoryPage from "@/pages/category";
 import WalletPage from "@/pages/wallet";
 import WalletDeposit from "@/pages/wallet-deposit";
@@ -78,7 +78,7 @@ function Router() {
   return (
     <div className="pb-20">
       <Switch>
-        <Route path="/" component={TashanWinHome} />
+        <Route path="/" component={TashanWinMain} />
         <Route path="/category/:slug" component={CategoryPage} />
         <Route path="/wallet" component={WalletPage} />
         <Route path="/wallet/deposit" component={WalletDeposit} />
