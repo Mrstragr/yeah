@@ -494,7 +494,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserLastLogin(userId: number): Promise<User | undefined> {
     const [user] = await db.update(users)
-      .set({ lastLogin: new Date(), updatedAt: new Date() })
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
     return user || undefined;
@@ -651,4 +651,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
