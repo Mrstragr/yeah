@@ -188,13 +188,211 @@ export default function TashanWinMain() {
         refreshBalance={refreshBalance}
       />
 
-      {/* Modern Dashboard */}
+      {/* Content Based on Active Section */}
       <div className="pb-20">
-        <ModernDashboard 
-          games={games} 
-          categories={categories} 
-          onGameSelect={openGame}
-        />
+        {activeSection === 'home' && (
+          <ModernDashboard 
+            games={games} 
+            categories={categories} 
+            onGameSelect={openGame}
+          />
+        )}
+        
+        {activeSection === 'games' && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
+                All Games
+              </h1>
+              <p className="text-casino-text-secondary font-exo">
+                Choose from our collection of exciting games
+              </p>
+            </div>
+            <ModernDashboard 
+              games={games} 
+              categories={categories} 
+              onGameSelect={openGame}
+            />
+          </div>
+        )}
+        
+        {activeSection === 'promotions' && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
+                Promotions & Bonuses
+              </h1>
+              <p className="text-casino-text-secondary font-exo">
+                Claim your daily bonuses and special offers
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="game-card p-6 bg-gradient-to-r from-green-600 to-emerald-600">
+                <h3 className="text-xl font-gaming font-bold text-white mb-2">Welcome Bonus</h3>
+                <p className="text-green-100 mb-4">Get 100% match on your first deposit up to ₹5,000</p>
+                <button 
+                  onClick={() => addToast("Welcome bonus activated! Check your wallet.", "success")}
+                  className="w-full bg-white text-green-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Claim Now
+                </button>
+              </div>
+              <div className="game-card p-6 bg-gradient-to-r from-purple-600 to-pink-600">
+                <h3 className="text-xl font-gaming font-bold text-white mb-2">Daily Bonus</h3>
+                <p className="text-purple-100 mb-4">Login daily to earn ₹50 bonus credits</p>
+                <button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/wallet/daily-bonus', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                      });
+                      const data = await response.json();
+                      if (response.ok) {
+                        addToast(`Daily bonus claimed! ₹${data.amount} added to your account.`, "success");
+                        refreshBalance();
+                      } else {
+                        addToast(data.message || "Daily bonus already claimed today", "error");
+                      }
+                    } catch (error) {
+                      addToast("Failed to claim daily bonus", "error");
+                    }
+                  }}
+                  className="w-full bg-white text-purple-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Claim Daily
+                </button>
+              </div>
+              <div className="game-card p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
+                <h3 className="text-xl font-gaming font-bold text-white mb-2">Referral Bonus</h3>
+                <p className="text-blue-100 mb-4">Invite friends and earn ₹100 for each referral</p>
+                <button 
+                  onClick={() => {
+                    const referralLink = `https://tashanwin.ink/ref/${user?.username || 'user'}`;
+                    navigator.clipboard.writeText(referralLink);
+                    addToast("Referral link copied to clipboard!", "success");
+                  }}
+                  className="w-full bg-white text-blue-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Share Link
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {activeSection === 'wallet' && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
+                Wallet & Banking
+              </h1>
+              <p className="text-casino-text-secondary font-exo">
+                Manage your funds securely with real Indian currency transactions
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="game-card p-6 bg-gradient-to-r from-green-600 to-emerald-600">
+                <h3 className="text-lg font-gaming text-white mb-2">Available Balance</h3>
+                <p className="text-3xl font-bold text-white">₹{userBalance}</p>
+              </div>
+              <div className="game-card p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
+                <h3 className="text-lg font-gaming text-white mb-2">Bonus Balance</h3>
+                <p className="text-3xl font-bold text-white">₹{user?.bonusBalance || "0.00"}</p>
+              </div>
+              <div className="game-card p-6 bg-gradient-to-r from-purple-600 to-pink-600">
+                <h3 className="text-lg font-gaming text-white mb-2">Total Winnings</h3>
+                <p className="text-3xl font-bold text-white">₹{(parseFloat(userBalance) + parseFloat(user?.bonusBalance || "0")).toFixed(2)}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="game-card p-6">
+                <h3 className="text-xl font-gaming text-gaming-gold mb-4">Quick Deposit</h3>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {[100, 500, 1000, 2500].map((amount) => (
+                    <button
+                      key={amount}
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                      ₹{amount}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => window.location.href = '/wallet'}
+                  className="w-full bg-gaming-gold text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-500 transition-colors"
+                >
+                  Deposit Money
+                </button>
+              </div>
+              <div className="game-card p-6">
+                <h3 className="text-xl font-gaming text-gaming-gold mb-4">Quick Withdrawal</h3>
+                <div className="space-y-3 mb-4">
+                  <p className="text-casino-text-secondary">Minimum withdrawal: ₹100</p>
+                  <p className="text-casino-text-secondary">Processing time: 1-3 business days</p>
+                </div>
+                <button 
+                  onClick={() => window.location.href = '/wallet'}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                >
+                  Withdraw Money
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {activeSection === 'vip' && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
+                VIP Program
+              </h1>
+              <p className="text-casino-text-secondary font-exo">
+                Unlock exclusive benefits and rewards
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="game-card p-8 bg-gradient-to-r from-yellow-600 to-amber-600">
+                <div className="flex items-center mb-6">
+                  <span className="text-4xl mr-4">👑</span>
+                  <div>
+                    <h3 className="text-2xl font-gaming font-bold text-white">VIP Status</h3>
+                    <p className="text-yellow-100">Current Level: Bronze</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-white">
+                    <span>Progress to Silver</span>
+                    <span>₹2,500 / ₹10,000</span>
+                  </div>
+                  <div className="w-full bg-yellow-800 rounded-full h-3">
+                    <div className="bg-white h-3 rounded-full" style={{width: '25%'}}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="game-card p-4">
+                  <h4 className="font-gaming text-gaming-gold mb-2">VIP Benefits</h4>
+                  <ul className="space-y-2 text-casino-text-secondary">
+                    <li>• Higher withdrawal limits</li>
+                    <li>• Exclusive bonuses</li>
+                    <li>• Priority customer support</li>
+                    <li>• Special tournaments</li>
+                  </ul>
+                </div>
+                <div className="game-card p-4">
+                  <h4 className="font-gaming text-gaming-gold mb-2">Next Level Rewards</h4>
+                  <ul className="space-y-2 text-casino-text-secondary">
+                    <li>• 5% cashback on losses</li>
+                    <li>• Weekly bonus of ₹500</li>
+                    <li>• Dedicated VIP manager</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Toast Notifications */}

@@ -15,7 +15,7 @@ export default function WalletPage() {
           <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
             Wallet & Banking
           </h1>
-          <p className="text-gray-400 font-exo">
+          <p className="text-casino-text-secondary font-exo">
             Manage your funds securely with real Indian currency transactions
           </p>
         </div>
