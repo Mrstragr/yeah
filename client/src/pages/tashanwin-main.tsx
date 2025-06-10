@@ -6,6 +6,9 @@ import { AndarBaharGame, TeenPattiGame, DragonTigerGame } from "@/components/gam
 import { SlotMachineGame, MegaJackpotSlot } from "@/components/games/slot-games";
 import { ToastManager } from "@/components/toast-notification";
 import { BalanceDisplay } from "@/components/balance-display";
+import { CoinFlipGame } from "@/components/games/coin-flip";
+import { DiceRollGame } from "@/components/games/dice-roll";
+import { HighLowCardGame } from "@/components/games/card-games";
 
 interface User {
   id: number;
@@ -366,17 +369,19 @@ export default function TashanWinMain() {
         <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
           <button
             onClick={() => openGame('aviator')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+            className="bg-gradient-to-br from-blue-900 to-blue-700 p-3 rounded-lg text-left border border-blue-600 hover:scale-105 transition-all duration-300"
           >
-            <div className="text-[#D4AF37] text-xs mb-1">Aviator</div>
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">✈️ Aviator</div>
             <div className="text-white text-xs">Crash multiplier game</div>
+            <div className="text-green-400 text-xs mt-1">Live players: 234</div>
           </button>
           <button
             onClick={() => openGame('jetx')}
-            className="bg-[#2a2a2a] p-3 rounded-lg text-left"
+            className="bg-gradient-to-br from-purple-900 to-purple-700 p-3 rounded-lg text-left border border-purple-600 hover:scale-105 transition-all duration-300"
           >
-            <div className="text-[#D4AF37] text-xs mb-1">JetX</div>
+            <div className="text-[#D4AF37] text-xs mb-1 font-bold">🚀 JetX</div>
             <div className="text-white text-xs">High-flying adventure</div>
+            <div className="text-green-400 text-xs mt-1">Live players: 156</div>
           </button>
         </div>
 

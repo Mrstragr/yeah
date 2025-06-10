@@ -1,5 +1,24 @@
 import { useState, useEffect } from "react";
 
+const NumberBall = ({ number, isSelected, isWinning, delay = 0 }: { 
+  number: number; 
+  isSelected?: boolean; 
+  isWinning?: boolean; 
+  delay?: number;
+}) => (
+  <div 
+    className={`
+      w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm
+      transition-all duration-500 transform hover:scale-110 cursor-pointer
+      ${isSelected ? 'bg-[#D4AF37] scale-110 shadow-lg' : 'bg-[#2a2a2a] hover:bg-[#3a3a3a]'}
+      ${isWinning ? 'animate-bounce bg-green-500 shadow-lg' : ''}
+    `}
+    style={{ animationDelay: `${delay}ms` }}
+  >
+    {number}
+  </div>
+);
+
 interface LotteryGameProps {
   title: string;
   onPlay: (betAmount: number) => void;
