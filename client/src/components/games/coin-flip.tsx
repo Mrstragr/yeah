@@ -65,29 +65,70 @@ export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
     const isHeads = isFlipping ? flipCount % 2 === 0 : result === 'heads';
     
     return (
-      <div className="relative">
-        <div 
-          className={`
-            w-32 h-32 rounded-full border-4 border-[#D4AF37] flex items-center justify-center
-            transition-all duration-100 transform
-            ${isFlipping ? 'animate-spin' : 'hover:scale-105'}
-            ${isHeads ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' : 'bg-gradient-to-br from-gray-300 to-gray-500'}
-            shadow-2xl
-          `}
-          style={{
-            boxShadow: '0 0 30px rgba(212, 175, 55, 0.5)',
-          }}
-        >
-          <div className="text-4xl font-bold text-white">
-            {isHeads ? '👑' : '🦅'}
-          </div>
-        </div>
-        
+      <div className="relative flex items-center justify-center">
+        {/* Particle effects during flip */}
         {isFlipping && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-36 h-36 border-4 border-[#D4AF37] rounded-full animate-ping opacity-30"></div>
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-[#D4AF37] rounded-full opacity-70 animate-particle-float"
+                style={{
+                  left: `${50 + (Math.random() - 0.5) * 200}px`,
+                  top: `${50 + (Math.random() - 0.5) * 200}px`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${2 + Math.random() * 2}s`
+                }}
+              />
+            ))}
           </div>
         )}
+        
+        {/* Main coin with 3D effect */}
+        <div 
+          className={`
+            relative w-40 h-40 rounded-full border-8 border-[#D4AF37] flex items-center justify-center
+            transition-all duration-150 transform-gpu perspective-1000
+            ${isFlipping ? 'animate-coin-flip' : 'hover:scale-110 hover:rotate-12'}
+            ${isHeads ? 'bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600' : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500'}
+            shadow-2xl
+            before:absolute before:inset-2 before:rounded-full before:bg-gradient-to-tr before:from-white/30 before:to-transparent
+            after:absolute after:inset-4 after:rounded-full after:bg-gradient-to-br after:from-transparent after:to-black/20
+          `}
+          style={{
+            boxShadow: isFlipping 
+              ? '0 0 60px rgba(212, 175, 55, 0.8), inset 0 4px 20px rgba(255, 255, 255, 0.3)' 
+              : '0 0 40px rgba(212, 175, 55, 0.6), inset 0 4px 15px rgba(255, 255, 255, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3)',
+            transform: isFlipping ? `rotateY(${flipCount * 180}deg)` : 'rotateY(0deg)',
+          }}
+        >
+          {/* Coin face content */}
+          <div className="relative z-10 text-center">
+            <div className="text-6xl mb-2 drop-shadow-lg filter">
+              {isHeads ? '👑' : '🦅'}
+            </div>
+            <div className="text-sm font-bold text-white drop-shadow-md">
+              {isHeads ? 'HEADS' : 'TAILS'}
+            </div>
+          </div>
+          
+          {/* Animated ring effects */}
+          {isFlipping && (
+            <>
+              <div className="absolute inset-0 rounded-full border-4 border-[#D4AF37] animate-ping opacity-40"></div>
+              <div className="absolute inset-4 rounded-full border-2 border-yellow-300 animate-pulse opacity-60"></div>
+            </>
+          )}
+        </div>
+        
+        {/* Glow effect */}
+        <div className={`
+          absolute inset-0 rounded-full transition-all duration-300
+          ${isFlipping ? 'animate-glow-pulse' : ''}
+        `} />
+        
+        {/* Ground shadow */}
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-32 h-8 bg-black/20 rounded-full blur-md"></div>
       </div>
     );
   };

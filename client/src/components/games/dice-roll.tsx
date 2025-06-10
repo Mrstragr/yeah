@@ -93,32 +93,73 @@ export function DiceRollGame({ title, onPlay, onClose }: DiceRollProps) {
     };
 
     return (
-      <div 
-        className={`
-          w-16 h-16 bg-white border-2 border-gray-300 rounded-lg shadow-lg
-          grid grid-cols-3 gap-1 p-2 transition-all duration-100
-          ${isRolling ? 'animate-bounce' : 'hover:scale-105'}
-        `}
-        style={{
-          animationDelay: `${index * 100}ms`,
-          transform: isRolling ? `rotate(${rollAnimation * 90}deg)` : 'rotate(0deg)'
-        }}
-      >
-        {Array.from({ length: 9 }, (_, i) => {
-          const row = Math.floor(i / 3);
-          const col = i % 3;
-          const shouldShowDot = dots[value as keyof typeof dots]?.some(([r, c]) => r === row && c === col);
+      <div className="relative">
+        {/* Particle effects during roll */}
+        {isRolling && (
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-white rounded-full opacity-70 animate-particle-float"
+                style={{
+                  left: `${Math.random() * 60}px`,
+                  top: `${Math.random() * 60}px`,
+                  animationDelay: `${Math.random() * 1}s`,
+                  animationDuration: `${1 + Math.random()}s`
+                }}
+              />
+            ))}
+          </div>
+        )}
+        
+        <div 
+          className={`
+            relative w-20 h-20 rounded-2xl shadow-2xl
+            grid grid-cols-3 gap-1 p-3 transition-all duration-150 transform-gpu perspective-1000
+            ${isRolling ? 'animate-dice-roll' : 'hover:scale-110 hover:rotate-6'}
+            bg-gradient-to-br from-white via-gray-50 to-gray-200
+            border-4 border-gray-300
+            before:absolute before:inset-1 before:rounded-xl before:bg-gradient-to-tr before:from-white/40 before:to-transparent
+            after:absolute after:inset-2 after:rounded-lg after:bg-gradient-to-br after:from-transparent after:to-black/10
+          `}
+          style={{
+            animationDelay: `${index * 150}ms`,
+            transform: isRolling ? 
+              `rotate3d(${Math.sin(rollAnimation)}, ${Math.cos(rollAnimation)}, 1, ${rollAnimation * 45}deg) scale(1.1)` : 
+              'rotate3d(0, 0, 1, 0deg) scale(1)',
+            boxShadow: isRolling 
+              ? '0 0 30px rgba(255, 255, 255, 0.8), 0 10px 40px rgba(0, 0, 0, 0.4)' 
+              : '0 8px 25px rgba(0, 0, 0, 0.3), inset 0 2px 8px rgba(255, 255, 255, 0.6)'
+          }}
+        >
+          {Array.from({ length: 9 }, (_, i) => {
+            const row = Math.floor(i / 3);
+            const col = i % 3;
+            const shouldShowDot = dots[value as keyof typeof dots]?.some(([r, c]) => r === row && c === col);
+            
+            return (
+              <div
+                key={i}
+                className={`
+                  relative w-3 h-3 rounded-full transition-all duration-300 z-10
+                  ${shouldShowDot ? 'bg-gradient-to-br from-gray-800 to-black shadow-inner' : 'bg-transparent'}
+                  ${shouldShowDot && isRolling ? 'animate-pulse scale-110' : ''}
+                `}
+                style={{
+                  boxShadow: shouldShowDot ? 'inset 0 2px 4px rgba(0, 0, 0, 0.6)' : 'none'
+                }}
+              />
+            );
+          })}
           
-          return (
-            <div
-              key={i}
-              className={`
-                w-2 h-2 rounded-full transition-all duration-200
-                ${shouldShowDot ? 'bg-black' : 'bg-transparent'}
-              `}
-            />
-          );
-        })}
+          {/* Glow ring when rolling */}
+          {isRolling && (
+            <div className="absolute inset-0 rounded-2xl border-2 border-green-400 animate-ping opacity-60"></div>
+          )}
+        </div>
+        
+        {/* Ground shadow */}
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-4 bg-black/20 rounded-full blur-sm"></div>
       </div>
     );
   };
