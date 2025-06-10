@@ -226,7 +226,7 @@ export function RealCashSystem() {
 
             {/* Promo Code */}
             <div>
-              <Label htmlFor="promo-code" className="font-gaming text-gray-300">
+              <Label htmlFor="promo-code" className="font-gaming text-casino-text-secondary">
                 Promo Code (Optional)
               </Label>
               <Input
@@ -298,7 +298,7 @@ export function RealCashSystem() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-casino-text-secondary">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-green-400" />
@@ -339,8 +339,8 @@ export function RealCashSystem() {
         <CardContent>
           {transactions.length === 0 ? (
             <div className="text-center py-8">
-              <TrendingUp className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-              <p className="text-gray-400 font-exo">No transactions yet</p>
+              <TrendingUp className="w-12 h-12 text-casino-text-muted mx-auto mb-2" />
+              <p className="text-casino-text-muted font-exo">No transactions yet</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -359,7 +359,7 @@ export function RealCashSystem() {
                       <p className="font-exo font-medium text-white capitalize">
                         {transaction.type} - {transaction.description}
                       </p>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-casino-text-muted">
                         {new Date(transaction.createdAt).toLocaleDateString("en-IN")}
                       </p>
                     </div>
