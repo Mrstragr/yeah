@@ -171,7 +171,9 @@ export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
       if (coinResult === betSide) {
         const prize = betAmount * 1.95; // 95% payout
         setWinAmount(prize);
+        setShowWinCelebration(true);
         onPlay(prize);
+        setTimeout(() => setShowWinCelebration(false), 4000);
       } else {
         setWinAmount(0);
       }
@@ -267,81 +269,100 @@ export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      <div className="bg-[#1e1e1e] p-3 flex items-center justify-between">
-        <button onClick={onClose} className="text-white text-lg">←</button>
-        <h1 className="text-white font-medium">{title}</h1>
-        <div className="w-6"></div>
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2a] to-[#2a1a0a] z-50 flex flex-col">
+      {/* Enhanced Background */}
+      <div className="fixed inset-0 pointer-events-none opacity-20">
+        <div className="absolute top-16 left-16 w-48 h-48 bg-purple-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-24 right-24 w-36 h-36 bg-yellow-400 rounded-full blur-2xl animate-bounce"></div>
+        <div className="absolute top-1/3 left-1/2 w-28 h-28 bg-blue-400 rounded-full blur-xl animate-ping"></div>
       </div>
 
-      <div className="flex-1 bg-gradient-to-b from-purple-900 via-blue-900 to-purple-900 p-4 flex flex-col">
-        {/* Game Status */}
-        <div className="text-center mb-6">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-[#1e1e1e] via-[#2a2a3a] to-[#1e1e1e] p-4 flex items-center justify-between shadow-2xl border-b border-purple-500/20">
+        <button 
+          onClick={onClose} 
+          className="text-white text-xl hover:text-purple-400 transition-all duration-300 hover:scale-110 transform"
+        >
+          ←
+        </button>
+        <h1 className="text-white font-bold text-lg bg-gradient-to-r from-white via-purple-400 to-white bg-clip-text text-transparent">
+          {title}
+        </h1>
+        <div className="text-yellow-400 text-lg font-bold">₹{betAmount}</div>
+      </div>
+
+      <div className="flex-1 bg-gradient-to-br from-purple-900/50 via-blue-900/50 to-purple-900/50 p-6 flex flex-col">
+        {/* Enhanced Game Status */}
+        <div className="text-center mb-8">
           {gamePhase === 'betting' && (
-            <div className="text-white text-xl font-bold animate-pulse">
-              Choose Heads or Tails
+            <div className="text-white text-3xl font-bold win-glow animate-pulse">
+              🪙 Choose Heads or Tails 🪙
             </div>
           )}
           {gamePhase === 'flipping' && (
-            <div className="text-[#D4AF37] text-xl font-bold">
-              Flipping...
+            <div className="text-[#D4AF37] text-3xl font-bold win-glow">
+              ✨ Flipping... ✨
             </div>
           )}
-          {gamePhase === 'result' && (
-            <div className={`text-xl font-bold ${winAmount > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {winAmount > 0 ? `🎉 You Won ₹${winAmount.toFixed(2)}!` : 'Better Luck Next Time!'}
+          {gamePhase === 'result' && !showWinCelebration && (
+            <div className={`text-3xl font-bold ${winAmount > 0 ? 'text-green-400 win-glow' : 'text-red-400'}`}>
+              {winAmount > 0 ? `🎉 You Won ₹${winAmount.toFixed(2)}! 🎉` : '💫 Better Luck Next Time! 💫'}
             </div>
           )}
         </div>
 
-        {/* Coin */}
-        <div className="flex-1 flex items-center justify-center mb-6">
-          <CoinComponent />
+        {/* Enhanced 3D Coin */}
+        <div className="flex-1 flex items-center justify-center mb-8">
+          <EnhancedCoin3D 
+            isFlipping={isFlipping} 
+            result={result} 
+            flipCount={flipCount} 
+          />
         </div>
 
         {/* Betting Options */}
         {gamePhase === 'betting' && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <button
                 onClick={() => setBetSide('heads')}
-                className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                className={`p-6 rounded-2xl border-3 transition-all duration-300 transform ${
                   betSide === 'heads' 
-                    ? 'bg-[#D4AF37] border-[#D4AF37] text-black scale-105' 
-                    : 'bg-[#2a2a2a] border-gray-600 text-white hover:border-[#D4AF37]'
+                    ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 border-yellow-300 text-black scale-105 shadow-2xl card-glow' 
+                    : 'bg-gradient-to-br from-[#2a2a2a] via-[#3a3a3a] to-[#2a2a2a] border-gray-600 text-white hover:border-yellow-400 hover:scale-105'
                 }`}
               >
-                <div className="text-3xl mb-2">👑</div>
-                <div className="font-bold">HEADS</div>
-                <div className="text-sm opacity-80">1.95x payout</div>
+                <div className="text-5xl mb-3">👑</div>
+                <div className="font-bold text-xl mb-2">HEADS</div>
+                <div className="text-lg opacity-80">1.95x payout</div>
               </button>
               
               <button
                 onClick={() => setBetSide('tails')}
-                className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                className={`p-6 rounded-2xl border-3 transition-all duration-300 transform ${
                   betSide === 'tails' 
-                    ? 'bg-[#D4AF37] border-[#D4AF37] text-black scale-105' 
-                    : 'bg-[#2a2a2a] border-gray-600 text-white hover:border-[#D4AF37]'
+                    ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 border-yellow-300 text-black scale-105 shadow-2xl card-glow' 
+                    : 'bg-gradient-to-br from-[#2a2a2a] via-[#3a3a3a] to-[#2a2a2a] border-gray-600 text-white hover:border-yellow-400 hover:scale-105'
                 }`}
               >
-                <div className="text-3xl mb-2">🦅</div>
-                <div className="font-bold">TAILS</div>
-                <div className="text-sm opacity-80">1.95x payout</div>
+                <div className="text-5xl mb-3">🦅</div>
+                <div className="font-bold text-xl mb-2">TAILS</div>
+                <div className="text-lg opacity-80">1.95x payout</div>
               </button>
             </div>
 
-            {/* Bet Amount */}
-            <div className="bg-[#1e1e1e] rounded-lg p-4">
-              <div className="text-white text-sm mb-3 text-center">Bet Amount</div>
-              <div className="grid grid-cols-4 gap-2 mb-4">
+            {/* Enhanced Bet Amount */}
+            <div className="bg-gradient-to-br from-[#1e1e1e] via-[#2a2a2a] to-[#1e1e1e] rounded-2xl p-6 border border-gray-700 shadow-2xl">
+              <div className="text-white text-lg mb-4 text-center font-bold">💰 Bet Amount 💰</div>
+              <div className="grid grid-cols-4 gap-3 mb-6">
                 {[10, 50, 100, 500].map((amount) => (
                   <button
                     key={amount}
                     onClick={() => setBetAmount(amount)}
-                    className={`p-2 rounded text-center transition-all duration-200 ${
+                    className={`p-3 rounded-xl text-center transition-all duration-300 font-bold ${
                       betAmount === amount 
-                        ? 'bg-[#D4AF37] text-black scale-105' 
-                        : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
+                        ? 'bg-gradient-to-r from-[#D4AF37] to-[#DAA520] text-black shadow-lg transform scale-105 card-glow' 
+                        : 'bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] text-white hover:from-[#3a3a3a] hover:to-[#4a4a4a] hover:scale-105'
                     }`}
                   >
                     ₹{amount}
@@ -352,34 +373,41 @@ export function CoinFlipGame({ title, onPlay, onClose }: CoinFlipProps) {
               <button
                 onClick={flipCoin}
                 disabled={!betSide}
-                className={`w-full py-4 rounded-lg font-bold text-lg transition-all duration-300 ${
+                className={`w-full py-4 rounded-xl font-bold text-xl transition-all duration-300 transform ${
                   betSide 
-                    ? 'bg-[#D4AF37] text-black hover:bg-yellow-500 transform hover:scale-105' 
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#DAA520] text-black hover:from-yellow-500 hover:to-yellow-600 hover:scale-105 shadow-lg' 
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                 }`}
               >
-                {betSide ? `FLIP COIN - ₹${betAmount}` : 'SELECT HEADS OR TAILS'}
+                {betSide ? `🪙 FLIP COIN - ₹${betAmount} 🪙` : 'SELECT HEADS OR TAILS'}
               </button>
             </div>
           </div>
         )}
 
-        {/* Result Display */}
-        {gamePhase === 'result' && (
-          <div className="text-center space-y-4">
-            <div className="text-white text-lg">
-              Result: <span className="text-[#D4AF37] font-bold uppercase">{result}</span>
-            </div>
-            <div className="text-white text-lg">
-              Your choice: <span className="text-[#D4AF37] font-bold uppercase">{betSide}</span>
-            </div>
-            {winAmount > 0 && (
-              <div className="bg-green-600 p-4 rounded-lg animate-pulse">
-                <div className="text-white text-xl font-bold">Congratulations!</div>
-                <div className="text-white text-lg">You won ₹{winAmount.toFixed(2)}</div>
+        {/* Enhanced Result Display */}
+        {gamePhase === 'result' && !showWinCelebration && (
+          <div className="text-center space-y-6">
+            <div className="bg-gradient-to-br from-[#1e1e1e] via-[#2a2a2a] to-[#1e1e1e] rounded-2xl p-6 border border-gray-700 shadow-2xl">
+              <div className="text-white text-2xl mb-4">
+                Result: <span className="text-[#D4AF37] font-bold uppercase win-glow">{result}</span>
               </div>
-            )}
+              <div className="text-white text-2xl mb-4">
+                Your choice: <span className="text-[#D4AF37] font-bold uppercase">{betSide}</span>
+              </div>
+              {winAmount > 0 && (
+                <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl animate-pulse shadow-lg">
+                  <div className="text-white text-3xl font-bold mb-2">🎉 Congratulations! 🎉</div>
+                  <div className="text-white text-2xl font-bold">You won ₹{winAmount.toFixed(2)}</div>
+                </div>
+              )}
+            </div>
           </div>
+        )}
+
+        {/* Win Celebration Overlay */}
+        {showWinCelebration && (
+          <WinCelebration isVisible={showWinCelebration} winAmount={winAmount} />
         )}
       </div>
     </div>
