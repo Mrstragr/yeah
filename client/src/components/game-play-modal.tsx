@@ -26,7 +26,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
@@ -88,7 +88,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
       return;
     }
 
-    const userBalance = parseFloat((user as any)?.walletBalance || "0");
+    const userBalance = parseFloat(user?.walletBalance || "0");
     if (userBalance < amount) {
       toast({
         title: "Insufficient Balance",
@@ -101,7 +101,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
     setIsPlaying(true);
     playGameMutation.mutate({
       gameId: game.id,
-      userId: (user as any).id,
+      userId: user.id,
       betAmount: betAmount,
     });
   };
@@ -112,7 +112,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
   if (game.title === "Dice Roll") {
     return (
       <DiceRoll 
-        userBalance={(user as any)?.walletBalance || "0"}
+        userBalance={user?.walletBalance || "0"}
         onBet={async (amount: number, gameData: any) => {
           await new Promise((resolve) => {
             onWin(amount.toString());
@@ -127,7 +127,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
   if (game.title === "Coin Flip") {
     return (
       <CoinFlip 
-        userBalance={(user as any)?.walletBalance || "0"}
+        userBalance={user?.walletBalance || "0"}
         onBet={async (amount: number, gameData: any) => {
           await new Promise((resolve) => {
             onWin(amount.toString());
@@ -161,7 +161,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
                 <span className="text-gray-300 font-exo">Your Balance:</span>
               </div>
               <Badge variant="secondary" className="bg-green-600 text-white font-gaming">
-                ₹{parseFloat((user as any)?.walletBalance || "0").toLocaleString()}
+                ₹{parseFloat(user?.walletBalance || "0").toLocaleString()}
               </Badge>
             </div>
           </div>
@@ -177,12 +177,12 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
               value={betAmount}
               onChange={(e) => setBetAmount(e.target.value)}
               min="10"
-              max={parseFloat((user as any)?.walletBalance || "0")}
+              max={parseFloat(user?.walletBalance || "0")}
               className="bg-gaming-surface border-gaming-border-light text-white font-gaming"
               disabled={isPlaying}
             />
             <p className="text-xs text-gray-400 font-exo">
-              Min: ₹10 | Max: ₹{(user as any)?.walletBalance || "0"}
+              Min: ₹10 | Max: ₹{user?.walletBalance || "0"}
             </p>
           </div>
 
@@ -194,7 +194,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
                 variant="outline"
                 size="sm"
                 onClick={() => setBetAmount(amount)}
-                disabled={isPlaying || parseFloat((user as any)?.walletBalance || "0") < parseFloat(amount)}
+                disabled={isPlaying || parseFloat(user?.walletBalance || "0") < parseFloat(amount)}
                 className="border-gaming-border-light text-gaming-gold hover:bg-gaming-accent"
               >
                 ₹{amount}
@@ -215,7 +215,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
           </div>
 
           {/* Insufficient Balance Warning */}
-          {user && parseFloat((user as any).walletBalance || "0") < parseFloat(betAmount) && (
+          {user && parseFloat(user.walletBalance || "0") < parseFloat(betAmount) && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
               <div className="flex items-center">
                 <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
@@ -238,7 +238,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
           </Button>
           <Button
             onClick={handlePlay}
-            disabled={isPlaying || !user || parseFloat((user as any)?.walletBalance || "0") < parseFloat(betAmount)}
+            disabled={isPlaying || !user || parseFloat(user?.walletBalance || "0") < parseFloat(betAmount)}
             className="bg-gradient-to-r from-gaming-gold to-yellow-500 text-black font-gaming hover:from-yellow-500 hover:to-gaming-gold"
           >
             {isPlaying ? "Playing..." : `Play for ₹${betAmount}`}
