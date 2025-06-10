@@ -367,6 +367,17 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.bonusBalance = newBalance;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      return user;
+    }
+    return undefined;
+  }
+
   async getUserWalletTransactions(userId: number, limit: number = 20): Promise<WalletTransaction[]> {
     return Array.from(this.walletTransactions.values())
       .filter(transaction => transaction.userId === userId)
@@ -640,4 +651,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
