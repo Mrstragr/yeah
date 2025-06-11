@@ -323,10 +323,10 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
           {/* Insufficient Balance Warning */}
           {user && parseFloat(user.walletBalance || "0") < parseFloat(betAmount) && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center">
-                <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
-                <p className="text-red-400 text-sm font-exo">
+                <AlertCircle className="w-5 h-5 text-red-300 mr-3" />
+                <p className="text-red-200 text-sm font-bold">
                   Insufficient wallet balance. Please add money to continue.
                 </p>
               </div>
@@ -334,11 +334,11 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
           )}
         </div>
 
-        <DialogFooter className="flex gap-3">
+        <DialogFooter className="flex gap-4 pt-6">
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-gaming-border-light text-gray-300 hover:bg-gaming-accent/50"
+            className="border-slate-400 text-slate-900 hover:bg-slate-200 font-bold px-6"
             disabled={isPlaying}
           >
             Cancel
@@ -346,9 +346,9 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
           <Button
             onClick={handlePlay}
             disabled={isPlaying || !user || parseFloat(user?.walletBalance || "0") < parseFloat(betAmount)}
-            className="bg-gradient-to-r from-gaming-gold to-yellow-500 text-black font-gaming hover:from-yellow-500 hover:to-gaming-gold"
+            className="casino-button px-8 py-3 text-lg"
           >
-            {isPlaying ? "Playing..." : `Play for ₹${betAmount}`}
+            {isPlaying ? "🎮 Playing..." : `🎲 Play for ₹${betAmount}`}
           </Button>
         </DialogFooter>
       </DialogContent>

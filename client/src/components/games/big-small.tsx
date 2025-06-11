@@ -122,16 +122,45 @@ export function BigSmall({ userBalance, onBet }: BigSmallProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-green-600 to-blue-700 text-white">
+      {/* Professional 3D Game Display */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-green-900 to-blue-900 text-white shadow-2xl border border-green-700/50">
+        <CardHeader className="bg-gradient-to-r from-green-800/30 to-blue-800/30 backdrop-blur-sm">
+          <CardTitle className="text-center text-4xl font-black flex items-center justify-center gap-3 neon-text">
+            🎲 BIG SMALL <span className="text-lg text-green-300 font-bold">THREE DICE</span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-8">
-          <div className="text-center space-y-6">
-            {/* Dice Display */}
-            <div className="flex justify-center gap-4">
+          <div className="text-center space-y-8">
+            {/* Enhanced 3D Dice Display */}
+            <div className="flex justify-center gap-6 h-32 items-center relative">
+              {/* Particle Effects */}
+              {isRolling && (
+                <div className="absolute inset-0 overflow-hidden">
+                  {[...Array(15)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 bg-green-400 rounded-full animate-ping"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: `${20 + Math.random() * 60}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${0.5 + Math.random()}s`
+                      }}
+                    ></div>
+                  ))}
+                </div>
+              )}
               {diceResults.map((die, index) => (
-                <div key={index} className={`p-4 bg-white rounded-lg shadow-2xl text-gray-800 transition-transform duration-200 ${
-                  isRolling ? 'animate-bounce' : ''
-                }`}>
+                <div 
+                  key={index} 
+                  className={`p-6 bg-gradient-to-br from-white to-gray-100 rounded-xl shadow-2xl text-gray-900 transition-all duration-300 transform-gpu ${
+                    isRolling ? 'animate-bounce scale-110' : 'scale-100'
+                  } border-2 border-gray-300`}
+                  style={{
+                    transform: isRolling ? `scale(1.2) rotate(${Math.random() * 360}deg)` : 'scale(1)',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.5)'
+                  }}
+                >
                   {getDiceIcon(die)}
                 </div>
               ))}
