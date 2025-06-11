@@ -12,6 +12,7 @@ import type { Game } from "@shared/schema";
 import type { GamePlayResult, User } from "@/lib/types";
 import DiceRoll from "@/components/games/dice-roll";
 import CoinFlip from "@/components/games/coin-flip";
+import Aviator from "@/components/games/aviator";
 
 interface GamePlayModalProps {
   isOpen: boolean;
@@ -127,6 +128,21 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
   if (game.title === "Coin Flip") {
     return (
       <CoinFlip 
+        userBalance={user?.walletBalance || "0"}
+        onBet={async (amount: number, gameData: any) => {
+          await new Promise((resolve) => {
+            onWin(amount.toString());
+            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+            resolve(undefined);
+          });
+        }}
+      />
+    );
+  }
+
+  if (game.title === "Aviator") {
+    return (
+      <Aviator 
         userBalance={user?.walletBalance || "0"}
         onBet={async (amount: number, gameData: any) => {
           await new Promise((resolve) => {

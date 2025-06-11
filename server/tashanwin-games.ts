@@ -508,5 +508,15 @@ export const tashanwinGames: InsertGame[] = [
     imageUrl: "/images/deepsea.png",
     rating: "4.4",
     jackpot: "600000.00"
+  },
+
+  // Crash Games
+  {
+    title: "Aviator",
+    description: "Watch the plane fly and cash out before it crashes! Popular crash-style multiplier game.",
+    category: "crash",
+    imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+    rating: "4.9",
+    jackpot: "5000000.00"
   }
 ];

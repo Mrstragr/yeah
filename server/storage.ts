@@ -122,6 +122,7 @@ export class MemStorage implements IStorage {
       { name: "PVC", slug: "pvc", description: "Premium Live Casino", icon: "fas fa-video", color: "from-pink-500 to-purple-600" },
       { name: "Rummy", slug: "rummy", description: "Card Games", icon: "fas fa-layer-group", color: "from-teal-500 to-green-600" },
       { name: "Fishing", slug: "fishing", description: "Arcade", icon: "fas fa-fish", color: "from-cyan-500 to-blue-600" },
+      { name: "Crash", slug: "crash", description: "Multiplier Games", icon: "fas fa-plane", color: "from-red-500 to-orange-600" },
     ];
 
     categories.forEach(category => this.createGameCategory(category));
