@@ -294,7 +294,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
                 <Button 
                   onClick={placeBet}
                   disabled={gamePhase !== 'waiting' || betAmount > parseFloat(userBalance)}
-                  className="w-full"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold"
                 >
                   Bet ${betAmount}
                 </Button>
@@ -302,7 +302,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
                 <Button 
                   onClick={cashOut}
                   disabled={hasCashedOut || gamePhase !== 'flying'}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
                 >
                   Cash Out ${(betAmount * multiplier).toFixed(2)}
                 </Button>
