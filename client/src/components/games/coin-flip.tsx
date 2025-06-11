@@ -150,7 +150,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
           <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Bet Amount */}
             <div>
-              <label className="block text-sm font-medium mb-2">Bet Amount (₹)</label>
+              <label className="block text-sm font-medium mb-2 text-slate-900">Bet Amount (₹)</label>
               <Input
                 type="number"
                 min="1"
@@ -179,7 +179,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
 
             {/* Side Selection */}
             <div>
-              <label className="block text-sm font-medium mb-3">Choose Side</label>
+              <label className="block text-sm font-medium mb-3 text-slate-900">Choose Side</label>
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant={selectedSide === "heads" ? "default" : "outline"}

@@ -252,7 +252,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
           </CardHeader>
           <CardContent className="p-6 pt-0 space-y-4 bg-[#edebebbf]">
             <div>
-              <label className="text-sm font-medium mb-2 block">Bet Amount</label>
+              <label className="text-sm font-medium mb-2 block text-slate-900">Bet Amount</label>
               <Input
                 type="number"
                 value={betAmount}
@@ -278,7 +278,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Auto Cash Out</label>
+              <label className="text-sm font-medium mb-2 block text-slate-900">Auto Cash Out</label>
               <Input
                 type="number"
                 placeholder="e.g., 2.00"

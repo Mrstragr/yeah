@@ -177,7 +177,7 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
           <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Bet Amount */}
             <div>
-              <label className="block text-sm font-medium mb-2">Bet Amount (₹)</label>
+              <label className="block text-sm font-medium mb-2 text-slate-900">Bet Amount (₹)</label>
               <Input
                 type="number"
                 min="1"
@@ -234,7 +234,7 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
             {/* Number Selection */}
             {betType === "numbers" && (
               <div>
-                <label className="block text-sm font-medium mb-3">
+                <label className="block text-sm font-medium mb-3 text-slate-900">
                   Select Numbers ({selectedNumbers.length}/6)
                 </label>
                 <div className="grid grid-cols-3 gap-3">
