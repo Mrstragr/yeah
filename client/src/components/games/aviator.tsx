@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Plane, TrendingUp, TrendingDown } from "lucide-react";
 
 interface AviatorProps {
   userBalance: string;
@@ -17,13 +19,18 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
   const [lastResult, setLastResult] = useState<{crashed: boolean, multiplier: number, payout: number} | null>(null);
   const [gameHistory, setGameHistory] = useState<number[]>([2.34, 1.56, 8.92, 1.03, 4.67]);
   const [autoCashOut, setAutoCashOut] = useState<number | null>(null);
+  const [gamePhase, setGamePhase] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
+  const [countdown, setCountdown] = useState(0);
+  const [planePosition, setPlanePosition] = useState({ x: 10, y: 80 });
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const gameStartTimeRef = useRef<number>(0);
+  const crashPointRef = useRef<number>(0);
 
   const quickAmounts = [50, 100, 250, 500, 1000, 2500];
 
   useEffect(() => {
+    startCountdown();
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -31,306 +38,298 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
     };
   }, []);
 
-  const startGame = async () => {
-    if (isFlying || betAmount > parseFloat(userBalance)) return;
+  const startCountdown = () => {
+    setGamePhase('waiting');
+    setCountdown(5);
+    const countInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countInterval);
+          startGame();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
+  const startGame = async () => {
+    setGamePhase('flying');
     setIsFlying(true);
-    setHasPlaced(true);
-    setHasCashedOut(false);
     setMultiplier(1.00);
+    setHasCashedOut(false);
     setLastResult(null);
+    setPlanePosition({ x: 10, y: 80 });
     gameStartTimeRef.current = Date.now();
 
-    // Generate crash point (1.00 to 10.00 with weighted probability)
+    // Generate crash point (1.00 to 50.00 with weighted probability)
     const random = Math.random();
     let crashPoint: number;
     
-    if (random < 0.4) {
-      // 40% chance of crash between 1.00-2.00
+    if (random < 0.5) {
       crashPoint = 1.00 + Math.random() * 1.00;
-    } else if (random < 0.7) {
-      // 30% chance of crash between 2.00-5.00
+    } else if (random < 0.75) {
       crashPoint = 2.00 + Math.random() * 3.00;
-    } else if (random < 0.9) {
-      // 20% chance of crash between 5.00-10.00
-      crashPoint = 5.00 + Math.random() * 5.00;
+    } else if (random < 0.92) {
+      crashPoint = 5.00 + Math.random() * 10.00;
     } else {
-      // 10% chance of crash between 10.00-50.00
-      crashPoint = 10.00 + Math.random() * 40.00;
+      crashPoint = 15.00 + Math.random() * 35.00;
     }
 
+    crashPointRef.current = crashPoint;
+
     intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - gameStartTimeRef.current) / 1000;
-      const currentMultiplier = 1.00 + (elapsed * 0.5); // Increases by 0.5x per second
+      const elapsed = Date.now() - gameStartTimeRef.current;
+      const currentMultiplier = 1 + (elapsed / 1000) * 0.1;
       
       setMultiplier(currentMultiplier);
+      setPlanePosition(prev => ({
+        x: Math.min(90, prev.x + 0.5),
+        y: Math.max(20, prev.y - 0.3)
+      }));
 
-      // Auto cash out if enabled
-      if (autoCashOut && currentMultiplier >= autoCashOut && !hasCashedOut) {
-        cashOut(currentMultiplier);
-        return;
+      // Auto cash out
+      if (autoCashOut && currentMultiplier >= autoCashOut && hasPlaced && !hasCashedOut) {
+        cashOut();
       }
 
       // Check if crashed
       if (currentMultiplier >= crashPoint) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-        
-        setIsFlying(false);
-        setHasPlaced(false);
-        
-        const crashed = !hasCashedOut;
-        const finalPayout = crashed ? 0 : betAmount * multiplier;
-        
-        setLastResult({
-          crashed,
-          multiplier: crashPoint,
-          payout: finalPayout
-        });
-
-        // Update game history
-        setGameHistory(prev => [crashPoint, ...prev.slice(0, 4)]);
-
-        // Call onBet with result
-        onBet(crashed ? -betAmount : finalPayout - betAmount, {
-          gameType: 'aviator',
-          multiplier: crashed ? crashPoint : multiplier,
-          crashed,
-          betAmount
-        });
+        crash();
       }
-    }, 100); // Update every 100ms for smooth animation
+    }, 50);
   };
 
-  const cashOut = async (currentMultiplier?: number) => {
-    if (!isFlying || hasCashedOut) return;
+  const placeBet = async () => {
+    if (gamePhase !== 'waiting' || betAmount > parseFloat(userBalance)) return;
+    
+    setHasPlaced(true);
+    await onBet(betAmount, {
+      type: 'aviator',
+      betAmount,
+      multiplier: null,
+      result: 'pending'
+    });
+  };
 
-    const finalMultiplier = currentMultiplier || multiplier;
+  const cashOut = async () => {
+    if (!hasPlaced || hasCashedOut || gamePhase !== 'flying') return;
+
     setHasCashedOut(true);
-    
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    setIsFlying(false);
-    setHasPlaced(false);
-    
-    const payout = betAmount * finalMultiplier;
+    const payout = betAmount * multiplier;
     
     setLastResult({
       crashed: false,
-      multiplier: finalMultiplier,
-      payout
+      multiplier: multiplier,
+      payout: payout
     });
 
-    // Call onBet with winnings
-    await onBet(payout - betAmount, {
-      gameType: 'aviator',
-      multiplier: finalMultiplier,
-      crashed: false,
-      betAmount
+    await onBet(betAmount, {
+      type: 'aviator',
+      betAmount,
+      multiplier: multiplier,
+      result: 'win',
+      payout: payout
     });
   };
 
+  const crash = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    setGamePhase('crashed');
+    setIsFlying(false);
+
+    if (hasPlaced && !hasCashedOut) {
+      setLastResult({
+        crashed: true,
+        multiplier: multiplier,
+        payout: 0
+      });
+    }
+
+    // Add to history
+    setGameHistory(prev => [multiplier, ...prev.slice(0, 4)]);
+
+    // Reset for next round
+    setTimeout(() => {
+      setHasPlaced(false);
+      setHasCashedOut(false);
+      startCountdown();
+    }, 3000);
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-2">🛩️ Aviator</h1>
-        <p className="text-gray-300">Watch the plane fly and cash out before it crashes!</p>
-        <div className="mt-2">
-          <Badge variant="secondary" className="bg-green-600 text-white">
-            Balance: ₹{parseFloat(userBalance).toLocaleString()}
-          </Badge>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Game Display */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900 to-purple-900 text-white">
+        <CardContent className="p-6">
+          <div className="relative h-64 mb-4">
+            {/* Background Grid */}
+            <div className="absolute inset-0 opacity-20">
+              <svg width="100%" height="100%" className="text-white">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+            </div>
 
-      {/* Game Area */}
-      <Card className="bg-gradient-to-br from-blue-900 to-purple-900 border-blue-600 min-h-96">
-        <CardContent className="p-8">
-          <div className="relative h-80 bg-gradient-to-t from-green-800 to-blue-400 rounded-lg overflow-hidden">
-            {/* Sky background */}
-            <div className="absolute inset-0 bg-gradient-to-t from-green-400 via-blue-300 to-blue-600"></div>
-            
-            {/* Clouds */}
-            <div className="absolute top-10 left-20 w-16 h-8 bg-white rounded-full opacity-70"></div>
-            <div className="absolute top-16 right-32 w-12 h-6 bg-white rounded-full opacity-50"></div>
-            <div className="absolute top-6 right-16 w-20 h-10 bg-white rounded-full opacity-60"></div>
-            
+            {/* Flight Path */}
+            <svg className="absolute inset-0 w-full h-full">
+              <path
+                d={`M 0 ${256} Q ${planePosition.x * 4} ${planePosition.y * 2.56} ${planePosition.x * 4 + 50} ${planePosition.y * 2.56 - 20}`}
+                stroke="#22d3ee"
+                strokeWidth="3"
+                fill="none"
+                className="opacity-80"
+              />
+            </svg>
+
             {/* Plane */}
-            <div className={`absolute bottom-10 left-10 text-4xl transition-all duration-300 ${isFlying ? 'transform translate-x-96 -translate-y-32' : ''}`}>
-              ✈️
-            </div>
-            
-            {/* Multiplier Display */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`text-6xl font-bold ${isFlying ? 'text-green-400' : 'text-white'} transition-colors`}>
-                {multiplier.toFixed(2)}x
-              </div>
-            </div>
-            
-            {/* Game Status */}
-            <div className="absolute top-4 left-4">
-              {isFlying && (
-                <Badge className="bg-green-600 text-white">
-                  FLYING
-                </Badge>
-              )}
-              {lastResult && (
-                <Badge className={lastResult.crashed ? "bg-red-600" : "bg-green-600"}>
-                  {lastResult.crashed ? "CRASHED" : "CASHED OUT"}
-                </Badge>
-              )}
-            </div>
-            
-            {/* Last Result */}
-            {lastResult && (
-              <div className="absolute bottom-4 left-4 text-white">
-                <div className={`text-2xl font-bold ${lastResult.crashed ? 'text-red-400' : 'text-green-400'}`}>
-                  {lastResult.crashed ? `❌ Crashed at ${lastResult.multiplier.toFixed(2)}x` : `✅ Won ₹${lastResult.payout.toFixed(2)}`}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Betting Panel */}
-        <Card className="bg-gray-800 border-gray-600">
-          <CardHeader>
-            <CardTitle className="text-white">Place Your Bet</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Bet Amount */}
-            <div className="space-y-2">
-              <label className="text-gray-300 text-sm">Bet Amount (₹)</label>
-              <input
-                type="number"
-                value={betAmount}
-                onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                min="1"
-                max={parseFloat(userBalance)}
-                disabled={isFlying}
+            <div 
+              className="absolute transition-all duration-75"
+              style={{ 
+                left: `${planePosition.x}%`, 
+                top: `${planePosition.y}%`,
+                transform: 'translate(-50%, -50%)'
+              }}
+            >
+              <Plane 
+                className={`w-8 h-8 transition-all duration-200 ${
+                  gamePhase === 'crashed' ? 'text-red-500 animate-pulse' : 'text-yellow-400'
+                }`}
+                style={{ transform: 'rotate(-15deg)' }}
               />
             </div>
 
-            {/* Quick Bet Buttons */}
+            {/* Multiplier Display */}
+            <div className="absolute top-4 left-4">
+              <div className={`text-4xl font-bold transition-all duration-200 ${
+                gamePhase === 'crashed' ? 'text-red-500' : 'text-green-400'
+              }`}>
+                {gamePhase === 'waiting' ? (
+                  countdown > 0 ? `${countdown}s` : 'Starting...'
+                ) : (
+                  `${multiplier.toFixed(2)}x`
+                )}
+              </div>
+            </div>
+
+            {/* Game Status */}
+            <div className="absolute top-4 right-4">
+              <Badge variant={gamePhase === 'crashed' ? 'destructive' : 'default'}>
+                {gamePhase === 'waiting' ? 'Waiting' : 
+                 gamePhase === 'flying' ? 'Flying' : 'Crashed'}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Result Display */}
+          {lastResult && (
+            <div className={`text-center py-2 rounded-lg ${
+              lastResult.crashed ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
+            }`}>
+              {lastResult.crashed ? (
+                <span>Crashed at {lastResult.multiplier.toFixed(2)}x - Lost ${betAmount}</span>
+              ) : (
+                <span>Cashed out at {lastResult.multiplier.toFixed(2)}x - Won ${lastResult.payout.toFixed(2)}</span>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Betting Panel */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Place Bet</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Bet Amount</label>
+              <Input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                min="10"
+                max={parseFloat(userBalance)}
+                disabled={gamePhase === 'flying'}
+              />
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               {quickAmounts.map(amount => (
                 <Button
                   key={amount}
-                  variant={betAmount === amount ? 'default' : 'outline'}
-                  className={betAmount === amount ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                  onClick={() => setBetAmount(amount)}
-                  disabled={isFlying}
+                  variant="outline"
                   size="sm"
+                  onClick={() => setBetAmount(amount)}
+                  disabled={gamePhase === 'flying' || amount > parseFloat(userBalance)}
                 >
-                  ₹{amount}
+                  ${amount}
                 </Button>
               ))}
             </div>
 
-            {/* Auto Cash Out */}
-            <div className="space-y-2">
-              <label className="text-gray-300 text-sm">Auto Cash Out (Optional)</label>
-              <input
+            <div>
+              <label className="text-sm font-medium mb-2 block">Auto Cash Out</label>
+              <Input
                 type="number"
-                value={autoCashOut || ''}
-                onChange={(e) => setAutoCashOut(e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="e.g., 2.00"
                 step="0.01"
                 min="1.01"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                disabled={isFlying}
+                value={autoCashOut || ''}
+                onChange={(e) => setAutoCashOut(e.target.value ? parseFloat(e.target.value) : null)}
               />
             </div>
 
-            {/* Action Buttons */}
             <div className="space-y-2">
-              {!isFlying ? (
-                <Button
-                  onClick={startGame}
-                  disabled={betAmount > parseFloat(userBalance) || betAmount < 1}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg py-3"
+              {!hasPlaced ? (
+                <Button 
+                  onClick={placeBet}
+                  disabled={gamePhase !== 'waiting' || betAmount > parseFloat(userBalance)}
+                  className="w-full"
                 >
-                  Bet ₹{betAmount}
+                  Bet ${betAmount}
                 </Button>
               ) : (
-                <Button
-                  onClick={() => cashOut()}
-                  disabled={hasCashedOut}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg py-3"
+                <Button 
+                  onClick={cashOut}
+                  disabled={hasCashedOut || gamePhase !== 'flying'}
+                  className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  {hasCashedOut ? "Cashed Out!" : `Cash Out ${multiplier.toFixed(2)}x`}
+                  Cash Out ${(betAmount * multiplier).toFixed(2)}
                 </Button>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Game Stats */}
-        <Card className="bg-gray-800 border-gray-600">
+        {/* Statistics */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white">Game History</CardTitle>
+            <CardTitle>Game History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="grid grid-cols-5 gap-2">
-                {gameHistory.map((mult, index) => (
-                  <div
-                    key={index}
-                    className={`p-2 rounded text-center text-sm font-bold ${
-                      mult >= 2.00 
-                        ? 'bg-green-600 text-white' 
-                        : mult >= 1.50 
-                        ? 'bg-yellow-600 text-white'
-                        : 'bg-red-600 text-white'
-                    }`}
-                  >
+            <div className="space-y-2">
+              {gameHistory.map((mult, index) => (
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <span className="font-mono">#{gameHistory.length - index}</span>
+                  <Badge variant={mult >= 2 ? 'default' : 'secondary'}>
                     {mult.toFixed(2)}x
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-4 space-y-2 text-sm text-gray-300">
-                <div className="flex justify-between">
-                  <span>Low Risk (1.00-1.99x):</span>
-                  <span className="text-red-400">40% chance</span>
+                  </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>Medium Risk (2.00-4.99x):</span>
-                  <span className="text-yellow-400">30% chance</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>High Risk (5.00x+):</span>
-                  <span className="text-green-400">30% chance</span>
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Game Rules */}
-      <Card className="bg-gray-800 border-gray-600">
-        <CardHeader>
-          <CardTitle className="text-white">How to Play Aviator</CardTitle>
-        </CardHeader>
-        <CardContent className="text-gray-300 space-y-2">
-          <p>• Place your bet before the plane takes off</p>
-          <p>• Watch the multiplier increase as the plane flies higher</p>
-          <p>• Cash out before the plane crashes to win your bet × multiplier</p>
-          <p>• If the plane crashes before you cash out, you lose your bet</p>
-          <p>• Set auto cash out to automatically collect winnings at your target multiplier</p>
-          <p>• Higher multipliers mean bigger wins but higher risk of crashing</p>
-          <p>• Minimum bet: ₹1 | Maximum bet: Your balance</p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
-
-export default Aviator;
