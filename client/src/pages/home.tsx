@@ -331,6 +331,9 @@ export default function Home() {
           <GameCategories />
         </div>
 
+        {/* Casino Games - Direct Access */}
+        <CasinoGamesSection />
+
         {/* Featured Games */}
         <FeaturedGames />
 
