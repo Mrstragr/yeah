@@ -250,11 +250,11 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="game-card max-w-md bg-[#edebebbf]">
         <DialogHeader>
-          <DialogTitle className="flex items-center text-gaming-gold font-gaming">
-            <Trophy className="w-5 h-5 mr-2" />
+          <DialogTitle className="flex items-center text-slate-900 font-bold text-xl">
+            <Trophy className="w-6 h-6 mr-2 text-yellow-600" />
             {game.title}
           </DialogTitle>
-          <DialogDescription className="text-gray-400 font-exo">
+          <DialogDescription className="text-slate-700 font-medium">
             {game.description}
           </DialogDescription>
         </DialogHeader>
@@ -265,7 +265,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Wallet className="w-4 h-4 text-gaming-gold mr-2" />
-                <span className="text-gray-300 font-exo">Your Balance:</span>
+                <span className="text-slate-900 font-bold">Your Balance:</span>
               </div>
               <Badge variant="secondary" className="bg-green-600 text-white font-gaming">
                 ₹{parseFloat(user?.walletBalance || "0").toLocaleString()}

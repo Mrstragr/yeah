@@ -162,60 +162,92 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900 to-purple-900 text-white">
-        <CardContent className="p-6">
-          <div className="relative h-64 mb-4">
-            {/* Background Grid */}
-            <div className="absolute inset-0 opacity-20">
-              <svg width="100%" height="100%" className="text-white">
+      {/* Professional 3D Game Display */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white shadow-2xl border border-slate-700">
+        <CardContent className="p-8">
+          <div className="relative h-80 mb-6 rounded-xl overflow-hidden">
+            {/* Animated Sky Background */}
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-indigo-800/30 to-purple-700/20"></div>
+            
+            {/* Professional Grid */}
+            <div className="absolute inset-0 opacity-15">
+              <svg width="100%" height="100%" className="text-cyan-400">
                 <defs>
-                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                  <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                    <path d="M 25 0 L 0 0 0 25" fill="none" stroke="currentColor" strokeWidth="1"/>
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
               </svg>
             </div>
 
-            {/* Flight Path */}
+            {/* Clouds Animation */}
+            <div className="absolute inset-0 opacity-40">
+              <div className="absolute top-12 left-0 w-24 h-12 bg-white/20 rounded-full animate-pulse" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
+              <div className="absolute top-24 right-0 w-20 h-10 bg-white/15 rounded-full animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+              <div className="absolute top-40 left-1/3 w-16 h-8 bg-white/10 rounded-full animate-pulse" style={{animationDelay: '1s', animationDuration: '3s'}}></div>
+            </div>
+
+            {/* Enhanced Flight Path */}
             <svg className="absolute inset-0 w-full h-full">
+              <defs>
+                <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style={{stopColor: '#22d3ee', stopOpacity: 0.3}} />
+                  <stop offset="50%" style={{stopColor: '#06b6d4', stopOpacity: 0.8}} />
+                  <stop offset="100%" style={{stopColor: '#0891b2', stopOpacity: 1}} />
+                </linearGradient>
+              </defs>
               <path
-                d={`M 0 ${256} Q ${planePosition.x * 4} ${planePosition.y * 2.56} ${planePosition.x * 4 + 50} ${planePosition.y * 2.56 - 20}`}
-                stroke="#22d3ee"
-                strokeWidth="3"
+                d={`M 0 ${320} Q ${planePosition.x * 5} ${planePosition.y * 3.2} ${planePosition.x * 5 + 60} ${planePosition.y * 3.2 - 30}`}
+                stroke="url(#pathGradient)"
+                strokeWidth="4"
                 fill="none"
-                className="opacity-80"
+                className="drop-shadow-lg filter brightness-125"
               />
             </svg>
 
-            {/* Plane */}
+            {/* Enhanced 3D Plane */}
             <div 
-              className="absolute transition-all duration-75"
+              className="absolute transition-all duration-100 transform-gpu"
               style={{ 
                 left: `${planePosition.x}%`, 
                 top: `${planePosition.y}%`,
-                transform: 'translate(-50%, -50%)'
+                transform: `translate(-50%, -50%) scale(${gamePhase === 'flying' ? 1.2 : 1}) rotate(${gamePhase === 'crashed' ? '45deg' : '-10deg'})`
               }}
             >
-              <Plane 
-                className={`w-8 h-8 transition-all duration-200 ${
-                  gamePhase === 'crashed' ? 'text-red-500 animate-pulse' : 'text-yellow-400'
-                }`}
-                style={{ transform: 'rotate(-15deg)' }}
-              />
+              <div className="relative">
+                <Plane 
+                  className={`w-12 h-12 transition-all duration-200 drop-shadow-2xl ${
+                    gamePhase === 'crashed' ? 'text-red-400 animate-bounce' : 'text-cyan-300'
+                  } filter brightness-125`}
+                />
+                {/* Engine Trail Effect */}
+                {gamePhase === 'flying' && (
+                  <div className="absolute -right-6 top-1/2 transform -translate-y-1/2">
+                    <div className="w-8 h-1 bg-gradient-to-r from-orange-400 via-yellow-300 to-transparent rounded-full animate-pulse"></div>
+                  </div>
+                )}
+                {/* Crash Effect */}
+                {gamePhase === 'crashed' && (
+                  <div className="absolute inset-0 animate-ping">
+                    <div className="w-16 h-16 bg-red-500/30 rounded-full -translate-x-1/4 -translate-y-1/4"></div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Multiplier Display */}
-            <div className="absolute top-4 left-4">
-              <div className={`text-4xl font-bold transition-all duration-200 ${
-                gamePhase === 'crashed' ? 'text-red-500' : 'text-green-400'
-              }`}>
-                {gamePhase === 'waiting' ? (
-                  countdown > 0 ? `${countdown}s` : 'Starting...'
-                ) : (
-                  `${multiplier.toFixed(2)}x`
-                )}
+            {/* Professional Multiplier Display */}
+            <div className="absolute top-8 left-8">
+              <div className="glass-effect px-6 py-3 rounded-xl backdrop-blur-md">
+                <div className={`text-5xl font-black transition-all duration-300 ${
+                  gamePhase === 'crashed' ? 'text-red-400 animate-bounce' : 'text-yellow-300 multiplier-display'
+                } drop-shadow-2xl neon-text`}>
+                  {gamePhase === 'waiting' ? (
+                    countdown > 0 ? `${countdown}s` : '🚀 Starting...'
+                  ) : (
+                    `${multiplier.toFixed(2)}x`
+                  )}
+                </div>
               </div>
             </div>
 

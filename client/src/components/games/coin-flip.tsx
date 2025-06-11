@@ -79,37 +79,61 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="bg-gradient-to-br from-amber-900 to-yellow-900 text-white">
-        <CardHeader>
-          <CardTitle className="text-center text-3xl font-bold flex items-center justify-center gap-2">
-            🪙 Coin Flip <span className="text-sm text-amber-200">50/50 Chance</span>
+      {/* Professional 3D Game Display */}
+      <Card className="bg-gradient-to-br from-slate-900 via-amber-900 to-yellow-900 text-white shadow-2xl border border-amber-700/50">
+        <CardHeader className="bg-gradient-to-r from-amber-800/30 to-yellow-800/30 backdrop-blur-sm">
+          <CardTitle className="text-center text-4xl font-black flex items-center justify-center gap-3 neon-text">
+            🪙 COIN FLIP <span className="text-lg text-amber-300 font-bold">50/50 CHANCE</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Coin Display */}
-          <div className="flex justify-center items-center h-64">
+        <CardContent className="space-y-8 p-8">
+          {/* Enhanced Coin Display */}
+          <div className="flex justify-center items-center h-80 relative">
+            {/* Particle Effects */}
+            {isFlipping && (
+              <div className="absolute inset-0 overflow-hidden">
+                {[...Array(12)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-ping"
+                    style={{
+                      left: `${20 + Math.random() * 60}%`,
+                      top: `${20 + Math.random() * 60}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${0.5 + Math.random()}s`
+                    }}
+                  ></div>
+                ))}
+              </div>
+            )}
+            
             <div 
-              className={`relative w-32 h-32 transition-transform duration-100 ${isFlipping ? 'animate-pulse' : ''}`}
+              className={`relative w-40 h-40 transition-all duration-200 transform-gpu ${
+                isFlipping ? 'coin-animation scale-110' : 'scale-100'
+              } drop-shadow-2xl`}
               style={{ 
-                transform: `rotateY(${coinRotation}deg)`,
+                transform: `rotateY(${coinRotation}deg) scale(${isFlipping ? 1.2 : 1})`,
                 transformStyle: 'preserve-3d'
               }}
             >
-              {/* Heads Side */}
+              {/* Enhanced Heads Side */}
               <div 
-                className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border-4 border-yellow-700 flex items-center justify-center text-4xl font-bold shadow-lg"
-                style={{ backfaceVisibility: 'hidden' }}
+                className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600 border-6 border-yellow-700 flex items-center justify-center text-6xl font-bold shadow-2xl"
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  boxShadow: '0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2)'
+                }}
               >
                 👑
               </div>
               
-              {/* Tails Side */}
+              {/* Enhanced Tails Side */}
               <div 
-                className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 border-4 border-gray-700 flex items-center justify-center text-4xl font-bold shadow-lg"
+                className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-br from-slate-300 via-slate-500 to-slate-700 border-6 border-slate-800 flex items-center justify-center text-6xl font-bold shadow-2xl"
                 style={{ 
                   backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)'
+                  transform: 'rotateY(180deg)',
+                  boxShadow: '0 0 30px rgba(148, 163, 184, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2)'
                 }}
               >
                 ⚡

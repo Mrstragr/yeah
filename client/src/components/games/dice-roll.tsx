@@ -126,21 +126,54 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="bg-gradient-to-br from-purple-900 to-indigo-900 text-white">
-        <CardHeader>
-          <CardTitle className="text-center text-3xl font-bold flex items-center justify-center gap-2">
-            🎲 Dice Roll <span className="text-sm text-purple-200">Predict the Number</span>
+      {/* Professional 3D Game Display */}
+      <Card className="bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white shadow-2xl border border-purple-700/50">
+        <CardHeader className="bg-gradient-to-r from-purple-800/30 to-indigo-800/30 backdrop-blur-sm">
+          <CardTitle className="text-center text-4xl font-black flex items-center justify-center gap-3 neon-text">
+            🎲 DICE ROLL <span className="text-lg text-purple-300 font-bold">PREDICT THE NUMBER</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Dice Display */}
-          <div className="flex justify-center items-center h-32">
-            <div className={`text-8xl transition-all duration-200 ${isRolling ? 'animate-bounce' : ''}`}>
-              {isRolling ? 
-                getDiceEmoji(animatingDice[0]) : 
-                (diceResult ? getDiceEmoji(diceResult) : "🎲")
-              }
+        <CardContent className="space-y-8 p-8">
+          {/* Enhanced 3D Dice Display */}
+          <div className="flex justify-center items-center h-48 relative">
+            {/* Particle Effects */}
+            {isRolling && (
+              <div className="absolute inset-0 overflow-hidden">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-2 h-2 bg-purple-400 rounded-full animate-ping"
+                    style={{
+                      left: `${20 + Math.random() * 60}%`,
+                      top: `${20 + Math.random() * 60}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${0.5 + Math.random()}s`
+                    }}
+                  ></div>
+                ))}
+              </div>
+            )}
+            
+            <div className="relative">
+              <div 
+                className={`text-9xl transition-all duration-300 transform-gpu drop-shadow-2xl ${
+                  isRolling ? 'animate-bounce scale-125' : 'scale-100'
+                } filter brightness-125`}
+                style={{
+                  textShadow: '0 0 20px rgba(147, 51, 234, 0.8)',
+                  transform: isRolling ? 'scale(1.3) rotateX(360deg)' : 'scale(1)'
+                }}
+              >
+                {isRolling ? 
+                  getDiceEmoji(animatingDice[0]) : 
+                  (diceResult ? getDiceEmoji(diceResult) : "🎲")
+                }
+              </div>
+              
+              {/* Glow Effect */}
+              <div className={`absolute inset-0 ${isRolling ? 'animate-pulse' : ''}`}>
+                <div className="w-24 h-24 bg-purple-500/20 rounded-full blur-xl mx-auto mt-8"></div>
+              </div>
             </div>
           </div>
 
