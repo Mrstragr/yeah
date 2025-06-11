@@ -248,7 +248,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="game-card max-w-md">
+      <DialogContent className="game-card max-w-md bg-[#edebebbf]">
         <DialogHeader>
           <DialogTitle className="flex items-center text-gaming-gold font-gaming">
             <Trophy className="w-5 h-5 mr-2" />

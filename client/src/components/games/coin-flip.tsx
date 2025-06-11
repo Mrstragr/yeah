@@ -147,7 +147,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
           <CardHeader>
             <CardTitle>Place Your Bet</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Bet Amount */}
             <div>
               <label className="block text-sm font-medium mb-2">Bet Amount (₹)</label>

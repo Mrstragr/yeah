@@ -250,7 +250,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
           <CardHeader>
             <CardTitle>Place Bet</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 pt-0 space-y-4 bg-[#edebebbf]">
             <div>
               <label className="text-sm font-medium mb-2 block">Bet Amount</label>
               <Input
