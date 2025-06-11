@@ -554,6 +554,19 @@ export default function TashanWinMain() {
           onClose={closeGame} 
         />
       )}
+
+      {/* Casino Games Modal */}
+      {currentGame && typeof currentGame === 'object' && (
+        <GamePlayModal
+          isOpen={true}
+          onClose={closeGame}
+          game={currentGame}
+          onWin={(amount) => {
+            setUserBalance(prev => (parseFloat(prev) + parseFloat(amount)).toFixed(2));
+            addToast(`Won ₹${amount}!`, "success");
+          }}
+        />
+      )}
     </div>
   );
 }
