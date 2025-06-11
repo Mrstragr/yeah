@@ -560,7 +560,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getGamesByCategory(category: string): Promise<Game[]> {
-    return await db.select().from(games).where(eq(games.category, category));
+    return await db.select().from(games).where(and(eq(games.category, category), eq(games.isActive, true)));
   }
 
   async getGame(id: number): Promise<Game | undefined> {

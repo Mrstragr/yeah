@@ -368,6 +368,10 @@ function CasinoGamesSection() {
           isOpen={showGameModal}
           onClose={() => setShowGameModal(false)}
           game={selectedGame}
+          onWin={(amount: string) => {
+            console.log(`Won ${amount} in ${selectedGame.title}`);
+            setShowGameModal(false);
+          }}
         />
       )}
     </>
