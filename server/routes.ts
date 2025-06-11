@@ -346,6 +346,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Game betting endpoint
+  app.post("/api/game/bet", authenticateToken, async (req: any, res) => {
+    try {
+      const { gameId, betAmount, gameData } = req.body;
+      const userId = req.user.userId || req.user.id;
+
+      if (!gameId || !betAmount || betAmount <= 0) {
+        return res.status(400).json({ message: "Invalid bet parameters" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentBalance = parseFloat(user.walletBalance);
+      if (currentBalance < betAmount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Determine win/loss based on game data
+      const isWin = gameData?.win || false;
+      const winAmount = isWin ? betAmount * (gameData?.multiplier || 2) : 0;
+      const netAmount = winAmount - betAmount;
+
+      // Update balance
+      const newBalance = (currentBalance + netAmount).toFixed(2);
+      await storage.updateUserWalletBalance(userId, newBalance);
+
+      // Record game history
+      await storage.addGameHistory({
+        userId,
+        gameId,
+        betAmount: betAmount.toString(),
+        winAmount: winAmount.toString()
+      });
+
+      // Update user stats
+      const currentTotalBet = parseFloat(user.totalBet || "0");
+      const currentTotalWin = parseFloat(user.totalWin || "0");
+      
+      await storage.updateUserStats?.(userId, {
+        totalBet: (currentTotalBet + betAmount).toFixed(2),
+        totalWin: (currentTotalWin + winAmount).toFixed(2)
+      });
+
+      res.json({ 
+        success: true,
+        result: isWin ? "win" : "lose",
+        winAmount: winAmount.toString(),
+        newBalance,
+        message: isWin ? `You won ₹${winAmount}!` : `You lost ₹${betAmount}`
+      });
+    } catch (error) {
+      console.error("Error processing bet:", error);
+      res.status(500).json({ message: "Failed to process bet" });
+    }
+  });
+
   // User routes
   app.post("/api/users", async (req, res) => {
     try {
