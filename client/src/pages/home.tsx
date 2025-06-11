@@ -402,6 +402,29 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* CASINO GAMES - TOP PRIORITY DISPLAY */}
+        <div className="bg-red-500 p-6 rounded-lg">
+          <h1 className="text-2xl font-bold text-white mb-4">🎰 CASINO GAMES</h1>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded text-center">
+              <div className="text-4xl mb-2">✈️</div>
+              <h3 className="font-bold">Aviator</h3>
+            </div>
+            <div className="bg-white p-4 rounded text-center">
+              <div className="text-4xl mb-2">🪙</div>
+              <h3 className="font-bold">Coin Flip</h3>
+            </div>
+            <div className="bg-white p-4 rounded text-center">
+              <div className="text-4xl mb-2">🎲</div>
+              <h3 className="font-bold">Dice Roll</h3>
+            </div>
+            <div className="bg-white p-4 rounded text-center">
+              <div className="text-4xl mb-2">🎫</div>
+              <h3 className="font-bold">Scratch Cards</h3>
+            </div>
+          </div>
+        </div>
+
         {/* Live Winner Ticker */}
         <LiveWinnerTicker />
 
