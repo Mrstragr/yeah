@@ -131,6 +131,60 @@ export class MemStorage implements IStorage {
     const initialGames: InsertGame[] = tashanwinGames;
     initialGames.forEach(game => this.createGame(game));
 
+    // Add popular casino games
+    const popularCasinoGames: InsertGame[] = [
+      {
+        title: "Aviator",
+        description: "Watch the plane fly and cash out before it crashes! Multipliers can reach up to 100x.",
+        category: "Crash",
+        imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.8",
+        jackpot: "₹2,50,000"
+      },
+      {
+        title: "Coin Flip",
+        description: "Classic heads or tails with 1.95x payout. Simple and exciting!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1640119435830-8b00942cd072?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.6",
+        jackpot: "₹1,00,000"
+      },
+      {
+        title: "Dice Roll",
+        description: "Predict under or over with customizable odds. High risk, high reward!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.7",
+        jackpot: "₹5,00,000"
+      },
+      {
+        title: "Big Small",
+        description: "Roll three dice and bet on the total. Big (11-17) or Small (4-10) with 1.95x payout!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.5",
+        jackpot: "₹3,00,000"
+      },
+      {
+        title: "Card Master",
+        description: "Draw a card and bet on red/black or high/low. Classic casino action!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.4",
+        jackpot: "₹2,00,000"
+      },
+      {
+        title: "Ball Number",
+        description: "Pick your lucky numbers from 1-36. Single number pays 35x!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.6",
+        jackpot: "₹10,00,000"
+      }
+    ];
+    
+    popularCasinoGames.forEach(game => this.createGame(game));
+
     // Initialize promotions
     const initialPromotions: InsertPromotion[] = [
       {

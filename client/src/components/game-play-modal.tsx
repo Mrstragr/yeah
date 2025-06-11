@@ -10,9 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Wallet, Trophy, AlertCircle } from "lucide-react";
 import type { Game } from "@shared/schema";
 import type { GamePlayResult, User } from "@/lib/types";
-import DiceRoll from "@/components/games/dice-roll";
-import CoinFlip from "@/components/games/coin-flip";
-import Aviator from "@/components/games/aviator";
+import { DiceRoll } from "@/components/games/dice-roll";
+import { CoinFlip } from "@/components/games/coin-flip";
+import { Aviator } from "@/components/games/aviator";
+import { BigSmall } from "@/components/games/big-small";
+import { CardGame } from "@/components/games/card-game";
+import { BallNumber } from "@/components/games/ball-number";
 
 interface GamePlayModalProps {
   isOpen: boolean;
@@ -110,48 +113,136 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
   if (!isOpen || !game) return null;
 
   // Handle specific games with custom components
-  if (game.title === "Dice Roll") {
+  const handleGameBet = async (amount: number, gameData: any) => {
+    try {
+      const response = await apiRequest("POST", `/api/games/${game.id}/play`, {
+        userId: user?.id,
+        betAmount: amount.toString(),
+        gameType: game?.category?.toLowerCase(),
+        gameData: gameData
+      });
+      
+      const result = await response.json();
+      
+      if (gameData.won) {
+        onWin(gameData.payout?.toString() || amount.toString());
+        toast({
+          title: "🎉 You Won!",
+          description: `You won ₹${gameData.payout?.toFixed(2) || amount}!`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Better luck next time!",
+          description: `You lost ₹${amount}`,
+          variant: "destructive",
+        });
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
+    } catch (error) {
+      toast({
+        title: "Game Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (game.title === "Aviator" || game.title.toLowerCase().includes("aviator")) {
     return (
-      <DiceRoll 
-        userBalance={user?.walletBalance || "0"}
-        onBet={async (amount: number, gameData: any) => {
-          await new Promise((resolve) => {
-            onWin(amount.toString());
-            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-            resolve(undefined);
-          });
-        }}
-      />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🛩️ Aviator</DialogTitle>
+          </DialogHeader>
+          <Aviator 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
     );
   }
 
-  if (game.title === "Coin Flip") {
+  if (game.title === "Coin Flip" || game.title.toLowerCase().includes("coin")) {
     return (
-      <CoinFlip 
-        userBalance={user?.walletBalance || "0"}
-        onBet={async (amount: number, gameData: any) => {
-          await new Promise((resolve) => {
-            onWin(amount.toString());
-            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-            resolve(undefined);
-          });
-        }}
-      />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🪙 Coin Flip</DialogTitle>
+          </DialogHeader>
+          <CoinFlip 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
     );
   }
 
-  if (game.title === "Aviator") {
+  if (game.title === "Dice Roll" || game.title.toLowerCase().includes("dice")) {
     return (
-      <Aviator 
-        userBalance={user?.walletBalance || "0"}
-        onBet={async (amount: number, gameData: any) => {
-          await new Promise((resolve) => {
-            onWin(amount.toString());
-            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-            resolve(undefined);
-          });
-        }}
-      />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🎲 Dice Roll</DialogTitle>
+          </DialogHeader>
+          <DiceRoll 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (game.title === "Big Small" || game.title.toLowerCase().includes("big") || game.title.toLowerCase().includes("small")) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🎯 Big Small</DialogTitle>
+          </DialogHeader>
+          <BigSmall 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (game.title.toLowerCase().includes("card") || game.title.toLowerCase().includes("poker") || game.title.toLowerCase().includes("blackjack")) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🃏 Card Game</DialogTitle>
+          </DialogHeader>
+          <CardGame 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (game.title.toLowerCase().includes("ball") || game.title.toLowerCase().includes("number") || game.title.toLowerCase().includes("roulette")) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>⚽ Ball Number</DialogTitle>
+          </DialogHeader>
+          <BallNumber 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
     );
   }
 
