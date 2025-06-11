@@ -133,17 +133,48 @@ export function BallNumber({ userBalance, onBet }: BallNumberProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-orange-600 to-red-700 text-white">
+      {/* Professional 3D Game Display */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-orange-900 to-red-900 text-white shadow-2xl border border-orange-700/50">
+        <CardHeader className="bg-gradient-to-r from-orange-800/30 to-red-800/30 backdrop-blur-sm">
+          <CardTitle className="text-center text-4xl font-black flex items-center justify-center gap-3 neon-text">
+            🎱 BALL NUMBER <span className="text-lg text-orange-300 font-bold">LUCKY NUMBERS</span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-8">
-          <div className="text-center space-y-6">
-            {/* Ball Display */}
-            <div className="flex justify-center items-center">
-              <div className={`w-24 h-24 rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-2xl font-bold transition-transform duration-200 ${
-                isSpinning ? 'animate-spin bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-white text-gray-800'
-              }`}>
+          <div className="text-center space-y-8">
+            {/* Enhanced 3D Ball Display */}
+            <div className="flex justify-center items-center h-48 relative">
+              {/* Particle Effects */}
+              {isSpinning && (
+                <div className="absolute inset-0 overflow-hidden">
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 bg-orange-400 rounded-full animate-ping"
+                      style={{
+                        left: `${10 + Math.random() * 80}%`,
+                        top: `${10 + Math.random() * 80}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                        animationDuration: `${0.3 + Math.random()}s`
+                      }}
+                    ></div>
+                  ))}
+                </div>
+              )}
+              
+              <div 
+                className={`w-32 h-32 rounded-full border-6 border-white shadow-2xl flex items-center justify-center text-4xl font-black transition-all duration-300 transform-gpu ${
+                  isSpinning ? 'animate-spin bg-gradient-to-br from-yellow-300 via-orange-400 to-red-400 scale-125' : 'bg-gradient-to-br from-white to-gray-100 text-gray-900 scale-100'
+                } drop-shadow-2xl`}
+                style={{
+                  boxShadow: isSpinning 
+                    ? '0 20px 40px rgba(255, 165, 0, 0.6), inset 0 5px 15px rgba(255, 255, 255, 0.3)' 
+                    : '0 15px 30px rgba(0,0,0,0.4), inset 0 5px 15px rgba(255, 255, 255, 0.3)',
+                  transform: isSpinning ? 'scale(1.3) rotateZ(720deg)' : 'scale(1)'
+                }}
+              >
                 {isSpinning ? (
-                  <Circle className="w-8 h-8 animate-pulse" />
+                  <div className="animate-pulse text-white font-black">🎯</div>
                 ) : (
                   drawnNumber || '?'
                 )}

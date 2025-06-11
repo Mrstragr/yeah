@@ -135,27 +135,58 @@ export function CardGame({ userBalance, onBet }: CardGameProps) {
 
   return (
     <div className="space-y-6">
-      {/* Game Display */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600 to-indigo-700 text-white">
+      {/* Professional 3D Game Display */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white shadow-2xl border border-purple-700/50">
+        <CardHeader className="bg-gradient-to-r from-purple-800/30 to-indigo-800/30 backdrop-blur-sm">
+          <CardTitle className="text-center text-4xl font-black flex items-center justify-center gap-3 neon-text">
+            🃏 CARD GAME <span className="text-lg text-purple-300 font-bold">PREDICT THE CARD</span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-8">
-          <div className="text-center space-y-6">
-            {/* Card Display */}
-            <div className="flex justify-center">
-              <div className={`w-32 h-44 bg-white rounded-lg shadow-2xl border-2 flex flex-col items-center justify-center transition-transform duration-200 ${
-                isDrawing ? 'animate-pulse scale-110' : ''
-              }`}>
+          <div className="text-center space-y-8">
+            {/* Enhanced 3D Card Display */}
+            <div className="flex justify-center h-56 items-center relative">
+              {/* Particle Effects */}
+              {isDrawing && (
+                <div className="absolute inset-0 overflow-hidden">
+                  {[...Array(12)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 bg-purple-400 rounded-full animate-ping"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: `${20 + Math.random() * 60}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${0.5 + Math.random()}s`
+                      }}
+                    ></div>
+                  ))}
+                </div>
+              )}
+              
+              <div 
+                className={`w-40 h-56 bg-gradient-to-br from-white to-gray-100 rounded-2xl shadow-2xl border-4 border-gray-300 flex flex-col items-center justify-center transition-all duration-500 transform-gpu ${
+                  isDrawing ? 'card-animation scale-110' : 'scale-100'
+                } drop-shadow-2xl`}
+                style={{
+                  transform: isDrawing ? 'scale(1.1) rotateY(180deg)' : 'scale(1) rotateY(0deg)',
+                  boxShadow: '0 15px 35px rgba(0,0,0,0.4), inset 0 2px 10px rgba(255,255,255,0.3)'
+                }}
+              >
                 {drawnCard ? (
                   <>
-                    <div className="text-2xl font-bold text-gray-800 mb-2">
+                    <div className="text-4xl font-black text-gray-900 mb-3">
                       {drawnCard.value}
                     </div>
-                    {getSuitIcon(drawnCard.suit)}
-                    <div className="text-2xl font-bold text-gray-800 mt-2 rotate-180">
+                    <div className="text-6xl">
+                      {getSuitIcon(drawnCard.suit)}
+                    </div>
+                    <div className="text-4xl font-black text-gray-900 mt-3 rotate-180">
                       {drawnCard.value}
                     </div>
                   </>
                 ) : (
-                  <div className="text-gray-400 text-lg">?</div>
+                  <div className="text-gray-500 text-6xl font-bold">🂠</div>
                 )}
               </div>
             </div>
