@@ -352,8 +352,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { gameId, betAmount, gameData } = req.body;
       const userId = req.user.userId || req.user.id;
 
-      if (!gameId || !betAmount || betAmount <= 0) {
-        return res.status(400).json({ message: "Invalid bet parameters" });
+      if (!betAmount || betAmount <= 0) {
+        return res.status(400).json({ message: "Invalid bet amount" });
       }
 
       const user = await storage.getUser(userId);
@@ -366,6 +366,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
+      // Map game names to IDs
+      const gameMapping: Record<string, number> = {
+        'Aviator': 206,
+        'Coin Flip': 173,
+        'Dice Roll': 172,
+        'Scratch Cards': 999
+      };
+
+      const actualGameId = typeof gameId === 'string' ? gameMapping[gameId] || 999 : gameId;
+
       // Determine win/loss based on game data
       const isWin = gameData?.win || false;
       const winAmount = isWin ? betAmount * (gameData?.multiplier || 2) : 0;
@@ -375,10 +385,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = (currentBalance + netAmount).toFixed(2);
       await storage.updateUserWalletBalance(userId, newBalance);
 
-      // Record game history
+      // Record game history with proper gameId
       await storage.addGameHistory({
         userId,
-        gameId,
+        gameId: actualGameId,
         betAmount: betAmount.toString(),
         winAmount: winAmount.toString()
       });

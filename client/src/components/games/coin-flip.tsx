@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Coins, Crown, DollarSign } from "lucide-react";
 
 interface CoinFlipProps {
   userBalance: string;
@@ -11,125 +10,133 @@ interface CoinFlipProps {
 }
 
 export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
-  const [betAmount, setBetAmount] = useState(100);
-  const [selectedSide, setSelectedSide] = useState<'heads' | 'tails'>('heads');
+  const [betAmount, setBetAmount] = useState(10);
+  const [selectedSide, setSelectedSide] = useState<"heads" | "tails" | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
-  const [result, setResult] = useState<'heads' | 'tails' | null>(null);
-  const [lastResult, setLastResult] = useState<{side: string, won: boolean, payout: number} | null>(null);
-  const [gameHistory, setGameHistory] = useState<{side: string, result: string, won: boolean}[]>([
-    {side: 'heads', result: 'tails', won: false},
-    {side: 'tails', result: 'tails', won: true},
-    {side: 'heads', result: 'heads', won: true},
-    {side: 'tails', result: 'heads', won: false},
-    {side: 'heads', result: 'tails', won: false}
-  ]);
+  const [gameResult, setGameResult] = useState<{
+    coinResult: "heads" | "tails";
+    won: boolean;
+    winAmount: number;
+  } | null>(null);
+  const [gameHistory, setGameHistory] = useState<("heads" | "tails")[]>([]);
   const [coinRotation, setCoinRotation] = useState(0);
 
-  const quickAmounts = [50, 100, 250, 500, 1000, 2500];
+  const quickAmounts = [10, 50, 100, 250, 500, 1000];
 
   const flipCoin = async () => {
-    if (isFlipping || betAmount > parseFloat(userBalance)) return;
+    if (!selectedSide || betAmount <= 0 || betAmount > parseFloat(userBalance)) return;
 
     setIsFlipping(true);
-    setResult(null);
-    setLastResult(null);
+    setGameResult(null);
 
-    // Animate coin flip
-    const flipDuration = 2000;
+    // Simulate coin flip animation
+    let rotations = 0;
     const flipInterval = setInterval(() => {
-      setCoinRotation(prev => prev + 180);
+      rotations += 180;
+      setCoinRotation(rotations);
     }, 100);
 
-    // Determine result
-    const flipResult = Math.random() < 0.5 ? 'heads' : 'tails';
-    const won = selectedSide === flipResult;
-    const payout = won ? betAmount * 1.95 : 0; // 1.95x multiplier (5% house edge)
-
-    setTimeout(() => {
+    // Determine result after 2 seconds
+    setTimeout(async () => {
       clearInterval(flipInterval);
-      setResult(flipResult);
-      setIsFlipping(false);
       
-      setLastResult({
-        side: selectedSide,
-        won: won,
-        payout: payout
+      const coinResult: "heads" | "tails" = Math.random() < 0.5 ? "heads" : "tails";
+      const won = coinResult === selectedSide;
+      const winAmount = won ? betAmount * 2 : 0;
+
+      // Final rotation to show result
+      const finalRotation = coinResult === "heads" ? Math.floor(rotations / 360) * 360 : Math.floor(rotations / 360) * 360 + 180;
+      setCoinRotation(finalRotation);
+
+      setGameResult({
+        coinResult,
+        won,
+        winAmount
       });
 
       // Add to history
-      setGameHistory(prev => [{
-        side: selectedSide,
-        result: flipResult,
-        won: won
-      }, ...prev.slice(0, 4)]);
+      setGameHistory(prev => [coinResult, ...prev.slice(0, 9)]);
 
-      // Place bet
-      onBet(betAmount, {
-        type: 'coin-flip',
-        betAmount,
+      // Submit bet result
+      await onBet(betAmount, {
+        type: 'coinflip',
         selectedSide,
-        result: flipResult,
-        won: won,
-        payout: payout
+        coinResult,
+        win: won,
+        multiplier: won ? 2 : 0
       });
-    }, flipDuration);
+
+      setIsFlipping(false);
+      setSelectedSide(null);
+    }, 2000);
+  };
+
+  const resetGame = () => {
+    setGameResult(null);
+    setSelectedSide(null);
+    setCoinRotation(0);
   };
 
   return (
     <div className="space-y-6">
       {/* Game Display */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-600 to-orange-700 text-white">
-        <CardContent className="p-8">
-          <div className="text-center space-y-6">
-            {/* Coin Animation */}
-            <div className="relative mx-auto w-32 h-32 perspective-1000">
+      <Card className="bg-gradient-to-br from-amber-900 to-yellow-900 text-white">
+        <CardHeader>
+          <CardTitle className="text-center text-3xl font-bold flex items-center justify-center gap-2">
+            🪙 Coin Flip <span className="text-sm text-amber-200">50/50 Chance</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Coin Display */}
+          <div className="flex justify-center items-center h-64">
+            <div 
+              className={`relative w-32 h-32 transition-transform duration-100 ${isFlipping ? 'animate-pulse' : ''}`}
+              style={{ 
+                transform: `rotateY(${coinRotation}deg)`,
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              {/* Heads Side */}
               <div 
-                className={`relative w-full h-full transition-transform duration-100 transform-style-preserve-3d ${
-                  isFlipping ? 'animate-pulse' : ''
-                }`}
-                style={{ transform: `rotateY(${coinRotation}deg)` }}
+                className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border-4 border-yellow-700 flex items-center justify-center text-4xl font-bold shadow-lg"
+                style={{ backfaceVisibility: 'hidden' }}
               >
-                {/* Heads Side */}
-                <div className="absolute inset-0 w-full h-full backface-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center border-4 border-yellow-300 shadow-2xl">
-                    <Crown className="w-16 h-16 text-yellow-900" />
-                  </div>
-                </div>
-                
-                {/* Tails Side */}
-                <div className="absolute inset-0 w-full h-full backface-hidden transform rotateY-180">
-                  <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center border-4 border-gray-300 shadow-2xl">
-                    <DollarSign className="w-16 h-16 text-gray-900" />
-                  </div>
-                </div>
+                👑
+              </div>
+              
+              {/* Tails Side */}
+              <div 
+                className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 border-4 border-gray-700 flex items-center justify-center text-4xl font-bold shadow-lg"
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)'
+                }}
+              >
+                ⚡
               </div>
             </div>
-
-            {/* Result Display */}
-            {!isFlipping && result && (
-              <div className="space-y-2">
-                <Badge variant={result === 'heads' ? 'default' : 'secondary'} className="text-lg px-4 py-2">
-                  Result: {result.toUpperCase()}
-                </Badge>
-                {lastResult && (
-                  <div className={`text-lg font-semibold ${
-                    lastResult.won ? 'text-green-300' : 'text-red-300'
-                  }`}>
-                    {lastResult.won ? 
-                      `Won $${lastResult.payout.toFixed(2)}!` : 
-                      `Lost $${betAmount}`
-                    }
-                  </div>
-                )}
-              </div>
-            )}
-
-            {isFlipping && (
-              <div className="text-xl font-semibold text-yellow-200 animate-pulse">
-                Flipping...
-              </div>
-            )}
           </div>
+
+          {/* Game Result */}
+          {gameResult && (
+            <div className={`text-center p-4 rounded-lg border-2 ${
+              gameResult.won 
+                ? 'bg-green-500/20 border-green-500 text-green-300' 
+                : 'bg-red-500/20 border-red-500 text-red-300'
+            }`}>
+              <div className="text-2xl font-bold mb-2">
+                {gameResult.won ? '🎉 You Won!' : '💸 You Lost!'}
+              </div>
+              <div className="text-lg">
+                Coin landed on: <span className="font-bold capitalize">{gameResult.coinResult}</span>
+              </div>
+              {gameResult.won && (
+                <div className="text-xl font-bold text-green-400 mt-2">
+                  Won ₹{gameResult.winAmount}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -141,41 +148,17 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
             <CardTitle>Place Your Bet</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Side Selection */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Choose Side</label>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant={selectedSide === 'heads' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSide('heads')}
-                  disabled={isFlipping}
-                  className="flex items-center gap-2"
-                >
-                  <Crown className="w-4 h-4" />
-                  Heads
-                </Button>
-                <Button
-                  variant={selectedSide === 'tails' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSide('tails')}
-                  disabled={isFlipping}
-                  className="flex items-center gap-2"
-                >
-                  <DollarSign className="w-4 h-4" />
-                  Tails
-                </Button>
-              </div>
-            </div>
-
             {/* Bet Amount */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Bet Amount</label>
+              <label className="block text-sm font-medium mb-2">Bet Amount (₹)</label>
               <Input
                 type="number"
-                value={betAmount}
-                onChange={(e) => setBetAmount(Number(e.target.value))}
-                min="10"
+                min="1"
                 max={parseFloat(userBalance)}
+                value={betAmount}
+                onChange={(e) => setBetAmount(Math.max(1, Number(e.target.value)))}
                 disabled={isFlipping}
+                className="text-center font-bold"
               />
             </div>
 
@@ -189,78 +172,129 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
                   onClick={() => setBetAmount(amount)}
                   disabled={isFlipping || amount > parseFloat(userBalance)}
                 >
-                  ${amount}
+                  ₹{amount}
                 </Button>
               ))}
             </div>
 
-            {/* Potential Payout */}
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <div className="flex justify-between text-sm">
-                <span>Potential Payout:</span>
-                <span className="font-semibold">${(betAmount * 1.95).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Multiplier:</span>
-                <span>1.95x</span>
+            {/* Side Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Choose Side</label>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant={selectedSide === "heads" ? "default" : "outline"}
+                  onClick={() => setSelectedSide("heads")}
+                  disabled={isFlipping}
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <span className="text-2xl">👑</span>
+                  <span className="font-bold">HEADS</span>
+                </Button>
+                <Button
+                  variant={selectedSide === "tails" ? "default" : "outline"}
+                  onClick={() => setSelectedSide("tails")}
+                  disabled={isFlipping}
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <span className="text-2xl">⚡</span>
+                  <span className="font-bold">TAILS</span>
+                </Button>
               </div>
             </div>
 
             {/* Flip Button */}
-            <Button 
+            <Button
               onClick={flipCoin}
-              disabled={isFlipping || betAmount > parseFloat(userBalance)}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+              disabled={!selectedSide || isFlipping || betAmount > parseFloat(userBalance)}
+              className="w-full h-12 text-lg font-bold bg-yellow-600 hover:bg-yellow-700"
             >
-              <Coins className="w-4 h-4 mr-2" />
-              {isFlipping ? 'Flipping...' : `Flip Coin - $${betAmount}`}
+              {isFlipping ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Flipping...
+                </div>
+              ) : (
+                `Flip Coin - Bet ₹${betAmount}`
+              )}
             </Button>
+
+            {gameResult && (
+              <Button
+                onClick={resetGame}
+                variant="outline"
+                className="w-full"
+              >
+                Play Again
+              </Button>
+            )}
           </CardContent>
         </Card>
 
-        {/* Statistics */}
+        {/* Statistics and History */}
         <Card>
           <CardHeader>
-            <CardTitle>Game History</CardTitle>
+            <CardTitle>Game History & Stats</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {gameHistory.map((game, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">#{gameHistory.length - index}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {game.side}
-                    </Badge>
-                    <span className="text-sm">→</span>
-                    <Badge variant={game.result === 'heads' ? 'default' : 'secondary'} className="text-xs">
-                      {game.result}
-                    </Badge>
-                  </div>
-                  <Badge variant={game.won ? 'default' : 'destructive'}>
-                    {game.won ? 'Won' : 'Lost'}
-                  </Badge>
-                </div>
-              ))}
+          <CardContent className="space-y-4">
+            {/* Current Balance */}
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <div className="text-sm text-gray-600">Your Balance</div>
+              <div className="text-xl font-bold">₹{userBalance}</div>
             </div>
 
-            {/* Statistics Summary */}
-            <div className="mt-4 pt-4 border-t">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center">
-                  <div className="font-semibold text-green-600">
-                    {gameHistory.filter(g => g.won).length}
+            {/* Potential Win */}
+            {selectedSide && !gameResult && (
+              <div className="p-3 bg-green-100 rounded-lg">
+                <div className="text-sm text-green-600">Potential Win</div>
+                <div className="text-xl font-bold text-green-700">₹{betAmount * 2}</div>
+              </div>
+            )}
+
+            {/* Recent Results */}
+            <div>
+              <h4 className="font-medium mb-3">Recent Results</h4>
+              <div className="grid grid-cols-5 gap-2">
+                {gameHistory.slice(0, 10).map((result, index) => (
+                  <div 
+                    key={index}
+                    className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-lg ${
+                      result === "heads" 
+                        ? 'bg-yellow-100 border-yellow-400 text-yellow-800' 
+                        : 'bg-gray-100 border-gray-400 text-gray-800'
+                    }`}
+                  >
+                    {result === "heads" ? "👑" : "⚡"}
                   </div>
-                  <div className="text-gray-500">Wins</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-red-600">
-                    {gameHistory.filter(g => !g.won).length}
-                  </div>
-                  <div className="text-gray-500">Losses</div>
-                </div>
+                ))}
               </div>
             </div>
+
+            {/* Statistics */}
+            {gameHistory.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Statistics</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-600">Heads</div>
+                    <div className="font-bold">
+                      {gameHistory.filter(r => r === "heads").length} 
+                      <span className="text-gray-500 ml-1">
+                        ({Math.round((gameHistory.filter(r => r === "heads").length / gameHistory.length) * 100)}%)
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600">Tails</div>
+                    <div className="font-bold">
+                      {gameHistory.filter(r => r === "tails").length}
+                      <span className="text-gray-500 ml-1">
+                        ({Math.round((gameHistory.filter(r => r === "tails").length / gameHistory.length) * 100)}%)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

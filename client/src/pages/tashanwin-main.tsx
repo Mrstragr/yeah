@@ -10,6 +10,7 @@ import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
 import { FloatingNavigation } from "@/components/floating-navigation";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
+import { GamePlayModal } from "@/components/game-play-modal";
 
 interface User {
   id: number;
@@ -72,7 +73,55 @@ export default function TashanWinMain() {
   };
 
   const openGame = (gameName: string) => {
-    setCurrentGame(gameName);
+    // Create a mock game object for the casino games
+    const casinoGames: Record<string, any> = {
+      'Aviator': {
+        id: 206,
+        title: 'Aviator',
+        description: 'Watch the plane fly and cash out before it crashes!',
+        category: 'crash',
+        imageUrl: '/images/aviator.jpg',
+        rating: '4.8',
+        jackpot: '₹50,000',
+        isActive: true
+      },
+      'Coin Flip': {
+        id: 173,
+        title: 'Coin Flip',
+        description: 'Choose heads or tails and double your money!',
+        category: 'simple',
+        imageUrl: '/images/coinflip.svg',
+        rating: '4.5',
+        jackpot: '₹25,000',
+        isActive: true
+      },
+      'Dice Roll': {
+        id: 172,
+        title: 'Dice Roll',
+        description: 'Predict the dice roll and win big!',
+        category: 'dice',
+        imageUrl: '/images/dice.svg',
+        rating: '4.6',
+        jackpot: '₹30,000',
+        isActive: true
+      },
+      'Scratch Cards': {
+        id: 999,
+        title: 'Scratch Cards',
+        description: 'Scratch to reveal instant prizes!',
+        category: 'instant',
+        imageUrl: '/images/scratch.jpg',
+        rating: '4.3',
+        jackpot: '₹15,000',
+        isActive: true
+      }
+    };
+
+    if (casinoGames[gameName]) {
+      setCurrentGame(casinoGames[gameName]);
+    } else {
+      setCurrentGame(gameName);
+    }
   };
 
   const closeGame = () => {
