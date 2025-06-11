@@ -235,7 +235,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
           <CardHeader>
             <CardTitle>Game History & Stats</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Current Balance */}
             <div className="p-3 bg-slate-100 rounded-lg border">
               <div className="text-sm text-slate-700 font-medium">Your Balance</div>
