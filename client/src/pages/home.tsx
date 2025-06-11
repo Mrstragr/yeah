@@ -304,7 +304,7 @@ function RecentWinners() {
 // Casino Games Section - Direct Access to Popular Games
 function CasinoGamesSection() {
   const [showGameModal, setShowGameModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [selectedGame, setSelectedGame] = useState<any>(null);
 
   const { data: allGames = [] } = useQuery<Game[]>({
     queryKey: ["/api/games"],
@@ -316,14 +316,20 @@ function CasinoGamesSection() {
     ['Aviator', 'Coin Flip', 'Dice Roll', 'Scratch Cards'].includes(game.title)
   );
 
-  const handlePlayGame = (game: Game) => {
+  // Define static casino games to ensure they always display
+  const staticCasinoGames = [
+    { id: 172, title: 'Dice Roll', description: 'Roll the dice and predict combinations', category: 'minigames' },
+    { id: 173, title: 'Coin Flip', description: 'Simple heads or tails betting', category: 'minigames' },
+    { id: 206, title: 'Aviator', description: 'Watch the plane fly and cash out before it crashes', category: 'crash' },
+    { id: 999, title: 'Scratch Cards', description: 'Instant win scratch cards', category: 'minigames' }
+  ];
+
+  const handlePlayGame = (game: any) => {
     setSelectedGame(game);
     setShowGameModal(true);
   };
 
-  if (casinoGames.length === 0) {
-    return null;
-  }
+  const displayGames = casinoGames.length > 0 ? casinoGames : staticCasinoGames;
 
   return (
     <>
@@ -338,7 +344,7 @@ function CasinoGamesSection() {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {casinoGames.map((game: Game) => (
+          {displayGames.map((game: any) => (
             <Card key={game.id} className="game-card cursor-pointer group" onClick={() => handlePlayGame(game)}>
               <CardContent className="p-4">
                 <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
