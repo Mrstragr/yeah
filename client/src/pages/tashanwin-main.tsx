@@ -204,9 +204,52 @@ export default function TashanWinMain() {
       {/* Content Based on Active Section */}
       <div className="pb-20">
         {activeSection === 'home' && (
-          <TashanWinGameLobby 
-            onGameSelect={(gameId, gameTitle) => openGame(gameTitle)}
-          />
+          <div>
+            {/* CASINO GAMES SECTION - PROMINENTLY DISPLAYED */}
+            <div className="container mx-auto px-4 py-6">
+              <div className="bg-red-500 p-6 rounded-lg mb-6">
+                <h1 className="text-3xl font-bold text-white mb-4">🎰 CASINO GAMES</h1>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div 
+                    className="bg-white p-4 rounded text-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => openGame('Aviator')}
+                  >
+                    <div className="text-4xl mb-2">✈️</div>
+                    <h3 className="font-bold text-black">Aviator</h3>
+                    <p className="text-sm text-gray-600">Crash Game</p>
+                  </div>
+                  <div 
+                    className="bg-white p-4 rounded text-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => openGame('Coin Flip')}
+                  >
+                    <div className="text-4xl mb-2">🪙</div>
+                    <h3 className="font-bold text-black">Coin Flip</h3>
+                    <p className="text-sm text-gray-600">50/50 Chance</p>
+                  </div>
+                  <div 
+                    className="bg-white p-4 rounded text-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => openGame('Dice Roll')}
+                  >
+                    <div className="text-4xl mb-2">🎲</div>
+                    <h3 className="font-bold text-black">Dice Roll</h3>
+                    <p className="text-sm text-gray-600">Dice Prediction</p>
+                  </div>
+                  <div 
+                    className="bg-white p-4 rounded text-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => openGame('Scratch Cards')}
+                  >
+                    <div className="text-4xl mb-2">🎫</div>
+                    <h3 className="font-bold text-black">Scratch Cards</h3>
+                    <p className="text-sm text-gray-600">Instant Win</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <TashanWinGameLobby 
+              onGameSelect={(gameId, gameTitle) => openGame(gameTitle)}
+            />
+          </div>
         )}
         
         {activeSection === 'games' && (
