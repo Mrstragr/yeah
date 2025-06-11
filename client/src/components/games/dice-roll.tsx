@@ -318,20 +318,20 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Current Balance */}
-            <div className="p-3 bg-gray-100 rounded-lg">
-              <div className="text-sm text-gray-600">Your Balance</div>
-              <div className="text-xl font-bold">₹{userBalance}</div>
+            <div className="p-3 bg-slate-100 rounded-lg border">
+              <div className="text-sm text-slate-700 font-medium">Your Balance</div>
+              <div className="text-xl font-bold text-slate-900">₹{userBalance}</div>
             </div>
 
             {/* Potential Win */}
             {((betType === "numbers" && selectedNumbers.length > 0) || 
               (betType === "range" && selectedRange)) && !gameResult && (
-              <div className="p-3 bg-green-100 rounded-lg">
-                <div className="text-sm text-green-600">Potential Win</div>
-                <div className="text-xl font-bold text-green-700">
+              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-sm text-green-700 font-medium">Potential Win</div>
+                <div className="text-xl font-bold text-green-800">
                   ₹{(betAmount * calculatePayout()).toFixed(2)}
                 </div>
-                <div className="text-xs text-green-600">
+                <div className="text-xs text-green-700 font-medium">
                   {calculatePayout()}x multiplier
                 </div>
               </div>
@@ -339,12 +339,12 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
 
             {/* Recent Results */}
             <div>
-              <h4 className="font-medium mb-3">Recent Results</h4>
+              <h4 className="font-medium mb-3 text-slate-900">Recent Results</h4>
               <div className="grid grid-cols-5 gap-2">
                 {gameHistory.slice(0, 10).map((result, index) => (
                   <div 
                     key={index}
-                    className="w-12 h-12 rounded-lg border-2 border-gray-300 flex items-center justify-center text-2xl bg-white"
+                    className="w-12 h-12 rounded-lg border-2 border-slate-300 flex items-center justify-center text-2xl bg-white shadow-sm"
                   >
                     {getDiceEmoji(result)}
                   </div>
@@ -355,16 +355,16 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
             {/* Number Frequency */}
             {gameHistory.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-medium">Number Frequency</h4>
+                <h4 className="font-medium text-slate-900">Number Frequency</h4>
                 <div className="grid grid-cols-6 gap-1 text-xs">
                   {diceNumbers.map(num => {
                     const count = gameHistory.filter(r => r === num).length;
                     const percentage = gameHistory.length > 0 ? Math.round((count / gameHistory.length) * 100) : 0;
                     return (
-                      <div key={num} className="text-center p-2 bg-gray-50 rounded">
+                      <div key={num} className="text-center p-2 bg-slate-50 rounded border">
                         <div className="text-lg">{getDiceEmoji(num)}</div>
-                        <div className="font-bold">{count}</div>
-                        <div className="text-gray-500">{percentage}%</div>
+                        <div className="font-bold text-slate-900">{count}</div>
+                        <div className="text-slate-600">{percentage}%</div>
                       </div>
                     );
                   })}
@@ -373,9 +373,9 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
             )}
 
             {/* Betting Tips */}
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <h4 className="font-medium text-blue-800 mb-2">💡 Tips</h4>
-              <div className="text-sm text-blue-700 space-y-1">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2">Tips</h4>
+              <div className="text-sm text-blue-800 space-y-1">
                 <div>• Fewer numbers = Higher payout</div>
                 <div>• High/Low bets pay 2x (50% chance)</div>
                 <div>• Single number pays 6x (16.67% chance)</div>

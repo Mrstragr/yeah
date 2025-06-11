@@ -3,6 +3,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Text Visibility Improvements */
+.text-gray-400 {
+  color: rgb(100 116 139) !important; /* slate-500 for better contrast */
+}
+
+.text-gray-500 {
+  color: rgb(71 85 105) !important; /* slate-600 for better contrast */
+}
+
+.text-gray-600 {
+  color: rgb(51 65 85) !important; /* slate-700 for better contrast */
+}
+
+/* Gaming specific text improvements */
+.text-gaming-gold {
+  color: #fbbf24 !important; /* amber-400 for better visibility */
+}
+
+.text-casino-text-secondary {
+  color: rgb(148 163 184) !important; /* slate-400 */
+}
+
+/* Force dark text on light backgrounds */
+.bg-gray-50 .text-gray-600,
+.bg-gray-100 .text-gray-600,
+.bg-slate-50 .text-slate-600,
+.bg-slate-100 .text-slate-600 {
+  color: rgb(30 41 59) !important; /* slate-800 */
+}
+
+/* Ensure all card content has proper contrast */
+.card-content {
+  color: rgb(15 23 42) !important; /* slate-900 */
+}
+
 /* Professional Game Animations */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }

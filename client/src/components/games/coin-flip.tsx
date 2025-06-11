@@ -237,30 +237,30 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Current Balance */}
-            <div className="p-3 bg-gray-100 rounded-lg">
-              <div className="text-sm text-gray-600">Your Balance</div>
-              <div className="text-xl font-bold">₹{userBalance}</div>
+            <div className="p-3 bg-slate-100 rounded-lg border">
+              <div className="text-sm text-slate-700 font-medium">Your Balance</div>
+              <div className="text-xl font-bold text-slate-900">₹{userBalance}</div>
             </div>
 
             {/* Potential Win */}
             {selectedSide && !gameResult && (
-              <div className="p-3 bg-green-100 rounded-lg">
-                <div className="text-sm text-green-600">Potential Win</div>
-                <div className="text-xl font-bold text-green-700">₹{betAmount * 2}</div>
+              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-sm text-green-700 font-medium">Potential Win</div>
+                <div className="text-xl font-bold text-green-800">₹{betAmount * 2}</div>
               </div>
             )}
 
             {/* Recent Results */}
             <div>
-              <h4 className="font-medium mb-3">Recent Results</h4>
+              <h4 className="font-medium mb-3 text-slate-900">Recent Results</h4>
               <div className="grid grid-cols-5 gap-2">
                 {gameHistory.slice(0, 10).map((result, index) => (
                   <div 
                     key={index}
                     className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-lg ${
                       result === "heads" 
-                        ? 'bg-yellow-100 border-yellow-400 text-yellow-800' 
-                        : 'bg-gray-100 border-gray-400 text-gray-800'
+                        ? 'bg-yellow-50 border-yellow-500 text-yellow-800' 
+                        : 'bg-slate-50 border-slate-500 text-slate-800'
                     }`}
                   >
                     {result === "heads" ? "👑" : "⚡"}
@@ -272,22 +272,22 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
             {/* Statistics */}
             {gameHistory.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-medium">Statistics</h4>
+                <h4 className="font-medium text-slate-900">Statistics</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-gray-600">Heads</div>
-                    <div className="font-bold">
+                    <div className="text-slate-700 font-medium">Heads</div>
+                    <div className="font-bold text-slate-900">
                       {gameHistory.filter(r => r === "heads").length} 
-                      <span className="text-gray-500 ml-1">
+                      <span className="text-slate-600 ml-1">
                         ({Math.round((gameHistory.filter(r => r === "heads").length / gameHistory.length) * 100)}%)
                       </span>
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-600">Tails</div>
-                    <div className="font-bold">
+                    <div className="text-slate-700 font-medium">Tails</div>
+                    <div className="font-bold text-slate-900">
                       {gameHistory.filter(r => r === "tails").length}
-                      <span className="text-gray-500 ml-1">
+                      <span className="text-slate-600 ml-1">
                         ({Math.round((gameHistory.filter(r => r === "tails").length / gameHistory.length) * 100)}%)
                       </span>
                     </div>

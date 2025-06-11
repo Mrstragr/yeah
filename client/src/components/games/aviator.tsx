@@ -319,9 +319,9 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
           <CardContent>
             <div className="space-y-2">
               {gameHistory.map((mult, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <span className="font-mono">#{gameHistory.length - index}</span>
-                  <Badge variant={mult >= 2 ? 'default' : 'secondary'}>
+                <div key={index} className="flex justify-between items-center p-2 bg-slate-50 rounded border">
+                  <span className="font-mono text-slate-900">#{gameHistory.length - index}</span>
+                  <Badge variant={mult >= 2 ? 'default' : 'secondary'} className="font-bold">
                     {mult.toFixed(2)}x
                   </Badge>
                 </div>
