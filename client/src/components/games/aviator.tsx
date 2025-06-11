@@ -294,17 +294,17 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
                 <Button 
                   onClick={placeBet}
                   disabled={gamePhase !== 'waiting' || betAmount > parseFloat(userBalance)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                  className="casino-button w-full text-lg py-3"
                 >
-                  Bet ${betAmount}
+                  🎯 BET ${betAmount}
                 </Button>
               ) : (
                 <Button 
                   onClick={cashOut}
                   disabled={hasCashedOut || gamePhase !== 'flying'}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg py-3 shadow-lg"
                 >
-                  Cash Out ${(betAmount * multiplier).toFixed(2)}
+                  💰 CASH OUT ${(betAmount * multiplier).toFixed(2)}
                 </Button>
               )}
             </div>

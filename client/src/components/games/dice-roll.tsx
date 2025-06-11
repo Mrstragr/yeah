@@ -297,15 +297,15 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
                 (betType === "numbers" && selectedNumbers.length === 0) ||
                 (betType === "range" && !selectedRange)
               }
-              className="w-full h-12 text-lg font-bold bg-purple-600 hover:bg-purple-700"
+              className="casino-button w-full h-12 text-lg"
             >
               {isRolling ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                   Rolling...
                 </div>
               ) : (
-                `Roll Dice - Bet ₹${betAmount}`
+                `🎲 ROLL DICE - BET ₹${betAmount}`
               )}
             </Button>
           </CardContent>

@@ -206,7 +206,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
             <Button
               onClick={flipCoin}
               disabled={!selectedSide || isFlipping || betAmount > parseFloat(userBalance)}
-              className="w-full h-12 text-lg font-bold bg-yellow-600 hover:bg-yellow-700"
+              className="casino-button w-full h-12 text-lg"
             >
               {isFlipping ? (
                 <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
                   Flipping...
                 </div>
               ) : (
-                `Flip Coin - Bet ₹${betAmount}`
+                `🪙 FLIP COIN - BET ₹${betAmount}`
               )}
             </Button>
 
