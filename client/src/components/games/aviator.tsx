@@ -248,7 +248,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
         {/* Betting Panel */}
         <Card>
           <CardHeader className="bg-[#dededeed]">
-            <CardTitle>Place Bet</CardTitle>
+            <CardTitle className="text-slate-900 font-bold">Place Bet</CardTitle>
           </CardHeader>
           <CardContent className="p-6 pt-0 space-y-4 bg-[#edebebbf]">
             <div>
@@ -314,7 +314,7 @@ export function Aviator({ userBalance, onBet }: AviatorProps) {
         {/* Statistics */}
         <Card>
           <CardHeader className="flex flex-col space-y-1.5 p-6 bg-[#dededeed]">
-            <CardTitle>Game History</CardTitle>
+            <CardTitle className="text-slate-900 font-bold">Game History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

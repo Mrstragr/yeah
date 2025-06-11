@@ -206,7 +206,7 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
 
             {/* Bet Type Selection */}
             <div>
-              <label className="block text-sm font-medium mb-3">Bet Type</label>
+              <label className="block text-sm font-medium mb-3 text-slate-900">Bet Type</label>
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant={betType === "numbers" ? "default" : "outline"}
@@ -262,7 +262,7 @@ export function DiceRoll({ userBalance, onBet }: DiceRollProps) {
             {/* Range Selection */}
             {betType === "range" && (
               <div>
-                <label className="block text-sm font-medium mb-3">Select Range</label>
+                <label className="block text-sm font-medium mb-3 text-slate-900">Select Range</label>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     variant={selectedRange === "low" ? "default" : "outline"}

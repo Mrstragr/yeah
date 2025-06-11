@@ -144,8 +144,8 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Betting Panel */}
         <Card>
-          <CardHeader>
-            <CardTitle>Place Your Bet</CardTitle>
+          <CardHeader className="bg-[#dededeed]">
+            <CardTitle className="text-slate-900 font-bold">Place Your Bet</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Bet Amount */}
@@ -232,8 +232,8 @@ export function CoinFlip({ userBalance, onBet }: CoinFlipProps) {
 
         {/* Statistics and History */}
         <Card>
-          <CardHeader>
-            <CardTitle>Game History & Stats</CardTitle>
+          <CardHeader className="bg-[#dededeed]">
+            <CardTitle className="text-slate-900 font-bold">Game History & Stats</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 bg-[#edebebbf] p-6">
             {/* Current Balance */}

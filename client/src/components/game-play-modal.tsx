@@ -275,7 +275,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
 
           {/* Bet Amount */}
           <div className="space-y-3">
-            <Label htmlFor="bet-amount" className="text-gaming-gold font-exo">
+            <Label htmlFor="bet-amount" className="text-slate-900 font-bold font-exo">
               Bet Amount (₹)
             </Label>
             <Input
@@ -288,7 +288,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
               className="bg-gaming-surface border-gaming-border-light text-white font-gaming"
               disabled={isPlaying}
             />
-            <p className="text-xs text-gray-400 font-exo">
+            <p className="text-xs text-slate-700 font-exo font-medium">
               Min: ₹10 | Max: ₹{user?.walletBalance || "0"}
             </p>
           </div>
@@ -302,7 +302,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
                 size="sm"
                 onClick={() => setBetAmount(amount)}
                 disabled={isPlaying || parseFloat(user?.walletBalance || "0") < parseFloat(amount)}
-                className="border-gaming-border-light text-gaming-gold hover:bg-gaming-accent"
+                className="border-slate-400 text-slate-900 hover:bg-slate-200 font-bold"
               >
                 ₹{amount}
               </Button>
