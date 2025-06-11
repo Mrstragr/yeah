@@ -19,7 +19,7 @@ export function EnhancedHeader({ user, userBalance, onLogout, refreshBalance }: 
   }, []);
 
   return (
-    <div className="bg-gradient-to-r from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] p-4 shadow-2xl border-b border-[#D4AF37]/30 relative z-20">
+    <div className="game-header p-4 shadow-2xl relative z-20 backdrop-blur-sm">
       {/* Top Status Bar */}
       <div className="flex items-center justify-between mb-3 text-xs">
         <div className="flex items-center gap-4 text-casino-text-muted">

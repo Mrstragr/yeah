@@ -9,7 +9,7 @@ interface GameCardProps {
 
 export function GameCard({ game, onPlay }: GameCardProps) {
   return (
-    <Card className="game-card group overflow-hidden transition-all duration-300 cursor-pointer">
+    <Card className="casino-card group overflow-hidden cursor-pointer relative">
       <div className="aspect-video relative overflow-hidden">
         <img 
           src={game.imageUrl} 
@@ -19,9 +19,8 @@ export function GameCard({ game, onPlay }: GameCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         
         {/* Premium Rating Badge */}
-        <div className="absolute top-3 right-3 bg-gaming-gold/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-gaming-gold">
-          <i className="fas fa-star mr-1"></i>
-          {game.rating}
+        <div className="absolute top-3 right-3 gold-gradient backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-400">
+          ⭐ {game.rating}
         </div>
         
         {/* Hot Badge */}
@@ -66,11 +65,10 @@ export function GameCard({ game, onPlay }: GameCardProps) {
             </div>
           </div>
           <Button 
-            className="btn-gaming-primary font-gaming font-bold text-sm px-6 py-2 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"
+            className="casino-button font-bold text-sm px-6 py-2 rounded-lg"
             onClick={() => onPlay?.(game)}
           >
-            <i className="fas fa-play mr-2"></i>
-            PLAY NOW
+            ▶ PLAY NOW
           </Button>
         </div>
       </CardContent>
