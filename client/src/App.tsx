@@ -10,6 +10,7 @@ import WalletPage from "@/pages/wallet";
 import WalletDeposit from "@/pages/wallet-deposit";
 import WalletWithdraw from "@/pages/wallet-withdraw";
 import AccountPage from "@/pages/account";
+import AnalyticsPage from "@/pages/analytics";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
@@ -105,6 +106,7 @@ function Router() {
           </div>
         )} />
         <Route path="/account" component={AccountPage} />
+        <Route path="/analytics" component={AnalyticsPage} />
         <Route component={NotFound} />
       </Switch>
       <MobileNav />
