@@ -4,6 +4,8 @@ import { UniversalGame } from "@/components/games/universal-game";
 import { PremiumNavigation } from "@/components/premium-navigation";
 import { PremiumGameInterface } from "@/components/premium-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
+import { WalletManagement } from "@/components/wallet-management";
+import { AchievementsDashboard } from "@/components/achievements-dashboard";
 import { ToastManager } from "@/components/toast-notification";
 
 interface User {
@@ -125,25 +127,31 @@ export default function TashanWinMainModern() {
           </div>
         )}
 
+        {/* Wallet Section */}
+        {activeSection === 'wallet' && (
+          <WalletManagement user={user} />
+        )}
+
+        {/* Achievements Section */}
+        {activeSection === 'analytics' && (
+          <AchievementsDashboard user={user} />
+        )}
+
         {/* Other Sections - Coming Soon */}
-        {(activeSection === 'wallet' || activeSection === 'promotions' || activeSection === 'tournaments' || activeSection === 'analytics') && (
+        {(activeSection === 'promotions' || activeSection === 'tournaments') && (
           <div className="px-4 pt-8 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             <div className="max-w-md mx-auto text-center">
               <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">
-                    {activeSection === 'wallet' ? '💰' : 
-                     activeSection === 'promotions' ? '🎁' : 
-                     activeSection === 'analytics' ? '📊' : '🏆'}
+                    {activeSection === 'promotions' ? '🎁' : '🏆'}
                   </span>
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2 capitalize">
                   {activeSection}
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  {activeSection === 'wallet' ? 'Secure wallet management with instant deposits and quick withdrawals' : 
-                   activeSection === 'promotions' ? 'Exciting bonuses, cashback offers, and exclusive rewards' : 
-                   activeSection === 'analytics' ? 'Comprehensive performance analytics and game statistics' :
+                  {activeSection === 'promotions' ? 'Exciting bonuses, cashback offers, and exclusive rewards' : 
                    'Competitive tournaments with massive prize pools'}
                 </p>
                 <div className="space-y-3">

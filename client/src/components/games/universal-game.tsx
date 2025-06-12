@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AviatorGame } from "./aviator-game";
+import { CoinFlipGame } from "./coin-flip-game";
+import { DiceRollGame } from "./dice-roll-game";
 
 interface UniversalGameProps {
   game: {
@@ -15,6 +18,26 @@ interface UniversalGameProps {
 }
 
 export function UniversalGame({ game, user, onBack }: UniversalGameProps) {
+  // Route to specific game components based on game title
+  const getSpecificGameComponent = () => {
+    switch (game.title.toLowerCase()) {
+      case 'aviator':
+        return <AviatorGame game={game} user={user} onBack={onBack} />;
+      case 'coin flip':
+        return <CoinFlipGame game={game} user={user} onBack={onBack} />;
+      case 'dice roll':
+        return <DiceRollGame game={game} user={user} onBack={onBack} />;
+      default:
+        return null;
+    }
+  };
+
+  const specificComponent = getSpecificGameComponent();
+  if (specificComponent) {
+    return specificComponent;
+  }
+
+  // Fallback to generic game interface for other games
   const [betAmount, setBetAmount] = useState(100);
   const [gameState, setGameState] = useState<any>({});
   const [isPlaying, setIsPlaying] = useState(false);
