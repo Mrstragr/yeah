@@ -901,6 +901,102 @@ export class DatabaseStorage implements IStorage {
     }
     return undefined;
   }
+
+  // Achievement methods for DatabaseStorage
+  async getAllAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements).where(eq(achievements.isActive, true));
+  }
+
+  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
+    const userAchievements = await db.select()
+      .from(userAchievements)
+      .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.userId, userId));
+    
+    return userAchievements.map(result => ({
+      ...result.user_achievements,
+      achievement: result.achievements
+    }));
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const [newAchievement] = await db.insert(achievements).values(achievement).returning();
+    return newAchievement;
+  }
+
+  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
+    const [newUserAchievement] = await db.insert(userAchievements).values({
+      userId,
+      achievementId,
+      progress: 100,
+      isCompleted: true
+    }).returning();
+    return newUserAchievement;
+  }
+
+  async updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
+    const [updatedUA] = await db.update(userAchievements)
+      .set({ 
+        progress,
+        isCompleted: progress >= 100
+      })
+      .where(and(
+        eq(userAchievements.userId, userId),
+        eq(userAchievements.achievementId, achievementId)
+      ))
+      .returning();
+    return updatedUA || undefined;
+  }
+
+  async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
+    const achievements = await this.getAllAchievements();
+    const unlockedAchievements: UserAchievement[] = [];
+    
+    for (const achievement of achievements) {
+      const condition = JSON.parse(achievement.condition);
+      let shouldUnlock = false;
+      
+      switch (condition.type) {
+        case "first_win":
+          if (action === "game_win") {
+            const userHistory = await db.select()
+              .from(userGameHistory)
+              .where(and(
+                eq(userGameHistory.userId, userId),
+                sql`CAST(${userGameHistory.winAmount} AS DECIMAL) > 0`
+              ));
+            if (userHistory.length === 1) shouldUnlock = true;
+          }
+          break;
+        case "high_bet":
+          if (action === "place_bet" && value && parseFloat(value) >= condition.amount) {
+            shouldUnlock = true;
+          }
+          break;
+        case "plinko_max_multiplier":
+          if (action === "plinko_win" && value && value.multiplier === 25) {
+            shouldUnlock = true;
+          }
+          break;
+      }
+      
+      if (shouldUnlock) {
+        const existingUA = await db.select()
+          .from(userAchievements)
+          .where(and(
+            eq(userAchievements.userId, userId),
+            eq(userAchievements.achievementId, achievement.id)
+          ));
+        
+        if (existingUA.length === 0) {
+          const newUA = await this.unlockAchievement(userId, achievement.id);
+          unlockedAchievements.push(newUA);
+        }
+      }
+    }
+    
+    return unlockedAchievements;
+  }
 }
 
 export const storage = new DatabaseStorage();
