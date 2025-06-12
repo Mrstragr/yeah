@@ -353,6 +353,7 @@ function CasinoGamesSection() {
                   {game.title === 'Coin Flip' && '🪙'}
                   {game.title === 'Dice Roll' && '🎲'}
                   {game.title === 'Scratch Cards' && '🎫'}
+                  {(game.title === 'Plinko' || game.title === 'Plinko Casino') && '🎯'}
                 </div>
                 <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
                   {game.title}

@@ -247,7 +247,7 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
     );
   }
 
-  if (game.title.toLowerCase().includes("plinko") || game.title === "Plinko") {
+  if (game.title.toLowerCase().includes("plinko") || game.title === "Plinko" || game.title === "Plinko Casino") {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
