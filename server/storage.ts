@@ -78,6 +78,14 @@ export interface IStorage {
 
   // Bonus balance methods
   updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined>;
+
+  // Achievement methods
+  getAllAchievements(): Promise<Achievement[]>;
+  getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]>;
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement>;
+  updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined>;
+  checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -88,6 +96,8 @@ export class MemStorage implements IStorage {
   private promotions: Map<number, Promotion>;
   private walletTransactions: Map<number, WalletTransaction>;
   private kycDocuments: Map<number, KycDocument>;
+  private achievements: Map<number, Achievement>;
+  private userAchievements: Map<number, UserAchievement>;
   private currentUserId: number;
   private currentGameId: number;
   private currentCategoryId: number;
@@ -95,6 +105,8 @@ export class MemStorage implements IStorage {
   private currentPromotionId: number;
   private currentTransactionId: number;
   private currentKycDocumentId: number;
+  private currentAchievementId: number;
+  private currentUserAchievementId: number;
 
   constructor() {
     this.users = new Map();
@@ -104,6 +116,8 @@ export class MemStorage implements IStorage {
     this.promotions = new Map();
     this.walletTransactions = new Map();
     this.kycDocuments = new Map();
+    this.achievements = new Map();
+    this.userAchievements = new Map();
     this.currentUserId = 1;
     this.currentGameId = 1;
     this.currentCategoryId = 1;
@@ -111,6 +125,8 @@ export class MemStorage implements IStorage {
     this.currentPromotionId = 1;
     this.currentTransactionId = 1;
     this.currentKycDocumentId = 1;
+    this.currentAchievementId = 1;
+    this.currentUserAchievementId = 1;
     
     this.initializeData();
   }
@@ -238,6 +254,77 @@ export class MemStorage implements IStorage {
 
     initialPromotions.forEach(promotion => this.createPromotion(promotion));
 
+    // Initialize achievements
+    const initialAchievements: InsertAchievement[] = [
+      {
+        title: "First Blood",
+        description: "Win your first game",
+        category: "milestone",
+        icon: "🎯",
+        color: "#10B981",
+        condition: JSON.stringify({ type: "first_win" }),
+        reward: "100.00",
+        xpValue: 50,
+        rarity: "common"
+      },
+      {
+        title: "High Roller",
+        description: "Place a bet of ₹10,000 or more",
+        category: "milestone",
+        icon: "💎",
+        color: "#8B5CF6",
+        condition: JSON.stringify({ type: "high_bet", amount: 10000 }),
+        reward: "500.00",
+        xpValue: 200,
+        rarity: "rare"
+      },
+      {
+        title: "Lucky Streak",
+        description: "Win 5 games in a row",
+        category: "streak",
+        icon: "🔥",
+        color: "#F59E0B",
+        condition: JSON.stringify({ type: "win_streak", count: 5 }),
+        reward: "750.00",
+        xpValue: 300,
+        rarity: "epic"
+      },
+      {
+        title: "Aviator Ace",
+        description: "Win 10 Aviator games",
+        category: "gameplay",
+        icon: "✈️",
+        color: "#3B82F6",
+        condition: JSON.stringify({ type: "game_wins", game: "Aviator", count: 10 }),
+        reward: "250.00",
+        xpValue: 150,
+        rarity: "common"
+      },
+      {
+        title: "Plinko Master",
+        description: "Hit the 25x multiplier in Plinko",
+        category: "jackpot",
+        icon: "🎯",
+        color: "#EF4444",
+        condition: JSON.stringify({ type: "plinko_max_multiplier" }),
+        reward: "1000.00",
+        xpValue: 500,
+        rarity: "legendary"
+      },
+      {
+        title: "Daily Player",
+        description: "Play games for 7 consecutive days",
+        category: "streak",
+        icon: "📅",
+        color: "#06B6D4",
+        condition: JSON.stringify({ type: "daily_streak", days: 7 }),
+        reward: "300.00",
+        xpValue: 175,
+        rarity: "rare"
+      }
+    ];
+
+    initialAchievements.forEach(achievement => this.createAchievement(achievement));
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -516,6 +603,102 @@ export class MemStorage implements IStorage {
       return user;
     }
     return undefined;
+  }
+
+  // Achievement methods
+  async getAllAchievements(): Promise<Achievement[]> {
+    return Array.from(this.achievements.values());
+  }
+
+  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
+    const userAchievements = Array.from(this.userAchievements.values())
+      .filter(ua => ua.userId === userId);
+    
+    return userAchievements.map(ua => {
+      const achievement = this.achievements.get(ua.achievementId);
+      return { ...ua, achievement: achievement! };
+    });
+  }
+
+  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const achievement: Achievement = {
+      id: this.currentAchievementId++,
+      createdAt: new Date(),
+      isActive: true,
+      ...insertAchievement,
+    };
+    this.achievements.set(achievement.id, achievement);
+    return achievement;
+  }
+
+  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
+    const userAchievement: UserAchievement = {
+      id: this.currentUserAchievementId++,
+      userId,
+      achievementId,
+      unlockedAt: new Date(),
+      progress: 100,
+      isCompleted: true,
+    };
+    this.userAchievements.set(userAchievement.id, userAchievement);
+    return userAchievement;
+  }
+
+  async updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
+    const existingUA = Array.from(this.userAchievements.values())
+      .find(ua => ua.userId === userId && ua.achievementId === achievementId);
+    
+    if (existingUA) {
+      existingUA.progress = progress;
+      if (progress >= 100) {
+        existingUA.isCompleted = true;
+      }
+      this.userAchievements.set(existingUA.id, existingUA);
+      return existingUA;
+    }
+    return undefined;
+  }
+
+  async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
+    const achievements = Array.from(this.achievements.values());
+    const unlockedAchievements: UserAchievement[] = [];
+    
+    for (const achievement of achievements) {
+      const condition = JSON.parse(achievement.condition);
+      let shouldUnlock = false;
+      
+      switch (condition.type) {
+        case "first_win":
+          if (action === "game_win") {
+            const userHistory = Array.from(this.userGameHistory.values())
+              .filter(h => h.userId === userId && parseFloat(h.winAmount) > 0);
+            if (userHistory.length === 1) shouldUnlock = true;
+          }
+          break;
+        case "high_bet":
+          if (action === "place_bet" && value && parseFloat(value) >= condition.amount) {
+            shouldUnlock = true;
+          }
+          break;
+        case "plinko_max_multiplier":
+          if (action === "plinko_win" && value && value.multiplier === 25) {
+            shouldUnlock = true;
+          }
+          break;
+      }
+      
+      if (shouldUnlock) {
+        const existingUA = Array.from(this.userAchievements.values())
+          .find(ua => ua.userId === userId && ua.achievementId === achievement.id);
+        
+        if (!existingUA) {
+          const newUA = await this.unlockAchievement(userId, achievement.id);
+          unlockedAchievements.push(newUA);
+        }
+      }
+    }
+    
+    return unlockedAchievements;
   }
 }
 

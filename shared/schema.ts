@@ -205,11 +205,7 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
   isCompleted: true,
 });
 
-// Type exports (achievements included)
-export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
-export type UserAchievement = typeof userAchievements.$inferSelect;
-export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -282,6 +278,12 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 export type KycDocument = typeof kycDocuments.$inferSelect;
 export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type PromoTransaction = typeof promoTransactions.$inferSelect;
+export type InsertPromoTransaction = z.infer<typeof insertPromoTransactionSchema>;
 
 // Promotional transaction table
 export const promoTransactions = pgTable("promo_transactions", {
