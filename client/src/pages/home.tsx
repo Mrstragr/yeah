@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayModal } from "@/components/game-play-modal";
 import { CasinoGamesSection as CasinoSection } from "@/components/casino-games-section";
+import { PlinkoModal } from "@/components/plinko-modal";
 import type { Game } from "@shared/schema";
 import { 
   Trophy, 
@@ -305,6 +306,12 @@ function RecentWinners() {
 
 
 export default function Home() {
+  const [showPlinkoModal, setShowPlinkoModal] = useState(false);
+
+  const handlePlayPlinko = () => {
+    setShowPlinkoModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-casino-primary">
       {/* Header with Balance */}
@@ -389,7 +396,7 @@ export default function Home() {
             </Card>
 
             {/* Plinko Casino */}
-            <Card className="game-card cursor-pointer group">
+            <Card className="game-card cursor-pointer group" onClick={() => handlePlayPlinko()}>
               <CardContent className="p-4">
                 <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
                   🎯
@@ -458,6 +465,15 @@ export default function Home() {
           </p>
         </div>
       </div>
+      
+      {/* Plinko Game Modal */}
+      <PlinkoModal
+        isOpen={showPlinkoModal}
+        onClose={() => setShowPlinkoModal(false)}
+        onWin={(amount: string) => {
+          console.log(`Won ${amount} in Plinko!`);
+        }}
+      />
     </div>
   );
 }
