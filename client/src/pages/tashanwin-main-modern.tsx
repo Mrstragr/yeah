@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UniversalGame } from "@/components/games/universal-game";
-import { ModernNavigation } from "@/components/modern-navigation";
-import { ModernGameInterface } from "@/components/modern-game-interface";
+import { PremiumNavigation } from "@/components/premium-navigation";
+import { PremiumGameInterface } from "@/components/premium-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
 import { ToastManager } from "@/components/toast-notification";
 
@@ -95,9 +95,9 @@ export default function TashanWinMainModern() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 text-white">
-      {/* Modern Navigation */}
-      <ModernNavigation 
+    <>
+      {/* Premium Navigation */}
+      <PremiumNavigation 
         activeSection={activeSection}
         onSectionChange={setActiveSection}
         user={user}
@@ -105,15 +105,13 @@ export default function TashanWinMainModern() {
 
       {/* Main Content */}
       <div className="pb-4">
-        {/* Home Section - Featured Games and Modern Interface */}
+        {/* Home Section - Featured Games and Premium Interface */}
         {activeSection === 'home' && (
-          <div>
-            <ModernGameInterface
-              games={games}
-              onGameSelect={handleGameSelect}
-              user={user}
-            />
-          </div>
+          <PremiumGameInterface
+            games={games}
+            onGameSelect={handleGameSelect}
+            user={user}
+          />
         )}
 
         {/* Games Section - Full Game Lobby */}
@@ -130,14 +128,15 @@ export default function TashanWinMainModern() {
         )}
 
         {/* Other Sections - Coming Soon */}
-        {(activeSection === 'wallet' || activeSection === 'promotions' || activeSection === 'tournaments') && (
-          <div className="px-4 pt-8">
+        {(activeSection === 'wallet' || activeSection === 'promotions' || activeSection === 'tournaments' || activeSection === 'analytics') && (
+          <div className="px-4 pt-8 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             <div className="max-w-md mx-auto text-center">
-              <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-8">
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">
                     {activeSection === 'wallet' ? '💰' : 
-                     activeSection === 'promotions' ? '🎁' : '🏆'}
+                     activeSection === 'promotions' ? '🎁' : 
+                     activeSection === 'analytics' ? '📊' : '🏆'}
                   </span>
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2 capitalize">
@@ -146,6 +145,7 @@ export default function TashanWinMainModern() {
                 <p className="text-gray-400 mb-6">
                   {activeSection === 'wallet' ? 'Secure wallet management with instant deposits and quick withdrawals' : 
                    activeSection === 'promotions' ? 'Exciting bonuses, cashback offers, and exclusive rewards' : 
+                   activeSection === 'analytics' ? 'Comprehensive performance analytics and game statistics' :
                    'Competitive tournaments with massive prize pools'}
                 </p>
                 <div className="space-y-3">
@@ -177,6 +177,6 @@ export default function TashanWinMainModern() {
 
       {/* Toast Notifications */}
       <ToastManager toasts={toasts} removeToast={removeToast} />
-    </div>
+    </>
   );
 }
