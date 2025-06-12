@@ -311,48 +311,19 @@ function CasinoGamesSection() {
     retry: false,
   });
 
-  // Filter for the specific casino games we built
-  const casinoGames = allGames.filter((game: Game) => 
-    ['Aviator', 'Coin Flip', 'Dice Roll', 'Scratch Cards', 'Plinko', 'Plinko Casino'].includes(game.title)
-  );
-
-  // Define static casino games to ensure they always display
-  const staticCasinoGames = [
-    { id: 172, title: 'Dice Roll', description: 'Roll the dice and predict combinations', category: 'minigames' },
-    { id: 173, title: 'Coin Flip', description: 'Simple heads or tails betting', category: 'minigames' },
+  // Core casino games that should always display
+  const displayGames = [
     { id: 206, title: 'Aviator', description: 'Watch the plane fly and cash out before it crashes', category: 'crash' },
+    { id: 173, title: 'Coin Flip', description: 'Simple heads or tails betting', category: 'minigames' },
+    { id: 172, title: 'Dice Roll', description: 'Roll the dice and predict combinations', category: 'minigames' },
     { id: 207, title: 'Plinko Casino', description: 'Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!', category: 'Casino' },
     { id: 999, title: 'Scratch Cards', description: 'Instant win scratch cards', category: 'minigames' }
   ];
-
-  // Ensure Plinko always appears by adding it to the display
-  const ensurePlinkoGame = { 
-    id: 207, 
-    title: 'Plinko Casino', 
-    description: 'Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!', 
-    category: 'Casino',
-    imageUrl: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250',
-    rating: '4.8',
-    jackpot: '₹15,00,000'
-  };
 
   const handlePlayGame = (game: any) => {
     setSelectedGame(game);
     setShowGameModal(true);
   };
-
-  // Always include Plinko in the display
-  const plinkoGames = allGames.filter((game: Game) => 
-    game.title.toLowerCase().includes("plinko")
-  );
-  
-  // Combine all games and ensure Plinko Casino is always included
-  const allCasinoGames = [...casinoGames, ...plinkoGames, ensurePlinkoGame];
-  const uniqueGames = allCasinoGames.filter((game, index, self) => 
-    index === self.findIndex(g => g.id === game.id)
-  );
-  
-  const displayGames = uniqueGames.length > 0 ? uniqueGames : staticCasinoGames;
 
   return (
     <>
