@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { analyticsService } from "./analytics";
 import { insertUserSchema, insertGameSchema, insertGameCategorySchema, insertUserGameHistorySchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcrypt";
@@ -1674,6 +1675,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ unlockedAchievements });
     } catch (error) {
       res.status(500).json({ message: "Failed to check achievements" });
+    }
+  });
+
+  // Analytics API endpoints
+  app.get("/api/analytics/games", async (req, res) => {
+    try {
+      const analytics = await analyticsService.getGameAnalytics(10);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching game analytics:", error);
+      res.status(500).json({ message: "Failed to fetch game analytics" });
+    }
+  });
+
+  app.get("/api/analytics/player/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const performance = await analyticsService.getPlayerPerformance(userId);
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching player performance:", error);
+      res.status(500).json({ message: "Failed to fetch player performance" });
+    }
+  });
+
+  app.get("/api/analytics/realtime", async (req, res) => {
+    try {
+      const stats = await analyticsService.getRealTimeStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching real-time stats:", error);
+      res.status(500).json({ message: "Failed to fetch real-time stats" });
+    }
+  });
+
+  app.post("/api/analytics/session/start", async (req, res) => {
+    try {
+      const { userId, sessionId } = req.body;
+      await analyticsService.startSession(userId, sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error starting session:", error);
+      res.status(500).json({ message: "Failed to start session" });
+    }
+  });
+
+  app.post("/api/analytics/session/end", async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      await analyticsService.endSession(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error ending session:", error);
+      res.status(500).json({ message: "Failed to end session" });
+    }
+  });
+
+  app.post("/api/analytics/event", async (req, res) => {
+    try {
+      const { userId, gameId, sessionId, eventType, data } = req.body;
+      await analyticsService.trackGameEvent(userId, gameId, sessionId, eventType, data);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking event:", error);
+      res.status(500).json({ message: "Failed to track event" });
     }
   });
 
