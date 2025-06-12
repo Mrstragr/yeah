@@ -323,7 +323,108 @@ export default function Home() {
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Casino Games Section */}
-        <CasinoSection />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-casino font-bold text-casino-gold">
+              🎰 Popular Casino Games
+            </h2>
+            <Button variant="ghost" size="sm" className="text-casino-gold">
+              View All <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {/* Aviator */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                  ✈️
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Aviator
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coin Flip */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                  🪙
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Coin Flip
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dice Roll */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                  🎲
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Dice Roll
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Plinko Casino */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                  🎯
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Plinko Casino
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Scratch Cards */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                  🎫
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Scratch Cards
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Live Winner Ticker */}
         <LiveWinnerTicker />
