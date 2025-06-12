@@ -285,6 +285,61 @@ export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type PromoTransaction = typeof promoTransactions.$inferSelect;
 export type InsertPromoTransaction = z.infer<typeof insertPromoTransactionSchema>;
 
+// Analytics Tables
+export const gameAnalytics = pgTable("game_analytics", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  gameTitle: text("game_title").notNull(),
+  category: text("category").notNull(),
+  totalPlays: integer("total_plays").default(0),
+  totalBets: decimal("total_bets", { precision: 15, scale: 2 }).default("0.00"),
+  totalWins: decimal("total_wins", { precision: 15, scale: 2 }).default("0.00"),
+  totalLosses: decimal("total_losses", { precision: 15, scale: 2 }).default("0.00"),
+  averageBetAmount: decimal("average_bet_amount", { precision: 10, scale: 2 }).default("0.00"),
+  winRate: decimal("win_rate", { precision: 5, scale: 2 }).default("0.00"),
+  popularityScore: integer("popularity_score").default(0),
+  lastPlayed: timestamp("last_played"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const playerSessions = pgTable("player_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  sessionId: text("session_id").notNull(),
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  duration: integer("duration"),
+  gamesPlayed: integer("games_played").default(0),
+  totalBets: decimal("total_bets", { precision: 15, scale: 2 }).default("0.00"),
+  totalWins: decimal("total_wins", { precision: 15, scale: 2 }).default("0.00"),
+  netResult: decimal("net_result", { precision: 15, scale: 2 }).default("0.00"),
+  isActive: boolean("is_active").default(true),
+});
+
+export const gameEvents = pgTable("game_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  gameId: integer("game_id").notNull(),
+  sessionId: text("session_id").notNull(),
+  eventType: text("event_type").notNull(),
+  betAmount: decimal("bet_amount", { precision: 10, scale: 2 }),
+  winAmount: decimal("win_amount", { precision: 10, scale: 2 }),
+  multiplier: decimal("multiplier", { precision: 10, scale: 2 }),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const insertGameAnalyticsSchema = createInsertSchema(gameAnalytics);
+export const insertPlayerSessionSchema = createInsertSchema(playerSessions);
+export const insertGameEventSchema = createInsertSchema(gameEvents);
+
+export type GameAnalytics = typeof gameAnalytics.$inferSelect;
+export type PlayerSession = typeof playerSessions.$inferSelect;
+export type GameEvent = typeof gameEvents.$inferSelect;
+export type InsertGameAnalytics = z.infer<typeof insertGameAnalyticsSchema>;
+export type InsertPlayerSession = z.infer<typeof insertPlayerSessionSchema>;
+export type InsertGameEvent = z.infer<typeof insertGameEventSchema>;
+
 // Promotional transaction table
 export const promoTransactions = pgTable("promo_transactions", {
   id: serial("id").primaryKey(),
