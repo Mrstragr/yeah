@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UniversalGame } from "@/components/games/universal-game";
-import { PremiumNavigation } from "@/components/premium-navigation";
+import { MobileOptimizedNavigation } from "@/components/mobile-optimized-navigation";
 import { PremiumGameInterface } from "@/components/premium-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
 import { WalletManagement } from "@/components/wallet-management";
@@ -98,15 +98,15 @@ export default function TashanWinMainModern() {
 
   return (
     <>
-      {/* Premium Navigation */}
-      <PremiumNavigation 
+      {/* Mobile Optimized Navigation */}
+      <MobileOptimizedNavigation 
         activeSection={activeSection}
         onSectionChange={setActiveSection}
         user={user}
       />
 
       {/* Main Content */}
-      <div className="pb-4">
+      <div className="pb-20 md:pb-4">
         {/* Home Section - Featured Games and Premium Interface */}
         {activeSection === 'home' && (
           <PremiumGameInterface
