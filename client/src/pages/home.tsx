@@ -460,6 +460,9 @@ export default function Home() {
         </div>
 
         {/* Casino Game Sliders */}
+        <div style={{backgroundColor: 'red', color: 'white', padding: '20px', margin: '20px 0'}}>
+          <h1>CASINO SLIDERS TEST - THIS SHOULD BE VISIBLE</h1>
+        </div>
         <CasinoSliders onPlayPlinko={handlePlayPlinko} />
 
         {/* Recent Winners */}
