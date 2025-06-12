@@ -48,36 +48,44 @@ export function PremiumGameInterface({ games, onGameSelect, user }: PremiumGameI
 
   const categories = [
     { 
-      name: "HOT", 
+      name: "ALL", 
       icon: Flame, 
       color: "from-red-500 to-orange-500", 
       gradient: "bg-gradient-to-r from-red-500/20 to-orange-500/20",
       border: "border-red-500/50",
-      games: games.filter(g => g.category === 'hot') 
+      games: games 
     },
     { 
-      name: "SLOTS", 
-      icon: Crown, 
-      color: "from-purple-500 to-pink-500", 
-      gradient: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
-      border: "border-purple-500/50",
-      games: games.filter(g => g.category === 'slots') 
-    },
-    { 
-      name: "LIVE", 
+      name: "CRASH", 
       icon: Zap, 
       color: "from-blue-500 to-cyan-500", 
       gradient: "bg-gradient-to-r from-blue-500/20 to-cyan-500/20",
       border: "border-blue-500/50",
-      games: games.filter(g => g.category === 'live') 
+      games: games.filter(g => g.category === 'crash') 
     },
     { 
-      name: "JACKPOT", 
+      name: "CASINO", 
+      icon: Crown, 
+      color: "from-purple-500 to-pink-500", 
+      gradient: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
+      border: "border-purple-500/50",
+      games: games.filter(g => g.category === 'casino') 
+    },
+    { 
+      name: "MINI GAMES", 
       icon: Trophy, 
       color: "from-yellow-500 to-amber-500", 
       gradient: "bg-gradient-to-r from-yellow-500/20 to-amber-500/20",
       border: "border-yellow-500/50",
-      games: games.filter(g => g.category === 'jackpot') 
+      games: games.filter(g => g.category === 'minigames') 
+    },
+    { 
+      name: "LOTTERY", 
+      icon: Target, 
+      color: "from-green-500 to-emerald-500", 
+      gradient: "bg-gradient-to-r from-green-500/20 to-emerald-500/20",
+      border: "border-green-500/50",
+      games: games.filter(g => g.category === 'lottery') 
     },
   ];
 
