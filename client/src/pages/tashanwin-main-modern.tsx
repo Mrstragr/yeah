@@ -74,9 +74,7 @@ export default function TashanWinMainModern() {
     setCurrentGame(game.title);
   };
 
-  const handleCategorySelect = (categorySlug: string) => {
-    setActiveSection("games");
-  };
+
 
   const closeGame = () => {
     setCurrentGame(null);
@@ -122,7 +120,7 @@ export default function TashanWinMainModern() {
                 const game = games.find(g => g.id === gameId);
                 if (game) handleGameSelect(game);
               }}
-              onCategorySelect={handleCategorySelect}
+
             />
           </div>
         )}
