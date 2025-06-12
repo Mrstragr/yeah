@@ -66,7 +66,7 @@ export function DailyBonusSystem({ user }: DailyBonusSystemProps) {
   const nextBonusHours = 18;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6">
       {/* Header */}
       <motion.div 
         className="text-center mb-8"

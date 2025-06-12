@@ -225,13 +225,13 @@ export function WalletManagement({ user }: WalletManagementProps) {
 
                 <div>
                   <p className="text-gray-300 text-sm mb-3">Quick amounts:</p>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                     {quickAmounts.map((amount) => (
                       <Button
                         key={amount}
                         onClick={() => setDepositAmount(amount.toString())}
                         variant="outline"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs sm:text-sm py-2"
                       >
                         ₹{amount.toLocaleString()}
                       </Button>
