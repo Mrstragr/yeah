@@ -4,6 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AviatorGame } from "./aviator-game";
 import { CoinFlipGame } from "./coin-flip-game";
 import { DiceRollGame } from "./dice-roll-game";
+import { BigSmallGame } from "./big-small-game";
+import { BlackjackGame } from "./blackjack-game";
+import { LuckyNumbersGame } from "./lucky-numbers-game";
+import { PlinkoGame } from "./plinko-game";
 
 interface UniversalGameProps {
   game: {
@@ -27,6 +31,14 @@ export function UniversalGame({ game, user, onBack }: UniversalGameProps) {
         return <CoinFlipGame game={game} user={user} onBack={onBack} />;
       case 'dice roll':
         return <DiceRollGame game={game} user={user} onBack={onBack} />;
+      case 'big small':
+        return <BigSmallGame game={game} user={user} onBack={onBack} />;
+      case 'blackjack':
+        return <BlackjackGame game={game} user={user} onBack={onBack} />;
+      case 'lucky numbers':
+        return <LuckyNumbersGame game={game} user={user} onBack={onBack} />;
+      case 'plinko':
+        return <PlinkoGame game={game} user={user} onBack={onBack} />;
       default:
         return null;
     }
