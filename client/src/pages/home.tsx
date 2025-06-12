@@ -325,6 +325,17 @@ function CasinoGamesSection() {
     { id: 999, title: 'Scratch Cards', description: 'Instant win scratch cards', category: 'minigames' }
   ];
 
+  // Ensure Plinko always appears by adding it to the display
+  const ensurePlinkoGame = { 
+    id: 207, 
+    title: 'Plinko Casino', 
+    description: 'Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!', 
+    category: 'Casino',
+    imageUrl: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250',
+    rating: '4.8',
+    jackpot: '₹15,00,000'
+  };
+
   const handlePlayGame = (game: any) => {
     setSelectedGame(game);
     setShowGameModal(true);
@@ -335,11 +346,13 @@ function CasinoGamesSection() {
     game.title.toLowerCase().includes("plinko")
   );
   
-  const displayGames = [...casinoGames, ...plinkoGames].length > 0 
-    ? [...casinoGames, ...plinkoGames].filter((game, index, self) => 
-        index === self.findIndex(g => g.id === game.id)
-      )
-    : staticCasinoGames;
+  // Combine all games and ensure Plinko Casino is always included
+  const allCasinoGames = [...casinoGames, ...plinkoGames, ensurePlinkoGame];
+  const uniqueGames = allCasinoGames.filter((game, index, self) => 
+    index === self.findIndex(g => g.id === game.id)
+  );
+  
+  const displayGames = uniqueGames.length > 0 ? uniqueGames : staticCasinoGames;
 
   return (
     <>

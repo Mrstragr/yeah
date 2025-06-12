@@ -24,7 +24,7 @@ import {
 import { tashanwinGames } from "./tashanwin-games";
 import bcrypt from "bcrypt";
 import { db } from "./db";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql, like } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -564,21 +564,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllGames(): Promise<Game[]> {
-    // Get all games with Plinko games prioritized
-    const allGames = await db.select().from(games).where(eq(games.isActive, true)).orderBy(games.id);
-    
-    // Ensure Plinko games are included by specifically fetching them
-    const plinkoGames = await db.select().from(games)
-      .where(and(
-        eq(games.isActive, true),
-        sql`${games.title} ILIKE '%plinko%'`
-      ));
-    
-    // Merge and deduplicate
-    const gameMap = new Map();
-    [...allGames, ...plinkoGames].forEach(game => gameMap.set(game.id, game));
-    
-    return Array.from(gameMap.values()).sort((a, b) => a.id - b.id);
+    return await db.select().from(games).where(eq(games.isActive, true)).orderBy(games.id);
   }
 
   async getGamesByCategory(category: string): Promise<Game[]> {
