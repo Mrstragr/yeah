@@ -355,30 +355,29 @@ export default function Home() {
           </div>
         </div>
 
-        {/* New Games Section - 2 LATEST GAMES */}
-        <div className="bg-gradient-to-r from-purple-900 to-blue-900 p-4 rounded-lg space-y-4 border-2 border-purple-400">
+        {/* NEW GAMES SECTION */}
+        <div className="bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-xl space-y-4 border-4 border-purple-400 shadow-2xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">🚀 NEW GAMES</h2>
-            <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+            <h2 className="text-3xl font-bold text-white">🚀 NEW GAMES</h2>
+            <span className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse shadow-lg">
               JUST LAUNCHED
             </span>
           </div>
           
-          {/* New Games Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-green-600 p-6 rounded-lg text-center border-4 border-white animate-pulse cursor-pointer transform hover:scale-105 transition-transform" onClick={() => handlePlayPlinko()}>
-              <div className="text-5xl mb-3">🎯</div>
-              <h3 className="font-bold text-white text-xl mb-2">PLINKO</h3>
-              <p className="text-green-100 text-sm mb-3">Drop balls & win big multipliers!</p>
-              <button className="bg-white text-green-600 px-4 py-2 rounded-lg font-bold text-lg hover:bg-green-100 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-green-600 p-8 rounded-xl text-center border-4 border-white animate-pulse cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl" onClick={() => handlePlayPlinko()}>
+              <div className="text-6xl mb-4">🎯</div>
+              <h3 className="font-bold text-white text-2xl mb-3">PLINKO</h3>
+              <p className="text-green-100 text-base mb-4">Drop balls and win big multipliers!</p>
+              <button className="bg-white text-green-600 px-6 py-3 rounded-xl font-bold text-xl hover:bg-green-100 transition-colors shadow-lg">
                 PLAY NOW
               </button>
             </div>
-            <div className="bg-purple-600 p-6 rounded-lg text-center border-2 border-purple-300 transform hover:scale-105 transition-transform">
-              <div className="text-5xl mb-3">🌈</div>
-              <h3 className="font-bold text-white text-xl mb-2">COLOR PREDICTION</h3>
-              <p className="text-purple-100 text-sm mb-3">Predict colors & multiply your winnings!</p>
-              <button className="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold text-lg hover:bg-purple-100 transition-colors">
+            <div className="bg-purple-600 p-8 rounded-xl text-center border-2 border-purple-300 transform hover:scale-105 transition-all duration-300 shadow-xl">
+              <div className="text-6xl mb-4">🌈</div>
+              <h3 className="font-bold text-white text-2xl mb-3">COLOR PREDICTION</h3>
+              <p className="text-purple-100 text-base mb-4">Predict colors and multiply your winnings!</p>
+              <button className="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-xl hover:bg-purple-100 transition-colors shadow-lg">
                 COMING SOON
               </button>
             </div>
