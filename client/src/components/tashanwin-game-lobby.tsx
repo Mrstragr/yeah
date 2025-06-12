@@ -89,33 +89,33 @@ export function TashanWinGameLobby({ onGameSelect }: TashanWinGameLobbyProps) {
               </div>
 
               {/* Game Info */}
-              <div className="p-3">
-                <h3 className="font-semibold text-sm text-white mb-1 truncate">
+              <div className="p-3 bg-black/20">
+                <h3 className="font-bold text-base text-white mb-2 truncate">
                   {game.title}
                 </h3>
-                <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                <p className="text-sm text-gray-200 mb-3 line-clamp-2">
                   {game.description}
                 </p>
                 
                 {/* Game Stats */}
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">Jackpot</span>
-                    <span className="text-xs font-bold text-[#ffd700]">
+                    <span className="text-sm font-medium text-gray-300">Jackpot</span>
+                    <span className="text-sm font-bold text-yellow-300 bg-yellow-900/30 px-2 py-1 rounded">
                       {formatAmount(game.jackpot)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">Players</span>
-                    <span className="text-xs text-green-400">
+                    <span className="text-sm font-medium text-gray-300">Players</span>
+                    <span className="text-sm font-semibold text-green-300 bg-green-900/30 px-2 py-1 rounded">
                       {getRandomPlayers()} playing
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">Rating</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-yellow-400">⭐</span>
-                      <span className="text-xs text-white">{game.rating}</span>
+                    <span className="text-sm font-medium text-gray-300">Rating</span>
+                    <div className="flex items-center gap-1 bg-orange-900/30 px-2 py-1 rounded">
+                      <span className="text-sm text-yellow-400">⭐</span>
+                      <span className="text-sm font-semibold text-white">{game.rating}</span>
                     </div>
                   </div>
                 </div>
@@ -126,12 +126,12 @@ export function TashanWinGameLobby({ onGameSelect }: TashanWinGameLobbyProps) {
 
         {/* Empty State */}
         {getGamesByCategory(activeTab).length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">{categories.find(c => c.id === activeTab)?.icon}</div>
-            <h3 className="text-lg font-semibold text-gray-300 mb-2">
+          <div className="text-center py-12 bg-gray-900/50 rounded-lg mx-4">
+            <div className="text-6xl mb-6">{categories.find(c => c.id === activeTab)?.icon}</div>
+            <h3 className="text-xl font-bold text-white mb-4">
               No {categories.find(c => c.id === activeTab)?.name} Games Available
             </h3>
-            <p className="text-gray-500">
+            <p className="text-lg text-gray-200">
               Check back soon for new games in this category!
             </p>
           </div>
