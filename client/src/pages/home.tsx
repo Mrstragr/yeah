@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { GamePlayModal } from "@/components/game-play-modal";
 import { CasinoGamesSection as CasinoSection } from "@/components/casino-games-section";
 import { PlinkoModal } from "@/components/plinko-modal";
+import { AchievementsShowcase } from "@/components/achievements-showcase";
 import type { Game } from "@shared/schema";
 import { 
   Trophy, 
@@ -373,6 +374,19 @@ export default function Home() {
         {/* Jackpot Section */}
         <JackpotCounter />
 
+        {/* Achievements Showcase */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-casino font-bold text-casino-gold">
+              🏆 Your Achievements
+            </h2>
+            <Button variant="ghost" size="sm" className="text-casino-gold">
+              View All <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+          <AchievementsShowcase />
+        </div>
+
         {/* Game Categories */}
         <div>
           <h2 className="text-xl font-casino font-bold text-casino-gold mb-4">
@@ -380,8 +394,6 @@ export default function Home() {
           </h2>
           <GameCategories />
         </div>
-
-
 
         {/* Featured Games */}
         <FeaturedGames />
