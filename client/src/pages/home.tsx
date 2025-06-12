@@ -313,7 +313,7 @@ function CasinoGamesSection() {
 
   // Filter for the specific casino games we built
   const casinoGames = allGames.filter((game: Game) => 
-    ['Aviator', 'Coin Flip', 'Dice Roll', 'Scratch Cards'].includes(game.title)
+    ['Aviator', 'Coin Flip', 'Dice Roll', 'Scratch Cards', 'Plinko', 'Plinko Casino'].includes(game.title)
   );
 
   // Define static casino games to ensure they always display
@@ -321,6 +321,7 @@ function CasinoGamesSection() {
     { id: 172, title: 'Dice Roll', description: 'Roll the dice and predict combinations', category: 'minigames' },
     { id: 173, title: 'Coin Flip', description: 'Simple heads or tails betting', category: 'minigames' },
     { id: 206, title: 'Aviator', description: 'Watch the plane fly and cash out before it crashes', category: 'crash' },
+    { id: 207, title: 'Plinko Casino', description: 'Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!', category: 'Casino' },
     { id: 999, title: 'Scratch Cards', description: 'Instant win scratch cards', category: 'minigames' }
   ];
 
