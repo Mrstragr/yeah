@@ -102,6 +102,31 @@ export const promotions = pgTable("promotions", {
   endDate: timestamp("end_date").notNull(),
 });
 
+// Achievements system
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // gameplay, milestone, streak, jackpot, special
+  icon: text("icon").notNull(),
+  color: text("color").notNull(),
+  condition: text("condition").notNull(), // JSON string defining unlock conditions
+  reward: decimal("reward", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  xpValue: integer("xp_value").notNull().default(0),
+  rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id),
+  unlockedAt: timestamp("unlocked_at").notNull().defaultNow(),
+  progress: integer("progress").notNull().default(0),
+  isCompleted: boolean("is_completed").notNull().default(false),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -161,11 +186,52 @@ export const insertKycDocumentSchema = createInsertSchema(kycDocuments).pick({
   status: true,
 });
 
+export const insertAchievementSchema = createInsertSchema(achievements).pick({
+  title: true,
+  description: true,
+  category: true,
+  icon: true,
+  color: true,
+  condition: true,
+  reward: true,
+  xpValue: true,
+  rarity: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).pick({
+  userId: true,
+  achievementId: true,
+  progress: true,
+  isCompleted: true,
+});
+
+// Type exports (achievements included)
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   gameHistory: many(userGameHistory),
   walletTransactions: many(walletTransactions),
   kycDocuments: many(kycDocuments),
+  achievements: many(userAchievements),
+}));
+
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementId],
+    references: [achievements.id],
+  }),
 }));
 
 export const gamesRelations = relations(games, ({ many }) => ({

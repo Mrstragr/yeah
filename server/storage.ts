@@ -6,6 +6,8 @@ import {
   walletTransactions,
   kycDocuments,
   promotions,
+  achievements,
+  userAchievements,
   type User,
   type InsertUser,
   type Game,
@@ -20,6 +22,10 @@ import {
   type InsertWalletTransaction,
   type KycDocument,
   type InsertKycDocument,
+  type Achievement,
+  type InsertAchievement,
+  type UserAchievement,
+  type InsertUserAchievement,
 } from "@shared/schema";
 import { tashanwinGames } from "./tashanwin-games";
 import bcrypt from "bcrypt";
