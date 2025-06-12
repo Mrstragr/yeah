@@ -63,8 +63,6 @@ const getCategoryIcon = (category: string) => {
 };
 
 export function AchievementsShowcase() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-
   const { data: allAchievements = [] } = useQuery<Achievement[]>({
     queryKey: ["/api/achievements"],
   });
@@ -79,17 +77,11 @@ export function AchievementsShowcase() {
     !userAchievements.some(ua => ua.achievementId === a.id)
   );
 
-  const filteredAchievements = selectedCategory === "all" 
-    ? allAchievements 
-    : allAchievements.filter(a => a.category === selectedCategory);
-
-  const categories = ["all", "milestone", "streak", "gameplay", "jackpot", "special"];
-
-  const totalXP = completedAchievements.reduce((sum, ua) => sum + ua.achievement.xpValue, 0);
-  const totalRewards = completedAchievements.reduce((sum, ua) => sum + parseFloat(ua.achievement.reward), 0);
+  const totalXP = completedAchievements.reduce((sum, ua) => sum + (ua.achievement?.xpValue || 0), 0);
+  const totalRewards = completedAchievements.reduce((sum, ua) => sum + parseFloat(ua.achievement?.reward || "0"), 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Achievement Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
