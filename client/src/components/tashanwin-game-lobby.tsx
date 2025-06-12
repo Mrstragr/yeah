@@ -17,22 +17,24 @@ interface TashanWinGameLobbyProps {
 }
 
 export function TashanWinGameLobby({ onGameSelect }: TashanWinGameLobbyProps) {
-  const [activeTab, setActiveTab] = useState('hot');
+  const [activeTab, setActiveTab] = useState('all');
 
   const { data: games = [] } = useQuery<Game[]>({
     queryKey: ["/api/games"],
   });
 
   const categories = [
-    { id: 'hot', name: 'Hot', icon: '🔥', color: '#ff6b35' },
-    { id: 'slots', name: 'Slots', icon: '🎰', color: '#f7931e' },
-    { id: 'cards', name: 'Cards', icon: '🃏', color: '#4dabf7' },
-    { id: 'dice', name: 'Dice', icon: '🎲', color: '#69db7c' },
-    { id: 'quick', name: 'Quick', icon: '⚡', color: '#ffd43b' },
-    { id: 'jackpot', name: 'Jackpot', icon: '🏆', color: '#da77f2' }
+    { id: 'all', name: 'All Games', icon: '🎯', color: '#ff6b35' },
+    { id: 'crash', name: 'Crash', icon: '✈️', color: '#4dabf7' },
+    { id: 'casino', name: 'Casino', icon: '🃏', color: '#f7931e' },
+    { id: 'minigames', name: 'Mini Games', icon: '🎲', color: '#69db7c' },
+    { id: 'lottery', name: 'Lottery', icon: '🎫', color: '#da77f2' }
   ];
 
   const getGamesByCategory = (category: string) => {
+    if (category === 'all') {
+      return games;
+    }
     return games.filter(game => game.category === category);
   };
 

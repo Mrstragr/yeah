@@ -43,7 +43,7 @@ interface PremiumGameInterfaceProps {
 
 export function PremiumGameInterface({ games, onGameSelect, user }: PremiumGameInterfaceProps) {
   const [featuredGame, setFeaturedGame] = useState(0);
-  const [activeCategory, setActiveCategory] = useState("HOT");
+  const [activeCategory, setActiveCategory] = useState("ALL");
   const [hoveredGame, setHoveredGame] = useState<number | null>(null);
 
   const categories = [
