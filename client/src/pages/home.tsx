@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayModal } from "@/components/game-play-modal";
+import { CasinoGamesSection as CasinoSection } from "@/components/casino-games-section";
 import type { Game } from "@shared/schema";
 import { 
   Trophy, 
@@ -301,83 +302,7 @@ function RecentWinners() {
   );
 }
 
-// Casino Games Section - Direct Access to Popular Games
-function CasinoGamesSection() {
-  const [showGameModal, setShowGameModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<any>(null);
 
-  const { data: allGames = [] } = useQuery<Game[]>({
-    queryKey: ["/api/games"],
-    retry: false,
-  });
-
-  // Core casino games that should always display
-  const displayGames = [
-    { id: 206, title: 'Aviator', description: 'Watch the plane fly and cash out before it crashes', category: 'crash' },
-    { id: 173, title: 'Coin Flip', description: 'Simple heads or tails betting', category: 'minigames' },
-    { id: 172, title: 'Dice Roll', description: 'Roll the dice and predict combinations', category: 'minigames' },
-    { id: 207, title: 'Plinko Casino', description: 'Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!', category: 'Casino' },
-    { id: 999, title: 'Scratch Cards', description: 'Instant win scratch cards', category: 'minigames' }
-  ];
-
-  const handlePlayGame = (game: any) => {
-    setSelectedGame(game);
-    setShowGameModal(true);
-  };
-
-  return (
-    <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-casino font-bold text-casino-gold">
-            🎰 Popular Casino Games
-          </h2>
-          <Button variant="ghost" size="sm" className="text-casino-gold">
-            View All <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {displayGames.map((game: any) => (
-            <Card key={game.id} className="game-card cursor-pointer group" onClick={() => handlePlayGame(game)}>
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
-                  {game.title === 'Aviator' && '✈️'}
-                  {game.title === 'Coin Flip' && '🪙'}
-                  {game.title === 'Dice Roll' && '🎲'}
-                  {game.title === 'Scratch Cards' && '🎫'}
-                  {(game.title === 'Plinko' || game.title === 'Plinko Casino') && '🎯'}
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  {game.title}
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Game Play Modal */}
-      {showGameModal && selectedGame && (
-        <GamePlayModal
-          isOpen={showGameModal}
-          onClose={() => setShowGameModal(false)}
-          game={selectedGame}
-          onWin={(amount: string) => {
-            console.log(`Won ${amount} in ${selectedGame.title}`);
-            setShowGameModal(false);
-          }}
-        />
-      )}
-    </>
-  );
-}
 
 export default function Home() {
   return (
@@ -397,28 +322,8 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* CASINO GAMES - TOP PRIORITY DISPLAY */}
-        <div className="bg-red-500 p-6 rounded-lg">
-          <h1 className="text-2xl font-bold text-white mb-4">🎰 CASINO GAMES</h1>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded text-center">
-              <div className="text-4xl mb-2">✈️</div>
-              <h3 className="font-bold">Aviator</h3>
-            </div>
-            <div className="bg-white p-4 rounded text-center">
-              <div className="text-4xl mb-2">🪙</div>
-              <h3 className="font-bold">Coin Flip</h3>
-            </div>
-            <div className="bg-white p-4 rounded text-center">
-              <div className="text-4xl mb-2">🎲</div>
-              <h3 className="font-bold">Dice Roll</h3>
-            </div>
-            <div className="bg-white p-4 rounded text-center">
-              <div className="text-4xl mb-2">🎫</div>
-              <h3 className="font-bold">Scratch Cards</h3>
-            </div>
-          </div>
-        </div>
+        {/* Casino Games Section */}
+        <CasinoSection />
 
         {/* Live Winner Ticker */}
         <LiveWinnerTicker />
