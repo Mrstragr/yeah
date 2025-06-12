@@ -564,7 +564,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllGames(): Promise<Game[]> {
-    return await db.select().from(games).where(eq(games.isActive, true));
+    // Get all games with Plinko games prioritized
+    const allGames = await db.select().from(games).where(eq(games.isActive, true)).orderBy(games.id);
+    
+    // Ensure Plinko games are included by specifically fetching them
+    const plinkoGames = await db.select().from(games)
+      .where(and(
+        eq(games.isActive, true),
+        sql`${games.title} ILIKE '%plinko%'`
+      ));
+    
+    // Merge and deduplicate
+    const gameMap = new Map();
+    [...allGames, ...plinkoGames].forEach(game => gameMap.set(game.id, game));
+    
+    return Array.from(gameMap.values()).sort((a, b) => a.id - b.id);
   }
 
   async getGamesByCategory(category: string): Promise<Game[]> {
