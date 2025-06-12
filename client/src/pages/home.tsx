@@ -330,7 +330,16 @@ function CasinoGamesSection() {
     setShowGameModal(true);
   };
 
-  const displayGames = casinoGames.length > 0 ? casinoGames : staticCasinoGames;
+  // Always include Plinko in the display
+  const plinkoGames = allGames.filter((game: Game) => 
+    game.title.toLowerCase().includes("plinko")
+  );
+  
+  const displayGames = [...casinoGames, ...plinkoGames].length > 0 
+    ? [...casinoGames, ...plinkoGames].filter((game, index, self) => 
+        index === self.findIndex(g => g.id === game.id)
+      )
+    : staticCasinoGames;
 
   return (
     <>
