@@ -9,7 +9,8 @@ import { UniversalGame } from "@/components/games/universal-game";
 import { ToastManager } from "@/components/toast-notification";
 import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
-import { FloatingNavigation } from "@/components/floating-navigation";
+import { ModernNavigation } from "@/components/modern-navigation";
+import { ModernGameInterface } from "@/components/modern-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
 import { GamePlayModal } from "@/components/game-play-modal";
 
@@ -250,33 +251,79 @@ export default function TashanWinMain() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] text-white relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none opacity-5">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-[#D4AF37] rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-purple-500 rounded-full blur-2xl animate-bounce"></div>
-        <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-blue-500 rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-40 right-1/3 w-20 h-20 bg-green-500 rounded-full blur-xl animate-bounce"></div>
-        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-pink-500 rounded-full blur-xl animate-ping"></div>
-      </div>
-
-      {/* Enhanced Header */}
-      <EnhancedHeader 
-        user={user} 
-        userBalance={userBalance} 
-        onLogout={logout} 
-        refreshBalance={refreshBalance}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 text-white">
+      {/* Modern Navigation */}
+      <ModernNavigation 
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        user={user}
       />
 
       {/* Content Based on Active Section */}
-      <div className="pb-20">
+      <div className="pb-4">
         {activeSection === 'home' && (
           <div>
-            {/* CASINO GAME SLIDERS - HORIZONTAL SCROLLING */}
-            <div className="container mx-auto px-4 py-6 space-y-6">
-              {/* Classic Casino Games Slider */}
-              <div className="bg-red-900 p-6 rounded-lg space-y-4">
-                <h2 className="text-2xl font-bold text-white">🎰 CLASSIC CASINO GAMES</h2>
+            <ModernGameInterface
+              games={games}
+              onGameSelect={handleGameSelect}
+              user={user}
+            />
+          </div>
+        )}
+
+        {activeSection === 'games' && (
+          <div className="px-4">
+            <TashanWinGameLobby 
+              games={games} 
+              categories={categories}
+              onGameSelect={handleGameSelect}
+              onCategorySelect={handleCategorySelect}
+            />
+          </div>
+        )}
+
+        {(activeSection === 'wallet' || activeSection === 'promotions' || activeSection === 'tournaments') && (
+          <div className="px-4 pt-8">
+            <div className="max-w-md mx-auto text-center">
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🚀</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {activeSection === 'wallet' ? 'Wallet' : 
+                   activeSection === 'promotions' ? 'Promotions' : 'Tournaments'}
+                </h2>
+                <p className="text-gray-400 mb-6">
+                  {activeSection === 'wallet' ? 'Manage your deposits and withdrawals' : 
+                   activeSection === 'promotions' ? 'Exciting bonuses and rewards coming soon' : 
+                   'Competitive tournaments launching soon'}
+                </p>
+                <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200">
+                  Coming Soon
+                </button>
+              </div>
+            </div>
+          </div>
+        
+        {/* Game Modal */}
+        {currentGame && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+              <UniversalGame 
+                game={games.find(g => g.title === currentGame) || games[0]} 
+                user={user}
+                onBack={() => setCurrentGame(null)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Toast Notifications */}
+      <ToastManager toasts={toasts} removeToast={removeToast} />
+    </div>
+  );
+}
                 <div className="overflow-x-auto">
                   <div className="flex space-x-4 pb-4" style={{minWidth: 'max-content'}}>
                     <div className="bg-yellow-600 p-6 rounded-lg text-center min-w-[200px] hover:bg-yellow-500 transition-colors cursor-pointer" onClick={() => openGame('Aviator')}>

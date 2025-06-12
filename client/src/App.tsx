@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MobileNav } from "@/components/mobile-nav";
-import TashanWinMain from "@/pages/tashanwin-main";
+import TashanWinMain from "@/pages/tashanwin-main-modern";
 import CategoryPage from "@/pages/category";
 import WalletPage from "@/pages/wallet";
 import WalletDeposit from "@/pages/wallet-deposit";
