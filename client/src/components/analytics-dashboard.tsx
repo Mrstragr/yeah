@@ -33,28 +33,28 @@ interface PlayerPerformance {
 }
 
 interface RealTimeStats {
-  activePlayers: number;
-  gamesInProgress: number;
-  totalBetsToday: string;
-  totalWinsToday: string;
-  popularGame: string;
-  peakHour: string;
+  activePlayers?: number;
+  gamesInProgress?: number;
+  totalBetsToday?: string;
+  totalWinsToday?: string;
+  popularGame?: string;
+  peakHour?: string;
 }
 
 export function AnalyticsDashboard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("24h");
 
-  const { data: gameAnalytics, isLoading: loadingGames } = useQuery({
+  const { data: gameAnalytics = [], isLoading: loadingGames } = useQuery({
     queryKey: ["/api/analytics/games"],
     refetchInterval: 30000, // Update every 30 seconds
   });
 
-  const { data: realTimeStats, isLoading: loadingRealTime } = useQuery({
+  const { data: realTimeStats = {}, isLoading: loadingRealTime } = useQuery<RealTimeStats>({
     queryKey: ["/api/analytics/realtime"],
     refetchInterval: 5000, // Update every 5 seconds
   });
 
-  const { data: playerPerformance, isLoading: loadingPlayer } = useQuery({
+  const { data: playerPerformance = {}, isLoading: loadingPlayer } = useQuery<PlayerPerformance>({
     queryKey: ["/api/analytics/player/1"], // Demo user
     refetchInterval: 60000, // Update every minute
   });
@@ -197,7 +197,7 @@ export function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {gameAnalytics?.slice(0, 8).map((game: GameAnalytics, index: number) => (
+                {Array.isArray(gameAnalytics) && gameAnalytics.slice(0, 8).map((game: GameAnalytics, index: number) => (
                   <motion.div
                     key={game.gameId}
                     initial={{ opacity: 0, x: -20 }}
@@ -253,46 +253,46 @@ export function AnalyticsDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {playerPerformance && (
+              {playerPerformance && Object.keys(playerPerformance).length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-blue-600">{playerPerformance.totalGames}</p>
+                      <p className="text-3xl font-bold text-blue-600">{(playerPerformance as any).totalGames || 0}</p>
                       <p className="text-sm text-blue-500">Total Games Played</p>
                     </div>
                   </div>
                   
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-green-600">{formatPercentage(playerPerformance.winRate)}</p>
+                      <p className="text-3xl font-bold text-green-600">{formatPercentage((playerPerformance as any).winRate || 0)}</p>
                       <p className="text-sm text-green-500">Overall Win Rate</p>
                     </div>
                   </div>
                   
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-purple-600">{playerPerformance.longestStreak}</p>
+                      <p className="text-3xl font-bold text-purple-600">{(playerPerformance as any).longestStreak || 0}</p>
                       <p className="text-sm text-purple-500">Longest Win Streak</p>
                     </div>
                   </div>
                   
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
                     <div className="text-center">
-                      <p className="text-xl font-bold text-orange-600">{formatCurrency(playerPerformance.totalBets)}</p>
+                      <p className="text-xl font-bold text-orange-600">{formatCurrency((playerPerformance as any).totalBets || "0")}</p>
                       <p className="text-sm text-orange-500">Total Wagered</p>
                     </div>
                   </div>
                   
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20">
                     <div className="text-center">
-                      <p className="text-xl font-bold text-red-600">{formatCurrency(playerPerformance.totalWins)}</p>
+                      <p className="text-xl font-bold text-red-600">{formatCurrency((playerPerformance as any).totalWins || "0")}</p>
                       <p className="text-sm text-red-500">Total Winnings</p>
                     </div>
                   </div>
                   
                   <div className="p-6 border rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20">
                     <div className="text-center">
-                      <p className="text-xl font-bold text-indigo-600">{playerPerformance.favoriteGame}</p>
+                      <p className="text-xl font-bold text-indigo-600">{(playerPerformance as any).favoriteGame || "No Data"}</p>
                       <p className="text-sm text-indigo-500">Favorite Game</p>
                     </div>
                   </div>
