@@ -356,28 +356,23 @@ export default function Home() {
         </div>
 
         {/* NEW GAMES SECTION */}
-        <div className="bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-xl space-y-4 border-4 border-purple-400 shadow-2xl">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-bold text-white">🚀 NEW GAMES</h2>
-            <span className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse shadow-lg">
-              JUST LAUNCHED
-            </span>
-          </div>
+        <div style={{backgroundColor: 'purple', padding: '20px', margin: '20px 0', borderRadius: '10px'}}>
+          <h2 style={{color: 'white', fontSize: '24px', marginBottom: '20px'}}>🚀 NEW GAMES SECTION</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-green-600 p-8 rounded-xl text-center border-4 border-white animate-pulse cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl" onClick={() => handlePlayPlinko()}>
-              <div className="text-6xl mb-4">🎯</div>
-              <h3 className="font-bold text-white text-2xl mb-3">PLINKO</h3>
-              <p className="text-green-100 text-base mb-4">Drop balls and win big multipliers!</p>
-              <button className="bg-white text-green-600 px-6 py-3 rounded-xl font-bold text-xl hover:bg-green-100 transition-colors shadow-lg">
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+            <div style={{backgroundColor: 'green', padding: '30px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer'}} onClick={() => handlePlayPlinko()}>
+              <div style={{fontSize: '60px', marginBottom: '10px'}}>🎯</div>
+              <h3 style={{color: 'white', fontSize: '20px', marginBottom: '10px'}}>PLINKO</h3>
+              <p style={{color: 'white', marginBottom: '15px'}}>Drop balls and win big!</p>
+              <button style={{backgroundColor: 'white', color: 'green', padding: '10px 20px', border: 'none', borderRadius: '5px', fontSize: '16px', cursor: 'pointer'}}>
                 PLAY NOW
               </button>
             </div>
-            <div className="bg-purple-600 p-8 rounded-xl text-center border-2 border-purple-300 transform hover:scale-105 transition-all duration-300 shadow-xl">
-              <div className="text-6xl mb-4">🌈</div>
-              <h3 className="font-bold text-white text-2xl mb-3">COLOR PREDICTION</h3>
-              <p className="text-purple-100 text-base mb-4">Predict colors and multiply your winnings!</p>
-              <button className="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-xl hover:bg-purple-100 transition-colors shadow-lg">
+            <div style={{backgroundColor: 'darkpurple', padding: '30px', borderRadius: '10px', textAlign: 'center'}}>
+              <div style={{fontSize: '60px', marginBottom: '10px'}}>🌈</div>
+              <h3 style={{color: 'white', fontSize: '20px', marginBottom: '10px'}}>COLOR PREDICTION</h3>
+              <p style={{color: 'white', marginBottom: '15px'}}>Predict colors and win!</p>
+              <button style={{backgroundColor: 'white', color: 'purple', padding: '10px 20px', border: 'none', borderRadius: '5px', fontSize: '16px'}}>
                 COMING SOON
               </button>
             </div>
