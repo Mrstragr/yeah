@@ -329,125 +329,41 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Casino Games Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-casino font-bold text-casino-gold">
-              🎰 Popular Casino Games (6 Games Available)
-            </h2>
-            <Button variant="ghost" size="sm" className="text-casino-gold">
-              View All <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+        {/* Casino Games Section - 6 GAMES TOTAL */}
+        <div className="bg-red-900 p-4 rounded-lg space-y-4">
+          <h2 className="text-2xl font-bold text-white">🎰 6 CASINO GAMES AVAILABLE</h2>
+          
+          {/* First Row */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-yellow-600 p-4 rounded text-center">
+              <div className="text-4xl mb-2">✈️</div>
+              <h3 className="font-bold text-white">Aviator</h3>
+            </div>
+            <div className="bg-yellow-600 p-4 rounded text-center">
+              <div className="text-4xl mb-2">🪙</div>
+              <h3 className="font-bold text-white">Coin Flip</h3>
+            </div>
+            <div className="bg-yellow-600 p-4 rounded text-center">
+              <div className="text-4xl mb-2">🎲</div>
+              <h3 className="font-bold text-white">Dice Roll</h3>
+            </div>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {/* Aviator */}
-            <Card className="game-card cursor-pointer group">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
-                  ✈️
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Aviator
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Coin Flip */}
-            <Card className="game-card cursor-pointer group">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
-                  🪙
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Coin Flip
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Dice Roll */}
-            <Card className="game-card cursor-pointer group">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
-                  🎲
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Dice Roll
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Plinko Casino - NEW GAME */}
-            <Card className="game-card cursor-pointer group border-2 border-green-500 animate-pulse" onClick={() => handlePlayPlinko()}>
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center text-3xl mb-3">
-                  🎯
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  NEW: Plinko Casino
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white w-full opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play New Game
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Scratch Cards */}
-            <Card className="game-card cursor-pointer group">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
-                  🎫
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Scratch Cards
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Color Prediction */}
-            <Card className="game-card cursor-pointer group">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-3xl mb-3">
-                  🌈
-                </div>
-                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Color Prediction
-                </h3>
-                <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Second Row */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-green-600 p-4 rounded text-center border-4 border-white animate-pulse cursor-pointer" onClick={() => handlePlayPlinko()}>
+              <div className="text-4xl mb-2">🎯</div>
+              <h3 className="font-bold text-white">NEW: PLINKO</h3>
+              <button className="bg-white text-green-600 px-2 py-1 rounded mt-2 font-bold">PLAY NOW</button>
+            </div>
+            <div className="bg-yellow-600 p-4 rounded text-center">
+              <div className="text-4xl mb-2">🎫</div>
+              <h3 className="font-bold text-white">Scratch Cards</h3>
+            </div>
+            <div className="bg-purple-600 p-4 rounded text-center">
+              <div className="text-4xl mb-2">🌈</div>
+              <h3 className="font-bold text-white">Color Prediction</h3>
+            </div>
           </div>
         </div>
 
