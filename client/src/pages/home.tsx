@@ -333,14 +333,14 @@ export default function Home() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-casino font-bold text-casino-gold">
-              🎰 Popular Casino Games
+              🎰 Popular Casino Games (6 Games Available)
             </h2>
             <Button variant="ghost" size="sm" className="text-casino-gold">
               View All <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {/* Aviator */}
             <Card className="game-card cursor-pointer group">
               <CardContent className="p-4">
