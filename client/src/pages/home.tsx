@@ -340,7 +340,7 @@ export default function Home() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {/* Aviator */}
             <Card className="game-card cursor-pointer group">
               <CardContent className="p-4">
@@ -395,19 +395,19 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Plinko Casino */}
-            <Card className="game-card cursor-pointer group" onClick={() => handlePlayPlinko()}>
+            {/* Plinko Casino - NEW GAME */}
+            <Card className="game-card cursor-pointer group border-2 border-green-500 animate-pulse" onClick={() => handlePlayPlinko()}>
               <CardContent className="p-4">
-                <div className="aspect-square bg-gradient-to-br from-casino-gold to-casino-orange rounded-xl flex items-center justify-center text-3xl mb-3">
+                <div className="aspect-square bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center text-3xl mb-3">
                   🎯
                 </div>
                 <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
-                  Plinko Casino
+                  NEW: Plinko Casino
                 </h3>
                 <div className="text-center">
-                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white w-full opacity-100 transition-opacity">
                     <PlayCircle className="w-4 h-4 mr-1" />
-                    Play Now
+                    Play New Game
                   </Button>
                 </div>
               </CardContent>
