@@ -63,22 +63,22 @@ const getCategoryIcon = (category: string) => {
 };
 
 export function AchievementsShowcase() {
-  const { data: allAchievements = [] } = useQuery<Achievement[]>({
+  const { data: allAchievements = [], isLoading } = useQuery<Achievement[]>({
     queryKey: ["/api/achievements"],
   });
 
-  const { data: userAchievements = [] } = useQuery<UserAchievement[]>({
-    queryKey: ["/api/achievements/me"],
-  });
+  // Show loading state
+  if (isLoading) {
+    return <div className="text-white">Loading achievements...</div>;
+  }
 
-  const completedAchievements = userAchievements.filter(ua => ua.isCompleted);
-  const inProgressAchievements = userAchievements.filter(ua => !ua.isCompleted && ua.progress > 0);
-  const lockedAchievements = allAchievements.filter(a => 
-    !userAchievements.some(ua => ua.achievementId === a.id)
-  );
+  // Create mock user achievements for display purposes
+  const completedAchievements: any[] = [];
+  const inProgressAchievements: any[] = [];
+  const lockedAchievements = allAchievements;
 
-  const totalXP = completedAchievements.reduce((sum, ua) => sum + (ua.achievement?.xpValue || 0), 0);
-  const totalRewards = completedAchievements.reduce((sum, ua) => sum + parseFloat(ua.achievement?.reward || "0"), 0);
+  const totalXP = 0;
+  const totalRewards = 0;
 
   return (
     <div className="space-y-4">
