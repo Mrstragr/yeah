@@ -120,9 +120,10 @@ export default function TashanWinMainModern() {
         {activeSection === 'games' && (
           <div className="px-4">
             <TashanWinGameLobby 
-              games={games} 
-              categories={categories}
-              onGameSelect={handleGameSelect}
+              onGameSelect={(gameId: number, gameTitle: string) => {
+                const game = games.find(g => g.id === gameId);
+                if (game) handleGameSelect(game);
+              }}
               onCategorySelect={handleCategorySelect}
             />
           </div>

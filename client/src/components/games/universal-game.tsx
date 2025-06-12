@@ -10,12 +10,11 @@ interface UniversalGameProps {
     rating: string;
     jackpot: string;
   };
-  onBet: (amount: number, gameData?: any) => void;
-  onClose: () => void;
-  userBalance: string;
+  user: any;
+  onBack: () => void;
 }
 
-export function UniversalGame({ game, onBet, onClose, userBalance }: UniversalGameProps) {
+export function UniversalGame({ game, user, onBack }: UniversalGameProps) {
   const [betAmount, setBetAmount] = useState(100);
   const [gameState, setGameState] = useState<any>({});
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,7 +23,7 @@ export function UniversalGame({ game, onBet, onClose, userBalance }: UniversalGa
   const quickBets = [50, 100, 500, 1000, 5000];
 
   const handlePlay = async () => {
-    if (parseFloat(userBalance) < betAmount) {
+    if (!user || parseFloat(user.walletBalance) < betAmount) {
       alert("Insufficient balance!");
       return;
     }
@@ -123,9 +122,9 @@ export function UniversalGame({ game, onBet, onClose, userBalance }: UniversalGa
 
       if (winMultiplier > 0) {
         const winAmount = Math.floor(betAmount * winMultiplier);
-        onBet(winAmount - betAmount); // Net win (excluding original bet)
+        console.log(`Won ₹${winAmount} on bet of ₹${betAmount}`);
       } else {
-        onBet(-betAmount); // Loss
+        console.log(`Lost ₹${betAmount}`);
       }
     }, 2000);
   };
@@ -209,20 +208,20 @@ export function UniversalGame({ game, onBet, onClose, userBalance }: UniversalGa
           {/* Balance & Actions */}
           <div className="space-y-4">
             <div className="text-center text-gray-300">
-              Balance: ₹{parseFloat(userBalance).toFixed(2)}
+              Balance: ₹{parseFloat(user?.walletBalance || '0').toFixed(2)}
             </div>
             
             <div className="flex gap-3">
               <Button
                 onClick={handlePlay}
-                disabled={isPlaying || parseFloat(userBalance) < betAmount}
+                disabled={isPlaying || parseFloat(user?.walletBalance || '0') < betAmount}
                 className="flex-1 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 disabled:opacity-50"
               >
                 {isPlaying ? 'Playing...' : `Bet ₹${betAmount}`}
               </Button>
               
               <Button
-                onClick={onClose}
+                onClick={onBack}
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-gray-700"
               >
