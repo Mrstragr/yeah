@@ -6,6 +6,8 @@ import { PremiumGameInterface } from "@/components/premium-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
 import { WalletManagement } from "@/components/wallet-management";
 import { AchievementsDashboard } from "@/components/achievements-dashboard";
+import { RealTimeDashboard } from "@/components/real-time-dashboard";
+import { DailyBonusSystem } from "@/components/daily-bonus-system";
 import { ToastManager } from "@/components/toast-notification";
 
 interface User {
@@ -132,13 +134,25 @@ export default function TashanWinMainModern() {
           <WalletManagement user={user} />
         )}
 
-        {/* Achievements Section */}
+        {/* Real-Time Dashboard Section */}
         {activeSection === 'analytics' && (
+          <RealTimeDashboard user={user} />
+        )}
+
+        {/* Promotions Section - Daily Bonus */}
+        {activeSection === 'promotions' && (
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-8">
+            <DailyBonusSystem user={user} />
+          </div>
+        )}
+
+        {/* Tournaments Section - Achievements */}
+        {activeSection === 'tournaments' && (
           <AchievementsDashboard user={user} />
         )}
 
         {/* Other Sections - Coming Soon */}
-        {(activeSection === 'promotions' || activeSection === 'tournaments') && (
+        {false && (
           <div className="px-4 pt-8 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             <div className="max-w-md mx-auto text-center">
               <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm">
