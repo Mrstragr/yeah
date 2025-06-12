@@ -16,6 +16,7 @@ import { Aviator } from "@/components/games/aviator";
 import { BigSmall } from "@/components/games/big-small";
 import { CardGame } from "@/components/games/card-game";
 import { BallNumber } from "@/components/games/ball-number";
+import { Plinko } from "@/components/games/plinko";
 
 interface GamePlayModalProps {
   isOpen: boolean;
@@ -238,6 +239,22 @@ export function GamePlayModal({ isOpen, onClose, game, onWin }: GamePlayModalPro
             <DialogTitle>⚽ Ball Number</DialogTitle>
           </DialogHeader>
           <BallNumber 
+            userBalance={user?.walletBalance || "0"}
+            onBet={handleGameBet}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (game.title.toLowerCase().includes("plinko") || game.title === "Plinko") {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>🎯 Plinko</DialogTitle>
+          </DialogHeader>
+          <Plinko 
             userBalance={user?.walletBalance || "0"}
             onBet={handleGameBet}
           />

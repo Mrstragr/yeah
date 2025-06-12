@@ -180,6 +180,14 @@ export class MemStorage implements IStorage {
         imageUrl: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
         rating: "4.6",
         jackpot: "₹10,00,000"
+      },
+      {
+        title: "Plinko",
+        description: "Drop the ball and watch it bounce through pegs! Hit the 25x multiplier slot for massive wins!",
+        category: "Casino",
+        imageUrl: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+        rating: "4.8",
+        jackpot: "₹15,00,000"
       }
     ];
     
