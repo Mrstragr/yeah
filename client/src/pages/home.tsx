@@ -340,7 +340,7 @@ export default function Home() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {/* Aviator */}
             <Card className="game-card cursor-pointer group">
               <CardContent className="p-4">
@@ -421,6 +421,24 @@ export default function Home() {
                 </div>
                 <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
                   Scratch Cards
+                </h3>
+                <div className="text-center">
+                  <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-4 h-4 mr-1" />
+                    Play Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Color Prediction */}
+            <Card className="game-card cursor-pointer group">
+              <CardContent className="p-4">
+                <div className="aspect-square bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-3xl mb-3">
+                  🌈
+                </div>
+                <h3 className="font-casino font-bold text-white text-center text-sm truncate mb-2">
+                  Color Prediction
                 </h3>
                 <div className="text-center">
                   <Button size="sm" className="btn-casino-primary w-full opacity-0 group-hover:opacity-100 transition-opacity">
