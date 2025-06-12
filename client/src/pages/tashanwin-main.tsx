@@ -5,6 +5,7 @@ import CrashGame from "@/components/games/crash-game";
 import DiceGame from "@/components/games/dice-game";
 import { DiceRoll } from "@/components/games/dice-roll";
 import { CoinFlip } from "@/components/games/coin-flip";
+import { UniversalGame } from "@/components/games/universal-game";
 import { ToastManager } from "@/components/toast-notification";
 import { EnhancedHeader } from "@/components/enhanced-header";
 import { ModernDashboard } from "@/components/modern-dashboard";
@@ -73,52 +74,69 @@ export default function TashanWinMain() {
   };
 
   const openGame = (gameName: string) => {
-    // Create a mock game object for the casino games
-    const casinoGames: Record<string, any> = {
-      'Aviator': {
-        id: 206,
-        title: 'Aviator',
-        description: 'Watch the plane fly and cash out before it crashes!',
-        category: 'crash',
-        imageUrl: '/images/aviator.jpg',
-        rating: '4.8',
-        jackpot: '₹50,000',
-        isActive: true
-      },
-      'Coin Flip': {
-        id: 173,
-        title: 'Coin Flip',
-        description: 'Choose heads or tails and double your money!',
-        category: 'simple',
-        imageUrl: '/images/coinflip.svg',
-        rating: '4.5',
-        jackpot: '₹25,000',
-        isActive: true
-      },
-      'Dice Roll': {
-        id: 172,
-        title: 'Dice Roll',
-        description: 'Predict the dice roll and win big!',
-        category: 'dice',
-        imageUrl: '/images/dice.svg',
-        rating: '4.6',
-        jackpot: '₹30,000',
-        isActive: true
-      },
-      'Scratch Cards': {
-        id: 999,
-        title: 'Scratch Cards',
-        description: 'Scratch to reveal instant prizes!',
-        category: 'instant',
-        imageUrl: '/images/scratch.jpg',
-        rating: '4.3',
-        jackpot: '₹15,000',
-        isActive: true
-      }
+    // Comprehensive game mapping for all categories
+    const allGames: Record<string, any> = {
+      // Original Casino Games
+      'Aviator': { id: 206, title: 'Aviator', category: 'crash', rating: '4.8', jackpot: '₹50,000' },
+      'Coin Flip': { id: 173, title: 'Coin Flip', category: 'simple', rating: '4.5', jackpot: '₹25,000' },
+      'Dice Roll': { id: 172, title: 'Dice Roll', category: 'dice', rating: '4.6', jackpot: '₹30,000' },
+      'Scratch Cards': { id: 999, title: 'Scratch Cards', category: 'instant', rating: '4.3', jackpot: '₹15,000' },
+      'Plinko': { id: 167, title: 'Plinko', category: 'minigames', rating: '4.8', jackpot: '₹15,00,000' },
+      
+      // Hot Games
+      'Aviator Pro': { id: 301, title: 'Aviator Pro', category: 'hot', rating: '4.9', jackpot: '₹80,00,000' },
+      'Dragon Fortune': { id: 302, title: 'Dragon Fortune', category: 'hot', rating: '4.8', jackpot: '₹65,00,000' },
+      'Golden Tiger': { id: 303, title: 'Golden Tiger', category: 'hot', rating: '4.7', jackpot: '₹55,00,000' },
+      'Lucky 7s': { id: 304, title: 'Lucky 7s', category: 'hot', rating: '4.6', jackpot: '₹40,00,000' },
+      'Fire Phoenix': { id: 305, title: 'Fire Phoenix', category: 'hot', rating: '4.8', jackpot: '₹75,00,000' },
+      'Mega Lottery Draw': { id: 160, title: 'Mega Lottery Draw', category: 'hot', rating: '4.9', jackpot: '₹5,00,00,000' },
+      'Lucky Spin': { id: 161, title: 'Lucky Spin', category: 'hot', rating: '4.8', jackpot: '₹50,00,000' },
+      'Dragon Tiger': { id: 162, title: 'Dragon Tiger', category: 'hot', rating: '4.7', jackpot: '₹20,00,000' },
+      'Color Prediction': { id: 163, title: 'Color Prediction', category: 'hot', rating: '4.6', jackpot: '₹10,00,000' },
+      'Number Guessing': { id: 164, title: 'Number Guessing', category: 'hot', rating: '4.5', jackpot: '₹30,00,000' },
+      'Fast Parity': { id: 165, title: 'Fast Parity', category: 'hot', rating: '4.8', jackpot: '₹15,00,000' },
+      
+      // Slots Games
+      'Mega Slots 777': { id: 401, title: 'Mega Slots 777', category: 'slots', rating: '4.8', jackpot: '₹1,00,00,000' },
+      'Fortune Wheel': { id: 402, title: 'Fortune Wheel', category: 'slots', rating: '4.6', jackpot: '₹1,50,00,000' },
+      'Diamond Rush': { id: 403, title: 'Diamond Rush', category: 'slots', rating: '4.7', jackpot: '₹75,00,000' },
+      'Win Go 1Min': { id: 153, title: 'Win Go 1Min', category: 'slots', rating: '4.8', jackpot: '₹5,00,000' },
+      'Win Go 3Min': { id: 154, title: 'Win Go 3Min', category: 'slots', rating: '4.7', jackpot: '₹7,50,000' },
+      'Win Go 5Min': { id: 155, title: 'Win Go 5Min', category: 'slots', rating: '4.9', jackpot: '₹10,00,000' },
+      'Win Go 10Min': { id: 156, title: 'Win Go 10Min', category: 'slots', rating: '4.6', jackpot: '₹20,00,000' },
+      
+      // Cards Games
+      'Texas Hold\'em': { id: 501, title: 'Texas Hold\'em', category: 'cards', rating: '4.8', jackpot: '₹50,00,000' },
+      'Blackjack Pro': { id: 502, title: 'Blackjack Pro', category: 'cards', rating: '4.7', jackpot: '₹25,00,000' },
+      'Baccarat Gold': { id: 503, title: 'Baccarat Gold', category: 'cards', rating: '4.9', jackpot: '₹80,00,000' },
+      'Super Jackpot': { id: 150, title: 'Super Jackpot', category: 'cards', rating: '4.9', jackpot: '₹50,00,000' },
+      'Daily Check-in': { id: 151, title: 'Daily Check-in', category: 'cards', rating: '4.8', jackpot: '₹1,00,000' },
+      'VIP Bonus': { id: 152, title: 'VIP Bonus', category: 'cards', rating: '4.7', jackpot: '₹25,00,000' },
+      
+      // Dice Games
+      'Dice Royale': { id: 601, title: 'Dice Royale', category: 'dice', rating: '4.7', jackpot: '₹30,00,000' },
+      'Sic Bo Classic': { id: 602, title: 'Sic Bo Classic', category: 'dice', rating: '4.6', jackpot: '₹45,00,000' },
+      'Lightning Dice': { id: 603, title: 'Lightning Dice', category: 'dice', rating: '4.8', jackpot: '₹60,00,000' },
+      'K3 Lotre': { id: 157, title: 'K3 Lotre', category: 'dice', rating: '4.5', jackpot: '₹8,00,000' },
+      'Mines': { id: 166, title: 'Mines', category: 'dice', rating: '4.7', jackpot: '₹20,00,000' },
+      'Limbo': { id: 168, title: 'Limbo', category: 'dice', rating: '4.6', jackpot: '₹30,00,000' },
+      
+      // Quick Games
+      'Speed Roulette': { id: 701, title: 'Speed Roulette', category: 'quick', rating: '4.7', jackpot: '₹20,00,000' },
+      'Crash Rocket': { id: 702, title: 'Crash Rocket', category: 'quick', rating: '4.8', jackpot: '₹50,00,000' },
+      'Instant Win': { id: 703, title: 'Instant Win', category: 'quick', rating: '4.5', jackpot: '₹15,00,000' },
+      
+      // Jackpot Games
+      'Progressive Mega': { id: 801, title: 'Progressive Mega', category: 'jackpot', rating: '4.9', jackpot: '₹2,50,00,000' },
+      'Jackpot King': { id: 802, title: 'Jackpot King', category: 'jackpot', rating: '4.8', jackpot: '₹2,00,00,000' },
+      'Million Dollar': { id: 803, title: 'Million Dollar', category: 'jackpot', rating: '4.9', jackpot: '₹5,00,00,000' },
+      '5D Lotre': { id: 158, title: '5D Lotre', category: 'jackpot', rating: '4.7', jackpot: '₹10,00,00,000' },
+      'Trx Win Go': { id: 159, title: 'Trx Win Go', category: 'jackpot', rating: '4.8', jackpot: '₹15,00,000' },
+      'Keno': { id: 169, title: 'Keno', category: 'jackpot', rating: '4.5', jackpot: '₹50,00,000' }
     };
 
-    if (casinoGames[gameName]) {
-      setCurrentGame(casinoGames[gameName]);
+    if (allGames[gameName]) {
+      setCurrentGame(allGames[gameName]);
     } else {
       setCurrentGame(gameName);
     }
@@ -620,16 +638,21 @@ export default function TashanWinMain() {
         />
       )}
 
-      {/* Casino Games Modal */}
+      {/* Universal Game Modal for All New Games */}
       {currentGame && typeof currentGame === 'object' && (
-        <GamePlayModal
-          isOpen={true}
-          onClose={closeGame}
+        <UniversalGame
           game={currentGame}
-          onWin={(amount) => {
-            setUserBalance(prev => (parseFloat(prev) + parseFloat(amount)).toFixed(2));
-            addToast(`Won ₹${amount}!`, "success");
+          onBet={(amount, gameData) => {
+            if (amount > 0) {
+              setUserBalance(prev => (parseFloat(prev) + amount).toFixed(2));
+              addToast(`Won ₹${amount}!`, "success");
+            } else {
+              setUserBalance(prev => (parseFloat(prev) + amount).toFixed(2));
+              addToast(`Bet placed: ₹${Math.abs(amount)}`, "info");
+            }
           }}
+          onClose={closeGame}
+          userBalance={userBalance}
         />
       )}
     </div>
