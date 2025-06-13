@@ -207,6 +207,16 @@ export function DreamClubHome() {
           ))}
         </div>
       </div>
+
+      {/* Game Modal */}
+      {selectedGame && (
+        <DreamClubGameModal
+          game={selectedGame}
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          userBalance={balance}
+        />
+      )}
     </div>
   );
 }
