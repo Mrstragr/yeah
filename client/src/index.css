@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global Styles matching 91dreamclub.com */
+/* Exact 91dreamclub.com styling */
 * {
   margin: 0;
   padding: 0;
@@ -17,378 +17,524 @@ html {
 }
 
 body {
-  background: #f3f4f6;
-  color: #374151;
+  background: #f9fafb;
+  color: #111827;
   overflow-x: hidden;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+/* Exact color matches from screenshots */
+.bg-red-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #ec4899 100%);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+.bg-orange-button {
+  background: #fb923c;
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ef4444 0%, #ec4899 100%);
-  border-radius: 3px;
+.bg-red-button {
+  background: #ef4444;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #dc2626 0%, #db2777 100%);
-}
-
-/* 91Club specific gradients */
-.gradient-red-pink {
-  background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
-}
-
-.gradient-orange {
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-}
-
-.gradient-blue {
+/* Game card exact styling */
+.lottery-card-blue {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 }
 
-.gradient-green {
+.lottery-card-pink {
+  background: linear-gradient(135deg, #ec4899 0%, #dc2626 100%);
+}
+
+.lottery-card-green {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
-.gradient-purple {
+.lottery-card-purple {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
 }
 
-.gradient-yellow {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+.mini-game-blue {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
 }
 
-/* Card styles */
-.card-shadow {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+.mini-game-green {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
 
-.card-shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+.mini-game-purple {
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
 }
 
-/* Button styles */
-.btn-transition {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.recommended-red {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
 }
 
-.btn-transition:hover {
-  transform: translateY(-1px);
+.recommended-purple {
+  background: linear-gradient(135deg, #9333ea 0%, #7c2d12 100%);
 }
 
-.btn-transition:active {
-  transform: translateY(0);
+.recommended-green {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
 }
 
-/* Game card animations */
-.game-card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Exact spacing and typography */
+.text-91club {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.game-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.balance-text {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1f2937;
 }
 
-/* Typography */
-.text-shadow-sm {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Loading states */
-.loading-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: .5;
-  }
-}
-
-/* Notification badge */
-.notification-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ef4444;
-  color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
+.section-title {
+  font-size: 16px;
   font-weight: 600;
+  color: #1f2937;
 }
 
-/* Bottom navigation active state */
-.nav-active {
-  background: #ef4444;
+.game-title {
+  font-size: 14px;
+  font-weight: 700;
   color: white;
 }
 
-/* Custom focus states */
-button:focus {
-  outline: 2px solid #ef4444;
-  outline-offset: 2px;
+/* Button styling to match exactly */
+.action-btn {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-input:focus {
-  outline: 2px solid #ef4444;
-  outline-offset: 2px;
-  border-color: #ef4444;
+.action-btn:active {
+  transform: scale(0.98);
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .mobile-padding {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-/* Safe area for mobile devices */
-@supports (padding: max(0px)) {
-  .safe-area-bottom {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-}
-
-/* Grid layouts */
-.game-grid {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.game-grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.game-grid-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.game-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Specific component styles */
-.balance-card {
+/* Card shadows and borders */
+.card-white {
   background: white;
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.action-button {
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  font-weight: 500;
+.game-card {
+  border-radius: 16px;
+  padding: 16px;
   text-align: center;
-  transition: all 0.2s;
+  color: white;
+  font-weight: bold;
+  transition: all 0.2s ease;
 }
 
-.action-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.game-card:active {
+  transform: scale(0.95);
 }
 
+/* Navigation styling */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  min-width: 60px;
+}
+
+.nav-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Bottom navigation exact styling */
+.bottom-nav {
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 0 12px 0;
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+}
+
+.bottom-nav-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav-icon.active {
+  background: #ef4444;
+  color: white;
+}
+
+.bottom-nav-icon.inactive {
+  background: transparent;
+  color: #9ca3af;
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.bottom-nav-label.active {
+  color: #ef4444;
+}
+
+.bottom-nav-label.inactive {
+  color: #9ca3af;
+}
+
+/* Exact header styling */
+.header-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 30%, #ec4899 100%);
+  padding: 48px 16px 24px 16px;
+}
+
+/* Category navigation exact match */
+.category-nav {
+  background: white;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+  gap: 8px;
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.category-icon.active {
+  background: #fee2e2;
+}
+
+.category-icon.inactive {
+  background: #f3f4f6;
+}
+
+.category-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.category-label.active {
+  color: #ef4444;
+}
+
+.category-label.inactive {
+  color: #6b7280;
+}
+
+/* Section headers exact styling */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
 
-.section-title {
+.section-left {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
+  gap: 8px;
 }
 
-.section-icon {
-  width: 1.5rem;
-  height: 1.5rem;
+.section-dot {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
 }
 
-/* Lottery game specific styles */
-.lottery-card {
-  border-radius: 1rem;
-  padding: 1rem;
-  text-align: center;
-  color: white;
-  font-weight: bold;
-}
-
-.mini-game-card {
-  border-radius: 1rem;
-  padding: 1rem;
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  aspect-ratio: 1;
+.section-right {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  color: #6b7280;
+  font-size: 14px;
 }
 
-/* Stats display */
-.stats-grid {
+/* Grid layouts exact spacing */
+.lottery-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 12px;
 }
 
-.stat-card {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  text-align: center;
+.mini-game-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1f2937;
+.recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.stat-label {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-/* Menu list styles */
+/* Content spacing */
+.content-padding {
+  padding: 16px;
+}
+
+.section-spacing {
+  margin-bottom: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .header-gradient {
+    padding-top: 44px;
+  }
+  
+  .content-padding {
+    padding: 12px;
+  }
+}
+
+/* Safe area for mobile */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Exact wallet circle styling */
+.wallet-circle-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+}
+
+.wallet-circle-bg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 8px solid #ef4444;
+  position: relative;
+}
+
+.wallet-circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+/* Menu item exact styling */
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0.5rem;
+  padding: 12px 8px;
   border-bottom: 1px solid #f3f4f6;
 }
 
-.menu-item-content {
+.menu-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .menu-icon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 16px;
 }
 
-/* Wallet screen specific */
-.wallet-circle {
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  position: relative;
-  margin: 0 auto;
+.menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.circle-progress {
-  stroke-dasharray: 314;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 0.5s ease;
+.menu-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
 }
 
-/* Profile header */
-.profile-avatar {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+.menu-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.menu-right {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
 }
 
-/* Service center grid */
-.service-grid {
+.notification-badge {
+  background: #ef4444;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Activity page exact styling */
+.activity-grid-4 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-.service-item {
-  text-align: center;
-}
-
-.service-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.75rem;
+.activity-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 0.5rem;
+  margin: 0 auto 8px;
+  font-size: 20px;
 }
 
-/* Activity screen banners */
-.promo-banner {
-  border-radius: 1rem;
-  padding: 1rem;
-  color: white;
-  margin-bottom: 1rem;
-}
-
-.promo-title {
-  font-size: 1.125rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.promo-description {
-  font-size: 0.875rem;
-  opacity: 0.9;
-}
-
-/* Agency commission display */
-.commission-display {
+.activity-label {
+  font-size: 11px;
+  color: #4b5563;
   text-align: center;
-  padding: 1.5rem;
-  border-radius: 1rem;
+  line-height: 1.3;
+}
+
+/* Promotion page exact styling */
+.commission-card {
+  background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
   color: white;
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
 }
 
 .commission-amount {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
 .commission-label {
-  font-size: 0.875rem;
+  font-size: 14px;
   opacity: 0.9;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
-/* Invitation code display */
-.invitation-code {
-  font-family: monospace;
-  background: #f3f4f6;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+.commission-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 24px;
+}
+
+.commission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.commission-item {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Stats grid exact styling */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+/* Invitation button exact styling */
+.invitation-btn {
+  width: 100%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  transition: all 0.2s ease;
+}
+
+.invitation-btn:active {
+  transform: scale(0.98);
+  background: #dc2626;
 }
