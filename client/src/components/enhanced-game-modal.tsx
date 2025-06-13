@@ -63,9 +63,9 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
       const response = await fetch('/api/games/bet', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           gameId: game.id,
           betAmount: betAmount

@@ -372,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Game betting endpoint
-  app.post("/api/game/bet", authenticateToken, async (req: any, res) => {
+  app.post("/api/games/bet", authenticateToken, async (req: any, res) => {
     try {
       const { gameId, betAmount, gameData } = req.body;
       const userId = req.user.userId || req.user.id;
