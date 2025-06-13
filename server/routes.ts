@@ -383,35 +383,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Session-based authentication middleware for games
-  const authenticateSession = async (req: any, res: any, next: any) => {
+  // Token-based authentication middleware for games
+  const authenticateGameToken = async (req: any, res: any, next: any) => {
     try {
-      console.log("Session data:", req.session);
-      console.log("Session userId:", req.session?.userId);
-      
-      // Check if user is authenticated via session
-      if (!req.session || !req.session.userId) {
-        console.log("No session or userId found");
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+
+      if (!token) {
+        console.log("No token provided");
         return res.status(401).json({ message: "Authentication required" });
       }
+
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      const user = await storage.getUser(decoded.userId);
       
-      const user = await storage.getUser(req.session.userId);
       if (!user) {
-        console.log("User not found for id:", req.session.userId);
+        console.log("User not found for id:", decoded.userId);
         return res.status(401).json({ message: "User not found" });
       }
       
-      console.log("User authenticated:", user.username);
+      console.log("User authenticated for game:", user.username);
       req.user = user;
       next();
     } catch (error) {
-      console.error("Authentication error:", error);
+      console.error("Token authentication error:", error);
       return res.status(401).json({ message: "Authentication failed" });
     }
   };
 
   // Game betting endpoint
-  app.post("/api/games/bet", authenticateSession, async (req: any, res) => {
+  app.post("/api/games/bet", authenticateGameToken, async (req: any, res) => {
     try {
       const { gameId, betAmount, gameData } = req.body;
       const userId = req.user.userId || req.user.id;

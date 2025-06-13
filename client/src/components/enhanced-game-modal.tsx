@@ -59,13 +59,20 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
     }
 
     try {
+      // Get stored auth token
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       // Call the actual betting API
       const response = await fetch('/api/games/bet', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
+        headers,
         body: JSON.stringify({
           gameId: game.id,
           betAmount: betAmount
