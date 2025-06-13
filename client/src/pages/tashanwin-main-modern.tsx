@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { UniversalGame } from "@/components/games/universal-game";
+import { SimpleGameModal } from "@/components/simple-game-modal";
 import { MobileOptimizedNavigation } from "@/components/mobile-optimized-navigation";
 import { PremiumGameInterface } from "@/components/premium-game-interface";
 import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
@@ -184,15 +184,11 @@ export default function TashanWinMainModern() {
 
       {/* Game Modal */}
       {currentGame && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md">
-            <UniversalGame 
-              game={games.find(g => g.title === currentGame) || games[0]} 
-              user={user}
-              onBack={closeGame}
-            />
-          </div>
-        </div>
+        <SimpleGameModal 
+          game={games.find(g => g.title === currentGame) || games[0]} 
+          user={user}
+          onClose={closeGame}
+        />
       )}
 
       {/* Toast Notifications */}
