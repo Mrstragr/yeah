@@ -37,7 +37,7 @@ export function SimpleGameModal({ game, user, onClose }: SimpleGameModalProps) {
   };
 
   const playGame = async () => {
-    if (!user || parseFloat(user.walletBalance) < betAmount) {
+    if (!user || parseFloat(user.balance) < betAmount) {
       setResult("Insufficient balance!");
       return;
     }
@@ -45,8 +45,36 @@ export function SimpleGameModal({ game, user, onClose }: SimpleGameModalProps) {
     setIsPlaying(true);
     setResult(null);
 
-    // Simulate game delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Call the actual betting API
+      const response = await fetch('/api/games/bet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({
+          gameId: game.id,
+          betAmount: betAmount
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setResult(data.result === 'win' ? 
+          `🎉 You won ₹${data.winAmount}!` : 
+          `💔 You lost ₹${betAmount}`
+        );
+        setGameState(data);
+      } else {
+        setResult(data.message || "Game error occurred");
+      }
+    } catch (error) {
+      setResult("Network error - please try again");
+    }
+
+    setIsPlaying(false);
 
     let winAmount = 0;
     let gameResult = "";

@@ -11,6 +11,7 @@ import WalletDeposit from "@/pages/wallet-deposit";
 import WalletWithdraw from "@/pages/wallet-withdraw";
 import AccountPage from "@/pages/account";
 import AnalyticsPage from "@/pages/analytics";
+import AdminPage from "@/pages/admin";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
@@ -107,6 +108,7 @@ function Router() {
         )} />
         <Route path="/account" component={AccountPage} />
         <Route path="/analytics" component={AnalyticsPage} />
+        <Route path="/admin" component={AdminPage} />
         <Route component={NotFound} />
       </Switch>
       <MobileNav />

@@ -67,25 +67,21 @@ export function AdminDashboard() {
   // Fetch dashboard stats
   const { data: stats } = useQuery({
     queryKey: ["/api/admin/stats"],
-    queryFn: () => apiRequest("GET", "/api/admin/stats"),
   });
 
   // Fetch users
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
-    queryFn: () => apiRequest("GET", "/api/admin/users"),
   });
 
   // Fetch transactions
   const { data: transactions = [] } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
-    queryFn: () => apiRequest("GET", "/api/admin/transactions"),
   });
 
   // Fetch KYC documents
   const { data: kycDocuments = [] } = useQuery<KycDocument[]>({
     queryKey: ["/api/admin/kyc-documents"],
-    queryFn: () => apiRequest("GET", "/api/admin/kyc-documents"),
   });
 
   // User status mutation
