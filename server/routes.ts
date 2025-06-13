@@ -110,7 +110,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastLoginAt: null,
       });
 
-      // Generate JWT token
+      // Set session for game authentication
+      (req as any).session.userId = user.id;
+      (req as any).session.user = user;
+
+      // Generate JWT token for other services
       const token = jwt.sign(
         { userId: user.id, phone: user.phone },
         JWT_SECRET,
@@ -160,6 +164,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update last login
       await storage.updateUserLastLogin(user.id);
+
+      // Set session for game authentication
+      (req as any).session.userId = user.id;
+      (req as any).session.user = user;
 
       // Generate JWT token
       const token = jwt.sign(
@@ -371,8 +379,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Session-based authentication middleware for games
+  const authenticateSession = async (req: any, res: any, next: any) => {
+    try {
+      console.log("Session data:", req.session);
+      console.log("Session userId:", req.session?.userId);
+      
+      // Check if user is authenticated via session
+      if (!req.session || !req.session.userId) {
+        console.log("No session or userId found");
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        console.log("User not found for id:", req.session.userId);
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      console.log("User authenticated:", user.username);
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error("Authentication error:", error);
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+  };
+
   // Game betting endpoint
-  app.post("/api/games/bet", authenticateToken, async (req: any, res) => {
+  app.post("/api/games/bet", authenticateSession, async (req: any, res) => {
     try {
       const { gameId, betAmount, gameData } = req.body;
       const userId = req.user.userId || req.user.id;
