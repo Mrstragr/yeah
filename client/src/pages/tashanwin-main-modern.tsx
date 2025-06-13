@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SimpleGameModal } from "@/components/simple-game-modal";
 import { MobileOptimizedNavigation } from "@/components/mobile-optimized-navigation";
-import { PremiumGameInterface } from "@/components/premium-game-interface";
-import { TashanWinGameLobby } from "@/components/tashanwin-game-lobby";
+import { EnhancedPremiumInterface } from "@/components/enhanced-premium-interface";
+import { EnhancedGameLobby } from "@/components/enhanced-game-lobby";
 import { WalletManagement } from "@/components/wallet-management";
 import { AchievementsDashboard } from "@/components/achievements-dashboard";
 import { RealTimeDashboard } from "@/components/real-time-dashboard";
@@ -71,14 +71,11 @@ export default function TashanWinMainModern() {
   };
 
   const handleGameSelect = (game: Game) => {
-    console.log("Game selected:", game);
     if (!user) {
       addToast("Please log in to play games", "error");
       return;
     }
-    console.log("Setting current game to:", game.title);
     setCurrentGame(game.title);
-    addToast(`Opening ${game.title}...`, "info");
   };
 
 
@@ -112,7 +109,7 @@ export default function TashanWinMainModern() {
       <div className="pb-20 md:pb-4">
         {/* Home Section - Featured Games and Premium Interface */}
         {activeSection === 'home' && (
-          <PremiumGameInterface
+          <EnhancedPremiumInterface
             games={games}
             onGameSelect={handleGameSelect}
             user={user}
@@ -121,15 +118,12 @@ export default function TashanWinMainModern() {
 
         {/* Games Section - Full Game Lobby */}
         {activeSection === 'games' && (
-          <div className="px-4">
-            <TashanWinGameLobby 
-              onGameSelect={(gameId: number, gameTitle: string) => {
-                const game = games.find(g => g.id === gameId);
-                if (game) handleGameSelect(game);
-              }}
-
-            />
-          </div>
+          <EnhancedGameLobby 
+            onGameSelect={(gameId: number, gameTitle: string) => {
+              const game = games.find(g => g.id === gameId);
+              if (game) handleGameSelect(game);
+            }}
+          />
         )}
 
         {/* Wallet Section */}
@@ -187,16 +181,11 @@ export default function TashanWinMainModern() {
 
       {/* Game Modal */}
       {currentGame && (
-        <div>
-          <div className="fixed top-4 left-4 bg-blue-600 text-white p-2 rounded z-50">
-            Debug: Game {currentGame} is open
-          </div>
-          <SimpleGameModal 
-            game={games.find(g => g.title === currentGame) || games[0]} 
-            user={user}
-            onClose={closeGame}
-          />
-        </div>
+        <SimpleGameModal 
+          game={games.find(g => g.title === currentGame) || games[0]} 
+          user={user}
+          onClose={closeGame}
+        />
       )}
 
       {/* Toast Notifications */}
