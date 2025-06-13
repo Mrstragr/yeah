@@ -41,7 +41,7 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
   };
 
   const playGame = async () => {
-    if (!user || parseFloat(user.balance) < betAmount) {
+    if (!user || parseFloat(user.walletBalance || user.balance || '0') < betAmount) {
       setResult("Insufficient balance!");
       return;
     }
@@ -327,13 +327,13 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
               <Coins className="w-5 h-5 text-yellow-400" />
               <span className="text-gray-400">Balance:</span>
             </div>
-            <span className="text-green-400 font-bold">₹{parseFloat(user?.balance || '0').toLocaleString()}</span>
+            <span className="text-green-400 font-bold">₹{parseFloat(user?.walletBalance || user?.balance || '0').toLocaleString()}</span>
           </div>
 
           {/* Play Button */}
           <Button
             onClick={playGame}
-            disabled={isPlaying || parseFloat(user?.balance || '0') < betAmount}
+            disabled={isPlaying || parseFloat(user?.walletBalance || user?.balance || '0') < betAmount}
             className={`w-full py-4 text-lg font-bold transition-all duration-300 ${
               isPlaying 
                 ? 'bg-gray-600 cursor-not-allowed' 
