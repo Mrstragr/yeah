@@ -401,9 +401,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const actualGameId = typeof gameId === 'string' ? gameMapping[gameId] || 999 : gameId;
 
-      // Determine win/loss based on game data
-      const isWin = gameData?.win || false;
-      const winAmount = isWin ? betAmount * (gameData?.multiplier || 2) : 0;
+      // Generate random game outcome based on game type
+      let isWin = false;
+      let multiplier = 2;
+      let gameResult = "";
+
+      // Get game info to determine type
+      const gameInfo = await storage.getGame(actualGameId);
+      const gameTitle = gameInfo?.title || "Unknown";
+
+      // Game-specific logic with realistic win rates
+      switch (gameTitle.toLowerCase()) {
+        case 'aviator':
+          const aviatorMultiplier = Math.random() * 10 + 1;
+          isWin = Math.random() > 0.4; // 60% win rate
+          multiplier = isWin ? aviatorMultiplier : 0;
+          gameResult = isWin ? `Plane flew to ${aviatorMultiplier.toFixed(2)}x!` : "Plane crashed!";
+          break;
+
+        case 'coin flip':
+          isWin = Math.random() > 0.5; // 50% win rate
+          multiplier = 2;
+          gameResult = isWin ? "Coin landed on your side!" : "Coin landed on the wrong side!";
+          break;
+
+        case 'dice roll':
+          const diceSum = Math.floor(Math.random() * 18) + 3; // 3-21
+          isWin = diceSum > 10; // Roughly 50% win rate
+          multiplier = isWin ? (diceSum / 10) : 0;
+          gameResult = `Dice rolled: ${diceSum}`;
+          break;
+
+        case 'big small':
+          const bigSmallResult = Math.random() > 0.5;
+          isWin = bigSmallResult;
+          multiplier = 2;
+          gameResult = isWin ? "Big wins!" : "Small wins!";
+          break;
+
+        case 'blackjack':
+          isWin = Math.random() > 0.45; // 55% win rate (house edge)
+          multiplier = 2;
+          gameResult = isWin ? "Blackjack!" : "House wins!";
+          break;
+
+        case 'lucky numbers':
+          isWin = Math.random() > 0.7; // 30% win rate, higher payout
+          multiplier = isWin ? 5 : 0;
+          gameResult = isWin ? "Lucky number hit!" : "Try again!";
+          break;
+
+        case 'plinko':
+          const plinkoMultiplier = [0.5, 1, 2, 5, 10, 5, 2, 1, 0.5][Math.floor(Math.random() * 9)];
+          isWin = plinkoMultiplier >= 1;
+          multiplier = plinkoMultiplier;
+          gameResult = `Ball landed on ${plinkoMultiplier}x slot!`;
+          break;
+
+        default:
+          isWin = Math.random() > 0.5;
+          multiplier = 2;
+          gameResult = isWin ? "You win!" : "You lose!";
+      }
+
+      const winAmount = isWin ? Math.floor(betAmount * multiplier) : 0;
       const netAmount = winAmount - betAmount;
 
       // Update balance
@@ -432,7 +493,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         result: isWin ? "win" : "lose",
         winAmount: winAmount.toString(),
         newBalance,
-        message: isWin ? `You won ₹${winAmount}!` : `You lost ₹${betAmount}`
+        gameResult,
+        multiplier: multiplier.toFixed(2),
+        message: isWin ? `${gameResult} You won ₹${winAmount}!` : `${gameResult} You lost ₹${betAmount}`
       });
     } catch (error) {
       console.error("Error processing bet:", error);

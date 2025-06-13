@@ -76,10 +76,10 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
       
       if (data.success) {
         const isWin = data.result === 'win';
-        setResult(isWin ? 
+        setResult(data.message || (isWin ? 
           `🎉 You won ₹${data.winAmount}!` : 
           `💔 You lost ₹${betAmount}`
-        );
+        ));
 
         // Add visual effects for wins
         if (isWin) {
@@ -90,6 +90,11 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
             setShowParticles(false);
           }, 3000);
         }
+
+        // Refresh user data to show updated balance
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         setResult(data.message || "Game error occurred");
       }
