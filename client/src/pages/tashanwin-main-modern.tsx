@@ -71,11 +71,14 @@ export default function TashanWinMainModern() {
   };
 
   const handleGameSelect = (game: Game) => {
+    console.log("Game selected:", game);
     if (!user) {
       addToast("Please log in to play games", "error");
       return;
     }
+    console.log("Setting current game to:", game.title);
     setCurrentGame(game.title);
+    addToast(`Opening ${game.title}...`, "info");
   };
 
 
@@ -184,11 +187,16 @@ export default function TashanWinMainModern() {
 
       {/* Game Modal */}
       {currentGame && (
-        <SimpleGameModal 
-          game={games.find(g => g.title === currentGame) || games[0]} 
-          user={user}
-          onClose={closeGame}
-        />
+        <div>
+          <div className="fixed top-4 left-4 bg-blue-600 text-white p-2 rounded z-50">
+            Debug: Game {currentGame} is open
+          </div>
+          <SimpleGameModal 
+            game={games.find(g => g.title === currentGame) || games[0]} 
+            user={user}
+            onClose={closeGame}
+          />
+        </div>
       )}
 
       {/* Toast Notifications */}
