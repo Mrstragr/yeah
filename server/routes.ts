@@ -25,6 +25,30 @@ const authenticateToken = (req: any, res: any, next: any) => {
   });
 };
 
+// Admin authentication middleware
+const authenticateAdmin = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const user = await storage.getUser(decoded.userId);
+    
+    if (!user || user.role !== 'admin') {
+      return res.sendStatus(403);
+    }
+    
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.sendStatus(403);
+  }
+};
+
 // Validation schemas
 const loginSchema = z.object({
   phone: z.string().min(10),
@@ -1800,6 +1824,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error tracking event:", error);
       res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+
+  // Admin API Routes
+  app.get("/api/admin/stats", authenticateAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const transactions = await storage.getAllTransactions();
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const todayTransactions = transactions.filter((t: any) => new Date(t.createdAt) >= today);
+      const weekTransactions = transactions.filter((t: any) => new Date(t.createdAt) >= thisWeek);
+      const monthTransactions = transactions.filter((t: any) => new Date(t.createdAt) >= thisMonth);
+
+      const stats = {
+        totalUsers: users.length,
+        totalRevenue: transactions.reduce((sum: number, t: any) => 
+          t.type === 'deposit' && t.status === 'approved' ? sum + parseFloat(t.amount) : sum, 0),
+        todayRevenue: todayTransactions.reduce((sum: number, t: any) => 
+          t.type === 'deposit' && t.status === 'approved' ? sum + parseFloat(t.amount) : sum, 0),
+        weekRevenue: weekTransactions.reduce((sum: number, t: any) => 
+          t.type === 'deposit' && t.status === 'approved' ? sum + parseFloat(t.amount) : sum, 0),
+        monthRevenue: monthTransactions.reduce((sum: number, t: any) => 
+          t.type === 'deposit' && t.status === 'approved' ? sum + parseFloat(t.amount) : sum, 0),
+        newUsersToday: users.filter((u: any) => new Date(u.createdAt) >= today).length,
+      };
+
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  app.get("/api/admin/users", authenticateAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/transactions", authenticateAdmin, async (req, res) => {
+    try {
+      const transactions = await storage.getAllTransactions();
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.get("/api/admin/kyc-documents", authenticateAdmin, async (req, res) => {
+    try {
+      const documents = await storage.getAllKycDocuments();
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch KYC documents" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/status", authenticateAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      const user = await storage.updateUserStatus(userId, isActive);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  app.patch("/api/admin/transactions/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const transactionId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      const transaction = await storage.updateTransactionStatus(transactionId, status);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      res.json(transaction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update transaction status" });
+    }
+  });
+
+  app.patch("/api/admin/kyc/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const documentId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      const document = await storage.updateKycDocumentStatus(documentId, status);
+      if (!document) {
+        return res.status(404).json({ message: "KYC document not found" });
+      }
+      
+      res.json(document);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update KYC status" });
     }
   });
 
