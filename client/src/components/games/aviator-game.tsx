@@ -83,9 +83,8 @@ export function AviatorGame({ game, user, onBack }: AviatorGameProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-gradient-to-br from-blue-900 via-purple-900 to-black border-2 border-blue-500">
-        <CardContent className="p-6">
+    <Card className="w-full max-w-2xl bg-gradient-to-br from-blue-900 via-purple-900 to-black border-2 border-blue-500">
+      <CardContent className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold text-blue-400">✈️ Aviator</h2>
@@ -260,6 +259,5 @@ export function AviatorGame({ game, user, onBack }: AviatorGameProps) {
           </div>
         </CardContent>
       </Card>
-    </div>
   );
 }
