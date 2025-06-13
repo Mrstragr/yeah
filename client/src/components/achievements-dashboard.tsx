@@ -32,10 +32,12 @@ export function AchievementsDashboard({ user }: AchievementsDashboardProps) {
 
   const { data: userAchievements = [] } = useQuery({
     queryKey: ["/api/user/achievements"],
+    enabled: !!user,
   });
 
   const { data: leaderboard = [] } = useQuery({
     queryKey: ["/api/leaderboard"],
+    enabled: !!user,
   });
 
   const categories = [

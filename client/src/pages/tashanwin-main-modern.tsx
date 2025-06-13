@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { SimpleGameModal } from "@/components/simple-game-modal";
+import { EnhancedGameModal } from "@/components/enhanced-game-modal";
 import { MobileOptimizedNavigation } from "@/components/mobile-optimized-navigation";
 import { EnhancedPremiumInterface } from "@/components/enhanced-premium-interface";
 import { EnhancedGameLobby } from "@/components/enhanced-game-lobby";

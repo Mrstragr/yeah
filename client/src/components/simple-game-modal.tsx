@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Minus, Plus } from "lucide-react";
+import { X, Minus, Plus, TrendingUp, Coins, Zap } from "lucide-react";
 
 interface SimpleGameModalProps {
   game: {
@@ -20,6 +20,11 @@ export function SimpleGameModal({ game, user, onClose }: SimpleGameModalProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [gameState, setGameState] = useState<any>(null);
+  const [winAnimation, setWinAnimation] = useState(false);
+  const [coinFlips, setCoinFlips] = useState<string[]>([]);
+  const [diceValues, setDiceValues] = useState<number[]>([]);
+  const [multiplier, setMultiplier] = useState(1.0);
+  const [showParticles, setShowParticles] = useState(false);
 
   const quickBets = [50, 100, 500, 1000, 5000];
 
@@ -75,6 +80,109 @@ export function SimpleGameModal({ game, user, onClose }: SimpleGameModalProps) {
     }
 
     setIsPlaying(false);
+
+    // Add visual effects for wins
+    if (data.result === 'win') {
+      setWinAnimation(true);
+      setShowParticles(true);
+      setTimeout(() => {
+        setWinAnimation(false);
+        setShowParticles(false);
+      }, 3000);
+    }
+  };
+
+  // Game-specific animation effects
+  const playAnimatedGame = async () => {
+    setIsPlaying(true);
+    setResult(null);
+
+    // Game-specific animations
+    if (game.title.toLowerCase() === 'coin flip') {
+      animateCoinFlip();
+    } else if (game.title.toLowerCase() === 'dice roll') {
+      animateDiceRoll();
+    } else if (game.title.toLowerCase() === 'aviator') {
+      animateAviator();
+    } else if (game.title.toLowerCase() === 'plinko') {
+      animatePlinko();
+    }
+
+    // Call actual game API after animation
+    setTimeout(() => {
+      playGame();
+    }, 2000);
+  };
+
+  const animateCoinFlip = () => {
+    const flips = ['heads', 'tails'];
+    let flipCount = 0;
+    const flipInterval = setInterval(() => {
+      setCoinFlips([flips[Math.random() > 0.5 ? 1 : 0]]);
+      flipCount++;
+      if (flipCount > 6) {
+        clearInterval(flipInterval);
+      }
+    }, 200);
+  };
+
+  const animateDiceRoll = () => {
+    let rollCount = 0;
+    const rollInterval = setInterval(() => {
+      setDiceValues([
+        Math.floor(Math.random() * 6) + 1,
+        Math.floor(Math.random() * 6) + 1,
+        Math.floor(Math.random() * 6) + 1
+      ]);
+      rollCount++;
+      if (rollCount > 8) {
+        clearInterval(rollInterval);
+      }
+    }, 150);
+  };
+
+  const animateAviator = () => {
+    let currentMultiplier = 1.0;
+    const aviatorInterval = setInterval(() => {
+      currentMultiplier += 0.1;
+      setMultiplier(currentMultiplier);
+      if (currentMultiplier > 3.0) {
+        clearInterval(aviatorInterval);
+        setMultiplier(1.0);
+      }
+    }, 100);
+  };
+
+  const animatePlinko = () => {
+    // Simulate ball dropping animation
+    let position = 0;
+    const plinkoInterval = setInterval(() => {
+      position += 10;
+      if (position > 100) {
+        clearInterval(plinkoInterval);
+      }
+    }, 50);
+  };
+
+  useEffect(() => {
+    if (winAnimation) {
+      const timer = setTimeout(() => setWinAnimation(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [winAnimation]);
+
+  // Alternative simplified game play function
+  const playSimpleGame = async () => {
+    if (!user || parseFloat(user.balance) < betAmount) {
+      setResult("Insufficient balance!");
+      return;
+    }
+
+    setIsPlaying(true);
+    setResult(null);
+
+    // Simulate game delay with animations
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     let winAmount = 0;
     let gameResult = "";
