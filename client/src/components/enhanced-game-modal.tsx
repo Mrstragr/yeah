@@ -244,12 +244,11 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
               {[...Array(20)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-ping"
+                  className="particle"
                   style={{
                     left: `${Math.random() * 100}%`,
                     top: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                    animationDuration: `${1 + Math.random()}s`
+                    animationDelay: `${Math.random() * 2}s`
                   }}
                 ></div>
               ))}
