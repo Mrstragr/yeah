@@ -111,8 +111,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Set session for game authentication
+      console.log("Setting session for user (registration):", user.id, user.username);
       (req as any).session.userId = user.id;
       (req as any).session.user = user;
+      console.log("Session after setting (registration):", (req as any).session);
 
       // Generate JWT token for other services
       const token = jwt.sign(
@@ -166,8 +168,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUserLastLogin(user.id);
 
       // Set session for game authentication
+      console.log("Setting session for user (login):", user.id, user.username);
       (req as any).session.userId = user.id;
       (req as any).session.user = user;
+      console.log("Session after setting (login):", (req as any).session);
 
       // Generate JWT token
       const token = jwt.sign(
