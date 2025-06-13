@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Bell, Star, TrendingUp, Gamepad2, Zap, Crown, Trophy } from "lucide-react";
+import { DreamClubGameModal } from "./dreamclub-game-modal";
 
 interface User {
   id: number;
@@ -22,6 +23,7 @@ interface Game {
 
 export function DreamClubHome() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -170,7 +172,10 @@ export function DreamClubHome() {
                   <span className="text-yellow-400 text-xs font-medium">⭐ {game.rating}</span>
                   <span className="text-green-400 text-xs font-medium">₹{game.jackpot}</span>
                 </div>
-                <button className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-xl text-sm font-medium">
+                <button 
+                  onClick={() => setSelectedGame(game)}
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-xl text-sm font-medium hover:scale-105 transition-all"
+                >
                   Play Now
                 </button>
               </div>

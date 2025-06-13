@@ -2,23 +2,13 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { MobileNav } from "@/components/mobile-nav";
-import TashanWinMain from "@/pages/tashanwin-main-modern";
-import CategoryPage from "@/pages/category";
-import WalletPage from "@/pages/wallet";
-import WalletDeposit from "@/pages/wallet-deposit";
-import WalletWithdraw from "@/pages/wallet-withdraw";
-import AccountPage from "@/pages/account";
-import AnalyticsPage from "@/pages/analytics";
+import DreamClubApp from "@/pages/dreamclub-app";
+import DreamClubLogin from "@/pages/dreamclub-login";
 import AdminPage from "@/pages/admin";
-import Login from "@/pages/auth/login";
-import Register from "@/pages/auth/register";
-import NotFound from "@/pages/not-found";
 import { useQuery } from "@tanstack/react-query";
 
 function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
       const token = localStorage.getItem('authToken');
@@ -41,7 +31,7 @@ function useAuth() {
         
         return response.json();
       } catch (error) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
         return null;
       }
     },
@@ -53,7 +43,6 @@ function useAuth() {
     user,
     isLoading,
     isAuthenticated: !!user,
-    error,
   };
 }
 
@@ -62,8 +51,11 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-[#ffd700] border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg font-semibold">Loading 91DreamClub...</p>
+        </div>
       </div>
     );
   }
@@ -71,60 +63,28 @@ function Router() {
   if (!isAuthenticated) {
     return (
       <Switch>
-        <Route path="/auth/login" component={Login} />
-        <Route path="/auth/register" component={Register} />
-        <Route component={Login} />
+        <Route path="/login" component={DreamClubLogin} />
+        <Route component={DreamClubLogin} />
       </Switch>
     );
   }
 
   return (
-    <div className="pb-20">
-      <Switch>
-        <Route path="/" component={TashanWinMain} />
-        <Route path="/category/:slug" component={CategoryPage} />
-        <Route path="/wallet" component={WalletPage} />
-        <Route path="/wallet/deposit" component={WalletDeposit} />
-        <Route path="/wallet/withdraw" component={WalletWithdraw} />
-        <Route path="/promotion" component={() => (
-          <div className="min-h-screen bg-[#1a1a1a] p-4">
-            <div className="max-w-md mx-auto pt-8">
-              <div className="bg-[#2a2a2a] border border-[#444] rounded-lg p-8 text-center">
-                <h1 className="text-2xl font-bold text-[#ffd700] mb-4">Promotion</h1>
-                <p className="text-gray-400">Exciting promotions coming soon!</p>
-              </div>
-            </div>
-          </div>
-        )} />
-        <Route path="/activity" component={() => (
-          <div className="min-h-screen bg-[#1a1a1a] p-4">
-            <div className="max-w-md mx-auto pt-8">
-              <div className="bg-[#2a2a2a] border border-[#444] rounded-lg p-8 text-center">
-                <h1 className="text-2xl font-bold text-[#ffd700] mb-4">Activity</h1>
-                <p className="text-gray-400">Activities coming soon!</p>
-              </div>
-            </div>
-          </div>
-        )} />
-        <Route path="/account" component={AccountPage} />
-        <Route path="/analytics" component={AnalyticsPage} />
-        <Route path="/admin" component={AdminPage} />
-        <Route component={NotFound} />
-      </Switch>
-      <MobileNav />
-    </div>
+    <Switch>
+      <Route path="/" component={DreamClubApp} />
+      <Route path="/admin" component={AdminPage} />
+      <Route component={DreamClubApp} />
+    </Switch>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen bg-casino-primary">
-          <Router />
-          <Toaster />
-        </div>
-      </TooltipProvider>
+      <div className="min-h-screen bg-slate-900">
+        <Router />
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }
