@@ -181,7 +181,7 @@ export default function TashanWinMainModern() {
 
       {/* Game Modal */}
       {currentGame && (
-        <SimpleGameModal 
+        <EnhancedGameModal 
           game={games.find(g => g.title === currentGame) || games[0]} 
           user={user}
           onClose={closeGame}

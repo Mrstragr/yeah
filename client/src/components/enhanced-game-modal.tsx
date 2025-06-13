@@ -152,8 +152,8 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
         return (
           <div className="bg-gradient-to-br from-blue-900/50 to-purple-900/50 rounded-lg p-4 mb-4">
             <div className="text-center">
-              <div className="text-4xl mb-2">✈️</div>
-              <div className="text-2xl font-bold text-blue-400">
+              <div className={`text-4xl mb-2 ${isPlaying ? 'aviator-fly-animation' : ''}`}>✈️</div>
+              <div className={`text-2xl font-bold text-blue-400 ${isPlaying ? 'multiplier-animation' : ''}`}>
                 {isPlaying ? `${multiplier.toFixed(2)}x` : '1.00x'}
               </div>
               <div className="text-gray-400 text-sm">Current Multiplier</div>
@@ -165,7 +165,7 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
         return (
           <div className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-lg p-4 mb-4">
             <div className="text-center">
-              <div className={`text-6xl mb-2 transform transition-transform duration-300 ${isPlaying ? 'animate-spin' : ''}`}>
+              <div className={`text-6xl mb-2 transform transition-transform duration-300 ${isPlaying ? 'coin-animation' : ''}`}>
                 🪙
               </div>
               {coinFlips.length > 0 && (
@@ -184,7 +184,7 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
               {(diceValues.length > 0 ? diceValues : [1, 1, 1]).map((value, index) => (
                 <div 
                   key={index}
-                  className={`w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl font-bold text-black transform transition-transform duration-200 ${isPlaying ? 'animate-bounce' : ''}`}
+                  className={`w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl font-bold text-black transform transition-transform duration-200 ${isPlaying ? 'dice-roll-animation' : ''}`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {value}
@@ -235,8 +235,8 @@ export function EnhancedGameModal({ game, user, onClose }: EnhancedGameModalProp
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className={`w-full max-w-md bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 transform transition-all duration-300 ${winAnimation ? 'scale-105 border-yellow-500' : ''}`}>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 modal-backdrop">
+      <Card className={`w-full max-w-md bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 transform transition-all duration-300 modal-content ${winAnimation ? 'scale-105 border-yellow-500 win-animation' : ''}`}>
         <CardContent className="p-6">
           {/* Particles Effect */}
           {showParticles && (

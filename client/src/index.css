@@ -247,6 +247,133 @@
   50% { transform: scale(1.05); }
 }
 
+/* Enhanced Game Animations */
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes aviatorFly {
+  0% { transform: translateX(-50px) translateY(0px) rotate(0deg); }
+  50% { transform: translateX(0px) translateY(-10px) rotate(5deg); }
+  100% { transform: translateX(50px) translateY(-5px) rotate(10deg); }
+}
+
+@keyframes winGlow {
+  0% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+  50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+}
+
+@keyframes multiplierRise {
+  0% { transform: scale(1); color: #60a5fa; }
+  50% { transform: scale(1.2); color: #34d399; }
+  100% { transform: scale(1.5); color: #fbbf24; }
+}
+
+@keyframes buttonPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes cardFlip {
+  0% { transform: perspective(1000px) rotateY(0deg); }
+  50% { transform: perspective(1000px) rotateY(90deg); }
+  100% { transform: perspective(1000px) rotateY(180deg); }
+}
+
+@keyframes plinkoFall {
+  0% { transform: translateY(-20px) translateX(0px); }
+  25% { transform: translateY(20px) translateX(10px); }
+  50% { transform: translateY(60px) translateX(-5px); }
+  75% { transform: translateY(100px) translateX(15px); }
+  100% { transform: translateY(140px) translateX(0px); }
+}
+
+/* Game-specific animation classes */
+.dice-roll-animation {
+  animation: diceRoll 0.4s ease-in-out;
+}
+
+.aviator-fly-animation {
+  animation: aviatorFly 2s ease-in-out infinite;
+}
+
+.win-animation {
+  animation: winGlow 1s ease-in-out infinite;
+}
+
+.multiplier-animation {
+  animation: multiplierRise 0.8s ease-out forwards;
+}
+
+.button-pulse-animation {
+  animation: buttonPulse 0.3s ease-in-out;
+}
+
+.card-flip-animation {
+  animation: cardFlip 1s ease-in-out;
+}
+
+.plinko-fall-animation {
+  animation: plinkoFall 2s ease-in-out forwards;
+}
+
+/* Enhanced hover effects for game cards */
+.game-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.game-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Particle effects */
+.particle-effect {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(45deg, #fbbf24, #f59e0b);
+  border-radius: 50%;
+  animation: particleFloat 3s ease-out forwards;
+}
+
+/* Smooth modal transitions */
+.modal-backdrop {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
 /* Casino Button Effect */
 .casino-button {
   background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
