@@ -20,6 +20,14 @@ function App() {
   const [selectedGame, setSelectedGame] = useState<{id: string, name: string, type: 'lottery' | 'mini' | 'recommended' | 'slot'} | null>(null);
   const [walletModal, setWalletModal] = useState<{type: 'deposit' | 'withdraw', isOpen: boolean}>({type: 'deposit', isOpen: false});
 
+  const handleTransaction = (amount: number, type: 'deposit' | 'withdraw') => {
+    if (type === 'deposit') {
+      setWalletBalance(prev => prev + amount);
+    } else {
+      setWalletBalance(prev => prev - amount);
+    }
+  };
+
   const HomeScreen = () => (
     <div className="app-container">
       {/* Exact Header Match */}
@@ -236,13 +244,22 @@ function App() {
           </div>
           
           <div className="slots-games">
-            <div className="slot-item">
+            <div 
+              className="slot-item"
+              onClick={() => setSelectedGame({id: 'jili', name: 'JILI SLOTS', type: 'slot'})}
+            >
               <div className="slot-preview purple-slot">JILI</div>
             </div>
-            <div className="slot-item">
+            <div 
+              className="slot-item"
+              onClick={() => setSelectedGame({id: 'jdb', name: 'JDB SLOTS', type: 'slot'})}
+            >
               <div className="slot-preview blue-slot">JDB</div>
             </div>
-            <div className="slot-item">
+            <div 
+              className="slot-item"
+              onClick={() => setSelectedGame({id: 'cq9', name: 'CQ9 SLOTS', type: 'slot'})}
+            >
               <div className="slot-preview orange-slot">CQ9</div>
             </div>
           </div>
@@ -262,7 +279,12 @@ function App() {
           </div>
           
           <div className="rummy-game">
-            <div className="rummy-card">505</div>
+            <div 
+              className="rummy-card"
+              onClick={() => setSelectedGame({id: 'rummy', name: 'RUMMY 505', type: 'slot'})}
+            >
+              505
+            </div>
           </div>
         </div>
       </div>
@@ -334,7 +356,7 @@ function App() {
           <div className="wallet-icon-container">
             <Wallet className="wallet-icon" />
           </div>
-          <div className="wallet-balance">₹0.39</div>
+          <div className="wallet-balance">₹{walletBalance.toFixed(2)}</div>
           <div className="wallet-label">Total balance</div>
           
           <div className="wallet-stats">
@@ -414,7 +436,7 @@ function App() {
 
         <div className="balance-card">
           <div className="balance-label">Total balance</div>
-          <div className="balance-amount">₹0.39</div>
+          <div className="balance-amount">₹{walletBalance.toFixed(2)}</div>
         </div>
       </div>
 
@@ -597,6 +619,24 @@ function App() {
           </button>
         ))}
       </div>
+
+      {/* Game Modal */}
+      {selectedGame && (
+        <GameModal
+          game={selectedGame}
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+        />
+      )}
+
+      {/* Wallet Modal */}
+      <WalletModal
+        type={walletModal.type}
+        isOpen={walletModal.isOpen}
+        onClose={() => setWalletModal({...walletModal, isOpen: false})}
+        currentBalance={walletBalance}
+        onTransaction={handleTransaction}
+      />
     </div>
   );
 }
