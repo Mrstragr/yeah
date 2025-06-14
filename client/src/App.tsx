@@ -11,9 +11,14 @@ import {
   Copy,
   MoreHorizontal
 } from 'lucide-react';
+import { GameModal } from './components/GameModal';
+import { WalletModal } from './components/WalletModal';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
+  const [walletBalance, setWalletBalance] = useState(0.39);
+  const [selectedGame, setSelectedGame] = useState<{id: string, name: string, type: 'lottery' | 'mini' | 'recommended' | 'slot'} | null>(null);
+  const [walletModal, setWalletModal] = useState<{type: 'deposit' | 'withdraw', isOpen: boolean}>({type: 'deposit', isOpen: false});
 
   const HomeScreen = () => (
     <div className="app-container">
@@ -36,13 +41,23 @@ function App() {
         {/* Balance Card - Exact Match */}
         <div className="balance-card">
           <div className="balance-label">Wallet balance</div>
-          <div className="balance-amount">₹0.39</div>
+          <div className="balance-amount">₹{walletBalance.toFixed(2)}</div>
         </div>
 
         {/* Action Buttons - Exact Match */}
         <div className="action-buttons">
-          <button className="withdraw-btn">Withdraw</button>
-          <button className="deposit-btn">Deposits</button>
+          <button 
+            className="withdraw-btn"
+            onClick={() => setWalletModal({type: 'withdraw', isOpen: true})}
+          >
+            Withdraw
+          </button>
+          <button 
+            className="deposit-btn"
+            onClick={() => setWalletModal({type: 'deposit', isOpen: true})}
+          >
+            Deposits
+          </button>
         </div>
 
         {/* Feature Cards - Exact Match */}
@@ -100,19 +115,31 @@ function App() {
           </div>
           
           <div className="lottery-games">
-            <div className="lottery-item blue-lottery">
+            <div 
+              className="lottery-item blue-lottery"
+              onClick={() => setSelectedGame({id: 'wingo', name: 'WIN GO', type: 'lottery'})}
+            >
               <div className="lottery-title">WIN GO</div>
               <div className="lottery-number">1</div>
             </div>
-            <div className="lottery-item pink-lottery">
+            <div 
+              className="lottery-item pink-lottery"
+              onClick={() => setSelectedGame({id: 'k3', name: 'K3 Lotre', type: 'lottery'})}
+            >
               <div className="lottery-title">K3</div>
               <div className="lottery-subtitle">Lotre</div>
             </div>
-            <div className="lottery-item green-lottery">
+            <div 
+              className="lottery-item green-lottery"
+              onClick={() => setSelectedGame({id: '5d', name: '5D Lotre', type: 'lottery'})}
+            >
               <div className="lottery-title">5D</div>
               <div className="lottery-subtitle">Lotre</div>
             </div>
-            <div className="lottery-item purple-lottery">
+            <div 
+              className="lottery-item purple-lottery"
+              onClick={() => setSelectedGame({id: 'trx', name: 'TRX WINGO', type: 'lottery'})}
+            >
               <div className="lottery-title-small">TRX WINGO</div>
               <div className="lottery-subtitle-small">Win</div>
             </div>
@@ -138,14 +165,23 @@ function App() {
           </div>
           
           <div className="mini-games">
-            <div className="mini-item blue-mini">
+            <div 
+              className="mini-item blue-mini"
+              onClick={() => setSelectedGame({id: 'dragontiger', name: 'DRAGON TIGER', type: 'mini'})}
+            >
               <div className="mini-title-two">DRAGON</div>
               <div className="mini-title-two">TIGER</div>
             </div>
-            <div className="mini-item green-mini">
+            <div 
+              className="mini-item green-mini"
+              onClick={() => setSelectedGame({id: 'goal', name: 'GOAL', type: 'mini'})}
+            >
               <div className="mini-title">GOAL</div>
             </div>
-            <div className="mini-item purple-mini">
+            <div 
+              className="mini-item purple-mini"
+              onClick={() => setSelectedGame({id: 'dice', name: 'DICE', type: 'mini'})}
+            >
               <div className="mini-title">DICE</div>
             </div>
           </div>
@@ -164,14 +200,23 @@ function App() {
           </div>
           
           <div className="recommended-games">
-            <div className="rec-item red-rec">
+            <div 
+              className="rec-item red-rec"
+              onClick={() => setSelectedGame({id: 'aviator', name: 'AVIATOR', type: 'recommended'})}
+            >
               <div className="rec-title">AVIATOR</div>
               <div className="rec-subtitle">x500+</div>
             </div>
-            <div className="rec-item purple-rec">
+            <div 
+              className="rec-item purple-rec"
+              onClick={() => setSelectedGame({id: 'mines', name: 'MINES', type: 'recommended'})}
+            >
               <div className="rec-title">MINES</div>
             </div>
-            <div className="rec-item green-rec">
+            <div 
+              className="rec-item green-rec"
+              onClick={() => setSelectedGame({id: 'goal2', name: 'GOAL', type: 'recommended'})}
+            >
               <div className="rec-title">GOAL</div>
             </div>
           </div>
