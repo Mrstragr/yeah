@@ -3,6 +3,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+  40%, 43% { transform: translate3d(0,-30px,0); }
+  70% { transform: translate3d(0,-15px,0); }
+  90% { transform: translate3d(0,-4px,0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.6); }
+}
+
 /* Reset and Base - Exact Match */
 * {
   margin: 0;
@@ -45,6 +83,20 @@ html, body {
   background: linear-gradient(135deg, #ff4444 0%, #ff6b35 50%, #ff1493 100%);
   padding: 44px 16px 20px 16px;
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: pulse 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .header-top {
@@ -322,11 +374,37 @@ html, body {
   text-align: center;
   color: white;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.lottery-item::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.3));
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lottery-item:hover {
+  transform: translateY(-4px) rotateX(5deg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.lottery-item:hover::before {
+  opacity: 1;
+  animation: shimmer 1.5s infinite;
 }
 
 .lottery-item:active {
-  transform: scale(0.95);
+  transform: translateY(-2px) scale(0.98);
 }
 
 .blue-lottery {
@@ -402,16 +480,33 @@ html, body {
   text-align: center;
   color: white;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-item::after {
+  content: '🎮';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+  animation: bounce 2s infinite;
+}
+
+.mini-item:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
 
 .mini-item:active {
-  transform: scale(0.95);
+  transform: translateY(-1px) scale(0.98);
 }
 
 .blue-mini {
@@ -497,6 +592,13 @@ html, body {
   border-radius: 16px;
   padding: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slot-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .slot-preview {
@@ -508,6 +610,23 @@ html, body {
   color: white;
   font-weight: 700;
   font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.slot-preview::before {
+  content: '🎰';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+  animation: spin 3s linear infinite;
+}
+
+.slot-preview:hover {
+  transform: scale(1.02);
 }
 
 .purple-slot {
