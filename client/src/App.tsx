@@ -20,6 +20,7 @@ import { MinesGame } from './components/games/MinesGame';
 import { DiceGame } from './components/games/DiceGame';
 import { DragonTigerGame } from './components/games/DragonTigerGame';
 import { LiveFeatures } from './components/LiveFeatures';
+import { RealTimeUpdates } from './components/RealTimeUpdates';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -171,6 +172,31 @@ function App() {
 
       {/* Game Content - Exact Match */}
       <div className="content-section">
+        {/* Quick Stats Bar */}
+        <div className="quick-stats-bar">
+          <div className="quick-stat">
+            <div className="quick-stat-icon">🎯</div>
+            <div className="quick-stat-info">
+              <div className="quick-stat-value">2,847</div>
+              <div className="quick-stat-label">Playing Now</div>
+            </div>
+          </div>
+          <div className="quick-stat">
+            <div className="quick-stat-icon">💰</div>
+            <div className="quick-stat-info">
+              <div className="quick-stat-value">₹1.2M</div>
+              <div className="quick-stat-label">Today's Wins</div>
+            </div>
+          </div>
+          <div className="quick-stat">
+            <div className="quick-stat-icon">⚡</div>
+            <div className="quick-stat-info">
+              <div className="quick-stat-value">98.7%</div>
+              <div className="quick-stat-label">Win Rate</div>
+            </div>
+          </div>
+        </div>
+
         {/* Lottery Section */}
         <div className="game-section">
           <div className="section-header">
@@ -350,10 +376,71 @@ function App() {
           </div>
         </div>
 
+        {/* Hot Games & Winners Section */}
+        <div className="hot-section">
+          <div className="section-header">
+            <div className="section-left">
+              <div className="fire-icon">🔥</div>
+              <span className="section-title">HOT GAMES</span>
+            </div>
+            <div className="section-right">
+              <span className="view-all">View All</span>
+              <ChevronRight className="chevron" />
+            </div>
+          </div>
+          
+          <div className="hot-games-grid">
+            <div 
+              className="hot-game-card wingo-hot"
+              onClick={() => setSelectedGame({id: 'wingo', name: 'WIN GO', type: 'lottery'})}
+            >
+              <div className="hot-badge">HOT</div>
+              <div className="hot-game-title">WIN GO</div>
+              <div className="hot-game-subtitle">Next: 2:15</div>
+              <div className="hot-game-multiplier">x98.5</div>
+            </div>
+            
+            <div 
+              className="hot-game-card aviator-hot"
+              onClick={() => setSelectedGame({id: 'aviator', name: 'Aviator', type: 'mini'})}
+            >
+              <div className="hot-badge">LIVE</div>
+              <div className="hot-game-title">Aviator</div>
+              <div className="hot-game-subtitle">Flying Now</div>
+              <div className="hot-game-multiplier">x15.64</div>
+            </div>
+            
+            <div 
+              className="hot-game-card mines-hot"
+              onClick={() => setSelectedGame({id: 'mines', name: 'Mines', type: 'mini'})}
+            >
+              <div className="hot-badge">WIN</div>
+              <div className="hot-game-title">Mines</div>
+              <div className="hot-game-subtitle">Safe Spots</div>
+              <div className="hot-game-multiplier">x45.2</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Winner Announcements */}
+        <div className="winners-section">
+          <div className="winner-banner">
+            <div className="winner-icon">🏆</div>
+            <div className="winner-text">
+              <div className="winner-name">ProGamer98 won ₹89,320</div>
+              <div className="winner-game">on Dragon Tiger just now!</div>
+            </div>
+            <div className="winner-amount">+₹89,320</div>
+          </div>
+        </div>
+
         {/* Live Features Section */}
         <div className="content-section">
           <LiveFeatures walletBalance={walletBalance} />
         </div>
+
+        {/* Real-time Updates Component */}
+        <RealTimeUpdates onWalletUpdate={(bonus) => setWalletBalance(prev => prev + bonus)} />
       </div>
     </div>
   );

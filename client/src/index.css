@@ -2140,6 +2140,497 @@ html, body {
   letter-spacing: 0.5px;
 }
 
+/* Hot Games Section */
+.hot-section {
+  margin: 20px 0;
+}
+
+.fire-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  animation: flicker 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.view-all {
+  font-size: 12px;
+  color: #666;
+  margin-right: 4px;
+}
+
+.hot-games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.hot-game-card {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.hot-game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.hot-game-card:hover::before {
+  transform: translateX(100%);
+}
+
+.hot-game-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
+}
+
+.aviator-hot {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.aviator-hot:hover {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+}
+
+.mines-hot {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.mines-hot:hover {
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+}
+
+.hot-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff4444;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  animation: pulse 2s infinite;
+}
+
+.aviator-hot .hot-badge {
+  color: #3b82f6;
+}
+
+.mines-hot .hot-badge {
+  color: #10b981;
+}
+
+.hot-game-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.hot-game-subtitle {
+  font-size: 10px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.hot-game-multiplier {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+/* Winner Announcements */
+.winners-section {
+  margin: 16px 0;
+}
+
+.winner-banner {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  animation: slideInRight 0.8s ease-out, celebration 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes celebration {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+
+.winner-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.winner-icon {
+  font-size: 24px;
+  animation: bounce 2s infinite;
+}
+
+.winner-text {
+  flex: 1;
+  color: white;
+}
+
+.winner-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.winner-game {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.winner-amount {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Quick Stats Bar */
+.quick-stats-bar {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.quick-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+}
+
+.quick-stat-icon {
+  font-size: 20px;
+  animation: pulse 2s infinite;
+}
+
+.quick-stat-info {
+  flex: 1;
+}
+
+.quick-stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.quick-stat-label {
+  font-size: 10px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Enhanced Game Cards with Real-time Effects */
+.lottery-item, .mini-item, .rec-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.lottery-item::after, .mini-item::after, .rec-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.lottery-item:hover::after, .mini-item:hover::after, .rec-item:hover::after {
+  left: 100%;
+}
+
+/* Live Indicators */
+.lottery-item::before {
+  content: '🔴 LIVE';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff4444;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+.mini-item::before {
+  content: '⚡ HOT';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff8800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  animation: bounce 2s infinite;
+}
+
+.rec-item::before {
+  content: '🏆 WIN';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #10b981;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  animation: glow 2s infinite;
+}
+
+/* Enhanced Hover Effects */
+.lottery-item:active, .mini-item:active, .rec-item:active {
+  transform: scale(0.95);
+}
+
+/* Real-time Numbers Animation */
+@keyframes countUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.lottery-number, .quick-stat-value, .stat-value {
+  animation: countUp 0.8s ease-out;
+}
+
+/* Floating Elements */
+@keyframes floatUp {
+  0% { transform: translateY(0px) scale(1); opacity: 1; }
+  100% { transform: translateY(-20px) scale(0.8); opacity: 0; }
+}
+
+/* Real-time Updates Styling */
+.live-stats-container {
+  display: none; /* Hidden by default, can be enabled with additional features */
+}
+
+.win-notification-popup {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+  animation: slideInRight 0.5s ease-out, celebration 3s ease-in-out infinite;
+  max-width: 280px;
+}
+
+.win-popup-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.win-popup-icon {
+  font-size: 24px;
+  animation: bounce 1s infinite;
+}
+
+.win-popup-text {
+  flex: 1;
+}
+
+.win-popup-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.win-popup-details {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.win-popup-amount {
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.recent-wins-ticker {
+  position: fixed;
+  bottom: 100px;
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 999;
+  animation: slideUp 0.5s ease-out;
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.ticker-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ticker-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.ticker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  padding: 4px 0;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.ticker-username {
+  font-weight: bold;
+  color: #60a5fa;
+}
+
+.ticker-amount {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.ticker-game {
+  color: #fbbf24;
+  font-size: 9px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Visual Effects */
+.game-section {
+  position: relative;
+}
+
+.game-section::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(45deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.game-section:hover::before {
+  opacity: 1;
+}
+
+/* Performance optimizations */
+.lottery-item, .mini-item, .rec-item, .hot-game-card {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 /* Responsive adjustments */
 @media (max-width: 374px) {
   .app-wrapper {
