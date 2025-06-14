@@ -19,6 +19,7 @@ import { AviatorGame } from './components/games/AviatorGame';
 import { MinesGame } from './components/games/MinesGame';
 import { DiceGame } from './components/games/DiceGame';
 import { DragonTigerGame } from './components/games/DragonTigerGame';
+import { LiveFeatures } from './components/LiveFeatures';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -292,6 +293,11 @@ function App() {
               505
             </div>
           </div>
+        </div>
+
+        {/* Live Features Section */}
+        <div className="content-section">
+          <LiveFeatures walletBalance={walletBalance} />
         </div>
       </div>
     </div>
@@ -626,8 +632,63 @@ function App() {
         ))}
       </div>
 
-      {/* Game Modal */}
-      {selectedGame && (
+      {/* Comprehensive Game Modals */}
+      {selectedGame?.id === 'wingo' && (
+        <WinGoGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {selectedGame?.id === 'k3' && (
+        <K3LotreGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {selectedGame?.id === 'aviator' && (
+        <AviatorGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {selectedGame?.id === 'mines' && (
+        <MinesGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {selectedGame?.id === 'dice' && (
+        <DiceGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {selectedGame?.id === 'dragon' && (
+        <DragonTigerGame
+          isOpen={!!selectedGame}
+          onClose={() => setSelectedGame(null)}
+          walletBalance={walletBalance}
+          onTransaction={handleTransaction}
+        />
+      )}
+      
+      {/* Fallback for slot games and other simple games */}
+      {selectedGame && !['wingo', 'k3', 'aviator', 'mines', 'dice', 'dragon'].includes(selectedGame.id) && (
         <GameModal
           game={selectedGame}
           isOpen={!!selectedGame}
