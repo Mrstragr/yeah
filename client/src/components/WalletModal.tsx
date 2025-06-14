@@ -111,9 +111,9 @@ export function WalletModal({ type, isOpen, onClose, currentBalance, onTransacti
               Quick Select
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {quickAmounts.map((quickAmount) => (
+              {quickAmounts.map((quickAmount, index) => (
                 <button
-                  key={quickAmount}
+                  key={`quick-${index}-${quickAmount}`}
                   onClick={() => setAmount(quickAmount.toString())}
                   className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                 >

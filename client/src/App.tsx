@@ -13,6 +13,12 @@ import {
 } from 'lucide-react';
 import { GameModal } from './components/GameModal';
 import { WalletModal } from './components/WalletModal';
+import { WinGoGame } from './components/games/WinGoGame';
+import { K3LotreGame } from './components/games/K3LotreGame';
+import { AviatorGame } from './components/games/AviatorGame';
+import { MinesGame } from './components/games/MinesGame';
+import { DiceGame } from './components/games/DiceGame';
+import { DragonTigerGame } from './components/games/DragonTigerGame';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
