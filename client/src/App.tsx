@@ -86,6 +86,61 @@ function App() {
             <div className="feature-subtitle">privileges</div>
           </div>
         </div>
+
+        {/* Enhanced Promotional Banner */}
+        <div className="promo-banner-section">
+          <div className="main-promo-banner">
+            <div className="promo-content">
+              <div className="promo-text">
+                <div className="promo-title">🎉 NEW MEMBER BONUS</div>
+                <div className="promo-subtitle">Get ₹5000 bonus on first deposit</div>
+                <div className="promo-details">Valid until 31st Dec 2024</div>
+              </div>
+              <button className="promo-btn">CLAIM NOW</button>
+            </div>
+          </div>
+          
+          <div className="secondary-promos">
+            <div className="mini-promo">
+              <span className="mini-promo-icon">🔥</span>
+              <span className="mini-promo-text">Daily Cashback 10%</span>
+            </div>
+            <div className="mini-promo">
+              <span className="mini-promo-icon">⚡</span>
+              <span className="mini-promo-text">Fast Withdrawal</span>
+            </div>
+            <div className="mini-promo">
+              <span className="mini-promo-icon">🎯</span>
+              <span className="mini-promo-text">Win Rate 98.5%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-time Statistics */}
+        <div className="stats-section">
+          <div className="stats-header">
+            <span className="stats-title">🔴 LIVE STATS</span>
+            <span className="online-count">1,247 playing now</span>
+          </div>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-value">₹2,45,680</div>
+              <div className="stat-label">Today's Jackpot</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">98.5%</div>
+              <div className="stat-label">Win Rate</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">₹89,320</div>
+              <div className="stat-label">Last Winner</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">847</div>
+              <div className="stat-label">Winners Today</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Category Navigation - Exact Match */}
