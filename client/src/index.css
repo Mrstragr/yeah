@@ -41,6 +41,57 @@
   50% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.6); }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Loading and Visual States */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.game-icon-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.lottery-title, .mini-title, .rec-title {
+  position: relative;
+  z-index: 2;
+}
+
+.visual-feedback {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.interactive-element {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-element:hover {
+  transform: translateY(-2px);
+}
+
+.interactive-element:active {
+  transform: scale(0.98);
+}
+
 /* Reset and Base - Exact Match */
 * {
   margin: 0;
@@ -228,6 +279,24 @@ html, body {
   padding: 12px;
   text-align: center;
   color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel-card::before {
+  content: '🎡';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  animation: spin 4s linear infinite;
+}
+
+.wheel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 184, 0, 0.3);
 }
 
 .vip-card {
@@ -236,6 +305,24 @@ html, body {
   padding: 12px;
   text-align: center;
   color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.vip-card::before {
+  content: '💎';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  animation: pulse 2s infinite;
+}
+
+.vip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(156, 39, 176, 0.3);
 }
 
 .feature-title {
@@ -458,6 +545,25 @@ html, body {
   text-align: center;
   margin-bottom: 24px;
   box-shadow: 0 4px 12px rgba(255,68,68,0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.moto-banner::before {
+  content: '🏍️';
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 20px;
+  animation: bounce 1.5s infinite;
+}
+
+.moto-banner:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 68, 68, 0.4);
+  animation: glow 2s infinite;
 }
 
 .moto-text {
@@ -465,6 +571,8 @@ html, body {
   font-weight: 800;
   color: white;
   letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Mini Games - Exact Match */
@@ -659,6 +767,26 @@ html, body {
   color: white;
   font-size: 20px;
   font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.rummy-card::before {
+  content: '🃏';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  opacity: 0.8;
+  animation: bounce 2s infinite;
+}
+
+.rummy-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(255, 68, 68, 0.3);
+  animation: glow 2s infinite;
 }
 
 /* Bottom Navigation - Exact Match */
@@ -688,7 +816,16 @@ html, body {
   background: none;
   cursor: pointer;
   padding: 4px;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nav-tab:hover {
+  transform: translateY(-2px);
+}
+
+.nav-tab.active {
+  animation: bounce 0.6s ease-out;
 }
 
 .nav-icon-wrapper {
