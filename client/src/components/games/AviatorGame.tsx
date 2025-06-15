@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, TrendingUp, Plane, DollarSign, Clock, Users, Target } from 'lucide-react';
+import { BettingChip, GameTimer, WinCelebration } from '../AuthenticGameElements';
+import { MultiplierDisplay } from '../AuthenticAnimations';
 
 interface AviatorGameProps {
   isOpen: boolean;
