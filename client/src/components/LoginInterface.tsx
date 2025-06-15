@@ -21,7 +21,7 @@ export const LoginInterface = ({ isOpen, onClose, onLogin }: LoginInterfaceProps
     const credentials = {
       password,
       rememberMe: rememberPassword,
-      ...(loginType === 'phone' ? { phone: `${countryCode}${phoneNumber}` } : { email })
+      ...(loginType === 'phone' ? { phone: phoneNumber } : { email })
     };
     onLogin(credentials);
   };
@@ -215,15 +215,27 @@ export const LoginInterface = ({ isOpen, onClose, onLogin }: LoginInterfaceProps
           {/* Login Button */}
           <button
             type="submit"
-            className={`w-full py-4 rounded-full text-white font-medium text-lg transition-all duration-200 ${
-              loginType === 'phone'
-                ? 'bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500 shadow-lg'
-                : 'bg-gray-300 text-gray-500'
-            }`}
-            disabled={loginType === 'email'}
+            className="w-full py-4 rounded-full text-white font-medium text-lg transition-all duration-200 bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500 shadow-lg"
           >
             Log in
           </button>
+
+          {/* Demo Credentials */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm font-medium mb-1">Demo Account:</p>
+            <p className="text-blue-600 text-xs">Phone: 9876543210</p>
+            <p className="text-blue-600 text-xs">Password: demo123</p>
+            <button
+              type="button"
+              onClick={() => {
+                setPhoneNumber('9876543210');
+                setPassword('demo123');
+              }}
+              className="mt-2 text-blue-600 text-xs underline hover:text-blue-800"
+            >
+              Use Demo Credentials
+            </button>
+          </div>
 
           {/* Register Button */}
           <button
