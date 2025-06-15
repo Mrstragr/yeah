@@ -129,26 +129,12 @@ function App() {
   }
 
   const HomeScreen = () => (
-    <div className="app-container pb-20 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
-      {/* Enhanced Header Section */}
-      <div className="header-section bg-gradient-to-br from-red-500 via-pink-500 to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="header-top relative z-10 flex items-center justify-between p-6 text-white">
-          <div className="logo-text text-3xl font-black tracking-wider flex items-center gap-2">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-              <span className="text-red-500 text-xl font-bold">91</span>
-            </div>
-            91CLUB
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Bell className="notification-icon w-6 h-6 text-white hover:text-yellow-300 transition-colors cursor-pointer" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            </div>
-            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center cursor-pointer hover:bg-opacity-30 transition-all">
-              <User className="w-5 h-5 text-white" />
-            </div>
-          </div>
+    <div className="app-container pb-20">
+      {/* Header Section - Original Style */}
+      <div className="header-section">
+        <div className="header-top">
+          <div className="logo-text">91CLUB</div>
+          <Bell className="notification-icon" />
         </div>
         
         {/* Info Banner - Exact Match */}
@@ -160,17 +146,14 @@ function App() {
           <div className="info-logo">91</div>
         </div>
 
-        {/* Enhanced Balance Card */}
-        <div className="balance-card bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 rounded-2xl p-6 shadow-2xl border border-yellow-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="balance-label text-yellow-900 font-medium text-sm opacity-90">Wallet Balance</div>
-              <div className="balance-amount text-2xl font-bold text-yellow-900">₹{walletBalance.toFixed(2)}</div>
-              <div className="text-yellow-800 text-xs mt-1">Available for play</div>
-            </div>
-            <div className="w-12 h-12 bg-yellow-300 rounded-full flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-yellow-800" />
-            </div>
+        {/* Balance Card - Original Style */}
+        <div className="balance-card">
+          <div className="balance-info">
+            <div className="balance-label">Wallet balance</div>
+            <div className="balance-amount">₹{walletBalance.toFixed(2)}</div>
+          </div>
+          <div className="balance-icon">
+            <Wallet className="wallet-icon" />
           </div>
         </div>
 
@@ -409,47 +392,37 @@ function App() {
           </div>
         </div>
 
-        {/* Enhanced Recommended Games */}
-        <div className="game-section bg-white px-4 py-6">
-          <div className="section-header flex items-center justify-between mb-6">
-            <div className="section-left flex items-center gap-3">
-              <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
-              <span className="section-title text-xl font-bold text-gray-800">Recommended Games</span>
-              <span className="bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full font-semibold">POPULAR</span>
+        {/* Recommended Games */}
+        <div className="game-section">
+          <div className="section-header">
+            <div className="section-left">
+              <div className="yellow-dot"></div>
+              <span className="section-title">Recommended Games</span>
             </div>
-            <div className="section-right flex items-center gap-2 text-gray-500 cursor-pointer hover:text-gray-700">
-              <span className="detail-text text-sm font-medium">View All</span>
-              <ChevronRight className="w-4 h-4" />
+            <div className="section-right">
+              <ChevronRight className="chevron" />
             </div>
           </div>
           
-          <div className="recommended-games flex gap-4">
+          <div className="recommended-games">
             <div 
-              className="rec-item flex-1 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="rec-item red-rec"
               onClick={() => setSelectedGame({id: 'aviator', name: 'AVIATOR', type: 'recommended'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">✈️</div>
-              <div className="rec-title text-lg font-bold mb-1">AVIATOR</div>
-              <div className="rec-subtitle text-sm opacity-90 font-semibold">x500+ Multiplier</div>
-              <div className="text-xs opacity-80 mt-3">Crash Game</div>
+              <div className="rec-title">AVIATOR</div>
+              <div className="rec-subtitle">x500+</div>
             </div>
             <div 
-              className="rec-item flex-1 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="rec-item purple-rec"
               onClick={() => setSelectedGame({id: 'mines', name: 'MINES', type: 'recommended'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">💎</div>
-              <div className="rec-title text-lg font-bold mb-1">MINES</div>
-              <div className="rec-subtitle text-sm opacity-90">Strategic Play</div>
-              <div className="text-xs opacity-80 mt-3">Risk & Reward</div>
+              <div className="rec-title">MINES</div>
             </div>
             <div 
-              className="rec-item flex-1 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="rec-item green-rec"
               onClick={() => setSelectedGame({id: 'goal2', name: 'GOAL', type: 'recommended'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">⚽</div>
-              <div className="rec-title text-lg font-bold mb-1">GOAL</div>
-              <div className="rec-subtitle text-sm opacity-90">Sports Betting</div>
-              <div className="text-xs opacity-80 mt-3">Live Scores</div>
+              <div className="rec-title">GOAL</div>
             </div>
           </div>
         </div>
@@ -582,7 +555,7 @@ function App() {
   );
 
   const ActivityScreen = () => (
-    <div className="app-container pb-20 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+    <div className="app-container pb-20">
       <div className="header-section">
         <div className="header-top">
           <div className="logo-text">91CLUB</div>
@@ -635,7 +608,7 @@ function App() {
   );
 
   const WalletScreen = () => (
-    <div className="app-container pb-20 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+    <div className="app-container pb-20">
       <div className="header-section">
         <div className="header-top">
           <ArrowLeft className="back-icon" />
@@ -710,7 +683,7 @@ function App() {
   );
 
   const AccountScreen = () => (
-    <div className="app-container pb-20 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+    <div className="app-container pb-20">
       <div className="header-section">
         <div className="profile-header">
           <div className="profile-avatar">
@@ -800,7 +773,7 @@ function App() {
   );
 
   const PromotionScreen = () => (
-    <div className="app-container pb-20 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+    <div className="app-container pb-20">
       <div className="header-section">
         <div className="header-top">
           <div className="logo-text">Agency</div>
@@ -889,39 +862,26 @@ function App() {
       {renderScreen()}
 
       {/* Bottom Navigation - Exact Match */}
-      {/* Enhanced Bottom Navigation */}
-      <div className="bottom-navigation fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-3 shadow-2xl z-50">
-        <div className="flex justify-around items-center max-w-md mx-auto">
-          {[
-            { id: 'home', icon: Home, label: 'Home', color: 'text-blue-500' },
-            { id: 'activity', icon: Activity, label: 'Activity', color: 'text-green-500' },
-            { id: 'promotion', icon: Gift, label: 'Promotion', color: 'text-purple-500' },
-            { id: 'wallet', icon: Wallet, label: 'Wallet', color: 'text-yellow-500' },
-            { id: 'account', icon: User, label: 'Account', color: 'text-red-500' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`nav-tab flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-300 ${
-                activeTab === tab.id 
-                  ? `bg-gradient-to-t from-gray-100 to-white shadow-lg transform scale-110 ${tab.color}` 
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <div className="nav-icon-wrapper relative">
-                <tab.icon className={`nav-icon w-6 h-6 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-                {activeTab === tab.id && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                )}
-              </div>
-              <span className={`nav-label text-xs font-medium mt-1 ${
-                activeTab === tab.id ? 'font-bold' : ''
-              }`}>
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
+      {/* Bottom Navigation - Original Style */}
+      <div className="bottom-navigation">
+        {[
+          { id: 'home', icon: Home, label: 'Home' },
+          { id: 'activity', icon: Activity, label: 'Activity' },
+          { id: 'promotion', icon: Gift, label: 'Promotion' },
+          { id: 'wallet', icon: Wallet, label: 'Wallet' },
+          { id: 'account', icon: User, label: 'Account' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+          >
+            <div className="nav-icon-wrapper">
+              <tab.icon className="nav-icon" />
+            </div>
+            <span className="nav-label">{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Comprehensive Game Modals */}
