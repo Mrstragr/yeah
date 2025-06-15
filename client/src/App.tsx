@@ -8,6 +8,7 @@ import {
   Bell, 
   ChevronRight,
   ArrowLeft,
+  ArrowRight,
   Copy,
   MoreHorizontal
 } from 'lucide-react';
@@ -157,68 +158,62 @@ function App() {
           </div>
         </div>
 
-        {/* Enhanced Action Buttons */}
-        <div className="action-buttons flex gap-4 px-4 mt-4">
+        {/* Action Buttons */}
+        <div className="action-buttons">
           <button 
-            className="withdraw-btn flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white py-4 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+            className="withdraw-btn"
             onClick={() => setWalletModal({type: 'withdraw', isOpen: true})}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="btn-icon" />
             Withdraw
           </button>
           <button 
-            className="deposit-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+            className="deposit-btn"
             onClick={() => setWalletModal({type: 'deposit', isOpen: true})}
           >
-            <Gift className="w-5 h-5" />
+            <Gift className="btn-icon" />
             Deposit
           </button>
         </div>
 
-        {/* Enhanced Feature Cards */}
-        <div className="feature-cards flex gap-4 px-4 mt-6">
-          <div className="wheel-card flex-1 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden">
-            <div className="absolute top-2 right-2 text-2xl opacity-80">🎡</div>
-            <div className="feature-title text-lg font-bold mb-1">Wheel</div>
-            <div className="feature-subtitle text-sm opacity-90">of Fortune</div>
-            <div className="text-xs mt-2 opacity-75">Spin to win prizes</div>
+        {/* Feature Cards */}
+        <div className="feature-cards">
+          <div className="wheel-card">
+            <div className="feature-title">Wheel</div>
+            <div className="feature-subtitle">of Fortune</div>
           </div>
-          <div className="vip-card flex-1 bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden">
-            <div className="absolute top-2 right-2 text-2xl opacity-80">👑</div>
-            <div className="feature-title text-lg font-bold mb-1">VIP</div>
-            <div className="feature-subtitle text-sm opacity-90">Privileges</div>
-            <div className="text-xs mt-2 opacity-75">Exclusive benefits</div>
+          <div className="vip-card">
+            <div className="feature-title">VIP</div>
+            <div className="feature-subtitle">Privileges</div>
           </div>
         </div>
 
-        {/* Enhanced Promotional Banner */}
-        <div className="promo-banner-section px-4 mt-6">
-          <div className="main-promo-banner bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-black opacity-10"></div>
-            <div className="promo-content relative z-10 flex items-center justify-between">
-              <div className="promo-text text-white">
-                <div className="promo-title text-2xl font-bold mb-2">🎉 NEW MEMBER BONUS</div>
-                <div className="promo-subtitle text-lg font-semibold mb-1">Get ₹5000 bonus on first deposit</div>
-                <div className="promo-details text-sm opacity-90">Valid until 31st Dec 2024</div>
+        {/* Promotional Banner */}
+        <div className="promo-banner-section">
+          <div className="main-promo-banner">
+            <div className="promo-content">
+              <div className="promo-text">
+                <div className="promo-title">NEW MEMBER BONUS</div>
+                <div className="promo-subtitle">Get ₹5000 bonus on first deposit</div>
               </div>
-              <button className="promo-btn bg-white text-red-600 px-6 py-3 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+              <button className="promo-btn">
                 CLAIM NOW
               </button>
             </div>
           </div>
           
-          <div className="secondary-promos flex gap-2 mt-4">
-            <div className="mini-promo flex-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl p-4 text-white text-center shadow-lg">
-              <span className="mini-promo-icon text-2xl block mb-1">🔥</span>
-              <span className="mini-promo-text text-sm font-semibold">Daily Cashback 10%</span>
+          <div className="secondary-promos">
+            <div className="mini-promo">
+              <span className="mini-promo-icon">🔥</span>
+              <span className="mini-promo-text">Daily Cashback 10%</span>
             </div>
-            <div className="mini-promo flex-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl p-4 text-white text-center shadow-lg">
-              <span className="mini-promo-icon text-2xl block mb-1">⚡</span>
-              <span className="mini-promo-text text-sm font-semibold">Fast Withdrawal</span>
+            <div className="mini-promo">
+              <span className="mini-promo-icon">⚡</span>
+              <span className="mini-promo-text">Fast Withdrawal</span>
             </div>
-            <div className="mini-promo flex-1 bg-gradient-to-r from-green-400 to-teal-400 rounded-xl p-4 text-white text-center shadow-lg">
-              <span className="mini-promo-icon text-2xl block mb-1">🎯</span>
-              <span className="mini-promo-text text-sm font-semibold">Win Rate 98.5%</span>
+            <div className="mini-promo">
+              <span className="mini-promo-icon">🎯</span>
+              <span className="mini-promo-text">Win Rate 98.5%</span>
             </div>
           </div>
         </div>
