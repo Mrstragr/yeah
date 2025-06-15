@@ -461,6 +461,209 @@ body {
   letter-spacing: 2px;
 }
 
+/* Authentic Bottom Navigation */
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 414px;
+  background: var(--card-background);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  z-index: 1000;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.nav-tab.active {
+  background: rgba(255,71,87,0.1);
+}
+
+.nav-icon-wrapper {
+  position: relative;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-gray);
+}
+
+.nav-tab.active .nav-icon {
+  color: var(--primary-red);
+}
+
+.nav-label {
+  font-size: 10px;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.nav-tab.active .nav-label {
+  color: var(--primary-red);
+  font-weight: 600;
+}
+
+/* Feature Cards */
+.feature-cards {
+  display: flex;
+  gap: 12px;
+  margin: 16px;
+}
+
+.wheel-card, .vip-card {
+  flex: 1;
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.feature-title {
+  color: var(--text-white);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.feature-subtitle {
+  color: var(--text-gray);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Promotional Banner */
+.promo-banner-section {
+  margin: 16px;
+}
+
+.main-promo-banner {
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-blue) 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(255,71,87,0.3);
+}
+
+.promo-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.promo-title {
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.promo-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.promo-btn, .claim-btn {
+  background: white;
+  color: var(--primary-red);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.secondary-promos {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mini-promo {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+}
+
+.mini-promo-icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.mini-promo-text {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Content Section */
+.content-section {
+  padding-bottom: 100px;
+}
+
+/* Stats Section */
+.stats-section {
+  margin: 16px;
+}
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.stats-title {
+  color: var(--text-white);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.stat-number {
+  color: var(--primary-red);
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  color: var(--text-gray);
+  font-size: 10px;
+  font-weight: 500;
+}
+
 .game-icon-overlay {
   position: absolute;
   top: 8px;
