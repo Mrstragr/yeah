@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, TrendingUp, History, Users } from 'lucide-react';
+import { NumberDisplay, BettingChip, GameTimer, ResultDisplay, WinCelebration } from '../AuthenticGameElements';
 
 interface WinGoGameProps {
   isOpen: boolean;
