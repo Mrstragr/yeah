@@ -41,20 +41,33 @@ function App() {
     }
   };
 
-  const handleLogin = (credentials: { phone?: string; email?: string; password: string; rememberMe: boolean }) => {
-    // Simulate login - in real app this would call an API
-    setUser({
-      phone: credentials.phone,
-      email: credentials.email,
-      username: credentials.phone ? `User${credentials.phone.slice(-4)}` : credentials.email?.split('@')[0]
-    });
-    setIsAuthenticated(true);
-    setShowLogin(false);
-    // Set initial wallet balance
-    setWalletBalance(0.39);
+  const handleLogin = async (credentials: { phone?: string; email?: string; password: string; rememberMe: boolean }) => {
+    try {
+      const { apiService } = await import('./lib/api');
+      const result = await apiService.login(credentials);
+      
+      setUser({
+        phone: result.user.phone,
+        email: result.user.email,
+        username: result.user.username
+      });
+      setIsAuthenticated(true);
+      setShowLogin(false);
+      setWalletBalance(parseFloat(result.user.walletBalance));
+    } catch (error: any) {
+      console.error('Login failed:', error.message);
+      // Show error to user - for now just log it
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const { apiService } = await import('./lib/api');
+      apiService.clearToken();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
     setIsAuthenticated(false);
     setUser(null);
     setWalletBalance(0);
