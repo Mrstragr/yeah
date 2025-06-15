@@ -183,13 +183,7 @@ export function WinGoGame({ isOpen, onClose, walletBalance, onTransaction }: Win
           </div>
           
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-red-500" />
-              <span className="text-2xl font-bold text-red-500">
-                {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:
-                {String(timeLeft % 60).padStart(2, '0')}
-              </span>
-            </div>
+            <GameTimer seconds={timeLeft} total={180} />
             {timeLeft <= 10 && (
               <div className="text-red-500 font-bold animate-pulse">Betting Closed</div>
             )}
@@ -209,19 +203,14 @@ export function WinGoGame({ isOpen, onClose, walletBalance, onTransaction }: Win
             <span className="text-sm font-medium">Bet Amount:</span>
             <span className="font-bold text-lg">₹{betAmount}</span>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="flex justify-center gap-3">
             {quickAmounts.map(amount => (
-              <button
+              <BettingChip
                 key={amount}
+                amount={amount}
+                selected={betAmount === amount}
                 onClick={() => setBetAmount(amount)}
-                className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                  betAmount === amount 
-                    ? 'bg-red-500 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                ₹{amount}
-              </button>
+              />
             ))}
           </div>
         </div>
@@ -270,22 +259,27 @@ export function WinGoGame({ isOpen, onClose, walletBalance, onTransaction }: Win
         {/* Number Bets */}
         <div className="p-4 border-b">
           <h3 className="font-medium mb-3">Select Number</h3>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 gap-3 justify-items-center">
             {numberBets.map(bet => (
-              <button
-                key={bet.number}
-                onClick={() => placeBet(bet.number.toString())}
-                disabled={timeLeft <= 10}
-                className={`${getNumberColor(bet.number)} text-white py-3 px-2 rounded-lg font-bold transition-all disabled:opacity-50 relative text-sm`}
-              >
-                <div>{bet.number}</div>
-                <div className="text-xs">{bet.multiplier}</div>
+              <div key={bet.number} className="relative">
+                <button
+                  onClick={() => placeBet(bet.number.toString())}
+                  disabled={timeLeft <= 10}
+                  className="disabled:opacity-50"
+                >
+                  <NumberDisplay 
+                    value={bet.number} 
+                    size="normal"
+                    color={bet.number === 0 || bet.number === 5 ? 'purple' : bet.number % 2 === 0 ? 'red' : 'green'}
+                  />
+                </button>
+                <div className="text-xs text-center mt-1 text-gray-600">{bet.multiplier}</div>
                 {selectedBets[bet.number.toString()] && (
-                  <div className="absolute -top-2 -right-1 bg-yellow-400 text-black text-xs px-1 py-0.5 rounded-full">
+                  <div className="absolute -top-2 -right-1 bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold">
                     ₹{selectedBets[bet.number.toString()]}
                   </div>
                 )}
-              </button>
+              </div>
             ))}
           </div>
         </div>
