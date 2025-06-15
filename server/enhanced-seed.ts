@@ -121,49 +121,59 @@ const gameCategories_data = [
 
 const achievements_data = [
   {
-    name: "First Win",
+    title: "First Win",
     description: "Win your first game",
     icon: "🏆",
     category: "gaming",
-    requirement: JSON.stringify({ type: "win_count", value: 1 }),
+    color: "#ffd700",
+    condition: JSON.stringify({ type: "win_count", value: 1 }),
     reward: "100",
-    isActive: true
+    xpValue: 50,
+    rarity: "common"
   },
   {
-    name: "High Roller",
+    title: "High Roller",
     description: "Place a bet of ₹5000 or more",
     icon: "💎",
-    category: "financial",
-    requirement: JSON.stringify({ type: "single_bet", value: 5000 }),
+    category: "milestone",
+    color: "#00bcd4",
+    condition: JSON.stringify({ type: "single_bet", value: 5000 }),
     reward: "500",
-    isActive: true
+    xpValue: 200,
+    rarity: "rare"
   },
   {
-    name: "Lucky Streak",
+    title: "Lucky Streak",
     description: "Win 5 games in a row",
     icon: "🍀",
-    category: "gaming",
-    requirement: JSON.stringify({ type: "win_streak", value: 5 }),
+    category: "streak",
+    color: "#4caf50",
+    condition: JSON.stringify({ type: "win_streak", value: 5 }),
     reward: "1000",
-    isActive: true
+    xpValue: 300,
+    rarity: "epic"
   },
   {
-    name: "Jackpot Hunter",
+    title: "Jackpot Hunter",
     description: "Win a jackpot prize",
     icon: "🎯",
-    category: "special",
-    requirement: JSON.stringify({ type: "jackpot_win", value: 1 }),
+    category: "jackpot",
+    color: "#ff5722",
+    condition: JSON.stringify({ type: "jackpot_win", value: 1 }),
     reward: "2500",
-    isActive: true
+    xpValue: 500,
+    rarity: "legendary"
   },
   {
-    name: "Daily Player",
+    title: "Daily Player",
     description: "Play games for 7 consecutive days",
     icon: "📅",
-    category: "social",
-    requirement: JSON.stringify({ type: "daily_streak", value: 7 }),
+    category: "gameplay",
+    color: "#9c27b0",
+    condition: JSON.stringify({ type: "daily_streak", value: 7 }),
     reward: "750",
-    isActive: true
+    xpValue: 150,
+    rarity: "rare"
   }
 ];
 
