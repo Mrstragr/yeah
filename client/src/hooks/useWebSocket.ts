@@ -53,7 +53,7 @@ export const useWebSocket = () => {
               break;
               
             case 'game_result':
-              setGameResults(prev => ({
+              setGameResults((prev: any) => ({
                 ...prev,
                 [message.data.gameType]: message.data.result
               }));

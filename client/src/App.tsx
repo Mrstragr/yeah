@@ -22,7 +22,6 @@ import { DragonTigerGame } from './components/games/DragonTigerGame';
 import { LiveFeatures } from './components/LiveFeatures';
 import { RealTimeUpdates } from './components/RealTimeUpdates';
 import { LoginInterface } from './components/LoginInterface';
-import { LandingPage } from './components/LandingPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -78,7 +77,48 @@ function App() {
   if (!isAuthenticated) {
     return (
       <>
-        <LandingPage onLoginClick={() => setShowLogin(true)} />
+        <div className="min-h-screen bg-gradient-to-br from-red-400 via-pink-400 to-purple-500">
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-black opacity-10"></div>
+            <div className="relative px-6 py-12 text-center">
+              <div className="flex items-center justify-center mb-8">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-3 shadow-2xl">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-lg font-bold">9</span>
+                  </div>
+                </div>
+                <span className="text-4xl font-bold text-white tracking-wider">91CLUB</span>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4 leading-tight">
+                Experience the Ultimate<br />Gaming Platform
+              </h1>
+              <p className="text-xl text-white/90 mb-8 leading-relaxed">
+                Join millions of players worldwide in<br />
+                the most exciting gaming experience
+              </p>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="bg-white text-red-500 px-12 py-4 rounded-full text-xl font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 mb-8"
+              >
+                Get Started
+              </button>
+              <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto text-center">
+                <div className="text-white">
+                  <div className="text-2xl font-bold">2.5M+</div>
+                  <div className="text-sm opacity-90">Active Players</div>
+                </div>
+                <div className="text-white">
+                  <div className="text-2xl font-bold">₹50L+</div>
+                  <div className="text-sm opacity-90">Daily Payouts</div>
+                </div>
+                <div className="text-white">
+                  <div className="text-2xl font-bold">24/7</div>
+                  <div className="text-sm opacity-90">Support</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <LoginInterface
           isOpen={showLogin}
           onClose={() => setShowLogin(false)}
