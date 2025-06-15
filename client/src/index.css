@@ -3,63 +3,462 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global Animations */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* 91CLUB Authentic Color Scheme */
+:root {
+  --primary-red: #FF4757;
+  --primary-blue: #3742FA;
+  --primary-green: #2ED573;
+  --primary-yellow: #FFA502;
+  --primary-purple: #A55EEA;
+  --primary-orange: #FF6348;
+  --background-dark: #1A1A2E;
+  --background-light: #16213E;
+  --card-background: #0F3460;
+  --text-white: #FFFFFF;
+  --text-gray: #B4B4B8;
+  --border-color: #2C3E50;
 }
 
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
-  40%, 43% { transform: translate3d(0,-30px,0); }
-  70% { transform: translate3d(0,-15px,0); }
-  90% { transform: translate3d(0,-4px,0); }
+/* 91CLUB Authentic App Styles */
+body {
+  background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text-white);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.app-wrapper {
+  min-height: 100vh;
+  background: var(--background-dark);
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.app-container {
+  max-width: 414px;
+  margin: 0 auto;
+  background: var(--background-dark);
+  min-height: 100vh;
+  position: relative;
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+/* Authentic 91CLUB Header */
+.header-section {
+  background: linear-gradient(135deg, var(--primary-red) 0%, #FF6B9D 50%, var(--primary-blue) 100%);
+  padding: 20px 16px;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
 }
 
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.6); }
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+.logo-text {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text-white);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
 }
 
-@keyframes ripple {
-  0% { transform: scale(0); opacity: 1; }
-  100% { transform: scale(4); opacity: 0; }
+.notification-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-white);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-/* Loading and Visual States */
-.loading-spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255,255,255,.3);
+/* Authentic Info Banner */
+.info-banner {
+  background: rgba(255,255,255,0.95);
+  margin: 16px;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.info-content {
+  flex: 1;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.info-logo {
+  background: var(--primary-red);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+/* Authentic Balance Card */
+.balance-card {
+  background: linear-gradient(135deg, var(--primary-yellow) 0%, #FFD32A 100%);
+  margin: 16px;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(255,165,2,0.3);
+}
+
+.balance-info {
+  flex: 1;
+}
+
+.balance-label {
+  color: #8B4513;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.balance-amount {
+  color: #8B4513;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.balance-icon {
+  background: rgba(255,255,255,0.2);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-icon {
+  width: 24px;
+  height: 24px;
+  color: #8B4513;
+}
+
+/* Authentic Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 16px;
+}
+
+.withdraw-btn, .deposit-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--primary-red) 0%, #FF6B85 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(255,71,87,0.3);
+  cursor: pointer;
+}
+
+.deposit-btn {
+  background: linear-gradient(135deg, var(--primary-green) 0%, #5FD79A 100%);
+  box-shadow: 0 4px 12px rgba(46,213,115,0.3);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Authentic Category Navigation */
+.category-section {
+  background: var(--card-background);
+  margin: 16px;
+  border-radius: 16px;
+  padding: 20px 16px;
+}
+
+.category-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.category-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+.category-circle.active {
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-blue) 100%);
+  transform: scale(1.1);
+}
+
+.category-name {
+  color: var(--text-gray);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.category-name.active {
+  color: var(--text-white);
+  font-weight: 600;
+}
+
+/* Authentic Game Sections */
+.game-section {
+  background: var(--card-background);
+  margin: 16px;
+  border-radius: 16px;
+  padding: 20px 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.red-dot, .purple-dot, .yellow-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
+  background: var(--primary-red);
+}
+
+.purple-dot {
+  background: var(--primary-purple);
+}
+
+.yellow-dot {
+  background: var(--primary-yellow);
+}
+
+.section-title {
+  color: var(--text-white);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.section-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-gray);
+  cursor: pointer;
+}
+
+.detail-text {
+  font-size: 12px;
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+}
+
+/* Authentic Lottery Games */
+.lottery-games {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lottery-item {
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.blue-lottery {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, #5A67D8 100%);
+}
+
+.pink-lottery {
+  background: linear-gradient(135deg, #FF6B9D 0%, #E91E63 100%);
+}
+
+.green-lottery {
+  background: linear-gradient(135deg, var(--primary-green) 0%, #38A169 100%);
+}
+
+.purple-lottery {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #9F7AEA 100%);
+}
+
+.lottery-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.lottery-number {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.lottery-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.lottery-title-small {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.lottery-subtitle-small {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+/* Authentic Mini Games */
+.mini-games {
+  display: flex;
+  gap: 12px;
+}
+
+.mini-item {
+  flex: 1;
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.blue-mini {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, #5A67D8 100%);
+}
+
+.green-mini {
+  background: linear-gradient(135deg, var(--primary-green) 0%, #38A169 100%);
+}
+
+.purple-mini {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #9F7AEA 100%);
+}
+
+.mini-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mini-title-two {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Authentic Recommended Games */
+.recommended-games {
+  display: flex;
+  gap: 12px;
+}
+
+.rec-item {
+  flex: 1;
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.red-rec {
+  background: linear-gradient(135deg, var(--primary-red) 0%, #FF6B85 100%);
+}
+
+.purple-rec {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #9F7AEA 100%);
+}
+
+.green-rec {
+  background: linear-gradient(135deg, var(--primary-green) 0%, #38A169 100%);
+}
+
+.rec-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.rec-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+/* Authentic MOTO RACING Banner */
+.moto-banner {
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #FF8C42 100%);
+  margin: 16px;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(255,99,72,0.3);
+}
+
+.moto-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
 }
 
 .game-icon-overlay {
