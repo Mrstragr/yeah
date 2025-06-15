@@ -61,6 +61,20 @@ function App() {
     setActiveTab('home');
   };
 
+  // Show landing page for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <>
+        <LandingPage onLoginClick={() => setShowLogin(true)} />
+        <LoginInterface
+          isOpen={showLogin}
+          onClose={() => setShowLogin(false)}
+          onLogin={handleLogin}
+        />
+      </>
+    );
+  }
+
   const HomeScreen = () => (
     <div className="app-container">
       {/* Exact Header Match */}
@@ -681,7 +695,7 @@ function App() {
           </div>
         </div>
 
-        <button className="logout-btn">
+        <button className="logout-btn" onClick={handleLogout}>
           <span>Log out</span>
         </button>
       </div>
