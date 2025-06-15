@@ -141,8 +141,8 @@ function App() {
         {/* Info Banner - Exact Match */}
         <div className="info-banner">
           <div className="info-content">
-            <div className="info-text-line">Only deposit funds through the official 91CLUB website and you can</div>
-            <div className="info-text-line">check from our alternative link at 91club.com the page are similar in look</div>
+            <div>Only deposit funds through the official 91CLUB website and you can</div>
+            <div>check from our alternative link at 91club.com the page are similar in look</div>
           </div>
           <div className="info-logo">91</div>
         </div>

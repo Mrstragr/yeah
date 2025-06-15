@@ -84,46 +84,48 @@ body {
 
 /* Authentic Info Banner */
 .info-banner {
-  background: rgba(255,255,255,0.95);
-  margin: 16px;
-  border-radius: 12px;
-  padding: 12px 16px;
+  background: rgba(255,255,255,0.97);
+  margin: 12px 16px;
+  border-radius: 8px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .info-content {
   flex: 1;
-  color: #333;
-  font-size: 13px;
-  line-height: 1.4;
+  color: #2c3e50;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 400;
 }
 
 .info-logo {
   background: var(--primary-red);
   color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 12px;
+  margin-left: 12px;
 }
 
 /* Authentic Balance Card */
 .balance-card {
-  background: linear-gradient(135deg, var(--primary-yellow) 0%, #FFD32A 100%);
-  margin: 16px;
-  border-radius: 16px;
-  padding: 20px;
+  background: linear-gradient(135deg, #FFA502 0%, #FF9500 100%);
+  margin: 12px 16px;
+  border-radius: 12px;
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 24px rgba(255,165,2,0.3);
+  box-shadow: 0 4px 16px rgba(255,165,2,0.25);
 }
 
 .balance-info {
@@ -132,74 +134,75 @@ body {
 
 .balance-label {
   color: #8B4513;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  opacity: 0.9;
 }
 
 .balance-amount {
   color: #8B4513;
-  font-size: 28px;
-  font-weight: 900;
+  font-size: 26px;
+  font-weight: 800;
   line-height: 1;
 }
 
 .balance-icon {
-  background: rgba(255,255,255,0.2);
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .wallet-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   color: #8B4513;
 }
 
 /* Authentic Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 12px;
-  margin: 16px;
+  gap: 10px;
+  margin: 12px 16px;
 }
 
 .withdraw-btn, .deposit-btn {
   flex: 1;
-  background: linear-gradient(135deg, var(--primary-red) 0%, #FF6B85 100%);
+  background: linear-gradient(135deg, #FF4757 0%, #FF6B85 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 14px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(255,71,87,0.3);
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(255,71,87,0.25);
   cursor: pointer;
 }
 
 .deposit-btn {
-  background: linear-gradient(135deg, var(--primary-green) 0%, #5FD79A 100%);
-  box-shadow: 0 4px 12px rgba(46,213,115,0.3);
+  background: linear-gradient(135deg, #2ED573 0%, #5FD79A 100%);
+  box-shadow: 0 3px 10px rgba(46,213,115,0.25);
 }
 
 .btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Authentic Category Navigation */
 .category-section {
   background: var(--card-background);
-  margin: 16px;
-  border-radius: 16px;
-  padding: 20px 16px;
+  margin: 12px 16px;
+  border-radius: 14px;
+  padding: 18px 14px;
 }
 
 .category-list {
@@ -212,30 +215,30 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
 }
 
 .category-circle {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.1);
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  transition: all 0.3s ease;
+  font-size: 22px;
+  transition: all 0.2s ease;
 }
 
 .category-circle.active {
-  background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-blue) 100%);
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #FF4757 0%, #3742FA 100%);
+  transform: scale(1.05);
 }
 
 .category-name {
   color: var(--text-gray);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -247,9 +250,9 @@ body {
 /* Authentic Game Sections */
 .game-section {
   background: var(--card-background);
-  margin: 16px;
-  border-radius: 16px;
-  padding: 20px 16px;
+  margin: 12px 16px;
+  border-radius: 14px;
+  padding: 18px 16px;
 }
 
 .section-header {
@@ -307,17 +310,21 @@ body {
 .lottery-games {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .lottery-item {
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 14px;
   color: white;
   text-align: center;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .blue-lottery {
