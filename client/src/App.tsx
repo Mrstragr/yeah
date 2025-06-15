@@ -270,30 +270,27 @@ function App() {
         </div>
       </div>
 
-      {/* Enhanced Category Navigation */}
-      <div className="category-section bg-white shadow-lg rounded-t-3xl mt-6 px-4 py-6">
-        <div className="category-list flex justify-between items-center">
+      {/* Category Navigation - Original Style */}
+      <div className="category-section">
+        <div className="category-list">
           {[
-            { name: 'Lobby', active: true, icon: '🏠', color: 'from-blue-500 to-cyan-500' },
-            { name: 'PK', active: false, icon: '⚔️', color: 'from-red-500 to-pink-500' },
-            { name: 'Mines', active: false, icon: '💎', color: 'from-purple-500 to-indigo-500' },
-            { name: 'Original', active: false, icon: '🎯', color: 'from-green-500 to-emerald-500' },
-            { name: 'Fishing', active: false, icon: '🎣', color: 'from-teal-500 to-cyan-500' },
-            { name: 'Lottery', active: false, icon: '🎰', color: 'from-orange-500 to-yellow-500' }
+            { name: 'Lobby', active: true },
+            { name: 'PK', active: false },
+            { name: 'Mines', active: false },
+            { name: 'Original', active: false },
+            { name: 'Fishing', active: false },
+            { name: 'Lottery', active: false }
           ].map((cat) => (
-            <div key={cat.name} className="category-item flex flex-col items-center cursor-pointer group">
-              <div className={`category-circle w-16 h-16 rounded-2xl flex items-center justify-center text-2xl shadow-lg transition-all duration-300 group-hover:scale-110 mb-2 ${
-                cat.active 
-                  ? `bg-gradient-to-br ${cat.color} text-white transform scale-110` 
-                  : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-              }`}>
-                {cat.icon}
+            <div key={cat.name} className="category-item">
+              <div className={`category-circle ${cat.active ? 'active' : ''}`}>
+                {cat.name === 'Lobby' && '🏠'}
+                {cat.name === 'PK' && '⚔️'}
+                {cat.name === 'Mines' && '💎'}
+                {cat.name === 'Original' && '🎯'}
+                {cat.name === 'Fishing' && '🎣'}
+                {cat.name === 'Lottery' && '🎰'}
               </div>
-              <div className={`category-name text-xs font-medium transition-colors ${
-                cat.active ? 'text-gray-800' : 'text-gray-500 group-hover:text-gray-700'
-              }`}>
-                {cat.name}
-              </div>
+              <div className={`category-name ${cat.active ? 'active' : ''}`}>{cat.name}</div>
             </div>
           ))}
         </div>
@@ -326,107 +323,88 @@ function App() {
           </div>
         </div>
 
-        {/* Enhanced Lottery Section */}
-        <div className="game-section bg-white px-4 py-6">
-          <div className="section-header flex items-center justify-between mb-6">
-            <div className="section-left flex items-center gap-3">
-              <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="section-title text-xl font-bold text-gray-800">Lottery Games</span>
-              <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-semibold">HOT</span>
+        {/* Lottery Section - Original Style */}
+        <div className="game-section">
+          <div className="section-header">
+            <div className="section-left">
+              <div className="red-dot"></div>
+              <span className="section-title">Lottery</span>
             </div>
-            <div className="section-right flex items-center gap-2 text-gray-500 cursor-pointer hover:text-gray-700">
-              <span className="detail-text text-sm font-medium">View All</span>
-              <ChevronRight className="w-4 h-4" />
+            <div className="section-right">
+              <span className="detail-text">Detail</span>
+              <ChevronRight className="chevron" />
             </div>
           </div>
           
-          <div className="lottery-games grid grid-cols-2 gap-4">
+          <div className="lottery-games">
             <div 
-              className="lottery-item bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="lottery-item blue-lottery"
               onClick={() => setSelectedGame({id: 'wingo', name: 'WIN GO', type: 'lottery'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">🎯</div>
-              <div className="lottery-title text-lg font-bold mb-1">WIN GO</div>
-              <div className="lottery-number text-3xl font-black">1</div>
-              <div className="text-xs opacity-80 mt-2">Next: 00:45</div>
+              <div className="lottery-title">WIN GO</div>
+              <div className="lottery-number">1</div>
             </div>
             <div 
-              className="lottery-item bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="lottery-item pink-lottery"
               onClick={() => setSelectedGame({id: 'k3', name: 'K3 Lotre', type: 'lottery'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">🎲</div>
-              <div className="lottery-title text-lg font-bold">K3</div>
-              <div className="lottery-subtitle text-sm opacity-90">Lottery</div>
-              <div className="text-xs opacity-80 mt-2">Live Now</div>
+              <div className="lottery-title">K3</div>
+              <div className="lottery-subtitle">Lotre</div>
             </div>
             <div 
-              className="lottery-item bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="lottery-item green-lottery"
               onClick={() => setSelectedGame({id: '5d', name: '5D Lotre', type: 'lottery'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">🎰</div>
-              <div className="lottery-title text-lg font-bold">5D</div>
-              <div className="lottery-subtitle text-sm opacity-90">Lottery</div>
-              <div className="text-xs opacity-80 mt-2">Next: 01:15</div>
+              <div className="lottery-title">5D</div>
+              <div className="lottery-subtitle">Lotre</div>
             </div>
             <div 
-              className="lottery-item bg-gradient-to-br from-purple-500 to-indigo-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="lottery-item purple-lottery"
               onClick={() => setSelectedGame({id: 'trx', name: 'TRX WINGO', type: 'lottery'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">⚡</div>
-              <div className="lottery-title-small text-sm font-bold">TRX WINGO</div>
-              <div className="lottery-subtitle-small text-xs opacity-90">Crypto Win</div>
-              <div className="text-xs opacity-80 mt-2">Fast Mode</div>
+              <div className="lottery-title-small">TRX WINGO</div>
+              <div className="lottery-subtitle-small">Win</div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced MOTO RACING Banner */}
-        <div className="moto-banner bg-gradient-to-r from-red-600 to-orange-500 mx-4 my-6 p-4 rounded-2xl shadow-xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-20"></div>
-          <div className="moto-text relative z-10 text-white text-2xl font-black text-center flex items-center justify-center gap-3">
-            🏁 MOTO RACING 🏁
-          </div>
+        {/* MOTO RACING Banner */}
+        <div className="moto-banner">
+          <div className="moto-text">MOTO RACING</div>
         </div>
 
-        {/* Enhanced Mini Games */}
-        <div className="game-section bg-white px-4 py-6">
-          <div className="section-header flex items-center justify-between mb-6">
-            <div className="section-left flex items-center gap-3">
-              <div className="w-4 h-4 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="section-title text-xl font-bold text-gray-800">Mini Games</span>
-              <span className="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full font-semibold">NEW</span>
+        {/* Mini Games */}
+        <div className="game-section">
+          <div className="section-header">
+            <div className="section-left">
+              <div className="purple-dot"></div>
+              <span className="section-title">Mini game</span>
             </div>
-            <div className="section-right flex items-center gap-2 text-gray-500 cursor-pointer hover:text-gray-700">
-              <span className="detail-text text-sm font-medium">View All</span>
-              <ChevronRight className="w-4 h-4" />
+            <div className="section-right">
+              <span className="detail-text">Detail</span>
+              <ChevronRight className="chevron" />
             </div>
           </div>
           
-          <div className="mini-games flex gap-4">
+          <div className="mini-games">
             <div 
-              className="mini-item flex-1 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="mini-item blue-mini"
               onClick={() => setSelectedGame({id: 'dragontiger', name: 'DRAGON TIGER', type: 'mini'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">🐲</div>
-              <div className="mini-title-two text-sm font-bold">DRAGON</div>
-              <div className="mini-title-two text-sm font-bold">TIGER</div>
-              <div className="text-xs opacity-80 mt-3">Classic Card Battle</div>
+              <div className="mini-title-two">DRAGON</div>
+              <div className="mini-title-two">TIGER</div>
             </div>
             <div 
-              className="mini-item flex-1 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="mini-item green-mini"
               onClick={() => setSelectedGame({id: 'goal', name: 'GOAL', type: 'mini'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">⚽</div>
-              <div className="mini-title text-lg font-bold">GOAL</div>
-              <div className="text-xs opacity-80 mt-3">Football Prediction</div>
+              <div className="mini-title">GOAL</div>
             </div>
             <div 
-              className="mini-item flex-1 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+              className="mini-item purple-mini"
               onClick={() => setSelectedGame({id: 'dice', name: 'DICE', type: 'mini'})}
             >
-              <div className="absolute top-2 right-2 text-3xl opacity-30">🎲</div>
-              <div className="mini-title text-lg font-bold">DICE</div>
-              <div className="text-xs opacity-80 mt-3">Lucky Roll</div>
+              <div className="mini-title">DICE</div>
             </div>
           </div>
         </div>

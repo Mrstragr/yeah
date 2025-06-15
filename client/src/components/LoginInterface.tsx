@@ -44,9 +44,9 @@ export const LoginInterface = ({ isOpen, onClose, onLogin }: LoginInterfaceProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-4 py-6 relative">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden">
+      {/* Header - Fixed at top */}
+      <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-4 py-4 relative flex-shrink-0">
         <button 
           onClick={onClose}
           className="absolute left-4 top-6 p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -90,8 +90,8 @@ export const LoginInterface = ({ isOpen, onClose, onLogin }: LoginInterfaceProps
         </div>
       </div>
 
-      {/* Form Container */}
-      <div className="flex-1 bg-gray-50 px-4 py-6">
+      {/* Form Container - Scrollable */}
+      <div className="flex-1 bg-gray-50 px-4 py-6 overflow-y-auto min-h-0">
         {/* Login Type Tabs */}
         <div className="flex bg-white rounded-lg p-1 mb-6 shadow-sm">
           <button
