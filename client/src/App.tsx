@@ -21,12 +21,17 @@ import { DiceGame } from './components/games/DiceGame';
 import { DragonTigerGame } from './components/games/DragonTigerGame';
 import { LiveFeatures } from './components/LiveFeatures';
 import { RealTimeUpdates } from './components/RealTimeUpdates';
+import { LoginInterface } from './components/LoginInterface';
+import { LandingPage } from './components/LandingPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [walletBalance, setWalletBalance] = useState(0.39);
   const [selectedGame, setSelectedGame] = useState<{id: string, name: string, type: 'lottery' | 'mini' | 'recommended' | 'slot'} | null>(null);
   const [walletModal, setWalletModal] = useState<{type: 'deposit' | 'withdraw', isOpen: boolean}>({type: 'deposit', isOpen: false});
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState<{phone?: string; email?: string; username?: string} | null>(null);
 
   const handleTransaction = (amount: number, type: 'deposit' | 'withdraw') => {
     if (type === 'deposit') {
@@ -34,6 +39,26 @@ function App() {
     } else {
       setWalletBalance(prev => prev - amount);
     }
+  };
+
+  const handleLogin = (credentials: { phone?: string; email?: string; password: string; rememberMe: boolean }) => {
+    // Simulate login - in real app this would call an API
+    setUser({
+      phone: credentials.phone,
+      email: credentials.email,
+      username: credentials.phone ? `User${credentials.phone.slice(-4)}` : credentials.email?.split('@')[0]
+    });
+    setIsAuthenticated(true);
+    setShowLogin(false);
+    // Set initial wallet balance
+    setWalletBalance(0.39);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+    setWalletBalance(0);
+    setActiveTab('home');
   };
 
   const HomeScreen = () => (
@@ -845,6 +870,13 @@ function App() {
         onClose={() => setWalletModal({...walletModal, isOpen: false})}
         currentBalance={walletBalance}
         onTransaction={handleTransaction}
+      />
+
+      {/* Login Interface */}
+      <LoginInterface
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLogin={handleLogin}
       />
     </div>
   );
