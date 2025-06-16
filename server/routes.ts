@@ -218,25 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mines Game
-  app.post('/api/games/mines/play', authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const { betAmount, mineCount, revealedTiles } = req.body;
-      const result = await gameEngine.playMines(req.user!.id, betAmount, mineCount, revealedTiles);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
   // Dice Game
   app.post('/api/games/dice/play', authenticateToken, async (req: AuthRequest, res) => {
     try {
