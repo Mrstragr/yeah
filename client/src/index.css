@@ -437,28 +437,88 @@ body {
 }
 
 /* Mini Games */
-.dice-card {
-  background: linear-gradient(135deg, #7B68EE 0%, #6A5ACD 100%);
+.aviator-card {
+  background: linear-gradient(135deg, #B91C1C 0%, #7F1D1D 100%);
+}
+
+.cricket-card {
+  background: linear-gradient(135deg, #84CC16 0%, #65A30D 100%);
+}
+
+.mines-card {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.aviator2-card {
+  background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+}
+
+.limbo-card {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.mines-pro-card {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.dragon-tiger-card {
+  background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
 }
 
 .goal-card {
-  background: linear-gradient(135deg, #3742FA 0%, #2F3542 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
-.roulette-card {
-  background: linear-gradient(135deg, #FF4757 0%, #FF3742 100%);
+.dice-card {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 }
 
-.aviator-card {
-  background: linear-gradient(135deg, #FFA502 0%, #FF6348 100%);
+.king-pauper-card {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+}
+
+.hilo-wave-card {
+  background: linear-gradient(135deg, #8B5A2B 0%, #92400E 100%);
+}
+
+.clash-hands-card {
+  background: linear-gradient(135deg, #164E63 0%, #0F172A 100%);
 }
 
 .plinko-card {
-  background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.bomb-wave-card {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
 }
 
 .hilo-card {
-  background: linear-gradient(135deg, #3742FA 0%, #2F3542 100%);
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.treasure-wave-card {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.hotline-card {
+  background: linear-gradient(135deg, #F472B6 0%, #EC4899 100%);
+}
+
+.cryptos-card {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.space-dice-card {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.goal-wave-card {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.mini-roulette-card {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
 }
 
 /* Slot Games */

@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from './lib/queryClient';
-import { GameModal } from './components/GameModal';
-import { WalletModal } from './components/WalletModal';
+import { useQuery } from '@tanstack/react-query';
 
 interface User {
   id: number;
@@ -162,6 +159,114 @@ function AuthModal({ onClose }: AuthModalProps) {
   );
 }
 
+function SimpleGameModal({ gameType, onClose }: { gameType: string; onClose: () => void }) {
+  const [betAmount, setBetAmount] = useState(100);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [gameResult, setGameResult] = useState<any>(null);
+
+  const playGame = async () => {
+    setIsPlaying(true);
+    try {
+      const response = await fetch(`/api/games/${gameType}/play`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+        body: JSON.stringify({ betAmount }),
+      });
+
+      const result = await response.json();
+      setGameResult(result);
+    } catch (error) {
+      alert('Game error. Please try again.');
+    } finally {
+      setIsPlaying(false);
+    }
+  };
+
+  return (
+    <div className="game-modal">
+      <div className="game-modal-content">
+        <div className="game-modal-header">
+          <h3 className="game-modal-title">{gameType.toUpperCase()}</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="game-modal-body">
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <label>Bet Amount:</label>
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                style={{ margin: '0 10px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+              />
+            </div>
+            
+            <button
+              onClick={playGame}
+              disabled={isPlaying}
+              style={{
+                background: '#FF4757',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              {isPlaying ? 'Playing...' : 'Play Game'}
+            </button>
+
+            {gameResult && (
+              <div style={{ marginTop: '20px', padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>
+                <p>Result: {gameResult.isWin ? 'WIN!' : 'LOSE'}</p>
+                <p>Amount: ₹{gameResult.winAmount}</p>
+                {gameResult.multiplier && <p>Multiplier: {gameResult.multiplier}x</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SimpleWalletModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="wallet-modal">
+      <div className="wallet-modal-content">
+        <div className="wallet-modal-header">
+          <h3>Wallet</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="wallet-modal-body">
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <p>Wallet operations coming soon!</p>
+            <button
+              onClick={onClose}
+              style={{
+                background: '#FF4757',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [showGameModal, setShowGameModal] = useState(false);
@@ -169,7 +274,6 @@ export default function App() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('lobby');
   const [bottomNavActive, setBottomNavActive] = useState('home');
-  const queryClient = useQueryClient();
 
   // Initialize user from localStorage
   useEffect(() => {
@@ -184,7 +288,7 @@ export default function App() {
   const { data: walletData, refetch: refetchBalance } = useQuery({
     queryKey: ['/api/wallet/balance'],
     enabled: !!user,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   const walletBalance = (walletData as any)?.walletBalance || user?.walletBalance || '0.00';
@@ -196,12 +300,6 @@ export default function App() {
   const openGame = (gameType: string) => {
     setSelectedGame(gameType);
     setShowGameModal(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    setUser(null);
   };
 
   if (!user) {
@@ -308,7 +406,7 @@ export default function App() {
               <div className="game-subtitle">TB GAME</div>
             </div>
           </div>
-          <div className="game-card 5d-card" onClick={() => openGame('5d')}>
+          <div className="game-card fived-card" onClick={() => openGame('5d')}>
             <div className="game-card-content">
               <div className="game-title">5D</div>
               <div className="game-subtitle">TB GAME</div>
@@ -335,28 +433,76 @@ export default function App() {
         </div>
 
         <div className="game-grid">
-          <div className="game-card dice-card" onClick={() => openGame('dice')}>
+          <div className="game-card aviator-card" onClick={() => openGame('aviator')}>
             <div className="game-card-content">
-              <div className="game-title">SPACE</div>
-              <div className="game-subtitle">DICE</div>
+              <div className="game-title">AVIATOR</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card cricket-card" onClick={() => openGame('cricket')}>
+            <div className="game-card-content">
+              <div className="game-title">CRICKET</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card mines-card" onClick={() => openGame('mines')}>
+            <div className="game-card-content">
+              <div className="game-title">MINES</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card aviator2-card" onClick={() => openGame('aviator2')}>
+            <div className="game-card-content">
+              <div className="game-title">AVIATOR</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card limbo-card" onClick={() => openGame('limbo')}>
+            <div className="game-card-content">
+              <div className="game-title">LIMBO</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card mines-pro-card" onClick={() => openGame('mines-pro')}>
+            <div className="game-card-content">
+              <div className="game-title">MINES PRO</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card dragon-tiger-card" onClick={() => openGame('dragon-tiger')}>
+            <div className="game-card-content">
+              <div className="game-title">DRAGON</div>
+              <div className="game-subtitle">TIGER</div>
             </div>
           </div>
           <div className="game-card goal-card" onClick={() => openGame('goal')}>
             <div className="game-card-content">
               <div className="game-title">GOAL</div>
-              <div className="game-subtitle">WAVE</div>
+              <div className="game-subtitle">TB GAME</div>
             </div>
           </div>
-          <div className="game-card roulette-card" onClick={() => openGame('roulette')}>
+          <div className="game-card dice-card" onClick={() => openGame('dice')}>
             <div className="game-card-content">
-              <div className="game-title">MINI</div>
-              <div className="game-subtitle">ROULETTE</div>
+              <div className="game-title">DICE</div>
+              <div className="game-subtitle">TB GAME</div>
             </div>
           </div>
-          <div className="game-card aviator-card" onClick={() => openGame('aviator')}>
+          <div className="game-card king-pauper-card" onClick={() => openGame('king-pauper')}>
             <div className="game-card-content">
-              <div className="game-title">AVIATOR</div>
-              <div className="game-subtitle">FLY GAME</div>
+              <div className="game-title">KING AND</div>
+              <div className="game-subtitle">PAUPER</div>
+            </div>
+          </div>
+          <div className="game-card hilo-wave-card" onClick={() => openGame('hilo-wave')}>
+            <div className="game-card-content">
+              <div className="game-title">HILO WAVE</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card clash-hands-card" onClick={() => openGame('clash-hands')}>
+            <div className="game-card-content">
+              <div className="game-title">CLASH OF</div>
+              <div className="game-subtitle">HANDS</div>
             </div>
           </div>
           <div className="game-card plinko-card" onClick={() => openGame('plinko')}>
@@ -365,10 +511,52 @@ export default function App() {
               <div className="game-subtitle">TB GAME</div>
             </div>
           </div>
+          <div className="game-card bomb-wave-card" onClick={() => openGame('bomb-wave')}>
+            <div className="game-card-content">
+              <div className="game-title">BOMB</div>
+              <div className="game-subtitle">WAVE</div>
+            </div>
+          </div>
           <div className="game-card hilo-card" onClick={() => openGame('hilo')}>
             <div className="game-card-content">
               <div className="game-title">HILO</div>
               <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card treasure-wave-card" onClick={() => openGame('treasure-wave')}>
+            <div className="game-card-content">
+              <div className="game-title">TREASURE</div>
+              <div className="game-subtitle">WAVE</div>
+            </div>
+          </div>
+          <div className="game-card hotline-card" onClick={() => openGame('hotline')}>
+            <div className="game-card-content">
+              <div className="game-title">HOTLINE</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card cryptos-card" onClick={() => openGame('cryptos')}>
+            <div className="game-card-content">
+              <div className="game-title">CRYPTOS</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card space-dice-card" onClick={() => openGame('space-dice')}>
+            <div className="game-card-content">
+              <div className="game-title">SPACE</div>
+              <div className="game-subtitle">DICE</div>
+            </div>
+          </div>
+          <div className="game-card goal-wave-card" onClick={() => openGame('goal-wave')}>
+            <div className="game-card-content">
+              <div className="game-title">GOAL</div>
+              <div className="game-subtitle">WAVE</div>
+            </div>
+          </div>
+          <div className="game-card mini-roulette-card" onClick={() => openGame('mini-roulette')}>
+            <div className="game-card-content">
+              <div className="game-title">MINI</div>
+              <div className="game-subtitle">ROULETTE</div>
             </div>
           </div>
         </div>
@@ -451,20 +639,19 @@ export default function App() {
 
       {/* Modals */}
       {showGameModal && selectedGame && (
-        <GameModal
+        <SimpleGameModal
           gameType={selectedGame}
           onClose={() => {
             setShowGameModal(false);
             setSelectedGame(null);
+            refreshBalance();
           }}
-          onBalanceUpdate={refreshBalance}
         />
       )}
 
       {showWalletModal && (
-        <WalletModal
+        <SimpleWalletModal
           onClose={() => setShowWalletModal(false)}
-          onBalanceUpdate={refreshBalance}
         />
       )}
     </div>
