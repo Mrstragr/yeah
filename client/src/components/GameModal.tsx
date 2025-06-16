@@ -122,8 +122,8 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
         const expectedBalance = result.isWin 
           ? Number(walletBalance) - betAmount + result.winAmount
           : Number(walletBalance) - betAmount;
-        const newBalance = Math.max(0, expectedBalance).toString();
-        onBalanceUpdate(Number(newBalance));
+        const newBalance = Math.max(0, expectedBalance);
+        onBalanceUpdate(newBalance);
 
         // Try to sync with server balance (optional, doesn't block game flow)
         try {
