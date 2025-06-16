@@ -750,19 +750,579 @@ body {
 
 /* Game Interface Styles */
 .game-interface {
-  background: #F8F9FA;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.aviator-interface, .dice-interface, .mines-interface, .default-game-interface {
-  min-height: 120px;
+.game-interface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,71,87,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Aviator Game Styles */
+.aviator-interface {
+  min-height: 300px;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.aviator-game-area {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.multiplier-history {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.history-item {
+  background: rgba(255,255,255,0.1);
+  color: #00ff88;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(0,255,136,0.3);
+}
+
+.history-item:nth-child(odd) {
+  color: #ff4757;
+  border-color: rgba(255,71,87,0.3);
+}
+
+.aviator-main-display {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(15,15,35,0.8) 0%, rgba(26,26,46,0.8) 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,71,87,0.2);
+}
+
+.trajectory-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.trajectory-canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.plane-container {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  transition: all 1s ease-out;
+}
+
+.plane-container.flying {
+  animation: flyTrajectory 3s ease-out forwards;
+}
+
+@keyframes flyTrajectory {
+  0% {
+    left: 10%;
+    top: 80%;
+    transform: translateY(-50%) rotate(0deg);
+  }
+  50% {
+    left: 50%;
+    top: 30%;
+    transform: translateY(-50%) rotate(-15deg);
+  }
+  80% {
+    left: 75%;
+    top: 20%;
+    transform: translateY(-50%) rotate(-20deg);
+  }
+  100% {
+    left: 85%;
+    top: 15%;
+    transform: translateY(-50%) rotate(-25deg);
+  }
+}
+
+.plane {
+  font-size: 24px;
+  filter: drop-shadow(0 0 8px rgba(255,71,87,0.6));
+  animation: planeFloat 2s ease-in-out infinite;
+}
+
+@keyframes planeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.plane-trail {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,71,87,0.8) 50%, rgba(255,71,87,0.3) 100%);
+  transform: translateY(-50%);
+  animation: trailGlow 1s ease-in-out infinite;
+}
+
+@keyframes trailGlow {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 4px rgba(255,71,87,0.3); }
+  50% { opacity: 1; box-shadow: 0 0 12px rgba(255,71,87,0.6); }
+}
+
+.current-multiplier {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.multiplier-text {
+  font-size: 48px;
+  font-weight: 900;
+  color: #00ff88;
+  text-shadow: 0 0 20px rgba(0,255,136,0.5);
+  animation: multiplierPulse 1s ease-in-out infinite;
+}
+
+.multiplier-text.climbing {
+  animation: multiplierClimb 0.5s ease-in-out infinite;
+  color: #ffff00;
+  text-shadow: 0 0 20px rgba(255,255,0,0.5);
+}
+
+@keyframes multiplierPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes multiplierClimb {
+  0%, 100% { transform: scale(1) rotate(-1deg); }
+  50% { transform: scale(1.1) rotate(1deg); }
+}
+
+.crash-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.cash-out-success {
+  color: #00ff88;
+  font-size: 18px;
+  font-weight: 700;
+  animation: successPulse 0.5s ease-in-out;
+  text-shadow: 0 0 10px rgba(0,255,136,0.5);
+}
+
+.crashed {
+  color: #ff4757;
+  font-size: 20px;
+  font-weight: 900;
+  animation: crashShake 0.5s ease-in-out;
+  text-shadow: 0 0 15px rgba(255,71,87,0.7);
+}
+
+@keyframes successPulse {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes crashShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.betting-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.betting-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+
+.betting-dot.active {
+  background: #00ff88;
+  box-shadow: 0 0 8px rgba(0,255,136,0.5);
+  animation: dotPulse 1s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Mines Game Styles */
+.mines-interface {
+  min-height: 350px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.mines-stats {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.mines-info {
+  display: flex;
+  gap: 16px;
+  background: rgba(255,255,255,0.1);
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+.mine-tile {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #2c2c54 0%, #40407a 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.mine-tile:hover:not(.revealed) {
+  background: linear-gradient(135deg, #3c3c74 0%, #50508a 100%);
+  border-color: rgba(255,255,255,0.4);
+  transform: scale(1.05);
+}
+
+.mine-tile.revealed {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+  border-color: #00ff88;
+  animation: tileReveal 0.5s ease-out;
+}
+
+.mine-tile.gem {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+  animation: gemGlow 1s ease-in-out infinite;
+}
+
+.mine-tile.bomb {
+  background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+  border-color: #ff4757;
+}
+
+.mine-tile.exploded {
+  background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+  animation: explodeTile 0.5s ease-out;
+}
+
+@keyframes tileReveal {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gemGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0,255,136,0.5); }
+  50% { box-shadow: 0 0 20px rgba(0,255,136,0.8); }
+}
+
+@keyframes explodeTile {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.2); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1.1); }
+}
+
+.tile-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mine-tile:hover .tile-glow {
+  opacity: 1;
+}
+
+.explosion-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.explosion-ring {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #ff4757;
+  border-radius: 50%;
+  animation: explosionRing 0.6s ease-out;
+}
+
+.explosion-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.explosion-particles::before,
+.explosion-particles::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ff4757;
+  border-radius: 50%;
+  animation: explosionParticles 0.8s ease-out;
+}
+
+.explosion-particles::before {
+  animation-delay: 0.1s;
+}
+
+.explosion-particles::after {
+  animation-delay: 0.2s;
+}
+
+@keyframes explosionRing {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+@keyframes explosionParticles {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(20px, -20px) scale(0); opacity: 0; }
+}
+
+.win-celebration {
+  text-align: center;
+  position: relative;
+}
+
+.celebration-text {
+  font-size: 20px;
+  font-weight: 900;
+  color: #00ff88;
+  animation: celebrationBounce 0.6s ease-out;
+  margin-bottom: 8px;
+}
+
+.win-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffff00;
+  animation: winAmountGlow 1s ease-in-out infinite;
+}
+
+.lose-animation {
+  text-align: center;
+}
+
+.explosion-text {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ff4757;
+  animation: explosionShake 0.5s ease-out;
+  margin-bottom: 8px;
+}
+
+.lose-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+@keyframes celebrationBounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+@keyframes winAmountGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(255,255,0,0.5); }
+  50% { text-shadow: 0 0 20px rgba(255,255,0,0.8); }
+}
+
+@keyframes explosionShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.confetti {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+}
+
+.confetti::before,
+.confetti::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #00ff88;
+  animation: confettiFall 1s ease-out infinite;
+}
+
+.confetti::before {
+  left: -10px;
+  animation-delay: 0.2s;
+  background: #ffff00;
+}
+
+.confetti::after {
+  right: -10px;
+  animation-delay: 0.4s;
+  background: #ff4757;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(40px) rotate(360deg); opacity: 0; }
+}
+
+/* Dice Game Styles */
+.dice-interface {
+  min-height: 200px;
+  background: linear-gradient(135deg, #2c2c54 0%, #40407a 100%);
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.dice-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.dice-icon {
+  font-size: 48px;
+  animation: diceFloat 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+
+.dice-result .dice-number {
+  font-size: 36px;
+  font-weight: 900;
+  color: #00ff88;
+  text-shadow: 0 0 15px rgba(0,255,136,0.6);
+  animation: diceNumberReveal 0.8s ease-out;
+}
+
+@keyframes diceFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes diceNumberReveal {
+  0% { transform: scale(0) rotate(180deg); opacity: 0; }
+  50% { transform: scale(1.3) rotate(90deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Default Game Interface */
+.default-game-interface {
+  min-height: 150px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-icon-large {
+  font-size: 64px;
+  animation: gameIconPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+}
+
+.game-status {
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ready-to-play {
+  color: #00ff88;
+  animation: readyTextGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes gameIconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes readyTextGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(0,255,136,0.5); }
+  50% { text-shadow: 0 0 20px rgba(0,255,136,0.8); }
 }
 
 .aviator-display, .dice-display {

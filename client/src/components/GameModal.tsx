@@ -20,9 +20,78 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
 
   const quickBetAmounts = [50, 100, 500, 1000, 5000];
 
+  const drawTrajectory = (canvas: HTMLCanvasElement, crashMultiplier: number) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, 'rgba(139, 69, 19, 0.1)');
+    gradient.addColorStop(1, 'rgba(255, 71, 87, 0.3)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 10; i++) {
+      const x = (canvas.width / 10) * i;
+      const y = (canvas.height / 10) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    // Draw trajectory curve
+    ctx.strokeStyle = '#FF4757';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#FF4757';
+    ctx.shadowBlur = 10;
+    
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    
+    const maxHeight = Math.min(crashMultiplier * 20, canvas.height - 20);
+    const points = 50;
+    
+    for (let i = 0; i <= points; i++) {
+      const x = (canvas.width / points) * i;
+      const progress = i / points;
+      const multiplier = 1 + (crashMultiplier - 1) * progress;
+      const y = canvas.height - (multiplier - 1) * 30;
+      
+      if (progress < 0.8) {
+        ctx.lineTo(x, y);
+      } else {
+        // Crash effect - sharp drop
+        ctx.lineTo(x, canvas.height - 10);
+        break;
+      }
+    }
+    
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Fill area under curve
+    ctx.fillStyle = 'rgba(255, 71, 87, 0.2)';
+    ctx.fill();
+  };
+
   const handleBetChange = (amount: number) => {
     const balance = Number(walletBalance || 0);
     setBetAmount(Math.max(10, Math.min(amount, balance)));
+  };
+
+  const handleTileClick = (tileIndex: number) => {
+    // Simulate tile reveal animation
+    console.log(`Tile ${tileIndex} clicked`);
   };
 
   const handlePlay = async () => {
@@ -73,19 +142,61 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
       case 'aviator':
         return (
           <div className="aviator-interface">
-            <div className="aviator-display">
-              <div className="plane-icon">✈️</div>
-              <div className="multiplier-display">
-                {gameResult ? `${gameResult.multiplier}x` : '1.00x'}
+            <div className="aviator-game-area">
+              <div className="multiplier-history">
+                <div className="history-item">1.94x</div>
+                <div className="history-item">1.02x</div>
+                <div className="history-item">1.00x</div>
+                <div className="history-item">1.72x</div>
+                <div className="history-item">1.19x</div>
+                <div className="history-item">1.54x</div>
+                <div className="history-item">1.00x</div>
+              </div>
+              
+              <div className="aviator-main-display">
+                <div className="trajectory-container">
+                  <canvas 
+                    className="trajectory-canvas" 
+                    width="300" 
+                    height="200"
+                    ref={(canvas) => {
+                      if (canvas && (isPlaying || gameResult)) {
+                        drawTrajectory(canvas, gameResult?.result?.crashMultiplier || 1);
+                      }
+                    }}
+                  />
+                  
+                  <div className={`plane-container ${isPlaying ? 'flying' : ''}`}>
+                    <div className="plane">✈️</div>
+                    <div className="plane-trail"></div>
+                  </div>
+                </div>
+                
+                <div className="current-multiplier">
+                  <div className={`multiplier-text ${isPlaying ? 'climbing' : ''}`}>
+                    {gameResult ? 
+                      `${parseFloat(gameResult.result?.crashMultiplier || gameResult.multiplier).toFixed(2)}x` : 
+                      isPlaying ? '1.00x' : '1.00x'
+                    }
+                  </div>
+                </div>
+                
+                {gameResult && (
+                  <div className="crash-indicator">
+                    {gameResult.isWin ? 
+                      <div className="cash-out-success">✓ Cashed Out!</div> : 
+                      <div className="crashed">💥 CRASHED!</div>
+                    }
+                  </div>
+                )}
+              </div>
+              
+              <div className="betting-dots">
+                {Array.from({ length: 10 }, (_, i) => (
+                  <div key={i} className={`betting-dot ${i < 5 ? 'active' : ''}`}></div>
+                ))}
               </div>
             </div>
-            {gameResult && (
-              <div className="result-display">
-                <div className={`result ${gameResult.isWin ? 'win' : 'lose'}`}>
-                  {gameResult.isWin ? `Won ₹${gameResult.winAmount}` : 'Crashed!'}
-                </div>
-              </div>
-            )}
           </div>
         );
       
@@ -96,7 +207,9 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
               <div className="dice-icon">🎲</div>
               {gameResult && (
                 <div className="dice-result">
-                  <div className="dice-number">{gameResult.result}</div>
+                  <div className="dice-number">
+                    {typeof gameResult.result === 'object' ? gameResult.result.diceResult : gameResult.result}
+                  </div>
                 </div>
               )}
             </div>
@@ -113,17 +226,50 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
       case 'mines':
         return (
           <div className="mines-interface">
+            <div className="mines-stats">
+              <div className="mines-info">
+                <span className="mines-count">💣 Mines: 3</span>
+                <span className="gems-found">💎 Gems: 0</span>
+                <span className="multiplier">x1.00</span>
+              </div>
+            </div>
+            
             <div className="mines-grid">
               {Array.from({ length: 25 }, (_, i) => (
-                <div key={i} className="mine-tile">
-                  💎
+                <div 
+                  key={i} 
+                  className={`mine-tile ${gameResult && i < 5 ? 'revealed' : ''} ${gameResult && gameResult.isWin && i < 3 ? 'gem' : ''} ${gameResult && !gameResult.isWin && i === 2 ? 'bomb exploded' : ''}`}
+                  onClick={() => !gameResult && handleTileClick(i)}
+                >
+                  {gameResult && i < 5 ? (
+                    gameResult.isWin && i < 3 ? '💎' : 
+                    !gameResult.isWin && i === 2 ? '💥' : '💎'
+                  ) : ''}
+                  <div className="tile-glow"></div>
+                  {gameResult && !gameResult.isWin && i === 2 && (
+                    <div className="explosion-effect">
+                      <div className="explosion-ring"></div>
+                      <div className="explosion-particles"></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+            
             {gameResult && (
               <div className="result-display">
                 <div className={`result ${gameResult.isWin ? 'win' : 'lose'}`}>
-                  {gameResult.isWin ? `Won ₹${gameResult.winAmount}` : 'Hit a mine!'}
+                  {gameResult.isWin ? 
+                    <div className="win-celebration">
+                      <div className="celebration-text">💎 SAFE! 💎</div>
+                      <div className="win-amount">+₹{gameResult.winAmount}</div>
+                      <div className="confetti"></div>
+                    </div> : 
+                    <div className="lose-animation">
+                      <div className="explosion-text">💥 BOOM! 💥</div>
+                      <div className="lose-amount">-₹{betAmount}</div>
+                    </div>
+                  }
                 </div>
               </div>
             )}
