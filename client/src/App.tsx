@@ -8,115 +8,67 @@ import {
   Bell, 
   ChevronRight,
   ArrowLeft,
+  Gamepad2,
+  Zap,
+  CreditCard,
+  Fish,
+  Trophy,
   ArrowRight,
   Copy,
   MoreHorizontal
 } from 'lucide-react';
-import { GameModal } from './components/GameModal';
-import { WalletModal } from './components/WalletModal';
-import { WinGoGame } from './components/games/WinGoGame';
-import { K3LotreGame } from './components/games/K3LotreGame';
-import { AviatorGame } from './components/games/AviatorGame';
-import { MinesGame } from './components/games/MinesGame';
-import { DiceGame } from './components/games/DiceGame';
-import { DragonTigerGame } from './components/games/DragonTigerGame';
-import { LiveFeatures } from './components/LiveFeatures';
-import { RealTimeUpdates } from './components/RealTimeUpdates';
+
 import { LoginInterface } from './components/LoginInterface';
 
-function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  const [walletBalance, setWalletBalance] = useState(0.39);
-  const [selectedGame, setSelectedGame] = useState<{id: string, name: string, type: 'lottery' | 'mini' | 'recommended' | 'slot'} | null>(null);
-  const [walletModal, setWalletModal] = useState<{type: 'deposit' | 'withdraw', isOpen: boolean}>({type: 'deposit', isOpen: false});
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState<{phone?: string; email?: string; username?: string} | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [walletBalance, setWalletBalance] = useState(10000);
 
-  const handleTransaction = (amount: number, type: 'deposit' | 'withdraw') => {
-    if (type === 'deposit') {
-      setWalletBalance(prev => prev + amount);
-    } else {
-      setWalletBalance(prev => prev - amount);
-    }
-  };
-
-  const handleLogin = async (credentials: { phone?: string; email?: string; password: string; rememberMe: boolean }) => {
+  const handleLogin = async (credentials: any) => {
     try {
-      const { apiService } = await import('./lib/api');
-      const result = await apiService.login(credentials);
-      
-      setUser({
-        phone: result.user.phone,
-        email: result.user.email,
-        username: result.user.username
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
       });
-      setIsAuthenticated(true);
-      setShowLogin(false);
-      setWalletBalance(parseFloat(result.user.walletBalance));
-    } catch (error: any) {
-      console.error('Login failed:', error.message);
-      // Show error to user - for now just log it
-    }
-  };
 
-  const handleLogout = async () => {
-    try {
-      const { apiService } = await import('./lib/api');
-      apiService.clearToken();
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setIsLoggedIn(true);
+        setShowLogin(false);
+        localStorage.setItem('authToken', data.token);
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Login error:', error);
     }
-    
-    setIsAuthenticated(false);
-    setUser(null);
-    setWalletBalance(0);
-    setActiveTab('home');
   };
 
-  // Show landing page for unauthenticated users
-  if (!isAuthenticated) {
+  if (!isLoggedIn) {
     return (
       <>
-        <div className="min-h-screen bg-gradient-to-br from-red-400 via-pink-400 to-purple-500">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-black opacity-10"></div>
-            <div className="relative px-6 py-12 text-center">
-              <div className="flex items-center justify-center mb-8">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-3 shadow-2xl">
-                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-lg font-bold">9</span>
-                  </div>
-                </div>
-                <span className="text-4xl font-bold text-white tracking-wider">91CLUB</span>
+        <div className="welcome-screen">
+          <div className="welcome-content">
+            <div className="logo-section">
+              <div className="logo-circle">
+                <span className="logo-text">91</span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-4 leading-tight">
-                Experience the Ultimate<br />Gaming Platform
-              </h1>
-              <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                Join millions of players worldwide in<br />
-                the most exciting gaming experience
-              </p>
-              <button
+              <h1 className="welcome-title">91CLUB</h1>
+              <p className="welcome-subtitle">Premium Gaming Experience</p>
+            </div>
+            <div className="action-section">
+              <button 
+                className="login-btn"
                 onClick={() => setShowLogin(true)}
-                className="bg-white text-red-500 px-12 py-4 rounded-full text-xl font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 mb-8"
               >
-                Get Started
+                Login to Continue
               </button>
-              <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto text-center">
-                <div className="text-white">
-                  <div className="text-2xl font-bold">2.5M+</div>
-                  <div className="text-sm opacity-90">Active Players</div>
-                </div>
-                <div className="text-white">
-                  <div className="text-2xl font-bold">₹50L+</div>
-                  <div className="text-sm opacity-90">Daily Payouts</div>
-                </div>
-                <div className="text-white">
-                  <div className="text-2xl font-bold">24/7</div>
-                  <div className="text-sm opacity-90">Support</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -129,837 +81,231 @@ function App() {
     );
   }
 
-  const HomeScreen = () => (
-    <div className="app-container pb-20">
-      {/* Header Section - Original Style */}
-      <div className="header-section">
-        <div className="header-top">
-          <div className="logo-text">91CLUB</div>
-          <Bell className="notification-icon" />
-        </div>
-        
-        {/* Info Banner - Exact Match */}
-        <div className="info-banner">
-          <div className="info-content">
-            <div>Only deposit funds through the official 91CLUB website and you can</div>
-            <div>check from our alternative link at 91club.com the page are similar in look</div>
-          </div>
-          <div className="info-logo">91</div>
-        </div>
-
-        {/* Balance Card - Original Style */}
-        <div className="balance-card">
-          <div className="balance-info">
-            <div className="balance-label">Wallet balance</div>
-            <div className="balance-amount">₹{walletBalance.toFixed(2)}</div>
-          </div>
-          <div className="balance-icon">
-            <Wallet className="wallet-icon" />
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          <button 
-            className="withdraw-btn"
-            onClick={() => setWalletModal({type: 'withdraw', isOpen: true})}
-          >
-            <ArrowLeft className="btn-icon" />
-            Withdraw
-          </button>
-          <button 
-            className="deposit-btn"
-            onClick={() => setWalletModal({type: 'deposit', isOpen: true})}
-          >
-            <Gift className="btn-icon" />
-            Deposit
-          </button>
-        </div>
-
-        {/* Feature Cards */}
-        <div className="feature-cards">
-          <div className="wheel-card">
-            <div className="feature-title">Wheel</div>
-            <div className="feature-subtitle">of Fortune</div>
-          </div>
-          <div className="vip-card">
-            <div className="feature-title">VIP</div>
-            <div className="feature-subtitle">Privileges</div>
-          </div>
-        </div>
-
-        {/* Promotional Banner */}
-        <div className="promo-banner-section">
-          <div className="main-promo-banner">
-            <div className="promo-content">
-              <div className="promo-text">
-                <div className="promo-title">NEW MEMBER BONUS</div>
-                <div className="promo-subtitle">Get ₹5000 bonus on first deposit</div>
-              </div>
-              <button className="promo-btn">
-                CLAIM NOW
-              </button>
-            </div>
-          </div>
-          
-          <div className="secondary-promos">
-            <div className="mini-promo">
-              <span className="mini-promo-icon">🔥</span>
-              <span className="mini-promo-text">Daily Cashback 10%</span>
-            </div>
-            <div className="mini-promo">
-              <span className="mini-promo-icon">⚡</span>
-              <span className="mini-promo-text">Fast Withdrawal</span>
-            </div>
-            <div className="mini-promo">
-              <span className="mini-promo-icon">🎯</span>
-              <span className="mini-promo-text">Win Rate 98.5%</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Enhanced Real-time Statistics */}
-        <div className="stats-section px-4 mt-6">
-          <div className="stats-header bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 mb-4 flex items-center justify-between">
-            <span className="stats-title text-white font-bold flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              LIVE STATS
-            </span>
-            <span className="online-count text-green-400 font-semibold text-sm">1,247 playing now</span>
-          </div>
-          <div className="stats-grid grid grid-cols-2 gap-4">
-            <div className="stat-item bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-4 text-white shadow-lg">
-              <div className="stat-value text-2xl font-bold">₹2,45,680</div>
-              <div className="stat-label text-sm opacity-90">Today's Jackpot</div>
-            </div>
-            <div className="stat-item bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white shadow-lg">
-              <div className="stat-value text-2xl font-bold">98.5%</div>
-              <div className="stat-label text-sm opacity-90">Win Rate</div>
-            </div>
-            <div className="stat-item bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-4 text-white shadow-lg">
-              <div className="stat-value text-2xl font-bold">₹89,320</div>
-              <div className="stat-label text-sm opacity-90">Last Winner</div>
-            </div>
-            <div className="stat-item bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-4 text-white shadow-lg">
-              <div className="stat-value text-2xl font-bold">847</div>
-              <div className="stat-label text-sm opacity-90">Winners Today</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Category Navigation - Original Style */}
-      <div className="category-section">
-        <div className="category-list">
-          {[
-            { name: 'Lobby', active: true },
-            { name: 'PK', active: false },
-            { name: 'Mines', active: false },
-            { name: 'Original', active: false },
-            { name: 'Fishing', active: false },
-            { name: 'Lottery', active: false }
-          ].map((cat) => (
-            <div key={cat.name} className="category-item">
-              <div className={`category-circle ${cat.active ? 'active' : ''}`}>
-                {cat.name === 'Lobby' && '🏠'}
-                {cat.name === 'PK' && '⚔️'}
-                {cat.name === 'Mines' && '💎'}
-                {cat.name === 'Original' && '🎯'}
-                {cat.name === 'Fishing' && '🎣'}
-                {cat.name === 'Lottery' && '🎰'}
-              </div>
-              <div className={`category-name ${cat.active ? 'active' : ''}`}>{cat.name}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Game Content - Exact Match */}
-      <div className="content-section">
-        {/* Quick Stats Bar */}
-        <div className="quick-stats-bar">
-          <div className="quick-stat">
-            <div className="quick-stat-icon">🎯</div>
-            <div className="quick-stat-info">
-              <div className="quick-stat-value">2,847</div>
-              <div className="quick-stat-label">Playing Now</div>
-            </div>
-          </div>
-          <div className="quick-stat">
-            <div className="quick-stat-icon">💰</div>
-            <div className="quick-stat-info">
-              <div className="quick-stat-value">₹1.2M</div>
-              <div className="quick-stat-label">Today's Wins</div>
-            </div>
-          </div>
-          <div className="quick-stat">
-            <div className="quick-stat-icon">⚡</div>
-            <div className="quick-stat-info">
-              <div className="quick-stat-value">98.7%</div>
-              <div className="quick-stat-label">Win Rate</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lottery Section - Original Style */}
-        <div className="game-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="red-dot"></div>
-              <span className="section-title">Lottery</span>
-            </div>
-            <div className="section-right">
-              <span className="detail-text">Detail</span>
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="lottery-games">
-            <div 
-              className="lottery-item blue-lottery"
-              onClick={() => setSelectedGame({id: 'wingo', name: 'WIN GO', type: 'lottery'})}
-            >
-              <div className="lottery-title">WIN GO</div>
-              <div className="lottery-number">1</div>
-            </div>
-            <div 
-              className="lottery-item pink-lottery"
-              onClick={() => setSelectedGame({id: 'k3', name: 'K3 Lotre', type: 'lottery'})}
-            >
-              <div className="lottery-title">K3</div>
-              <div className="lottery-subtitle">Lotre</div>
-            </div>
-            <div 
-              className="lottery-item green-lottery"
-              onClick={() => setSelectedGame({id: '5d', name: '5D Lotre', type: 'lottery'})}
-            >
-              <div className="lottery-title">5D</div>
-              <div className="lottery-subtitle">Lotre</div>
-            </div>
-            <div 
-              className="lottery-item purple-lottery"
-              onClick={() => setSelectedGame({id: 'trx', name: 'TRX WINGO', type: 'lottery'})}
-            >
-              <div className="lottery-title-small">TRX WINGO</div>
-              <div className="lottery-subtitle-small">Win</div>
-            </div>
-          </div>
-        </div>
-
-        {/* MOTO RACING Banner */}
-        <div className="moto-banner">
-          <div className="moto-text">MOTO RACING</div>
-        </div>
-
-        {/* Mini Games */}
-        <div className="game-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="purple-dot"></div>
-              <span className="section-title">Mini game</span>
-            </div>
-            <div className="section-right">
-              <span className="detail-text">Detail</span>
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="mini-games">
-            <div 
-              className="mini-item blue-mini"
-              onClick={() => setSelectedGame({id: 'dragontiger', name: 'DRAGON TIGER', type: 'mini'})}
-            >
-              <div className="mini-title-two">DRAGON</div>
-              <div className="mini-title-two">TIGER</div>
-            </div>
-            <div 
-              className="mini-item green-mini"
-              onClick={() => setSelectedGame({id: 'goal', name: 'GOAL', type: 'mini'})}
-            >
-              <div className="mini-title">GOAL</div>
-            </div>
-            <div 
-              className="mini-item purple-mini"
-              onClick={() => setSelectedGame({id: 'dice', name: 'DICE', type: 'mini'})}
-            >
-              <div className="mini-title">DICE</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recommended Games */}
-        <div className="game-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="yellow-dot"></div>
-              <span className="section-title">Recommended Games</span>
-            </div>
-            <div className="section-right">
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="recommended-games">
-            <div 
-              className="rec-item red-rec"
-              onClick={() => setSelectedGame({id: 'aviator', name: 'AVIATOR', type: 'recommended'})}
-            >
-              <div className="rec-title">AVIATOR</div>
-              <div className="rec-subtitle">x500+</div>
-            </div>
-            <div 
-              className="rec-item purple-rec"
-              onClick={() => setSelectedGame({id: 'mines', name: 'MINES', type: 'recommended'})}
-            >
-              <div className="rec-title">MINES</div>
-            </div>
-            <div 
-              className="rec-item green-rec"
-              onClick={() => setSelectedGame({id: 'goal2', name: 'GOAL', type: 'recommended'})}
-            >
-              <div className="rec-title">GOAL</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Slots */}
-        <div className="game-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="orange-dot"></div>
-              <span className="section-title">Slots</span>
-            </div>
-            <div className="section-right">
-              <span className="detail-text">Detail</span>
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="slots-games">
-            <div 
-              className="slot-item"
-              onClick={() => setSelectedGame({id: 'jili', name: 'JILI SLOTS', type: 'slot'})}
-            >
-              <div className="slot-preview purple-slot">JILI</div>
-            </div>
-            <div 
-              className="slot-item"
-              onClick={() => setSelectedGame({id: 'jdb', name: 'JDB SLOTS', type: 'slot'})}
-            >
-              <div className="slot-preview blue-slot">JDB</div>
-            </div>
-            <div 
-              className="slot-item"
-              onClick={() => setSelectedGame({id: 'cq9', name: 'CQ9 SLOTS', type: 'slot'})}
-            >
-              <div className="slot-preview orange-slot">CQ9</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Rummy */}
-        <div className="game-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="red-dot"></div>
-              <span className="section-title">Rummy</span>
-            </div>
-            <div className="section-right">
-              <span className="detail-text">Detail</span>
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="rummy-game">
-            <div 
-              className="rummy-card"
-              onClick={() => setSelectedGame({id: 'rummy', name: 'RUMMY 505', type: 'slot'})}
-            >
-              505
-            </div>
-          </div>
-        </div>
-
-        {/* Hot Games & Winners Section */}
-        <div className="hot-section">
-          <div className="section-header">
-            <div className="section-left">
-              <div className="fire-icon">🔥</div>
-              <span className="section-title">HOT GAMES</span>
-            </div>
-            <div className="section-right">
-              <span className="view-all">View All</span>
-              <ChevronRight className="chevron" />
-            </div>
-          </div>
-          
-          <div className="hot-games-grid">
-            <div 
-              className="hot-game-card wingo-hot"
-              onClick={() => setSelectedGame({id: 'wingo', name: 'WIN GO', type: 'lottery'})}
-            >
-              <div className="hot-badge">HOT</div>
-              <div className="hot-game-title">WIN GO</div>
-              <div className="hot-game-subtitle">Next: 2:15</div>
-              <div className="hot-game-multiplier">x98.5</div>
-            </div>
-            
-            <div 
-              className="hot-game-card aviator-hot"
-              onClick={() => setSelectedGame({id: 'aviator', name: 'Aviator', type: 'mini'})}
-            >
-              <div className="hot-badge">LIVE</div>
-              <div className="hot-game-title">Aviator</div>
-              <div className="hot-game-subtitle">Flying Now</div>
-              <div className="hot-game-multiplier">x15.64</div>
-            </div>
-            
-            <div 
-              className="hot-game-card mines-hot"
-              onClick={() => setSelectedGame({id: 'mines', name: 'Mines', type: 'mini'})}
-            >
-              <div className="hot-badge">WIN</div>
-              <div className="hot-game-title">Mines</div>
-              <div className="hot-game-subtitle">Safe Spots</div>
-              <div className="hot-game-multiplier">x45.2</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Winner Announcements */}
-        <div className="winners-section">
-          <div className="winner-banner">
-            <div className="winner-icon">🏆</div>
-            <div className="winner-text">
-              <div className="winner-name">ProGamer98 won ₹89,320</div>
-              <div className="winner-game">on Dragon Tiger just now!</div>
-            </div>
-            <div className="winner-amount">+₹89,320</div>
-          </div>
-        </div>
-
-        {/* Live Features Section */}
-        <div className="content-section">
-          <LiveFeatures walletBalance={walletBalance} />
-        </div>
-
-        {/* Real-time Updates Component */}
-        <RealTimeUpdates onWalletUpdate={(bonus) => setWalletBalance(prev => prev + bonus)} />
-      </div>
-    </div>
-  );
-
-  const ActivityScreen = () => (
-    <div className="app-container pb-20">
-      <div className="header-section">
-        <div className="header-top">
-          <div className="logo-text">91CLUB</div>
-        </div>
-        <div className="page-title">Activity</div>
-        <div className="page-description">
-          <div>Please remember to follow the event page</div>
-          <div>We will launch new feedback activities from time to time!</div>
-        </div>
-      </div>
-
-      <div className="content-section">
-        <div className="activity-grid-top">
-          {[
-            { name: 'Activity Award', icon: '🏆', bg: 'orange-bg' },
-            { name: 'Invitation bonus', icon: '👥', bg: 'blue-bg' },
-            { name: 'Betting mobile', icon: '📱', bg: 'yellow-bg' },
-            { name: 'Super Jackpot', icon: '💰', bg: 'green-bg' }
-          ].map((item) => (
-            <div key={item.name} className="activity-item">
-              <div className={`activity-icon ${item.bg}`}>{item.icon}</div>
-              <div className="activity-label">{item.name}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="activity-center">
-          <div className="activity-icon purple-bg">🎁</div>
-          <div className="activity-label">First gift</div>
-        </div>
-
-        <div className="activity-banners">
-          <div className="banner red-banner">
-            <div className="banner-title">Gifts</div>
-            <div className="banner-desc">Enter the redemption code to receive gift rewards</div>
-          </div>
-          <div className="banner orange-banner">
-            <div className="banner-title">Attendance bonus</div>
-            <div className="banner-desc">The more consecutive days you sign in, the higher the reward will be</div>
-          </div>
-          <div className="banner white-banner">
-            <div className="banner-title red-text">Benefits of Using ARWALLET</div>
-          </div>
-          <div className="banner yellow-banner">
-            <div className="banner-title">New Member First Deposit Bonus</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const WalletScreen = () => (
-    <div className="app-container pb-20">
-      <div className="header-section">
-        <div className="header-top">
-          <ArrowLeft className="back-icon" />
-          <div className="page-title">Wallet</div>
-        </div>
-        
-        <div className="wallet-info">
-          <div className="wallet-icon-container">
-            <Wallet className="wallet-icon" />
-          </div>
-          <div className="wallet-balance">₹{walletBalance.toFixed(2)}</div>
-          <div className="wallet-label">Total balance</div>
-          
-          <div className="wallet-stats">
-            <div className="stat-item">
-              <div className="stat-number">156816</div>
-              <div className="stat-label">Total deposit</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">167805</div>
-              <div className="stat-label">Total withdrawal</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="content-section">
-        <div className="wallet-transfer-card">
-          <div className="transfer-info">
-            <div className="main-wallet">
-              <div className="transfer-percent">0%</div>
-              <div className="transfer-amount">₹0.00</div>
-              <div className="transfer-label">Main wallet</div>
-            </div>
-            <div className="circle-progress">
-              <div className="progress-circle">100%</div>
-            </div>
-            <div className="third-party-wallet">
-              <div className="transfer-amount red">₹0.39</div>
-              <div className="transfer-label">3rd party wallet</div>
-            </div>
-          </div>
-          <button className="transfer-btn">Main wallet transfer</button>
-        </div>
-
-        <div className="wallet-actions">
-          {[
-            { name: 'Deposit', icon: '💳' },
-            { name: 'Withdraw', icon: '💰' },
-            { name: 'Deposit history', icon: '📊' },
-            { name: 'Withdrawal history', icon: '📈' }
-          ].map((action) => (
-            <div key={action.name} className="wallet-action">
-              <div className="action-icon">{action.icon}</div>
-              <div className="action-name">{action.name}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="wallet-games">
-          <button className="game-btn active">
-            <div className="game-number">6.49</div>
-            <div className="game-name">All Game</div>
-          </button>
-          <button className="game-btn">
-            <div className="game-number">6.38</div>
-            <div className="game-name">Evolution</div>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const AccountScreen = () => (
-    <div className="app-container pb-20">
-      <div className="header-section">
-        <div className="profile-header">
-          <div className="profile-avatar">
-            <User className="avatar-icon" />
-          </div>
-          <div className="profile-info">
-            <div className="profile-name">ANURAG KUMAR</div>
-            <div className="profile-copy">🎯 Copy</div>
-            <div className="profile-uid">UID: 396313</div>
-            <div className="profile-login">Last login: 2025-06-13 19:34:40</div>
-          </div>
-        </div>
-
-        <div className="balance-card">
-          <div className="balance-label">Total balance</div>
-          <div className="balance-amount">₹{walletBalance.toFixed(2)}</div>
-        </div>
-      </div>
-
-      <div className="content-section">
-        <div className="account-actions">
-          {[
-            { name: 'ARWallet', icon: '💳' },
-            { name: 'Deposit', icon: '💰' },
-            { name: 'Withdraw', icon: '📤' },
-            { name: 'VIP', icon: '👑' }
-          ].map((action) => (
-            <div key={action.name} className="account-action">
-              <div className="action-icon">{action.icon}</div>
-              <div className="action-name">{action.name}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="menu-list">
-          {[
-            { icon: '📊', title: 'Game History', subtitle: 'My game history' },
-            { icon: '💳', title: 'Transaction', subtitle: 'My transaction history' },
-            { icon: '💰', title: 'Deposit', subtitle: 'My deposit history' },
-            { icon: '📤', title: 'Withdraw', subtitle: 'My withdraw history' },
-            { icon: '🔔', title: 'Notification', badge: '33' },
-            { icon: '🎁', title: 'Gifts' },
-            { icon: '📈', title: 'Game statistics' },
-            { icon: '🌐', title: 'Language', value: 'English' }
-          ].map((item, index) => (
-            <div key={index} className="menu-item">
-              <div className="menu-left">
-                <div className="menu-icon">{item.icon}</div>
-                <div className="menu-text">
-                  <div className="menu-title">{item.title}</div>
-                  {item.subtitle && <div className="menu-subtitle">{item.subtitle}</div>}
-                </div>
-              </div>
-              <div className="menu-right">
-                {item.badge && <div className="menu-badge">{item.badge}</div>}
-                {item.value && <div className="menu-value">{item.value}</div>}
-                <ChevronRight className="menu-chevron" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="service-section">
-          <div className="service-title">Service center</div>
-          <div className="service-grid">
-            {[
-              { name: 'Settings', icon: '⚙️' },
-              { name: 'Feedback', icon: '💬' },
-              { name: 'Announcement', icon: '📢' },
-              { name: 'Customer Service', icon: '🎧' },
-              { name: "Beginner's Guide", icon: '📖' },
-              { name: 'About us', icon: '👥' }
-            ].map((service) => (
-              <div key={service.name} className="service-item">
-                <div className="service-icon">{service.icon}</div>
-                <div className="service-name">{service.name}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <button className="logout-btn" onClick={handleLogout}>
-          <span>Log out</span>
-        </button>
-      </div>
-    </div>
-  );
-
-  const PromotionScreen = () => (
-    <div className="app-container pb-20">
-      <div className="header-section">
-        <div className="header-top">
-          <div className="logo-text">Agency</div>
-          <div className="agency-icon">🎯</div>
-        </div>
-      </div>
-
-      <div className="content-section">
-        <div className="commission-card">
-          <div className="commission-amount">0</div>
-          <div className="commission-label">Yesterday's total commission</div>
-          <div className="commission-subtitle">Upgrade the level to increase commission percentage</div>
-          
-          <div className="commission-actions">
-            <div className="commission-item">Direct subordinates</div>
-            <div className="commission-item">Team subordinates</div>
-          </div>
-        </div>
-
-        <div className="stats-section">
-          <div className="stat-card">
-            <div className="stat-number">0</div>
-            <div className="stat-label">number of register</div>
-            <div className="stat-number">0</div>
-            <div className="stat-label">Deposit Number</div>
-            <div className="stat-title">Deposit amount</div>
-            <div className="stat-number">0</div>
-            <div className="stat-label">Number of people making first deposit</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">0</div>
-            <div className="stat-label">number of register</div>
-            <div className="stat-number">0</div>
-            <div className="stat-label">Deposit Number</div>
-            <div className="stat-title">Deposit amount</div>
-            <div className="stat-number">0</div>
-            <div className="stat-label">Number of people making first deposit</div>
-          </div>
-        </div>
-
-        <button className="invitation-link-btn">INVITATION LINK</button>
-
-        <div className="promotion-menu">
-          {[
-            { icon: '🏆', title: 'Partner rewards' },
-            { icon: '📋', title: 'Copy invitation code', code: '3654752684217' },
-            { icon: '👥', title: 'Subordinate data' },
-            { icon: '💰', title: 'Commission detail' },
-            { icon: '📋', title: 'Invitation rules' },
-            { icon: '🎧', title: 'Agent line customer service' }
-          ].map((item, index) => (
-            <div key={index} className="promotion-item">
-              <div className="promotion-left">
-                <div className="promotion-icon">{item.icon}</div>
-                <div className="promotion-title">{item.title}</div>
-              </div>
-              <div className="promotion-right">
-                {item.code && (
-                  <>
-                    <div className="invitation-code">{item.code}</div>
-                    <Copy className="copy-icon" />
-                  </>
-                )}
-                <ChevronRight className="promotion-chevron" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderScreen = () => {
-    switch (activeTab) {
-      case 'home': return <HomeScreen />;
-      case 'activity': return <ActivityScreen />;
-      case 'promotion': return <PromotionScreen />;
-      case 'wallet': return <WalletScreen />;
-      case 'account': return <AccountScreen />;
-      default: return <HomeScreen />;
-    }
-  };
-
   return (
-    <div className="app-wrapper">
-      {renderScreen()}
-
-      {/* Bottom Navigation - Exact Match */}
-      {/* Bottom Navigation - Original Style */}
-      <div className="bottom-navigation">
-        {[
-          { id: 'home', icon: Home, label: 'Home' },
-          { id: 'activity', icon: Activity, label: 'Activity' },
-          { id: 'promotion', icon: Gift, label: 'Promotion' },
-          { id: 'wallet', icon: Wallet, label: 'Wallet' },
-          { id: 'account', icon: User, label: 'Account' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-          >
-            <div className="nav-icon-wrapper">
-              <tab.icon className="nav-icon" />
-            </div>
-            <span className="nav-label">{tab.label}</span>
-          </button>
-        ))}
+    <div className="app-container">
+      {/* Top Navigation Bar */}
+      <div className="top-nav">
+        <div className="nav-item active">
+          <Home className="nav-icon" />
+          <span>Lobby</span>
+        </div>
+        <div className="nav-item">
+          <Gamepad2 className="nav-icon" />
+          <span>Mini game</span>
+        </div>
+        <div className="nav-item">
+          <Zap className="nav-icon" />
+          <span>Slots</span>
+        </div>
+        <div className="nav-item">
+          <CreditCard className="nav-icon" />
+          <span>Card</span>
+        </div>
+        <div className="nav-item">
+          <Fish className="nav-icon" />
+          <span>Fishing</span>
+        </div>
+        <div className="nav-item">
+          <Trophy className="nav-icon" />
+          <span>Sports</span>
+        </div>
       </div>
 
-      {/* Comprehensive Game Modals */}
-      {selectedGame?.id === 'wingo' && (
-        <WinGoGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {selectedGame?.id === 'k3' && (
-        <K3LotreGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {selectedGame?.id === 'aviator' && (
-        <AviatorGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {selectedGame?.id === 'mines' && (
-        <MinesGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {selectedGame?.id === 'dice' && (
-        <DiceGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {selectedGame?.id === 'dragon' && (
-        <DragonTigerGame
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-          walletBalance={walletBalance}
-          onTransaction={handleTransaction}
-        />
-      )}
-      
-      {/* Fallback for slot games and other simple games */}
-      {selectedGame && !['wingo', 'k3', 'aviator', 'mines', 'dice', 'dragon'].includes(selectedGame.id) && (
-        <GameModal
-          game={selectedGame}
-          isOpen={!!selectedGame}
-          onClose={() => setSelectedGame(null)}
-        />
-      )}
+      {/* Featured Promotion Banner */}
+      <div className="promo-banner">
+        <div className="promo-content">
+          <div className="promo-badge">🎯</div>
+          <div className="promo-title">PENALTY KICKS</div>
+          <div className="promo-subtitle">JiLi Game</div>
+        </div>
+      </div>
 
-      {/* Wallet Modal */}
-      <WalletModal
-        type={walletModal.type}
-        isOpen={walletModal.isOpen}
-        onClose={() => setWalletModal({...walletModal, isOpen: false})}
-        currentBalance={walletBalance}
-        onTransaction={handleTransaction}
-      />
+      {/* Mini Game Section */}
+      <div className="game-section">
+        <div className="section-header">
+          <div className="section-icon">🎮</div>
+          <h3 className="section-title">Mini game</h3>
+          <button className="detail-btn">Detail</button>
+        </div>
+        <div className="game-grid">
+          <div className="game-card purple-gradient">
+            <div className="game-icon">🎲</div>
+            <div className="game-name">SPACE DICE</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+          <div className="game-card blue-gradient">
+            <div className="game-icon">⚽</div>
+            <div className="game-name">GOAL WAVE</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+          <div className="game-card orange-gradient">
+            <div className="game-icon">🎰</div>
+            <div className="game-name">MINI ROULETTE</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+        </div>
+      </div>
 
-      {/* Login Interface */}
-      <LoginInterface
-        isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
-        onLogin={handleLogin}
-      />
+      {/* Recommended Games Section */}
+      <div className="game-section">
+        <div className="section-header">
+          <div className="section-icon">⭐</div>
+          <h3 className="section-title">Recommended Games</h3>
+        </div>
+        <div className="game-grid">
+          <div className="game-card red-gradient">
+            <div className="game-icon">🎯</div>
+            <div className="game-name">DICE</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+          <div className="game-card purple-gradient">
+            <div className="game-icon">🌪️</div>
+            <div className="game-name">PLINKO</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+          <div className="game-card blue-gradient">
+            <div className="game-icon">🎲</div>
+            <div className="game-name">HILO</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Slots Section */}
+      <div className="game-section">
+        <div className="section-header">
+          <div className="section-icon">🎰</div>
+          <h3 className="section-title">Slots</h3>
+          <button className="detail-btn">Detail</button>
+        </div>
+        <div className="game-grid">
+          <div className="game-card purple-gradient">
+            <div className="game-artwork">👑</div>
+            <div className="game-name">JILI GAME</div>
+          </div>
+          <div className="game-card blue-gradient">
+            <div className="game-artwork">🎯</div>
+            <div className="game-name">JDB</div>
+          </div>
+          <div className="game-card green-gradient">
+            <div className="game-artwork">💎</div>
+            <div className="game-name">M GAME</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Popular Aviator/Crash Games */}
+      <div className="game-section">
+        <div className="section-header">
+          <h3 className="section-title">Popular Games</h3>
+        </div>
+        <div className="game-grid">
+          <div className="game-card aviator-red">
+            <div className="multiplier-badge">+500%</div>
+            <div className="game-name">AVIATOR</div>
+            <div className="game-provider">TB GAME</div>
+            <div className="time-badge">10 SEC</div>
+          </div>
+          <div className="game-card cricket-green">
+            <div className="game-name">CRICKET</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+          <div className="game-card mines-purple">
+            <div className="game-name">MINES</div>
+            <div className="game-provider">TB GAME</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Today's Earnings Chart */}
+      <div className="earnings-section">
+        <div className="section-header">
+          <div className="section-icon">📊</div>
+          <h3 className="section-title">Today's earnings chart</h3>
+        </div>
+        <div className="podium-chart">
+          <div className="podium-item second">
+            <div className="avatar">👨</div>
+            <div className="position">2</div>
+            <div className="username">Mem***QQ8</div>
+            <div className="amount">₹1,647,800.40</div>
+          </div>
+          <div className="podium-item first">
+            <div className="avatar">👩</div>
+            <div className="position">1</div>
+            <div className="username">Mem***IHA</div>
+            <div className="amount">₹1,990,770.00</div>
+          </div>
+          <div className="podium-item third">
+            <div className="avatar">👨</div>
+            <div className="position">3</div>
+            <div className="username">Mem***S5W</div>
+            <div className="amount">₹1,363,620.00</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Winning Information */}
+      <div className="winning-section">
+        <div className="section-header">
+          <div className="section-icon">🎯</div>
+          <h3 className="section-title">Winning information</h3>
+        </div>
+        <div className="winning-table">
+          <div className="table-header">
+            <span>Game</span>
+            <span>User</span>
+            <span>Winning amount</span>
+          </div>
+          <div className="winning-row">
+            <div className="game-info">
+              <div className="game-icon">🎯</div>
+              <span>Wickets9</span>
+            </div>
+            <span>Mem***CND</span>
+            <span className="amount">₹600.00</span>
+          </div>
+          <div className="winning-row">
+            <div className="game-info">
+              <div className="game-icon">🎯</div>
+              <span>Wickets9</span>
+            </div>
+            <span>Mem***SEL</span>
+            <span className="amount">₹10,000.00</span>
+          </div>
+          <div className="winning-row">
+            <div className="game-info">
+              <div className="game-icon">🎯</div>
+              <span>Wickets9</span>
+            </div>
+            <span>Mem***WVS</span>
+            <span className="amount">₹109.00</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="bottom-nav">
+        <div className="nav-tab">
+          <Gift className="tab-icon" />
+          <span>Promotion</span>
+        </div>
+        <div className="nav-tab">
+          <Activity className="tab-icon" />
+          <span>Activity</span>
+        </div>
+        <div className="nav-tab main active">
+          <Gamepad2 className="tab-icon" />
+        </div>
+        <div className="nav-tab">
+          <Wallet className="tab-icon" />
+          <span>Wallet</span>
+        </div>
+        <div className="nav-tab">
+          <User className="tab-icon" />
+          <span>Account</span>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default App;
