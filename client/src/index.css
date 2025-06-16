@@ -686,6 +686,531 @@ body {
   text-align: center;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.game-modal, .wallet-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.game-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-title h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #F3F4F6;
+}
+
+/* Game Interface Styles */
+.game-interface {
+  background: #F8F9FA;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.aviator-interface, .dice-interface, .mines-interface, .default-game-interface {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.aviator-display, .dice-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.plane-icon, .dice-icon, .game-icon-large {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.multiplier-display, .dice-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-width: 200px;
+}
+
+.mine-tile {
+  aspect-ratio: 1;
+  background: #E5E7EB;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.result-display {
+  margin-top: 16px;
+}
+
+.result {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.result.win {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.result.lose {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Betting Panel Styles */
+.betting-panel {
+  border-top: 1px solid #E5E7EB;
+  padding-top: 20px;
+}
+
+.balance-display {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.bet-controls {
+  margin-bottom: 20px;
+}
+
+.bet-amount-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bet-btn {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bet-btn:hover:not(:disabled) {
+  background: #E5E7EB;
+}
+
+.bet-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bet-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+  text-align: center;
+}
+
+.quick-bets {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.quick-bet {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-bet:hover:not(:disabled) {
+  background: #E5E7EB;
+}
+
+.quick-bet.active {
+  background: #FF4757;
+  color: white;
+}
+
+.quick-bet:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.play-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #FF4757 0%, #FF6B85 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.play-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,71,87,0.3);
+}
+
+.play-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.play-btn.playing {
+  background: #6B7280;
+}
+
+/* Wallet Modal Styles */
+.wallet-balance {
+  margin-bottom: 24px;
+}
+
+.wallet-balance .balance-card {
+  background: linear-gradient(135deg, #FF4757 0%, #FF6B85 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.wallet-balance .balance-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.wallet-balance .balance-amount {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.wallet-tabs {
+  display: flex;
+  background: #F3F4F6;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.wallet-tabs .tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.wallet-tabs .tab.active {
+  background: white;
+  color: #FF4757;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.wallet-content {
+  min-height: 300px;
+}
+
+.amount-input {
+  margin-bottom: 16px;
+}
+
+.amount-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.amount-input input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.amount-input input:focus {
+  outline: none;
+  border-color: #FF4757;
+}
+
+.quick-amounts {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.quick-amount {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-amount:hover {
+  background: #E5E7EB;
+}
+
+.quick-amount.active {
+  background: #FF4757;
+  color: white;
+}
+
+.payment-methods {
+  margin-bottom: 24px;
+}
+
+.payment-methods label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.method-options {
+  display: flex;
+  gap: 8px;
+}
+
+.method {
+  flex: 1;
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.method:hover {
+  background: #E5E7EB;
+}
+
+.method.active {
+  background: #FF4757;
+  color: white;
+}
+
+.action-btn {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn.deposit {
+  background: linear-gradient(135deg, #2ED573 0%, #5FD79A 100%);
+  color: white;
+}
+
+.action-btn.withdraw {
+  background: linear-gradient(135deg, #FF4757 0%, #FF6B85 100%);
+  color: white;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.withdraw-limits {
+  margin-bottom: 16px;
+}
+
+.limit-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+
+.transaction-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  background: #F3F4F6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deposit-icon {
+  color: #10B981;
+}
+
+.withdraw-icon {
+  color: #EF4444;
+}
+
+.win-icon {
+  font-size: 16px;
+}
+
+.tx-details {
+  flex: 1;
+}
+
+.tx-type {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.tx-time {
+  font-size: 12px;
+  color: #666;
+}
+
+.tx-amount {
+  text-align: right;
+}
+
+.amount.positive {
+  color: #10B981;
+}
+
+.amount.negative {
+  color: #EF4444;
+}
+
+.status {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.status.completed {
+  color: #10B981;
+}
+
+.status.pending {
+  color: #F59E0B;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .game-grid {
@@ -704,5 +1229,23 @@ body {
   
   .game-provider {
     font-size: 8px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .game-modal, .wallet-modal {
+    max-height: 95vh;
+    padding: 16px;
+  }
+
+  .quick-bets, .quick-amounts {
+    gap: 4px;
+  }
+
+  .quick-bet, .quick-amount {
+    font-size: 11px;
+    padding: 6px 8px;
   }
 }

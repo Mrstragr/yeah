@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 
 import { LoginInterface } from './components/LoginInterface';
+import { GameModal } from './components/GameModal';
+import { WalletModal } from './components/WalletModal';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
