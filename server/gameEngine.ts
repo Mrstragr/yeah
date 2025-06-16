@@ -65,8 +65,8 @@ export class GameEngine {
     const user = await storage.getUser(userId);
     if (user) {
       const currentBalance = Number(user.walletBalance || 0);
-      // Deduct bet amount and add win amount
       const newBalance = currentBalance - betAmount + winAmount;
+      console.log(`[WINGO] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}`);
       await storage.updateUserWalletBalance(userId, newBalance.toString());
     }
     
@@ -178,6 +178,7 @@ export class GameEngine {
     if (user) {
       const currentBalance = Number(user.walletBalance || 0);
       const newBalance = currentBalance - betAmount + winAmount;
+      console.log(`[AVIATOR] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}, Win: ${isWin}`);
       await storage.updateUserWalletBalance(userId, newBalance.toString());
     }
     
@@ -256,6 +257,7 @@ export class GameEngine {
     if (user) {
       const currentBalance = Number(user.walletBalance || 0);
       const newBalance = currentBalance - betAmount + winAmount;
+      console.log(`[DICE] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}, Win: ${isWin}, Roll: ${result}`);
       await storage.updateUserWalletBalance(userId, newBalance.toString());
     }
     
