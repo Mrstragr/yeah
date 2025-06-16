@@ -21,11 +21,13 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
   const quickBetAmounts = [50, 100, 500, 1000, 5000];
 
   const handleBetChange = (amount: number) => {
-    setBetAmount(Math.max(10, Math.min(amount, walletBalance)));
+    const balance = Number(walletBalance || 0);
+    setBetAmount(Math.max(10, Math.min(amount, balance)));
   };
 
   const handlePlay = async () => {
-    if (betAmount > walletBalance) return;
+    const balance = Number(walletBalance || 0);
+    if (betAmount > balance) return;
     
     setIsPlaying(true);
     
@@ -46,7 +48,8 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
       if (response.ok) {
         const result = await response.json();
         setGameResult(result);
-        onBalanceUpdate(walletBalance + result.winAmount - betAmount);
+        const balance = Number(walletBalance || 0);
+        onBalanceUpdate(balance + result.winAmount - betAmount);
       }
     } catch (error) {
       console.error('Game play error:', error);
@@ -154,7 +157,7 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
 
         <div className="betting-panel">
           <div className="balance-display">
-            <span>Balance: ₹{walletBalance.toFixed(2)}</span>
+            <span>Balance: ₹{Number(walletBalance || 0).toFixed(2)}</span>
           </div>
           
           <div className="bet-controls">
@@ -170,7 +173,7 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
               <button 
                 className="bet-btn plus"
                 onClick={() => handleBetChange(betAmount + 50)}
-                disabled={betAmount >= walletBalance}
+                disabled={betAmount >= Number(walletBalance || 0)}
               >
                 <Plus size={16} />
               </button>
@@ -182,7 +185,7 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
                   key={amount}
                   className={`quick-bet ${betAmount === amount ? 'active' : ''}`}
                   onClick={() => setBetAmount(amount)}
-                  disabled={amount > walletBalance}
+                  disabled={amount > Number(walletBalance || 0)}
                 >
                   ₹{amount}
                 </button>
@@ -193,7 +196,7 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
           <button 
             className={`play-btn ${isPlaying ? 'playing' : ''}`}
             onClick={handlePlay}
-            disabled={isPlaying || betAmount > walletBalance || betAmount < 10}
+            disabled={isPlaying || betAmount > Number(walletBalance || 0) || betAmount < 10}
           >
             {isPlaying ? 'Playing...' : `Bet ₹${betAmount}`}
           </button>

@@ -36,7 +36,7 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
 
       if (response.ok) {
         const result = await response.json();
-        onBalanceUpdate(balance + parseFloat(amount));
+        onBalanceUpdate(Number(balance || 0) + parseFloat(amount));
         setAmount('');
         alert('Deposit successful!');
       }
@@ -48,7 +48,8 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
   };
 
   const handleWithdraw = async () => {
-    if (!amount || parseFloat(amount) < 500 || parseFloat(amount) > balance) return;
+    const currentBalance = Number(balance || 0);
+    if (!amount || parseFloat(amount) < 500 || parseFloat(amount) > currentBalance) return;
     
     setIsProcessing(true);
     
@@ -99,7 +100,7 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
         <div className="wallet-balance">
           <div className="balance-card">
             <div className="balance-label">Available Balance</div>
-            <div className="balance-amount">₹{balance.toFixed(2)}</div>
+            <div className="balance-amount">₹{Number(balance || 0).toFixed(2)}</div>
           </div>
         </div>
 
