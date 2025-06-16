@@ -96,14 +96,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { betAmount, betType, betValue } = req.body;
       const result = await gameEngine.playWinGo(req.user!.id, betAmount, betType, betValue);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -115,14 +107,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { betAmount, betType, betValue } = req.body;
       const result = await gameEngine.playK3Lottery(req.user!.id, betAmount, betType, betValue);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -134,14 +118,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { betAmount, cashOutMultiplier } = req.body;
       const result = await gameEngine.playAviator(req.user!.id, betAmount, cashOutMultiplier);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -186,30 +162,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generic game handler for other game types
+  // Generic game handler for other game types  
   app.post('/api/games/:gameType/play', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { gameType } = req.params;
       const { betAmount } = req.body;
       
-      // Simulate game result for unsupported game types
-      const isWin = Math.random() > 0.5;
-      const multiplier = isWin ? 1.5 + Math.random() * 1.5 : 0;
-      const winAmount = isWin ? Math.floor(betAmount * multiplier) : 0;
+      // Handle specific game types or use generic logic
+      let result;
       
-      const result = {
-        gameId: Date.now(),
-        result: Math.floor(Math.random() * 100),
-        multiplier: multiplier,
-        winAmount: winAmount,
-        isWin: isWin
-      };
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      switch (gameType) {
+        case 'mines':
+          const { mineCount = 3, revealedTiles = [0] } = req.body;
+          result = await gameEngine.playMines(req.user!.id, betAmount, mineCount, revealedTiles);
+          break;
+        default:
+          // Generic game simulation with proper balance handling
+          const isWin = Math.random() > 0.4; // Better win rate
+          const multiplier = isWin ? 1.2 + Math.random() * 2.8 : 0;
+          const winAmount = isWin ? Math.floor(betAmount * multiplier) : 0;
+          
+          // Update balance properly
+          const currentUser = await storage.getUser(req.user!.id);
+          if (currentUser) {
+            const currentBalance = Number(currentUser.walletBalance || 0);
+            const newBalance = currentBalance - betAmount + winAmount;
+            await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+          }
+          
+          result = {
+            gameId: Date.now(),
+            result: Math.floor(Math.random() * 100),
+            multiplier: multiplier,
+            winAmount: winAmount,
+            isWin: isWin
+          };
+          break;
       }
       
       res.json(result);
@@ -223,14 +211,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { betAmount, prediction, targetNumber } = req.body;
       const result = await gameEngine.playDice(req.user!.id, betAmount, prediction, targetNumber);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -242,14 +222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { betAmount, betType } = req.body;
       const result = await gameEngine.playDragonTiger(req.user!.id, betAmount, betType);
-      
-      // Update user balance
-      const currentUser = await storage.getUser(req.user!.id);
-      if (currentUser) {
-        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-      }
-      
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
