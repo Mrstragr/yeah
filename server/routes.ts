@@ -217,5 +217,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to verify game functionality
+  app.post('/api/test/game', async (req, res) => {
+    try {
+      const { gameType = 'aviator', betAmount = 50 } = req.body;
+      
+      // Get demo user (ID 1)
+      const user = await storage.getUser(1);
+      if (!user) {
+        return res.status(404).json({ error: 'Demo user not found' });
+      }
+
+      const beforeBalance = Number(user.walletBalance || 0);
+      let result;
+
+      switch (gameType) {
+        case 'aviator':
+          result = await gameEngine.playAviator(1, betAmount, 1.5);
+          break;
+        case 'dice':
+          result = await gameEngine.playDice(1, betAmount, 'over', 50);
+          break;
+        default:
+          result = await gameEngine.playAviator(1, betAmount, 1.5);
+      }
+
+      const afterUser = await storage.getUser(1);
+      const afterBalance = Number(afterUser?.walletBalance || 0);
+
+      res.json({
+        success: true,
+        gameResult: result,
+        balanceChange: {
+          before: beforeBalance,
+          after: afterBalance,
+          change: afterBalance - beforeBalance,
+          expected: result.winAmount - betAmount
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return app as any; // Return app, server will be started in index.ts
 }
