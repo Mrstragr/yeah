@@ -120,12 +120,14 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
         const balance = Number(walletBalance || 0);
         onBalanceUpdate(balance + result.winAmount - betAmount);
         
-        // Show win/loss notification
-        if (result.isWin) {
-          setTimeout(() => {
-            alert(`Congratulations! You won ₹${result.winAmount}`);
-          }, 500);
-        }
+        // Show win/loss notification with better UX
+        setTimeout(() => {
+          if (result.isWin) {
+            alert(`🎉 Congratulations! You won ₹${result.winAmount}!`);
+          } else {
+            alert(`💥 Game over! Better luck next time!`);
+          }
+        }, 800);
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Game play failed. Please try again.');

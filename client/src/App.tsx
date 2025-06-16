@@ -160,7 +160,37 @@ export default function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app">
+      {/* Header with logo, balance, and user controls */}
+      <div className="top-header">
+        <div className="header-left">
+          <div className="logo">
+            <div className="logo-icon">9</div>
+            <span className="logo-text">1CLUB</span>
+          </div>
+        </div>
+        
+        <div className="header-center">
+          <div className="user-welcome">
+            Welcome, {user?.username || 'Player'}
+          </div>
+          <button className="demo-btn" onClick={() => {
+            alert('🎮 Try any game card! Login with Phone: 9876543210, Password: demo123');
+          }}>
+            Demo Guide
+          </button>
+        </div>
+        
+        <div className="header-right">
+          <div className="wallet-balance" onClick={() => setShowWalletModal(true)}>
+            ₹{Number(walletBalance || 0).toFixed(2)}
+          </div>
+          <button className="logout-btn" onClick={handleLogout} title="Logout">
+            <User size={20} />
+          </button>
+        </div>
+      </div>
+
       {/* Top Navigation Bar */}
       <div className="top-nav">
         <div className={`nav-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => handleTabChange('lobby')}>
@@ -403,6 +433,31 @@ export default function App() {
           onBalanceUpdate={setWalletBalance}
         />
       )}
+
+      {/* Floating Help Button */}
+      <div className="floating-help">
+        <button 
+          className="help-btn"
+          onClick={() => {
+            const features = [
+              "✅ Click any game card to play",
+              "✅ Click wallet balance to deposit/withdraw", 
+              "✅ All animations and effects working",
+              "✅ Real-time balance updates",
+              "✅ Functional betting system",
+              "✅ Working login/logout",
+              "✅ Interactive navigation tabs",
+              "✅ Viral game animations",
+              "",
+              "Demo Login: Phone 9876543210, Password demo123"
+            ];
+            alert(features.join('\n'));
+          }}
+          title="View all working features"
+        >
+          ?
+        </button>
+      </div>
     </div>
   );
 }
