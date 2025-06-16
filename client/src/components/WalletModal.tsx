@@ -69,7 +69,7 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
 
       if (response.ok) {
         const result = await response.json();
-        onBalanceUpdate(balance - parseFloat(amount));
+        onBalanceUpdate(Number(balance || 0) - parseFloat(amount));
         setAmount('');
         alert('Withdrawal request submitted!');
       }
@@ -193,14 +193,14 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Enter amount"
                   min="500"
-                  max={balance}
+                  max={Number(balance || 0)}
                 />
               </div>
 
               <div className="withdraw-limits">
                 <div className="limit-info">
                   <span>Min: ₹500</span>
-                  <span>Max: ₹{balance.toFixed(2)}</span>
+                  <span>Max: ₹{Number(balance || 0).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -225,7 +225,7 @@ export const WalletModal = ({ onClose, balance, onBalanceUpdate }: WalletModalPr
               <button
                 className="action-btn withdraw"
                 onClick={handleWithdraw}
-                disabled={isProcessing || !amount || parseFloat(amount) < 500 || parseFloat(amount) > balance}
+                disabled={isProcessing || !amount || parseFloat(amount) < 500 || parseFloat(amount) > Number(balance || 0)}
               >
                 {isProcessing ? 'Processing...' : `Withdraw ₹${amount || '0'}`}
               </button>

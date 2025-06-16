@@ -148,6 +148,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dice Game
+  app.post('/api/games/dice/play', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { betAmount, prediction, targetNumber } = req.body;
+      const result = await gameEngine.playDice(req.user!.id, betAmount, prediction || 'over', targetNumber || 50);
+      
+      // Update user balance
+      const currentUser = await storage.getUser(req.user!.id);
+      if (currentUser) {
+        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
+        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Mines Game
+  app.post('/api/games/mines/play', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { betAmount, mineCount, revealedTiles } = req.body;
+      const result = await gameEngine.playMines(req.user!.id, betAmount, mineCount || 3, revealedTiles || []);
+      
+      // Update user balance
+      const currentUser = await storage.getUser(req.user!.id);
+      if (currentUser) {
+        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
+        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Generic game handler for other game types
+  app.post('/api/games/:gameType/play', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { gameType } = req.params;
+      const { betAmount } = req.body;
+      
+      // Simulate game result for unsupported game types
+      const isWin = Math.random() > 0.5;
+      const multiplier = isWin ? 1.5 + Math.random() * 1.5 : 0;
+      const winAmount = isWin ? Math.floor(betAmount * multiplier) : 0;
+      
+      const result = {
+        gameId: Date.now(),
+        result: Math.floor(Math.random() * 100),
+        multiplier: multiplier,
+        winAmount: winAmount,
+        isWin: isWin
+      };
+      
+      // Update user balance
+      const currentUser = await storage.getUser(req.user!.id);
+      if (currentUser) {
+        const newBalance = parseFloat(currentUser.walletBalance) + result.winAmount - betAmount;
+        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Mines Game
   app.post('/api/games/mines/play', authenticateToken, async (req: AuthRequest, res) => {
     try {

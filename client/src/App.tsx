@@ -70,7 +70,7 @@ export default function App() {
       
       if (response.ok) {
         const data = await response.json();
-        setWalletBalance(data.balance);
+        setWalletBalance(parseFloat(data.walletBalance) || 0);
       }
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
@@ -85,7 +85,7 @@ export default function App() {
       if (data.type === 'stats_update') {
         setLiveStats(data.data);
       } else if (data.type === 'balance_update') {
-        setWalletBalance(data.balance);
+        setWalletBalance(parseFloat(data.balance) || 0);
       }
     };
   };
