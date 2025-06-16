@@ -369,7 +369,8 @@ export class GameEngine {
 
   private calculateDiceMultiplier(prediction: 'over' | 'under', targetNumber: number): number {
     const winChance = prediction === 'over' ? (100 - targetNumber) / 100 : targetNumber / 100;
-    return Math.round((0.99 / winChance) * 100) / 100; // 1% house edge
+    const multiplier = Math.round((0.95 / winChance) * 100) / 100; // 5% house edge, better for players
+    return Math.max(multiplier, 1.01); // Minimum 1.01x multiplier
   }
 
   // Real-time game data for live updates

@@ -117,15 +117,24 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
       if (response.ok) {
         const result = await response.json();
         setGameResult(result);
-        const balance = Number(walletBalance || 0);
-        onBalanceUpdate(balance + result.winAmount - betAmount);
         
-        // Show win/loss notification with better UX
+        // Fetch updated balance from server (backend already handled the transaction)
+        const balanceResponse = await fetch('/api/wallet/balance', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        let newBalance = walletBalance;
+        if (balanceResponse.ok) {
+          const balanceData = await balanceResponse.json();
+          newBalance = balanceData.walletBalance;
+          onBalanceUpdate(newBalance);
+        }
+        
+        // Show detailed win/loss notification
         setTimeout(() => {
           if (result.isWin) {
-            alert(`🎉 Congratulations! You won ₹${result.winAmount}!`);
+            alert(`🎉 Congratulations! You won ₹${result.winAmount}! (${result.multiplier}x multiplier)\nNew balance: ₹${Number(newBalance || 0).toFixed(2)}`);
           } else {
-            alert(`💥 Game over! Better luck next time!`);
+            alert(`💥 Game over! You lost ₹${betAmount}.\nBetter luck next time!\nBalance: ₹${Number(newBalance || 0).toFixed(2)}`);
           }
         }, 800);
       } else {
