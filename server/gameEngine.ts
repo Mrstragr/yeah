@@ -61,9 +61,13 @@ export class GameEngine {
     
     const winAmount = isWin ? betAmount * multiplier : 0;
     
-    // Update user balance and record transaction
-    if (isWin) {
-      await storage.updateUserWalletBalance(userId, ((await storage.getUser(userId))?.walletBalance || '0'));
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      // Deduct bet amount and add win amount
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
     }
     
     // Record game history
@@ -131,6 +135,14 @@ export class GameEngine {
     
     const winAmount = isWin ? betAmount * multiplier : 0;
     
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    }
+    
     // Record game history
     await storage.addGameHistory({
       userId,
@@ -160,6 +172,14 @@ export class GameEngine {
     const playerCashOut = cashOutMultiplier || 1;
     const isWin = playerCashOut <= crashMultiplier;
     const winAmount = isWin ? betAmount * playerCashOut : 0;
+    
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    }
     
     // Record game history
     await storage.addGameHistory({
@@ -191,6 +211,15 @@ export class GameEngine {
     const hitMine = revealedTiles.some(tile => minePositions.includes(tile));
     const multiplier = hitMine ? 0 : this.calculateMinesMultiplier(revealedTiles.length, mineCount);
     const winAmount = hitMine ? 0 : betAmount * multiplier;
+    const isWin = !hitMine;
+    
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    }
     
     // Record game history
     await storage.addGameHistory({
@@ -221,6 +250,14 @@ export class GameEngine {
     const isWin = prediction === 'over' ? result > targetNumber : result < targetNumber;
     const multiplier = isWin ? this.calculateDiceMultiplier(prediction, targetNumber) : 0;
     const winAmount = isWin ? betAmount * multiplier : 0;
+    
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    }
     
     // Record game history
     await storage.addGameHistory({
@@ -257,6 +294,14 @@ export class GameEngine {
     const isWin = result === betType;
     const multiplier = isWin ? (betType === 'tie' ? 8 : 2) : 0;
     const winAmount = isWin ? betAmount * multiplier : 0;
+    
+    // Update user balance properly
+    const user = await storage.getUser(userId);
+    if (user) {
+      const currentBalance = Number(user.walletBalance || 0);
+      const newBalance = currentBalance - betAmount + winAmount;
+      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    }
     
     // Record game history
     await storage.addGameHistory({
