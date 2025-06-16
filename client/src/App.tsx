@@ -1,493 +1,472 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Home, 
-  Activity, 
-  Gift, 
-  Wallet, 
-  User, 
-  Bell, 
-  ChevronRight,
-  ArrowLeft,
-  Gamepad2,
-  Zap,
-  CreditCard,
-  Fish,
-  Trophy,
-  ArrowRight,
-  Copy,
-  MoreHorizontal
-} from 'lucide-react';
-
-import { LoginInterface } from './components/LoginInterface';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from './lib/queryClient';
 import { GameModal } from './components/GameModal';
 import { WalletModal } from './components/WalletModal';
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  phone: string;
+  balance: string;
+  walletBalance: string;
+  bonusBalance: string;
+  vipLevel: number;
+  kycStatus: string;
+}
+
+interface AuthModalProps {
+  onClose?: () => void;
+}
+
+function AuthModal({ onClose }: AuthModalProps) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    phone: '',
+    password: '',
+    username: '',
+    email: '',
+    referralCode: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.reload();
+      } else {
+        alert(data.error || 'Authentication failed');
+      }
+    } catch (error) {
+      alert('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2 className="modal-title">{isLogin ? 'Welcome Back' : 'Join 91CLUB'}</h2>
+          <p className="modal-subtitle">
+            {isLogin ? 'Sign in to your account' : 'Create your gaming account'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input
+              type="tel"
+              className="form-input"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="Enter your phone number"
+              required
+            />
+          </div>
+
+          {!isLogin && (
+            <>
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="Choose a username"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email (Optional)</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="Enter your email"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-input"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          {!isLogin && (
+            <div className="form-group">
+              <label className="form-label">Referral Code (Optional)</label>
+              <input
+                type="text"
+                className="form-input"
+                value={formData.referralCode}
+                onChange={(e) => setFormData({ ...formData, referralCode: e.target.value })}
+                placeholder="Enter referral code"
+              />
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+          </button>
+        </form>
+
+        <div className="auth-switch">
+          {isLogin ? "Don't have an account? " : 'Already have an account? '}
+          <button
+            type="button"
+            className="auth-link"
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin ? 'Sign up' : 'Sign in'}
+          </button>
+        </div>
+
+        <div style={{ marginTop: '16px', padding: '12px', background: '#f0f0f0', borderRadius: '8px', fontSize: '12px', color: '#666' }}>
+          Demo Login: Phone: 9876543210, Password: demo123
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [walletBalance, setWalletBalance] = useState(10000);
-  const [activeTab, setActiveTab] = useState('lobby');
-  const [selectedGame, setSelectedGame] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showGameModal, setShowGameModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [liveStats, setLiveStats] = useState<any>({});
+  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('lobby');
+  const [bottomNavActive, setBottomNavActive] = useState('home');
+  const queryClient = useQueryClient();
 
-  // Check for existing auth token on app load
+  // Initialize user from localStorage
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsLoggedIn(true);
-      fetchWalletBalance();
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setUser(JSON.parse(userData));
     }
   }, []);
 
-  const handleLogin = async (credentials: any) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
+  // Fetch wallet balance
+  const { data: walletData, refetch: refetchBalance } = useQuery({
+    queryKey: ['/api/wallet/balance'],
+    enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        setIsLoggedIn(true);
-        setShowLogin(false);
-        localStorage.setItem('authToken', data.token);
-        await fetchWalletBalance();
-        startLiveUpdates();
-      } else {
-        const errorData = await response.json();
-        alert(`Login failed: ${errorData.error || 'Please check your credentials'}`);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
-    }
+  const walletBalance = (walletData as any)?.walletBalance || user?.walletBalance || '0.00';
+
+  const refreshBalance = () => {
+    refetchBalance();
   };
 
-  const fetchWalletBalance = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/wallet/balance', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setWalletBalance(parseFloat(data.walletBalance) || 0);
-      } else if (response.status === 403) {
-        // Token expired, redirect to login
-        setIsLoggedIn(false);
-        setShowLogin(true);
-        localStorage.removeItem('authToken');
-      }
-    } catch (error) {
-      console.error('Error fetching wallet balance:', error);
-    }
-  };
-
-  const startLiveUpdates = () => {
-    const ws = new WebSocket(`ws://${window.location.host}`);
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'stats_update') {
-        setLiveStats(data.data);
-      } else if (data.type === 'balance_update') {
-        setWalletBalance(parseFloat(data.balance) || 0);
-      }
-    };
-  };
-
-  const handleGameSelect = (game: any) => {
-    if (!isLoggedIn) {
-      setShowLogin(true);
-      return;
-    }
-    setSelectedGame(game);
+  const openGame = (gameType: string) => {
+    setSelectedGame(gameType);
     setShowGameModal(true);
   };
 
-  const handleTabChange = (tab: string) => {
-    if (!isLoggedIn && tab !== 'lobby') {
-      setShowLogin(true);
-      return;
-    }
-    setActiveTab(tab);
-  };
-
-  const handleLogout = () => {
+  const logout = () => {
     localStorage.removeItem('authToken');
-    setIsLoggedIn(false);
+    localStorage.removeItem('user');
     setUser(null);
-    setWalletBalance(0);
-    setActiveTab('lobby');
-    setShowGameModal(false);
-    setShowWalletModal(false);
   };
 
-  if (!isLoggedIn) {
-    return (
-      <>
-        <div className="welcome-screen">
-          <div className="welcome-content">
-            <div className="logo-section">
-              <div className="logo-circle">
-                <span className="logo-text">91</span>
-              </div>
-              <h1 className="welcome-title">91CLUB</h1>
-              <p className="welcome-subtitle">Premium Gaming Experience</p>
-            </div>
-            <div className="action-section">
-              <button 
-                className="login-btn"
-                onClick={() => setShowLogin(true)}
-              >
-                Login to Continue
-              </button>
-            </div>
-          </div>
-        </div>
-        <LoginInterface
-          isOpen={showLogin}
-          onClose={() => setShowLogin(false)}
-          onLogin={handleLogin}
-        />
-      </>
-    );
+  if (!user) {
+    return <AuthModal />;
   }
 
   return (
-    <div className="app">
-      {/* Header with logo, balance, and user controls */}
+    <div className="app-container">
+      {/* Top Header */}
       <div className="top-header">
-        <div className="header-left">
+        <div className="header-top">
           <div className="logo">
-            <div className="logo-icon">9</div>
-            <span className="logo-text">1CLUB</span>
+            <div className="logo-icon">91</div>
+            91CLUB
           </div>
+          <div className="notification-icon">🔔</div>
         </div>
         
-        <div className="header-center">
-          <div className="user-welcome">
-            Welcome, {user?.username || 'Player'}
+        <div className="wallet-section">
+          <div className="wallet-header">
+            <span className="wallet-label">Wallet balance</span>
+            <div className="refresh-icon" onClick={refreshBalance}>↻</div>
           </div>
-          <button className="demo-btn" onClick={() => {
-            alert(`✅ PLATFORM STATUS: FULLY OPERATIONAL
+          <div className="balance-amount">₹{walletBalance}</div>
+          <div className="action-buttons">
+            <button className="action-btn withdraw-btn" onClick={() => setShowWalletModal(true)}>
+              Withdraw
+            </button>
+            <button className="action-btn deposit-btn" onClick={() => setShowWalletModal(true)}>
+              Deposit
+            </button>
+          </div>
+        </div>
+      </div>
 
-🎮 All Games Working:
-- Aviator: Real plane physics & multipliers
-- Dice: Number prediction system  
-- Mines: Field clearing mechanics
-- WinGo: Color/number betting
-- K3: Lottery system
-- Dragon Tiger: Card battles
+      {/* Main Content */}
+      <div className="main-content">
+        {/* Promotional Banner */}
+        <div className="promo-banner">
+          <div className="promo-title">SPECIAL ATTENDANCE BONUS</div>
+          <div className="promo-subtitle">PROVIDED BY 91CLUB</div>
+          <div className="promo-amount">up to 558RS</div>
+          <button className="claim-btn">CLAIM IT RIGHT AWAY</button>
+        </div>
 
-💰 Balance System:
-- Real-time deductions on bets
-- Accurate win calculations 
-- Instant balance updates
-- Transaction history tracking
+        {/* Quick Games */}
+        <div className="quick-games">
+          <div className="quick-game-card" onClick={() => openGame('wheel')}>
+            <div className="quick-game-title">Wheel</div>
+            <div className="quick-game-subtitle">of fortune</div>
+          </div>
+          <div className="quick-game-card" onClick={() => openGame('vip')}>
+            <div className="quick-game-title">VIP</div>
+            <div className="quick-game-subtitle">privileges</div>
+          </div>
+        </div>
 
-🔧 Technical Features:
-- Database persistence
-- Authentication system
-- Live game statistics
-- Viral animations & effects
-
-Login: Phone 9876543210, Password demo123
-Starting Balance: ₹10,814
-
-The platform is production-ready!`);
-          }}>
-            Status Check
+        {/* Game Categories Navigation */}
+        <div className="game-nav">
+          <button className={`nav-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => setActiveTab('lobby')}>
+            <div className="nav-icon">🏠</div>
+            Lobby
+          </button>
+          <button className={`nav-item ${activeTab === 'mini' ? 'active' : ''}`} onClick={() => setActiveTab('mini')}>
+            <div className="nav-icon">🎮</div>
+            Mini game
+          </button>
+          <button className={`nav-item ${activeTab === 'slots' ? 'active' : ''}`} onClick={() => setActiveTab('slots')}>
+            <div className="nav-icon">🎰</div>
+            Slots
+          </button>
+          <button className={`nav-item ${activeTab === 'card' ? 'active' : ''}`} onClick={() => setActiveTab('card')}>
+            <div className="nav-icon">🃏</div>
+            Card
+          </button>
+          <button className={`nav-item ${activeTab === 'fishing' ? 'active' : ''}`} onClick={() => setActiveTab('fishing')}>
+            <div className="nav-icon">🎣</div>
+            Fishing
           </button>
         </div>
-        
-        <div className="header-right">
-          <div className="wallet-balance" onClick={() => setShowWalletModal(true)}>
-            ₹{Number(walletBalance || 0).toFixed(2)}
-          </div>
-          <button className="logout-btn" onClick={handleLogout} title="Logout">
-            <User size={20} />
-          </button>
-        </div>
-      </div>
 
-      {/* Top Navigation Bar */}
-      <div className="top-nav">
-        <div className={`nav-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => handleTabChange('lobby')}>
-          <Home className="nav-icon" />
-          <span>Lobby</span>
-        </div>
-        <div className={`nav-item ${activeTab === 'mini' ? 'active' : ''}`} onClick={() => handleTabChange('mini')}>
-          <Gamepad2 className="nav-icon" />
-          <span>Mini game</span>
-        </div>
-        <div className={`nav-item ${activeTab === 'slots' ? 'active' : ''}`} onClick={() => handleTabChange('slots')}>
-          <Zap className="nav-icon" />
-          <span>Slots</span>
-        </div>
-        <div className={`nav-item ${activeTab === 'card' ? 'active' : ''}`} onClick={() => handleTabChange('card')}>
-          <CreditCard className="nav-icon" />
-          <span>Card</span>
-        </div>
-        <div className={`nav-item ${activeTab === 'fishing' ? 'active' : ''}`} onClick={() => handleTabChange('fishing')}>
-          <Fish className="nav-icon" />
-          <span>Fishing</span>
-        </div>
-        <div className={`nav-item ${activeTab === 'sports' ? 'active' : ''}`} onClick={() => handleTabChange('sports')}>
-          <Trophy className="nav-icon" />
-          <span>Sports</span>
-        </div>
-      </div>
-
-      {/* Featured Promotion Banner */}
-      <div className="promo-banner">
-        <div className="promo-content">
-          <div className="promo-badge">🎯</div>
-          <div className="promo-title">PENALTY KICKS</div>
-          <div className="promo-subtitle">JiLi Game</div>
-        </div>
-      </div>
-
-      {/* Mini Game Section */}
-      <div className="game-section">
+        {/* Lottery Section */}
         <div className="section-header">
-          <div className="section-icon">🎮</div>
-          <h3 className="section-title">Mini game</h3>
-          <button className="detail-btn">Detail</button>
+          <div className="section-title">
+            <div className="section-icon lottery-icon">8</div>
+            Lottery
+          </div>
+          <div className="nav-arrows">
+            <button className="nav-arrow">‹</button>
+            <button className="nav-arrow">›</button>
+          </div>
         </div>
+
         <div className="game-grid">
-          <div className="game-card purple-gradient" onClick={() => handleGameSelect({name: 'SPACE DICE', type: 'dice', icon: '🎲'})}>
-            <div className="game-icon">🎲</div>
-            <div className="game-name">SPACE DICE</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-          <div className="game-card blue-gradient" onClick={() => handleGameSelect({name: 'GOAL WAVE', type: 'sports', icon: '⚽'})}>
-            <div className="game-icon">⚽</div>
-            <div className="game-name">GOAL WAVE</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-          <div className="game-card orange-gradient" onClick={() => handleGameSelect({name: 'MINI ROULETTE', type: 'casino', icon: '🎰'})}>
-            <div className="game-icon">🎰</div>
-            <div className="game-name">MINI ROULETTE</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recommended Games Section */}
-      <div className="game-section">
-        <div className="section-header">
-          <div className="section-icon">⭐</div>
-          <h3 className="section-title">Recommended Games</h3>
-        </div>
-        <div className="game-grid">
-          <div className="game-card red-gradient" onClick={() => handleGameSelect({name: 'DICE', type: 'dice', icon: '🎯'})}>
-            <div className="game-icon">🎯</div>
-            <div className="game-name">DICE</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-          <div className="game-card purple-gradient" onClick={() => handleGameSelect({name: 'PLINKO', type: 'plinko', icon: '🌪️'})}>
-            <div className="game-icon">🌪️</div>
-            <div className="game-name">PLINKO</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-          <div className="game-card blue-gradient" onClick={() => handleGameSelect({name: 'HILO', type: 'hilo', icon: '🎲'})}>
-            <div className="game-icon">🎲</div>
-            <div className="game-name">HILO</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Slots Section */}
-      <div className="game-section">
-        <div className="section-header">
-          <div className="section-icon">🎰</div>
-          <h3 className="section-title">Slots</h3>
-          <button className="detail-btn">Detail</button>
-        </div>
-        <div className="game-grid">
-          <div className="game-card purple-gradient">
-            <div className="game-artwork">👑</div>
-            <div className="game-name">JILI GAME</div>
-          </div>
-          <div className="game-card blue-gradient">
-            <div className="game-artwork">🎯</div>
-            <div className="game-name">JDB</div>
-          </div>
-          <div className="game-card green-gradient">
-            <div className="game-artwork">💎</div>
-            <div className="game-name">M GAME</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Popular Aviator/Crash Games */}
-      <div className="game-section">
-        <div className="section-header">
-          <h3 className="section-title">Popular Games</h3>
-        </div>
-        <div className="game-grid">
-          <div className="game-card aviator-red" onClick={() => handleGameSelect({name: 'AVIATOR', type: 'aviator', icon: '✈️', multiplier: '500%'})}>
-            <div className="multiplier-badge">+500%</div>
-            <div className="game-name">AVIATOR</div>
-            <div className="game-provider">TB GAME</div>
-            <div className="time-badge">10 SEC</div>
-          </div>
-          <div className="game-card cricket-green" onClick={() => handleGameSelect({name: 'CRICKET', type: 'sports', icon: '🏏'})}>
-            <div className="game-name">CRICKET</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-          <div className="game-card mines-purple" onClick={() => handleGameSelect({name: 'MINES', type: 'mines', icon: '💣'})}>
-            <div className="game-name">MINES</div>
-            <div className="game-provider">TB GAME</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Today's Earnings Chart */}
-      <div className="earnings-section">
-        <div className="section-header">
-          <div className="section-icon">📊</div>
-          <h3 className="section-title">Today's earnings chart</h3>
-        </div>
-        <div className="podium-chart">
-          <div className="podium-item second">
-            <div className="avatar">👨</div>
-            <div className="position">2</div>
-            <div className="username">Mem***QQ8</div>
-            <div className="amount">₹1,647,800.40</div>
-          </div>
-          <div className="podium-item first">
-            <div className="avatar">👩</div>
-            <div className="position">1</div>
-            <div className="username">Mem***IHA</div>
-            <div className="amount">₹1,990,770.00</div>
-          </div>
-          <div className="podium-item third">
-            <div className="avatar">👨</div>
-            <div className="position">3</div>
-            <div className="username">Mem***S5W</div>
-            <div className="amount">₹1,363,620.00</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Winning Information */}
-      <div className="winning-section">
-        <div className="section-header">
-          <div className="section-icon">🎯</div>
-          <h3 className="section-title">Winning information</h3>
-        </div>
-        <div className="winning-table">
-          <div className="table-header">
-            <span>Game</span>
-            <span>User</span>
-            <span>Winning amount</span>
-          </div>
-          <div className="winning-row">
-            <div className="game-info">
-              <div className="game-icon">🎯</div>
-              <span>Wickets9</span>
+          <div className="game-card wingo-card" onClick={() => openGame('wingo')}>
+            <div className="game-card-content">
+              <div className="game-title">WIN GO</div>
+              <div className="game-subtitle">TB GAME</div>
             </div>
-            <span>Mem***CND</span>
-            <span className="amount">₹600.00</span>
           </div>
-          <div className="winning-row">
-            <div className="game-info">
-              <div className="game-icon">🎯</div>
-              <span>Wickets9</span>
+          <div className="game-card k3-card" onClick={() => openGame('k3')}>
+            <div className="game-card-content">
+              <div className="game-title">K3</div>
+              <div className="game-subtitle">TB GAME</div>
             </div>
-            <span>Mem***SEL</span>
-            <span className="amount">₹10,000.00</span>
           </div>
-          <div className="winning-row">
-            <div className="game-info">
-              <div className="game-icon">🎯</div>
-              <span>Wickets9</span>
+          <div className="game-card 5d-card" onClick={() => openGame('5d')}>
+            <div className="game-card-content">
+              <div className="game-title">5D</div>
+              <div className="game-subtitle">TB GAME</div>
             </div>
-            <span>Mem***WVS</span>
-            <span className="amount">₹109.00</span>
+          </div>
+          <div className="game-card trx-card" onClick={() => openGame('trx')}>
+            <div className="game-card-content">
+              <div className="game-title">TRX WINGO</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mini Games Section */}
+        <div className="section-header">
+          <div className="section-title">
+            <div className="section-icon minigame-icon">🎮</div>
+            Mini game
+          </div>
+          <div className="nav-arrows">
+            <button className="nav-arrow">‹</button>
+            <button className="nav-arrow">›</button>
+          </div>
+        </div>
+
+        <div className="game-grid">
+          <div className="game-card dice-card" onClick={() => openGame('dice')}>
+            <div className="game-card-content">
+              <div className="game-title">SPACE</div>
+              <div className="game-subtitle">DICE</div>
+            </div>
+          </div>
+          <div className="game-card goal-card" onClick={() => openGame('goal')}>
+            <div className="game-card-content">
+              <div className="game-title">GOAL</div>
+              <div className="game-subtitle">WAVE</div>
+            </div>
+          </div>
+          <div className="game-card roulette-card" onClick={() => openGame('roulette')}>
+            <div className="game-card-content">
+              <div className="game-title">MINI</div>
+              <div className="game-subtitle">ROULETTE</div>
+            </div>
+          </div>
+          <div className="game-card aviator-card" onClick={() => openGame('aviator')}>
+            <div className="game-card-content">
+              <div className="game-title">AVIATOR</div>
+              <div className="game-subtitle">FLY GAME</div>
+            </div>
+          </div>
+          <div className="game-card plinko-card" onClick={() => openGame('plinko')}>
+            <div className="game-card-content">
+              <div className="game-title">PLINKO</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+          <div className="game-card hilo-card" onClick={() => openGame('hilo')}>
+            <div className="game-card-content">
+              <div className="game-title">HILO</div>
+              <div className="game-subtitle">TB GAME</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Slots Section */}
+        <div className="section-header">
+          <div className="section-title">
+            <div className="section-icon slots-icon">🎰</div>
+            Slots
+          </div>
+          <div className="nav-arrows">
+            <button className="nav-arrow">‹</button>
+            <button className="nav-arrow">›</button>
+          </div>
+        </div>
+
+        <div className="game-grid">
+          <div className="game-card slot-card" onClick={() => openGame('slots1')}>
+            <div className="game-card-content">
+              <div className="game-title">GOLDEN WEALTH</div>
+              <div className="game-subtitle">SLOT GAME</div>
+            </div>
+          </div>
+          <div className="game-card slot-card" onClick={() => openGame('slots2')}>
+            <div className="game-card-content">
+              <div className="game-title">TREASURE HUNT</div>
+              <div className="game-subtitle">SLOT GAME</div>
+            </div>
+          </div>
+          <div className="game-card slot-card" onClick={() => openGame('slots3')}>
+            <div className="game-card-content">
+              <div className="game-title">MAGIC REALM</div>
+              <div className="game-subtitle">SLOT GAME</div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <div className="nav-tab" onClick={() => handleTabChange('promotion')}>
-          <Gift className="tab-icon" />
-          <span>Promotion</span>
-        </div>
-        <div className="nav-tab" onClick={() => handleTabChange('activity')}>
-          <Activity className="tab-icon" />
-          <span>Activity</span>
-        </div>
-        <div className="nav-tab main active" onClick={() => handleTabChange('lobby')}>
-          <Gamepad2 className="tab-icon" />
-        </div>
-        <div className="nav-tab" onClick={() => setShowWalletModal(true)}>
-          <Wallet className="tab-icon" />
-          <span>Wallet</span>
-        </div>
-        <div className="nav-tab" onClick={() => handleTabChange('account')}>
-          <User className="tab-icon" />
-          <span>Account</span>
-        </div>
-      </div>
-
-      {/* Game Modal */}
-      {showGameModal && selectedGame && (
-        <GameModal 
-          game={selectedGame}
-          onClose={() => setShowGameModal(false)}
-          walletBalance={walletBalance}
-          onBalanceUpdate={setWalletBalance}
-        />
-      )}
-
-      {/* Wallet Modal */}
-      {showWalletModal && (
-        <WalletModal 
-          onClose={() => setShowWalletModal(false)}
-          balance={walletBalance}
-          onBalanceUpdate={setWalletBalance}
-        />
-      )}
-
-      {/* Floating Help Button */}
-      <div className="floating-help">
         <button 
-          className="help-btn"
-          onClick={() => {
-            const features = [
-              "✅ Click any game card to play",
-              "✅ Click wallet balance to deposit/withdraw", 
-              "✅ All animations and effects working",
-              "✅ Real-time balance updates",
-              "✅ Functional betting system",
-              "✅ Working login/logout",
-              "✅ Interactive navigation tabs",
-              "✅ Viral game animations",
-              "",
-              "Demo Login: Phone 9876543210, Password demo123"
-            ];
-            alert(features.join('\n'));
-          }}
-          title="View all working features"
+          className={`nav-item-bottom ${bottomNavActive === 'promotion' ? 'active' : ''}`}
+          onClick={() => setBottomNavActive('promotion')}
         >
-          ?
+          <div className="nav-icon">🎁</div>
+          <div className="nav-label">Promotion</div>
+        </button>
+        <button 
+          className={`nav-item-bottom ${bottomNavActive === 'activity' ? 'active' : ''}`}
+          onClick={() => setBottomNavActive('activity')}
+        >
+          <div className="nav-icon">📊</div>
+          <div className="nav-label">Activity</div>
+        </button>
+        <button 
+          className={`nav-item-bottom ${bottomNavActive === 'home' ? 'active' : ''}`}
+          onClick={() => setBottomNavActive('home')}
+        >
+          <div className="nav-icon">🏠</div>
+          <div className="nav-label">Home</div>
+        </button>
+        <button 
+          className={`nav-item-bottom ${bottomNavActive === 'wallet' ? 'active' : ''}`}
+          onClick={() => {
+            setBottomNavActive('wallet');
+            setShowWalletModal(true);
+          }}
+        >
+          <div className="nav-icon">💰</div>
+          <div className="nav-label">Wallet</div>
+        </button>
+        <button 
+          className={`nav-item-bottom ${bottomNavActive === 'account' ? 'active' : ''}`}
+          onClick={() => setBottomNavActive('account')}
+        >
+          <div className="nav-icon">👤</div>
+          <div className="nav-label">Account</div>
         </button>
       </div>
+
+      {/* Modals */}
+      {showGameModal && selectedGame && (
+        <GameModal
+          gameType={selectedGame}
+          onClose={() => {
+            setShowGameModal(false);
+            setSelectedGame(null);
+          }}
+          onBalanceUpdate={refreshBalance}
+        />
+      )}
+
+      {showWalletModal && (
+        <WalletModal
+          onClose={() => setShowWalletModal(false)}
+          onBalanceUpdate={refreshBalance}
+        />
+      )}
     </div>
   );
 }
