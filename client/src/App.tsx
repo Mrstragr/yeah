@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   Activity, 
@@ -33,6 +33,15 @@ export default function App() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [liveStats, setLiveStats] = useState<any>({});
 
+  // Check for existing auth token on app load
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsLoggedIn(true);
+      fetchWalletBalance();
+    }
+  }, []);
+
   const handleLogin = async (credentials: any) => {
     try {
       const response = await fetch('/api/auth/login', {
@@ -52,10 +61,12 @@ export default function App() {
         await fetchWalletBalance();
         startLiveUpdates();
       } else {
-        throw new Error('Login failed');
+        const errorData = await response.json();
+        alert(`Login failed: ${errorData.error || 'Please check your credentials'}`);
       }
     } catch (error) {
       console.error('Login error:', error);
+      alert('Login failed. Please try again.');
     }
   };
 
@@ -91,12 +102,30 @@ export default function App() {
   };
 
   const handleGameSelect = (game: any) => {
+    if (!isLoggedIn) {
+      setShowLogin(true);
+      return;
+    }
     setSelectedGame(game);
     setShowGameModal(true);
   };
 
   const handleTabChange = (tab: string) => {
+    if (!isLoggedIn && tab !== 'lobby') {
+      setShowLogin(true);
+      return;
+    }
     setActiveTab(tab);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    setUser(null);
+    setWalletBalance(0);
+    setActiveTab('lobby');
+    setShowGameModal(false);
+    setShowWalletModal(false);
   };
 
   if (!isLoggedIn) {
