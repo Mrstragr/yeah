@@ -25,6 +25,11 @@ export default function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [walletBalance, setWalletBalance] = useState(10000);
+  const [activeTab, setActiveTab] = useState('lobby');
+  const [selectedGame, setSelectedGame] = useState<any>(null);
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [liveStats, setLiveStats] = useState<any>({});
 
   const handleLogin = async (credentials: any) => {
     try {
@@ -42,12 +47,54 @@ export default function App() {
         setIsLoggedIn(true);
         setShowLogin(false);
         localStorage.setItem('authToken', data.token);
+        await fetchWalletBalance();
+        startLiveUpdates();
       } else {
         throw new Error('Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
     }
+  };
+
+  const fetchWalletBalance = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/wallet/balance', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setWalletBalance(data.balance);
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+    }
+  };
+
+  const startLiveUpdates = () => {
+    const ws = new WebSocket(`ws://${window.location.host}`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'stats_update') {
+        setLiveStats(data.data);
+      } else if (data.type === 'balance_update') {
+        setWalletBalance(data.balance);
+      }
+    };
+  };
+
+  const handleGameSelect = (game: any) => {
+    setSelectedGame(game);
+    setShowGameModal(true);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
   };
 
   if (!isLoggedIn) {
@@ -85,27 +132,27 @@ export default function App() {
     <div className="app-container">
       {/* Top Navigation Bar */}
       <div className="top-nav">
-        <div className="nav-item active">
+        <div className={`nav-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => handleTabChange('lobby')}>
           <Home className="nav-icon" />
           <span>Lobby</span>
         </div>
-        <div className="nav-item">
+        <div className={`nav-item ${activeTab === 'mini' ? 'active' : ''}`} onClick={() => handleTabChange('mini')}>
           <Gamepad2 className="nav-icon" />
           <span>Mini game</span>
         </div>
-        <div className="nav-item">
+        <div className={`nav-item ${activeTab === 'slots' ? 'active' : ''}`} onClick={() => handleTabChange('slots')}>
           <Zap className="nav-icon" />
           <span>Slots</span>
         </div>
-        <div className="nav-item">
+        <div className={`nav-item ${activeTab === 'card' ? 'active' : ''}`} onClick={() => handleTabChange('card')}>
           <CreditCard className="nav-icon" />
           <span>Card</span>
         </div>
-        <div className="nav-item">
+        <div className={`nav-item ${activeTab === 'fishing' ? 'active' : ''}`} onClick={() => handleTabChange('fishing')}>
           <Fish className="nav-icon" />
           <span>Fishing</span>
         </div>
-        <div className="nav-item">
+        <div className={`nav-item ${activeTab === 'sports' ? 'active' : ''}`} onClick={() => handleTabChange('sports')}>
           <Trophy className="nav-icon" />
           <span>Sports</span>
         </div>
@@ -128,17 +175,17 @@ export default function App() {
           <button className="detail-btn">Detail</button>
         </div>
         <div className="game-grid">
-          <div className="game-card purple-gradient">
+          <div className="game-card purple-gradient" onClick={() => handleGameSelect({name: 'SPACE DICE', type: 'dice', icon: '🎲'})}>
             <div className="game-icon">🎲</div>
             <div className="game-name">SPACE DICE</div>
             <div className="game-provider">TB GAME</div>
           </div>
-          <div className="game-card blue-gradient">
+          <div className="game-card blue-gradient" onClick={() => handleGameSelect({name: 'GOAL WAVE', type: 'sports', icon: '⚽'})}>
             <div className="game-icon">⚽</div>
             <div className="game-name">GOAL WAVE</div>
             <div className="game-provider">TB GAME</div>
           </div>
-          <div className="game-card orange-gradient">
+          <div className="game-card orange-gradient" onClick={() => handleGameSelect({name: 'MINI ROULETTE', type: 'casino', icon: '🎰'})}>
             <div className="game-icon">🎰</div>
             <div className="game-name">MINI ROULETTE</div>
             <div className="game-provider">TB GAME</div>
@@ -153,17 +200,17 @@ export default function App() {
           <h3 className="section-title">Recommended Games</h3>
         </div>
         <div className="game-grid">
-          <div className="game-card red-gradient">
+          <div className="game-card red-gradient" onClick={() => handleGameSelect({name: 'DICE', type: 'dice', icon: '🎯'})}>
             <div className="game-icon">🎯</div>
             <div className="game-name">DICE</div>
             <div className="game-provider">TB GAME</div>
           </div>
-          <div className="game-card purple-gradient">
+          <div className="game-card purple-gradient" onClick={() => handleGameSelect({name: 'PLINKO', type: 'plinko', icon: '🌪️'})}>
             <div className="game-icon">🌪️</div>
             <div className="game-name">PLINKO</div>
             <div className="game-provider">TB GAME</div>
           </div>
-          <div className="game-card blue-gradient">
+          <div className="game-card blue-gradient" onClick={() => handleGameSelect({name: 'HILO', type: 'hilo', icon: '🎲'})}>
             <div className="game-icon">🎲</div>
             <div className="game-name">HILO</div>
             <div className="game-provider">TB GAME</div>
@@ -200,17 +247,17 @@ export default function App() {
           <h3 className="section-title">Popular Games</h3>
         </div>
         <div className="game-grid">
-          <div className="game-card aviator-red">
+          <div className="game-card aviator-red" onClick={() => handleGameSelect({name: 'AVIATOR', type: 'aviator', icon: '✈️', multiplier: '500%'})}>
             <div className="multiplier-badge">+500%</div>
             <div className="game-name">AVIATOR</div>
             <div className="game-provider">TB GAME</div>
             <div className="time-badge">10 SEC</div>
           </div>
-          <div className="game-card cricket-green">
+          <div className="game-card cricket-green" onClick={() => handleGameSelect({name: 'CRICKET', type: 'sports', icon: '🏏'})}>
             <div className="game-name">CRICKET</div>
             <div className="game-provider">TB GAME</div>
           </div>
-          <div className="game-card mines-purple">
+          <div className="game-card mines-purple" onClick={() => handleGameSelect({name: 'MINES', type: 'mines', icon: '💣'})}>
             <div className="game-name">MINES</div>
             <div className="game-provider">TB GAME</div>
           </div>
@@ -286,26 +333,45 @@ export default function App() {
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <div className="nav-tab">
+        <div className="nav-tab" onClick={() => handleTabChange('promotion')}>
           <Gift className="tab-icon" />
           <span>Promotion</span>
         </div>
-        <div className="nav-tab">
+        <div className="nav-tab" onClick={() => handleTabChange('activity')}>
           <Activity className="tab-icon" />
           <span>Activity</span>
         </div>
-        <div className="nav-tab main active">
+        <div className="nav-tab main active" onClick={() => handleTabChange('lobby')}>
           <Gamepad2 className="tab-icon" />
         </div>
-        <div className="nav-tab">
+        <div className="nav-tab" onClick={() => setShowWalletModal(true)}>
           <Wallet className="tab-icon" />
           <span>Wallet</span>
         </div>
-        <div className="nav-tab">
+        <div className="nav-tab" onClick={() => handleTabChange('account')}>
           <User className="tab-icon" />
           <span>Account</span>
         </div>
       </div>
+
+      {/* Game Modal */}
+      {showGameModal && selectedGame && (
+        <GameModal 
+          game={selectedGame}
+          onClose={() => setShowGameModal(false)}
+          walletBalance={walletBalance}
+          onBalanceUpdate={setWalletBalance}
+        />
+      )}
+
+      {/* Wallet Modal */}
+      {showWalletModal && (
+        <WalletModal 
+          onClose={() => setShowWalletModal(false)}
+          balance={walletBalance}
+          onBalanceUpdate={setWalletBalance}
+        />
+      )}
     </div>
   );
 }
