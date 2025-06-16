@@ -1424,6 +1424,33 @@ body {
   transform: scale(1.1);
 }
 
+/* Floating Help Button */
+.floating-help {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.help-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF4757 0%, #FF6B85 100%);
+  border: none;
+  color: white;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,71,87,0.4);
+  transition: all 0.3s ease;
+}
+
+.help-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(255,71,87,0.6);
+}
+
 .aviator-display, .dice-display {
   display: flex;
   flex-direction: column;
