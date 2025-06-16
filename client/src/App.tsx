@@ -82,6 +82,11 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
         setWalletBalance(parseFloat(data.walletBalance) || 0);
+      } else if (response.status === 403) {
+        // Token expired, redirect to login
+        setIsLoggedIn(false);
+        setShowLogin(true);
+        localStorage.removeItem('authToken');
       }
     } catch (error) {
       console.error('Error fetching wallet balance:', error);

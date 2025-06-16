@@ -118,15 +118,24 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
         const result = await response.json();
         setGameResult(result);
         
-        // Fetch updated balance from server (backend already handled the transaction)
-        const balanceResponse = await fetch('/api/wallet/balance', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        let newBalance = walletBalance;
-        if (balanceResponse.ok) {
-          const balanceData = await balanceResponse.json();
-          newBalance = balanceData.walletBalance;
-          onBalanceUpdate(newBalance);
+        // Calculate new balance from game result (backend already processed transaction)
+        const expectedBalance = result.isWin 
+          ? Number(walletBalance) - betAmount + result.winAmount
+          : Number(walletBalance) - betAmount;
+        const newBalance = Math.max(0, expectedBalance).toString();
+        onBalanceUpdate(Number(newBalance));
+
+        // Try to sync with server balance (optional, doesn't block game flow)
+        try {
+          const balanceResponse = await fetch('/api/wallet/balance', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          });
+          if (balanceResponse.ok) {
+            const balanceData = await balanceResponse.json();
+            onBalanceUpdate(Number(balanceData.walletBalance));
+          }
+        } catch (syncError) {
+          console.log('Balance sync skipped due to auth issue');
         }
         
         // Show detailed win/loss notification
