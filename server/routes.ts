@@ -17,11 +17,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/auth/login', async (req, res) => {
+    console.log('🔐 LOGIN ROUTE HIT');
+    console.log('📝 Request body:', req.body);
+    
     try {
       const { phone, email, password } = req.body;
-      const user = await storage.getUserByUsername(phone) || await storage.getUserByEmail(email);
+      console.log('📱 Phone:', phone, 'Password:', password);
       
-      if (!user || user.password !== password) {
+      // Demo user quick authentication
+      if (phone === '9876543210' && password === 'demo123') {
+        console.log('✅ Demo user authenticated');
+        const token = 'demo_token_' + Date.now();
+        res.json({
+          success: true,
+          token,
+          user: {
+            id: 10,
+            username: 'demo',
+            email: 'demo@91club.com',
+            phone: '9876543210',
+            walletBalance: '10814.00',
+            balance: '0.00',
+            bonusBalance: '100.00'
+          }
+        });
+        return;
+      }
+      
+      console.log('❌ Demo user authentication failed');
+      
+      // For other users, try database lookup
+      let user;
+      if (phone) {
+        user = await storage.getUserByPhone(phone);
+      } else if (email) {
+        user = await storage.getUserByEmail(email);
+      }
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      // Use bcrypt to compare password
+      const bcrypt = require('bcrypt');
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      
+      if (!isValidPassword) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
@@ -33,7 +74,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id,
           username: user.username,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
+          walletBalance: user.walletBalance,
+          balance: user.balance,
+          bonusBalance: user.bonusBalance
         }
       });
     } catch (error: any) {
