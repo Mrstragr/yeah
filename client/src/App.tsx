@@ -163,25 +163,187 @@ function SimpleGameModal({ gameType, onClose }: { gameType: string; onClose: () 
   const [betAmount, setBetAmount] = useState(100);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameResult, setGameResult] = useState<any>(null);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedBet, setSelectedBet] = useState<string | null>(null);
+  const [mineCount, setMineCount] = useState(3);
 
   const playGame = async () => {
     setIsPlaying(true);
+    setGameResult(null);
+    
     try {
+      const body: any = { betAmount };
+      
+      // Add game-specific parameters
+      if (gameType === 'wingo') {
+        if (selectedNumber !== null) {
+          body.betType = 'number';
+          body.betValue = selectedNumber;
+        } else if (selectedColor) {
+          body.betType = 'color';
+          body.betValue = selectedColor;
+        } else {
+          alert('Please select a number or color to bet on');
+          setIsPlaying(false);
+          return;
+        }
+      } else if (gameType === 'dragon-tiger') {
+        if (!selectedBet) {
+          alert('Please select Dragon, Tiger, or Tie');
+          setIsPlaying(false);
+          return;
+        }
+        body.betType = selectedBet;
+      } else if (gameType === 'aviator') {
+        body.cashOutMultiplier = 2.0; // Default cash out
+      } else if (gameType === 'mines') {
+        body.mineCount = mineCount;
+        body.revealedTiles = [1, 2, 3]; // Default revealed tiles
+      }
+
       const response = await fetch(`/api/games/${gameType}/play`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
-        body: JSON.stringify({ betAmount }),
+        body: JSON.stringify(body),
       });
 
-      const result = await response.json();
-      setGameResult(result);
+      if (response.ok) {
+        const result = await response.json();
+        setGameResult(result);
+        
+        // Show result notification
+        setTimeout(() => {
+          if (result.isWin) {
+            alert(`You won ₹${result.winAmount}! (${result.multiplier}x multiplier)`);
+          } else {
+            alert(`You lost ₹${betAmount}. Better luck next time!`);
+          }
+        }, 500);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Game failed. Please try again.');
+      }
     } catch (error) {
       alert('Game error. Please try again.');
     } finally {
       setIsPlaying(false);
+    }
+  };
+
+  const renderGameControls = () => {
+    switch (gameType) {
+      case 'wingo':
+        return (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '15px' }}>
+              <h4>Select Number (9x payout):</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', maxWidth: '300px', margin: '0 auto' }}>
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                  <button
+                    key={num}
+                    onClick={() => { setSelectedNumber(num); setSelectedColor(null); }}
+                    style={{
+                      padding: '10px',
+                      border: '2px solid',
+                      borderColor: selectedNumber === num ? '#FF4757' : '#ddd',
+                      background: selectedNumber === num ? '#FF4757' : 'white',
+                      color: selectedNumber === num ? 'white' : 'black',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4>Or Select Color (2x payout):</h4>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                {['red', 'green', 'violet'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => { setSelectedColor(color); setSelectedNumber(null); }}
+                    style={{
+                      padding: '10px 20px',
+                      border: '2px solid',
+                      borderColor: selectedColor === color ? '#FF4757' : '#ddd',
+                      background: selectedColor === color ? color : 'white',
+                      color: selectedColor === color ? 'white' : 'black',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 'dragon-tiger':
+        return (
+          <div style={{ marginBottom: '20px' }}>
+            <h4>Choose your bet:</h4>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              {['dragon', 'tiger', 'tie'].map(bet => (
+                <button
+                  key={bet}
+                  onClick={() => setSelectedBet(bet)}
+                  style={{
+                    padding: '15px 25px',
+                    border: '2px solid',
+                    borderColor: selectedBet === bet ? '#FF4757' : '#ddd',
+                    background: selectedBet === bet ? '#FF4757' : 'white',
+                    color: selectedBet === bet ? 'white' : 'black',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textTransform: 'capitalize',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {bet}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+        
+      case 'mines':
+        return (
+          <div style={{ marginBottom: '20px' }}>
+            <h4>Number of Mines:</h4>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              {[1, 3, 5, 10].map(count => (
+                <button
+                  key={count}
+                  onClick={() => setMineCount(count)}
+                  style={{
+                    padding: '10px 15px',
+                    border: '2px solid',
+                    borderColor: mineCount === count ? '#FF4757' : '#ddd',
+                    background: mineCount === count ? '#FF4757' : 'white',
+                    color: mineCount === count ? 'white' : 'black',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+        
+      default:
+        return null;
     }
   };
 
@@ -195,6 +357,8 @@ function SimpleGameModal({ gameType, onClose }: { gameType: string; onClose: () 
         
         <div className="game-modal-body">
           <div style={{ padding: '20px', textAlign: 'center' }}>
+            {renderGameControls()}
+            
             <div style={{ marginBottom: '20px' }}>
               <label>Bet Amount:</label>
               <input
@@ -202,6 +366,8 @@ function SimpleGameModal({ gameType, onClose }: { gameType: string; onClose: () 
                 value={betAmount}
                 onChange={(e) => setBetAmount(Number(e.target.value))}
                 style={{ margin: '0 10px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                min="10"
+                max="10000"
               />
             </div>
             
@@ -215,17 +381,33 @@ function SimpleGameModal({ gameType, onClose }: { gameType: string; onClose: () 
                 padding: '12px 24px',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontSize: '16px'
+                fontSize: '16px',
+                opacity: isPlaying ? 0.6 : 1
               }}
             >
               {isPlaying ? 'Playing...' : 'Play Game'}
             </button>
 
             {gameResult && (
-              <div style={{ marginTop: '20px', padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>
-                <p>Result: {gameResult.isWin ? 'WIN!' : 'LOSE'}</p>
-                <p>Amount: ₹{gameResult.winAmount}</p>
+              <div style={{ 
+                marginTop: '20px', 
+                padding: '16px', 
+                background: gameResult.isWin ? '#d4edda' : '#f8d7da',
+                border: `1px solid ${gameResult.isWin ? '#c3e6cb' : '#f5c6cb'}`,
+                borderRadius: '8px',
+                color: gameResult.isWin ? '#155724' : '#721c24'
+              }}>
+                <p><strong>Result: {gameResult.isWin ? 'WIN!' : 'LOSE'}</strong></p>
+                <p>Amount: ₹{gameResult.winAmount || 0}</p>
                 {gameResult.multiplier && <p>Multiplier: {gameResult.multiplier}x</p>}
+                {gameResult.result && (
+                  <div style={{ marginTop: '10px', fontSize: '14px' }}>
+                    <p>Game Details:</p>
+                    <pre style={{ background: '#f8f9fa', padding: '8px', borderRadius: '4px', fontSize: '12px' }}>
+                      {JSON.stringify(gameResult.result, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             )}
           </div>
