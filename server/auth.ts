@@ -125,21 +125,30 @@ export class AuthService {
     email?: string;
     password: string;
   }): Promise<{ user: any; token: string }> {
+    console.log('🔐 Login attempt:', { phone: credentials.phone, email: credentials.email });
+    
     // Find user by phone or email
     let user;
     if (credentials.phone) {
       user = await storage.getUserByPhone(credentials.phone);
+      console.log('📱 User found by phone:', user ? `ID: ${user.id}, Username: ${user.username}` : 'Not found');
     } else if (credentials.email) {
       user = await storage.getUserByEmail(credentials.email);
+      console.log('📧 User found by email:', user ? `ID: ${user.id}, Username: ${user.username}` : 'Not found');
     }
 
     if (!user) {
+      console.log('❌ No user found');
       throw new Error('Invalid credentials');
     }
 
     // Check password
+    console.log('🔒 Checking password for user:', user.id);
     const isValidPassword = await this.comparePassword(credentials.password, user.password);
+    console.log('🔓 Password valid:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ Invalid password');
       throw new Error('Invalid credentials');
     }
 
