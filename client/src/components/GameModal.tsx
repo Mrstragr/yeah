@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { X, Plus, Minus } from 'lucide-react';
+import { AviatorGame } from './games/AviatorGame';
+import { MinesGame } from './games/MinesGame';
+import { WinGoGame } from './games/WinGoGame';
+import { DragonTigerGame } from './games/DragonTigerGame';
 
 interface GameModalProps {
   game: {
@@ -157,68 +161,58 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
     }
   };
 
+  const handleGameResult = async (result: any) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        alert('Please login first');
+        setIsPlaying(false);
+        return;
+      }
+
+      const response = await fetch(`/api/games/${game.type}/play`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          betAmount,
+          betType: game.type === 'aviator' ? 'single' : 'default',
+          betValue: result.number || result.multiplier || Math.floor(Math.random() * 10),
+          gameResult: result
+        })
+      });
+
+      const serverResult = await response.json();
+      
+      if (serverResult.gameId) {
+        setGameResult(serverResult);
+        onBalanceUpdate(walletBalance - betAmount + (serverResult.winAmount || 0));
+      } else {
+        throw new Error(serverResult.error || 'Game failed');
+      }
+    } catch (error: any) {
+      console.error('Game error:', error);
+      alert(error.message || 'Game failed. Please try again.');
+    }
+    
+    setIsPlaying(false);
+  };
+
   const renderGameInterface = () => {
     switch (game.type) {
       case 'aviator':
-        return (
-          <div className="aviator-interface">
-            <div className="aviator-game-area">
-              <div className="multiplier-history">
-                <div className="history-item">1.94x</div>
-                <div className="history-item">1.02x</div>
-                <div className="history-item">1.00x</div>
-                <div className="history-item">1.72x</div>
-                <div className="history-item">1.19x</div>
-                <div className="history-item">1.54x</div>
-                <div className="history-item">1.00x</div>
-              </div>
-              
-              <div className="aviator-main-display">
-                <div className="trajectory-container">
-                  <canvas 
-                    className="trajectory-canvas" 
-                    width="300" 
-                    height="200"
-                    ref={(canvas) => {
-                      if (canvas && (isPlaying || gameResult)) {
-                        drawTrajectory(canvas, gameResult?.result?.crashMultiplier || 1);
-                      }
-                    }}
-                  />
-                  
-                  <div className={`plane-container ${isPlaying ? 'flying' : ''}`}>
-                    <div className="plane">✈️</div>
-                    <div className="plane-trail"></div>
-                  </div>
-                </div>
-                
-                <div className="current-multiplier">
-                  <div className={`multiplier-text ${isPlaying ? 'climbing' : ''}`}>
-                    {gameResult ? 
-                      `${parseFloat(gameResult.result?.crashMultiplier || gameResult.multiplier).toFixed(2)}x` : 
-                      isPlaying ? '1.00x' : '1.00x'
-                    }
-                  </div>
-                </div>
-                
-                {gameResult && (
-                  <div className="crash-indicator">
-                    {gameResult.isWin ? 
-                      <div className="cash-out-success">✓ Cashed Out!</div> : 
-                      <div className="crashed">💥 CRASHED!</div>
-                    }
-                  </div>
-                )}
-              </div>
-              
-              <div className="betting-dots">
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div key={i} className={`betting-dot ${i < 5 ? 'active' : ''}`}></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
+        return <AviatorGame betAmount={betAmount} onGameResult={handleGameResult} isPlaying={isPlaying} />;
+      
+      case 'mines':
+        return <MinesGame betAmount={betAmount} onGameResult={handleGameResult} isPlaying={isPlaying} />;
+      
+      case 'wingo':
+        return <WinGoGame betAmount={betAmount} onGameResult={handleGameResult} isPlaying={isPlaying} />;
+      
+      case 'dragon-tiger':
+        return <DragonTigerGame betAmount={betAmount} onGameResult={handleGameResult} isPlaying={isPlaying} />;
       
       case 'dice':
         return (
