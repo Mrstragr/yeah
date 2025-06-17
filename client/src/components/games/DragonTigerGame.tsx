@@ -159,17 +159,19 @@ export const DragonTigerGame = ({ betAmount, onGameResult, isPlaying }: DragonTi
           {/* Dragon Side */}
           <div className="text-center">
             <div className="text-red-400 text-lg font-bold mb-4">DRAGON</div>
-            <div className={`card-container ${animating ? 'dealing' : ''}`}>
+            <div className="card-container">
               {showCards && dragonCard ? (
-                <div className={`playing-card ${dragonCard.color} ${winner === 'dragon' ? 'winner' : winner === 'tiger' ? 'loser' : ''}`}>
-                  <div className="card-content">
-                    <div className="card-value">{dragonCard.value}</div>
-                    <div className="card-suit">{dragonCard.suit}</div>
+                <div className={`w-20 h-28 bg-white rounded-lg flex flex-col items-center justify-center mx-auto shadow-lg ${winner === 'dragon' ? 'ring-2 ring-yellow-500' : ''}`}>
+                  <div className={`text-2xl font-bold ${dragonCard.color === 'red' ? 'text-red-600' : 'text-gray-800'}`}>
+                    {dragonCard.value}
+                  </div>
+                  <div className={`text-xl ${dragonCard.color === 'red' ? 'text-red-600' : 'text-gray-800'}`}>
+                    {dragonCard.suit}
                   </div>
                 </div>
               ) : (
-                <div className="card-back">
-                  <div className="card-pattern"></div>
+                <div className="w-20 h-28 bg-blue-800 rounded-lg flex items-center justify-center mx-auto shadow-lg">
+                  <div className="text-white text-sm">🂠</div>
                 </div>
               )}
             </div>
@@ -183,17 +185,19 @@ export const DragonTigerGame = ({ betAmount, onGameResult, isPlaying }: DragonTi
           {/* Tiger Side */}
           <div className="text-center">
             <div className="text-orange-400 text-lg font-bold mb-4">TIGER</div>
-            <div className={`card-container ${animating ? 'dealing' : ''}`}>
+            <div className="card-container">
               {showCards && tigerCard ? (
-                <div className={`playing-card ${tigerCard.color} ${winner === 'tiger' ? 'winner' : winner === 'dragon' ? 'loser' : ''}`}>
-                  <div className="card-content">
-                    <div className="card-value">{tigerCard.value}</div>
-                    <div className="card-suit">{tigerCard.suit}</div>
+                <div className={`w-20 h-28 bg-white rounded-lg flex flex-col items-center justify-center mx-auto shadow-lg ${winner === 'tiger' ? 'ring-2 ring-yellow-500' : ''}`}>
+                  <div className={`text-2xl font-bold ${tigerCard.color === 'red' ? 'text-red-600' : 'text-gray-800'}`}>
+                    {tigerCard.value}
+                  </div>
+                  <div className={`text-xl ${tigerCard.color === 'red' ? 'text-red-600' : 'text-gray-800'}`}>
+                    {tigerCard.suit}
                   </div>
                 </div>
               ) : (
-                <div className="card-back">
-                  <div className="card-pattern"></div>
+                <div className="w-20 h-28 bg-blue-800 rounded-lg flex items-center justify-center mx-auto shadow-lg">
+                  <div className="text-white text-sm">🂠</div>
                 </div>
               )}
             </div>

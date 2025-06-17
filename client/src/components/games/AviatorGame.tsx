@@ -43,94 +43,55 @@ export const AviatorGame = ({ betAmount, onGameResult, isPlaying }: AviatorGameP
     if (!ctx) return;
 
     let startTime = Date.now();
-    let planeX = 50;
-    let planeY = canvas.height - 100;
     let multiplier = 1.00;
+    let frameCount = 0;
 
     const animate = () => {
+      frameCount++;
       const elapsed = (Date.now() - startTime) / 1000;
-      multiplier = Math.min(1.00 + elapsed * 0.5, crashPoint);
+      multiplier = Math.min(1.00 + elapsed * 0.8, crashPoint);
       
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw gradient background
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, '#0a0f1a');
-      gradient.addColorStop(1, '#1a1a2e');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Optimize: Only redraw every other frame for better performance
+      if (frameCount % 2 === 0) {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Simplified background
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw grid
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 10; i++) {
-        const x = (canvas.width / 10) * i;
-        const y = (canvas.height / 10) * i;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
+        // Simplified grid - fewer lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const x = (canvas.width / 5) * i;
+          const y = (canvas.height / 5) * i;
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
 
-      // Calculate plane position
-      planeX = 50 + (elapsed * 60);
-      planeY = canvas.height - 100 - (elapsed * 40);
+        // Calculate plane position
+        const planeX = Math.min(50 + (elapsed * 40), canvas.width - 50);
+        const planeY = Math.max(canvas.height - 100 - (elapsed * 30), 50);
 
-      // Draw trajectory line
-      if (multiplier < crashPoint) {
-        ctx.strokeStyle = '#00ff88';
-        ctx.lineWidth = 3;
+        // Draw simplified trajectory line
+        ctx.strokeStyle = multiplier < crashPoint ? '#00ff88' : '#ff4757';
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(50, canvas.height - 100);
         ctx.lineTo(planeX, planeY);
         ctx.stroke();
 
-        // Draw glowing effect
-        ctx.shadowColor = '#00ff88';
-        ctx.shadowBlur = 20;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      } else {
-        // Crashed - red line
-        ctx.strokeStyle = '#ff4757';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(50, canvas.height - 100);
-        ctx.lineTo(planeX, planeY);
-        ctx.stroke();
-      }
-
-      // Draw plane
-      if (multiplier < crashPoint) {
-        // Flying plane
-        ctx.fillStyle = '#00ff88';
-        ctx.font = '24px Arial';
-        ctx.fillText('✈️', planeX - 12, planeY + 8);
-        
-        // Plane trail effect
-        ctx.fillStyle = 'rgba(0, 255, 136, 0.3)';
-        for (let i = 1; i <= 5; i++) {
-          ctx.fillText('✈️', planeX - 12 - (i * 15), planeY + 8 + (i * 5));
-        }
-      } else {
-        // Crashed plane with explosion effect
-        ctx.fillStyle = '#ff4757';
-        ctx.font = '24px Arial';
-        ctx.fillText('💥', planeX - 12, planeY + 8);
-        
-        // Explosion particles
-        for (let i = 0; i < 8; i++) {
-          const angle = (i / 8) * Math.PI * 2;
-          const particleX = planeX + Math.cos(angle) * 20;
-          const particleY = planeY + Math.sin(angle) * 20;
-          ctx.fillStyle = `rgba(255, 71, 87, ${1 - (elapsed % 1)})`;
-          ctx.fillText('💥', particleX - 6, particleY + 4);
-        }
+        // Draw plane (simplified)
+        ctx.fillStyle = multiplier < crashPoint ? '#00ff88' : '#ff4757';
+        ctx.font = '20px Arial';
+        ctx.fillText(multiplier < crashPoint ? '✈️' : '💥', planeX - 10, planeY + 6);
       }
 
       // Update multiplier display

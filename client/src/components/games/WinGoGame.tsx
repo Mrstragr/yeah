@@ -110,57 +110,66 @@ export const WinGoGame = ({ betAmount, onGameResult, isPlaying }: WinGoGameProps
     if (!ctx) return;
 
     let rotation = 0;
+    let frameCount = 0;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = 80;
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frameCount++;
       
-      // Draw background
-      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-      gradient.addColorStop(0, '#1a1a2e');
-      gradient.addColorStop(1, '#16213e');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Optimize: Only redraw every 3rd frame
+      if (frameCount % 3 === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Simplified background
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw spinning wheel
-      for (let i = 0; i < 10; i++) {
-        const angle = (i / 10) * Math.PI * 2 + rotation;
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
+        // Draw spinning indicator instead of complex wheel
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(rotation);
         
-        // Number background
+        // Draw simple spinning circle segments
+        for (let i = 0; i < 10; i++) {
+          const angle = (i / 10) * Math.PI * 2;
+          const startAngle = angle - Math.PI / 20;
+          const endAngle = angle + Math.PI / 20;
+          
+          ctx.beginPath();
+          ctx.arc(0, 0, 60, startAngle, endAngle);
+          ctx.lineWidth = 8;
+          
+          const color = getNumberColor(i);
+          if (color === 'red') ctx.strokeStyle = '#ff4757';
+          else if (color === 'green') ctx.strokeStyle = '#2ed573';
+          else ctx.strokeStyle = '#8e44ad';
+          
+          ctx.stroke();
+          
+          // Draw number
+          const textX = Math.cos(angle) * 40;
+          const textY = Math.sin(angle) * 40;
+          ctx.fillStyle = 'white';
+          ctx.font = '14px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(i.toString(), textX, textY);
+        }
+        
+        ctx.restore();
+
+        // Draw center pointer
         ctx.beginPath();
-        ctx.arc(x, y, 20, 0, Math.PI * 2);
-        
-        const color = getNumberColor(i);
-        if (color === 'red') ctx.fillStyle = '#ff4757';
-        else if (color === 'green') ctx.fillStyle = '#2ed573';
-        else if (color === 'red-violet') ctx.fillStyle = '#8e44ad';
-        else if (color === 'green-violet') ctx.fillStyle = '#9b59b6';
-        else ctx.fillStyle = '#8e44ad';
-        
+        ctx.moveTo(centerX, centerY - 8);
+        ctx.lineTo(centerX - 4, centerY + 4);
+        ctx.lineTo(centerX + 4, centerY + 4);
+        ctx.closePath();
+        ctx.fillStyle = '#ffd700';
         ctx.fill();
-        
-        // Number text
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(i.toString(), x, y);
       }
 
-      // Draw center pointer
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY - 10);
-      ctx.lineTo(centerX - 5, centerY + 5);
-      ctx.lineTo(centerX + 5, centerY + 5);
-      ctx.closePath();
-      ctx.fillStyle = '#ffd700';
-      ctx.fill();
-
-      rotation += 0.3;
+      rotation += 0.2;
       
       if (spinning) {
         requestAnimationFrame(animate);

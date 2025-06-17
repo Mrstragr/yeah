@@ -112,7 +112,7 @@ export const MinesGame = ({ betAmount, onGameResult, isPlaying }: MinesGameProps
   const getTileContent = (tile: any, index: number) => {
     if (!tile.revealed) {
       return (
-        <div className="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center cursor-pointer hover:from-slate-500 hover:to-slate-600 transition-all duration-200 shadow-lg">
+        <div className="w-full h-full bg-slate-600 rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-500 transition-colors duration-150">
           <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
         </div>
       );
@@ -120,17 +120,15 @@ export const MinesGame = ({ betAmount, onGameResult, isPlaying }: MinesGameProps
 
     if (tile.isMine) {
       return (
-        <div className="w-full h-full bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center animate-pulse">
-          <Bomb className="w-6 h-6 text-white" />
-          <div className="absolute inset-0 bg-red-500 rounded-lg opacity-50 animate-ping"></div>
+        <div className="w-full h-full bg-red-600 rounded-lg flex items-center justify-center">
+          <span className="text-white text-lg">💣</span>
         </div>
       );
     }
 
     return (
-      <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center animate-bounce">
-        <Gem className="w-6 h-6 text-white drop-shadow-lg" />
-        <div className="absolute inset-0 bg-green-400 rounded-lg opacity-30 animate-pulse"></div>
+      <div className="w-full h-full bg-green-500 rounded-lg flex items-center justify-center">
+        <span className="text-white text-lg">💎</span>
       </div>
     );
   };
