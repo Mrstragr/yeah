@@ -89,9 +89,13 @@ export const DragonTigerGame = ({ betAmount, onGameResult, isPlaying }: DragonTi
         }
 
         onGameResult({
-          dragonCard: dragon,
-          tigerCard: tiger,
-          winner: gameWinner,
+          betType: selectedBet,
+          betValue: selectedBet,
+          gameResult: {
+            dragonCard: dragon,
+            tigerCard: tiger,
+            winner: gameWinner
+          },
           isWin,
           multiplier,
           winAmount: isWin ? betAmount * multiplier : 0

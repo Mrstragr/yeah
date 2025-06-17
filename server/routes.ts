@@ -106,7 +106,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       switch (gameType) {
         case 'wingo':
-          const { betType: wingoType = 'number', betValue: wingoValue = 5 } = req.body;
+          const { betType: wingoType, betValue: wingoValue } = req.body;
+          if (!wingoType || wingoValue === undefined) {
+            return res.status(400).json({ error: 'WinGo game requires betType and betValue' });
+          }
           result = await gameEngine.playWinGo(req.user!.id, betAmount, wingoType, wingoValue);
           break;
         
@@ -116,23 +119,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
         
         case 'aviator':
-          const { cashOutMultiplier = 1.5 } = req.body;
+          const { cashOutMultiplier } = req.body;
           result = await gameEngine.playAviator(req.user!.id, betAmount, cashOutMultiplier);
           break;
         
         case 'mines':
-          const { mineCount = 3, revealedTiles = [0] } = req.body;
-          result = await gameEngine.playMines(req.user!.id, betAmount, mineCount, revealedTiles);
+          const { mineCount, revealedTiles } = req.body;
+          result = await gameEngine.playMines(req.user!.id, betAmount, mineCount || 3, revealedTiles || [0]);
           break;
         
         case 'dice':
-          const { prediction = 'over', targetNumber = 50 } = req.body;
-          result = await gameEngine.playDice(req.user!.id, betAmount, prediction, targetNumber);
+          const { prediction, targetNumber } = req.body;
+          result = await gameEngine.playDice(req.user!.id, betAmount, prediction || 'over', targetNumber || 50);
           break;
         
         case 'dragon-tiger':
-          const { betType = 'dragon' } = req.body;
-          result = await gameEngine.playDragonTiger(req.user!.id, betAmount, betType);
+          const { betType: dragonTigerType } = req.body;
+          if (!dragonTigerType) {
+            return res.status(400).json({ error: 'Dragon Tiger game requires betType' });
+          }
+          result = await gameEngine.playDragonTiger(req.user!.id, betAmount, dragonTigerType);
           break;
         
         default:
@@ -168,24 +174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Wallet Routes
   app.get('/api/wallet/balance', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // For demo user, return fixed balance
-      if (req.user!.id === 10) {
-        res.json({
-          balance: '0.00',
-          walletBalance: '10814.00',
-          bonusBalance: '100.00'
-        });
-        return;
-      }
-      
       const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
       res.json({
-        balance: user.balance,
-        walletBalance: user.walletBalance,
-        bonusBalance: user.bonusBalance
+        balance: user.balance || '0.00',
+        walletBalance: user.walletBalance || '10814.00',
+        bonusBalance: user.bonusBalance || '100.00'
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
