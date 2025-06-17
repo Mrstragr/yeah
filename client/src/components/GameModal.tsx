@@ -100,65 +100,13 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
 
   const handlePlay = async () => {
     const balance = Number(walletBalance || 0);
-    if (betAmount > balance) return;
+    if (betAmount > balance) {
+      alert('Insufficient balance');
+      return;
+    }
     
     setIsPlaying(true);
-    
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`/api/games/${game.type}/play`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          betAmount,
-          gameType: game.type,
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setGameResult(result);
-        
-        // Calculate new balance from game result (backend already processed transaction)
-        const expectedBalance = result.isWin 
-          ? Number(walletBalance) - betAmount + result.winAmount
-          : Number(walletBalance) - betAmount;
-        const newBalance = Math.max(0, expectedBalance);
-        onBalanceUpdate(newBalance);
-
-        // Try to sync with server balance (optional, doesn't block game flow)
-        try {
-          const balanceResponse = await fetch('/api/wallet/balance', {
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-          });
-          if (balanceResponse.ok) {
-            const balanceData = await balanceResponse.json();
-            onBalanceUpdate(Number(balanceData.walletBalance));
-          }
-        } catch (syncError) {
-          console.log('Balance sync skipped due to auth issue');
-        }
-        
-        // Show detailed win/loss notification
-        setTimeout(() => {
-          if (result.isWin) {
-            alert(`🎉 Congratulations! You won ₹${result.winAmount}! (${result.multiplier}x multiplier)\nNew balance: ₹${Number(newBalance || 0).toFixed(2)}`);
-          } else {
-            alert(`💥 Game over! You lost ₹${betAmount}.\nBetter luck next time!\nBalance: ₹${Number(newBalance || 0).toFixed(2)}`);
-          }
-        }, 800);
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Game play failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Game play error:', error);
-    } finally {
-      setIsPlaying(false);
-    }
+    setGameResult(null);
   };
 
   const handleGameResult = async (result: any) => {
@@ -191,18 +139,36 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
 
       const serverResult = await response.json();
       
-      if (serverResult.gameId) {
+      if (response.ok && serverResult.gameId) {
         setGameResult(serverResult);
-        onBalanceUpdate(walletBalance - betAmount + (serverResult.winAmount || 0));
+        
+        // Get updated balance from server
+        const balanceResponse = await fetch('/api/wallet/balance', {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        
+        if (balanceResponse.ok) {
+          const balanceData = await balanceResponse.json();
+          onBalanceUpdate(Number(balanceData.walletBalance));
+        }
+        
+        // Show result notification
+        setTimeout(() => {
+          if (serverResult.isWin) {
+            alert(`🎉 You won ₹${serverResult.winAmount}! (${serverResult.multiplier}x)`);
+          } else {
+            alert(`💥 You lost ₹${betAmount}. Better luck next time!`);
+          }
+        }, 500);
       } else {
         throw new Error(serverResult.error || 'Game failed');
       }
     } catch (error: any) {
       console.error('Game error:', error);
       alert(error.message || 'Game failed. Please try again.');
+    } finally {
+      setIsPlaying(false);
     }
-    
-    setIsPlaying(false);
   };
 
   const renderGameInterface = () => {
