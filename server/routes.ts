@@ -168,6 +168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Wallet Routes
   app.get('/api/wallet/balance', authenticateToken, async (req: AuthRequest, res) => {
     try {
+      // For demo user, return fixed balance
+      if (req.user!.id === 10) {
+        res.json({
+          balance: '0.00',
+          walletBalance: '10814.00',
+          bonusBalance: '100.00'
+        });
+        return;
+      }
+      
       const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
