@@ -163,7 +163,9 @@ export const AviatorGame = ({ betAmount, onGameResult, isPlaying }: AviatorGameP
         setIsFlying(false);
         setTimeout(() => {
           onGameResult({
+            betType: 'aviator',
             multiplier: crashPoint,
+            cashOutMultiplier: cashedOut ? multiplier : null,
             isWin: cashedOut,
             winAmount: cashedOut ? betAmount * multiplier : 0
           });
@@ -184,7 +186,9 @@ export const AviatorGame = ({ betAmount, onGameResult, isPlaying }: AviatorGameP
         cancelAnimationFrame(animationRef.current);
       }
       onGameResult({
+        betType: 'aviator',
         multiplier: currentMultiplier,
+        cashOutMultiplier: currentMultiplier,
         isWin: true,
         winAmount: betAmount * currentMultiplier
       });

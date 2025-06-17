@@ -71,6 +71,9 @@ export const MinesGame = ({ betAmount, onGameResult, isPlaying }: MinesGameProps
         if (tile.isMine) tile.revealed = true;
       });
       onGameResult({
+        betType: 'mines',
+        mineCount,
+        revealedTiles: [index],
         isWin: false,
         winAmount: 0,
         multiplier: 0
@@ -88,6 +91,9 @@ export const MinesGame = ({ betAmount, onGameResult, isPlaying }: MinesGameProps
       if (newRevealedSafe === safeSpots) {
         setGameEnded(true);
         onGameResult({
+          betType: 'mines',
+          mineCount,
+          revealedTiles: Array.from({length: newRevealedSafe}, (_, i) => i),
           isWin: true,
           winAmount: betAmount * multiplier,
           multiplier: multiplier
@@ -102,6 +108,9 @@ export const MinesGame = ({ betAmount, onGameResult, isPlaying }: MinesGameProps
     if (!gameEnded && revealedSafe > 0) {
       setGameEnded(true);
       onGameResult({
+        betType: 'mines',
+        mineCount,
+        revealedTiles: Array.from({length: revealedSafe}, (_, i) => i),
         isWin: true,
         winAmount: betAmount * currentMultiplier,
         multiplier: currentMultiplier

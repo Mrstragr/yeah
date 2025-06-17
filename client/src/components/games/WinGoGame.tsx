@@ -90,13 +90,18 @@ export const WinGoGame = ({ betAmount, onGameResult, isPlaying }: WinGoGameProps
         }
       }
 
-      onGameResult({
-        number: result,
-        color: resultColor,
-        isWin,
-        multiplier,
-        winAmount: isWin ? betAmount * multiplier : 0
-      });
+      // Send game data to backend with proper bet parameters
+      const gameData = {
+        betType: selectedNumber !== null ? 'number' : 'color',
+        betValue: selectedNumber !== null ? selectedNumber : selectedColor,
+        gameResult: {
+          number: result,
+          color: resultColor,
+          period: currentPeriod
+        }
+      };
+      
+      onGameResult(gameData);
 
       setTimeout(() => {
         setShowResult(false);

@@ -178,9 +178,14 @@ export const GameModal = ({ game, onClose, walletBalance, onBalanceUpdate }: Gam
         },
         body: JSON.stringify({
           betAmount,
-          betType: game.type === 'aviator' ? 'single' : 'default',
-          betValue: result.number || result.multiplier || Math.floor(Math.random() * 10),
-          gameResult: result
+          betType: result.betType || 'default',
+          betValue: result.betValue,
+          cashOutMultiplier: result.multiplier,
+          mineCount: result.mineCount,
+          revealedTiles: result.revealedTiles,
+          prediction: result.prediction,
+          targetNumber: result.targetNumber,
+          gameResult: result.gameResult || result
         })
       });
 
