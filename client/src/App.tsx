@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ModernGameModal } from './components/ModernGameModal';
 
 interface User {
   id: number;
@@ -821,13 +822,14 @@ export default function App() {
 
       {/* Modals */}
       {showGameModal && selectedGame && (
-        <SimpleGameModal
+        <ModernGameModal
           gameType={selectedGame}
           onClose={() => {
             setShowGameModal(false);
             setSelectedGame(null);
             refreshBalance();
           }}
+          refreshBalance={refreshBalance}
         />
       )}
 
