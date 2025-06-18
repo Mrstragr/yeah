@@ -366,23 +366,31 @@ export class GameEngine {
   }
 
   private generateAviatorMultiplier(): number {
-    // More realistic crash distribution matching actual Aviator patterns
+    // Realistic Aviator crash distribution based on actual game patterns
     const rand = Math.random();
     
-    // 60% chance: 1.0x - 2.0x (most common crashes)
-    if (rand < 0.6) return 1.0 + Math.random();
+    // 60% chance: 1.0x - 2.0x (most common)
+    if (rand < 0.6) {
+      return Number((1.0 + Math.random()).toFixed(2));
+    }
     
-    // 25% chance: 2.0x - 5.0x (medium range)
-    if (rand < 0.85) return 2.0 + Math.random() * 3;
+    // 25% chance: 2.0x - 5.0x (medium)
+    if (rand < 0.85) {
+      return Number((2.0 + Math.random() * 3).toFixed(2));
+    }
     
-    // 10% chance: 5.0x - 20.0x (good multipliers)
-    if (rand < 0.95) return 5.0 + Math.random() * 15;
+    // 10% chance: 5.0x - 20.0x (high)
+    if (rand < 0.95) {
+      return Number((5.0 + Math.random() * 15).toFixed(2));
+    }
     
-    // 4% chance: 20.0x - 100.0x (high multipliers)
-    if (rand < 0.99) return 20.0 + Math.random() * 80;
+    // 4% chance: 20.0x - 100.0x (very high)
+    if (rand < 0.99) {
+      return Number((20.0 + Math.random() * 80).toFixed(2));
+    }
     
-    // 1% chance: 100.0x - 500.0x (jackpot range)
-    return 100.0 + Math.random() * 400;
+    // 1% chance: 100.0x - 500.0x (jackpot)
+    return Number((100.0 + Math.random() * 400).toFixed(2));
   }
 
   private generateMinePositions(totalTiles: number, mineCount: number): number[] {

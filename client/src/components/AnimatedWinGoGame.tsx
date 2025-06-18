@@ -92,14 +92,20 @@ export const AnimatedWinGoGame = ({ betAmount, onGameResult, isPlaying }: Animat
       let isWin = false;
       let multiplier = 0;
 
+      // Fixed WinGo win calculation logic to match backend
       if (selectedNumber === result) {
         isWin = true;
-        multiplier = result === 0 || result === 5 ? 4.5 : 9;
+        multiplier = 9; // Number bet always 9x
       } else if (selectedColor) {
-        if (selectedColor === resultColor || 
-            (selectedColor === 'violet' && (result === 0 || result === 5))) {
+        if (selectedColor === 'violet' && (result === 0 || result === 5)) {
           isWin = true;
-          multiplier = selectedColor === 'violet' ? 4.5 : 2;
+          multiplier = 4.5;
+        } else if (selectedColor === 'red' && (resultColor === 'red' || resultColor === 'red-violet')) {
+          isWin = true;
+          multiplier = 2;
+        } else if (selectedColor === 'green' && (resultColor === 'green' || resultColor === 'green-violet')) {
+          isWin = true;
+          multiplier = 2;
         }
       }
 

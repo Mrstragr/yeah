@@ -173,7 +173,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error: any) {
       console.error(`Game ${req.params.gameType} error:`, error);
-      res.status(500).json({ error: error.message });
+      
+      // Handle specific errors with user-friendly messages
+      if (error.message === 'Insufficient balance') {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      if (error.message === 'User not found') {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      if (error.message.includes('Invalid bet')) {
+        return res.status(400).json({ error: 'Invalid bet amount' });
+      }
+      
+      res.status(500).json({ error: error.message || 'Game play failed' });
     }
   });
 
