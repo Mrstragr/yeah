@@ -40,14 +40,28 @@ export const AnimatedAviatorGame = ({ betAmount, onGameResult, isPlaying }: Anim
     };
   }, []);
 
-  const startGame = () => {
-    const newCrashPoint = generateCrashPoint();
-    setCrashPoint(newCrashPoint);
+  const startGame = async () => {
     setGamePhase('flying');
     setCurrentMultiplier(1.0);
     setCashedOut(false);
     setPlanePosition({ x: 50, y: 250 });
     gameStartTime.current = Date.now();
+    
+    // Get crash point from backend by playing the game
+    try {
+      const gameResult = await onGameResult({
+        betType: 'aviator',
+        cashOutMultiplier: 2.0 // Default cash out
+      });
+      
+      if (gameResult && gameResult.result) {
+        setCrashPoint(gameResult.result.crashMultiplier);
+      } else {
+        setCrashPoint(generateCrashPoint()); // Fallback
+      }
+    } catch (error) {
+      setCrashPoint(generateCrashPoint()); // Fallback on error
+    }
     
     animateFlight();
   };

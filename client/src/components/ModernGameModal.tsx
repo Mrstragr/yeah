@@ -21,14 +21,14 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
       if (!token) {
         alert('Please login first');
         setIsPlaying(false);
-        return;
+        return null;
       }
       
       // Validate bet amount before sending
       if (betAmount <= 0 || betAmount > 50000) {
         alert('Invalid bet amount');
         setIsPlaying(false);
-        return;
+        return null;
       }
 
       const response = await fetch(`/api/games/${gameType}/play`, {
@@ -76,6 +76,9 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
             }, 5000);
           }
         }, 500);
+        
+        // Return server result for frontend to use
+        return serverResult;
       } else {
         const errorData = await response.json();
         
@@ -87,10 +90,12 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
         } else {
           alert(errorData.error || 'Game failed. Please try again.');
         }
+        return null;
       }
     } catch (error: any) {
       console.error('Game error:', error);
       alert('Game failed. Please try again.');
+      return null;
     } finally {
       setIsPlaying(false);
     }
