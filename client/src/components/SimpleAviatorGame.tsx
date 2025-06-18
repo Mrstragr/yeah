@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 interface SimpleAviatorGameProps {
   betAmount: number;
-  onGameResult: (result: any) => void;
+  onGameResult: (result: any) => Promise<any>;
   isPlaying: boolean;
 }
 
@@ -55,8 +55,12 @@ export const SimpleAviatorGame = ({ betAmount, onGameResult, isPlaying }: Simple
     
     animate();
     
-    // Send to backend
-    onGameResult(gameData);
+    // Send to backend and handle result
+    onGameResult(gameData).then(result => {
+      console.log('Aviator game result:', result);
+    }).catch(error => {
+      console.error('Aviator game error:', error);
+    });
   };
 
   const handleCrash = (crashPoint: number) => {

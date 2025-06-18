@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 interface SimpleWinGoGameProps {
   betAmount: number;
-  onGameResult: (result: any) => void;
+  onGameResult: (result: any) => Promise<any>;
   isPlaying: boolean;
 }
 
@@ -56,27 +56,25 @@ export const SimpleWinGoGame = ({ betAmount, onGameResult, isPlaying }: SimpleWi
       betValue: selectedNumber !== null ? selectedNumber : selectedColor
     };
 
-    // Call the game result handler and handle response
-    const resultPromise = onGameResult(gameData);
-    
-    // Show spinning animation
+    // Show spinning animation first
     setTimeout(async () => {
       try {
-        const result = await resultPromise;
+        // Call the game result handler
+        const result = await onGameResult(gameData);
         
-        if (result && result.result && typeof result.result.number === 'number') {
+        if (result && typeof result === 'object' && result.result && typeof result.result.number === 'number') {
           const serverNumber = result.result.number;
           const resultColor = getNumberColor(serverNumber);
           setLastResult({ number: serverNumber, color: resultColor });
         } else {
-          // Fallback to random result if server response is invalid
+          // Use random result as fallback
           const fallbackNumber = Math.floor(Math.random() * 10);
           const resultColor = getNumberColor(fallbackNumber);
           setLastResult({ number: fallbackNumber, color: resultColor });
         }
       } catch (error) {
         console.error('Game error:', error);
-        // Fallback to random result on error
+        // Use random result on error
         const fallbackNumber = Math.floor(Math.random() * 10);
         const resultColor = getNumberColor(fallbackNumber);
         setLastResult({ number: fallbackNumber, color: resultColor });

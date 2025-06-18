@@ -4,6 +4,7 @@ import { AnimatedWinGoGame } from './AnimatedWinGoGame';
 import { SimpleWinGoGame } from './SimpleWinGoGame';
 import { AnimatedAviatorGame } from './AnimatedAviatorGame';
 import { SimpleAviatorGame } from './SimpleAviatorGame';
+import { BasicGameModal } from './BasicGameModal';
 import { AnimatedMinesGame } from './AnimatedMinesGame';
 import { AnimatedDragonTigerGame } from './AnimatedDragonTigerGame';
 
@@ -116,9 +117,9 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
 
     switch (gameType) {
       case 'wingo':
-        return <AnimatedWinGoGame {...commonProps} />;
+        return <SimpleWinGoGame {...commonProps} />;
       case 'aviator':
-        return <AnimatedAviatorGame {...commonProps} />;
+        return <SimpleAviatorGame {...commonProps} />;
       case 'mines':
         return <AnimatedMinesGame {...commonProps} />;
       case 'dragon-tiger':
