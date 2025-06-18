@@ -841,15 +841,15 @@ export default function App() {
           <div className="nav-label">Lobby</div>
         </button>
         <button 
-          className={`nav-item-bottom ${bottomNavActive === 'dashboard' ? 'active' : ''}`}
+          className={`nav-item-bottom ${bottomNavActive === 'activity' ? 'active' : ''}`}
           onClick={() => {
-            setBottomNavActive('dashboard');
-            setShowDashboard(true);
+            setBottomNavActive('activity');
+            setShowDashboard(false);
             setShowLobby(false);
           }}
         >
           <div className="nav-icon">📊</div>
-          <div className="nav-label">Dashboard</div>
+          <div className="nav-label">Activity</div>
         </button>
         <button 
           className={`nav-item-bottom ${bottomNavActive === 'wallet' ? 'active' : ''}`}
