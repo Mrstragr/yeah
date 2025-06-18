@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ModernGameModal } from './components/ModernGameModal';
 import { GameCardWithImages } from './components/GameCardWithImages';
+import { EnhancedGameInterface } from './components/EnhancedGameInterface';
+import { ImprovedGameCards } from './components/ImprovedGameCards';
+import { GameDashboard } from './components/GameDashboard';
 
 interface User {
   id: number;
@@ -456,8 +459,10 @@ export default function App() {
   const [showGameModal, setShowGameModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [useEnhancedInterface, setUseEnhancedInterface] = useState(true);
   const [activeTab, setActiveTab] = useState('lobby');
   const [bottomNavActive, setBottomNavActive] = useState('home');
+  const [showDashboard, setShowDashboard] = useState(false);
 
   // Initialize user from localStorage
   useEffect(() => {
@@ -484,6 +489,11 @@ export default function App() {
   const openGame = (gameType: string) => {
     setSelectedGame(gameType);
     setShowGameModal(true);
+  };
+
+  const closeGameModal = () => {
+    setShowGameModal(false);
+    setSelectedGame(null);
   };
 
   if (!user) {
