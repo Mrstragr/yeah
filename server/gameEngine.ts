@@ -196,14 +196,20 @@ export class GameEngine {
     const isWin = playerCashOut <= crashMultiplier;
     const winAmount = isWin ? betAmount * playerCashOut : 0;
     
-    // Update user balance properly
+    // Validate and update user balance
     const user = await storage.getUser(userId);
-    if (user) {
-      const currentBalance = Number(user.walletBalance || 0);
-      const newBalance = currentBalance - betAmount + winAmount;
-      console.log(`[AVIATOR] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}, Win: ${isWin}`);
-      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    if (!user) {
+      throw new Error('User not found');
     }
+    
+    const currentBalance = Number(user.walletBalance || 0);
+    if (currentBalance < betAmount) {
+      throw new Error('Insufficient balance');
+    }
+    
+    const newBalance = currentBalance - betAmount + winAmount;
+    console.log(`[AVIATOR] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}, Win: ${isWin}`);
+    await storage.updateUserWalletBalance(userId, newBalance.toString());
     
     // Record game history
     await storage.addGameHistory({
@@ -360,13 +366,23 @@ export class GameEngine {
   }
 
   private generateAviatorMultiplier(): number {
-    // Realistic Aviator crash distribution
+    // More realistic crash distribution matching actual Aviator patterns
     const rand = Math.random();
-    if (rand < 0.33) return 1 + Math.random() * 1; // 1.0x - 2.0x (33%)
-    if (rand < 0.65) return 2 + Math.random() * 3; // 2.0x - 5.0x (32%)
-    if (rand < 0.85) return 5 + Math.random() * 10; // 5.0x - 15.0x (20%)
-    if (rand < 0.95) return 15 + Math.random() * 35; // 15.0x - 50.0x (10%)
-    return 50 + Math.random() * 950; // 50.0x - 1000.0x (5%)
+    
+    // 60% chance: 1.0x - 2.0x (most common crashes)
+    if (rand < 0.6) return 1.0 + Math.random();
+    
+    // 25% chance: 2.0x - 5.0x (medium range)
+    if (rand < 0.85) return 2.0 + Math.random() * 3;
+    
+    // 10% chance: 5.0x - 20.0x (good multipliers)
+    if (rand < 0.95) return 5.0 + Math.random() * 15;
+    
+    // 4% chance: 20.0x - 100.0x (high multipliers)
+    if (rand < 0.99) return 20.0 + Math.random() * 80;
+    
+    // 1% chance: 100.0x - 500.0x (jackpot range)
+    return 100.0 + Math.random() * 400;
   }
 
   private generateMinePositions(totalTiles: number, mineCount: number): number[] {

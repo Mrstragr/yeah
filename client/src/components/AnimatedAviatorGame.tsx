@@ -24,11 +24,21 @@ export const AnimatedAviatorGame = ({ betAmount, onGameResult, isPlaying }: Anim
       startGame();
     }
     return () => {
+      // Cleanup animations when component unmounts
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
   }, [isPlaying]);
+  
+  // Additional cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
 
   const startGame = () => {
     const newCrashPoint = generateCrashPoint();

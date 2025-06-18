@@ -78,7 +78,15 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
         }, 500);
       } else {
         const errorData = await response.json();
-        alert(errorData.error || 'Game failed. Please try again.');
+        
+        // Handle specific error types with better user feedback
+        if (errorData.error === 'Insufficient balance') {
+          alert('Insufficient balance! Please deposit more funds to continue playing.');
+        } else if (errorData.error === 'Invalid bet amount') {
+          alert('Invalid bet amount! Please enter a valid amount between ₹10 and ₹50,000.');
+        } else {
+          alert(errorData.error || 'Game failed. Please try again.');
+        }
       }
     } catch (error: any) {
       console.error('Game error:', error);
