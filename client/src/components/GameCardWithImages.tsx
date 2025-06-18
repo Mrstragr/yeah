@@ -110,44 +110,55 @@ export const GameCardWithImages = ({ gameType, title, subtitle = "TB GAME", onCl
       case 'aviator':
         return (
           <div className="relative w-full h-full bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600 overflow-hidden">
-            {/* Airplane */}
+            {/* Airplane with animation */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-white text-xl">✈️</div>
+              <div className="text-white text-xl animate-float">✈️</div>
             </div>
-            {/* Flight path */}
+            {/* Animated flight path */}
             <div className="absolute inset-0">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <path 
                   d="M10,80 Q50,20 90,40" 
-                  stroke="rgba(255,255,255,0.3)" 
+                  stroke="rgba(255,255,255,0.5)" 
                   strokeWidth="2" 
                   fill="none"
-                  strokeDasharray="2,2"
+                  strokeDasharray="3,3"
+                  className="animate-pulse"
                 />
               </svg>
             </div>
-            {/* Multiplier display */}
-            <div className="absolute bottom-1 right-2 text-white text-xs font-bold">2.5x</div>
+            {/* Animated multiplier display */}
+            <div className="absolute bottom-1 right-2 text-yellow-300 text-xs font-bold neon-text animate-glow">2.5x</div>
+            {/* Cloud effects */}
+            <div className="absolute top-2 left-4 w-2 h-1 bg-white/40 rounded-full animate-float"></div>
+            <div className="absolute bottom-4 left-2 w-1.5 h-0.5 bg-white/30 rounded-full" style={{animationDelay: '1s'}}></div>
           </div>
         );
       
       case 'mines':
         return (
           <div className="relative w-full h-full bg-gradient-to-br from-gray-700 via-slate-600 to-gray-800 overflow-hidden">
-            {/* Mine grid */}
+            {/* Animated mine grid */}
             <div className="absolute inset-0 p-2">
               <div className="grid grid-cols-4 gap-0.5 h-full">
                 {Array.from({length: 16}).map((_, i) => (
                   <div 
                     key={i}
-                    className={`bg-gray-500 rounded-sm ${i === 5 ? 'bg-red-500' : i === 10 ? 'bg-green-500' : ''}`}
+                    className={`bg-gray-500 rounded-sm transition-all duration-300 ${
+                      i === 5 ? 'bg-red-500 animate-pulse' : 
+                      i === 10 ? 'bg-green-500 animate-glow' : 
+                      'hover:bg-gray-400'
+                    }`}
                   >
-                    {i === 5 && <div className="text-white text-xs text-center">💣</div>}
-                    {i === 10 && <div className="text-white text-xs text-center">💎</div>}
+                    {i === 5 && <div className="text-white text-xs text-center animate-bounce">💣</div>}
+                    {i === 10 && <div className="text-white text-xs text-center animate-sparkle">💎</div>}
                   </div>
                 ))}
               </div>
             </div>
+            {/* Danger indicators */}
+            <div className="absolute top-1 right-1 w-1 h-1 bg-red-400 rounded-full animate-ping"></div>
+            <div className="absolute bottom-1 left-1 w-0.5 h-0.5 bg-yellow-400 rounded-full animate-pulse"></div>
           </div>
         );
       

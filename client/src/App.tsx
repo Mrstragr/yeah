@@ -747,24 +747,27 @@ export default function App() {
             onClick={() => openGame('cryptos')}
             className="cryptos-card"
           />
-          <div className="game-card space-dice-card" onClick={() => openGame('space-dice')}>
-            <div className="game-card-content">
-              <div className="game-title">SPACE</div>
-              <div className="game-subtitle">DICE</div>
-            </div>
-          </div>
-          <div className="game-card goal-wave-card" onClick={() => openGame('goal-wave')}>
-            <div className="game-card-content">
-              <div className="game-title">GOAL</div>
-              <div className="game-subtitle">WAVE</div>
-            </div>
-          </div>
-          <div className="game-card mini-roulette-card" onClick={() => openGame('mini-roulette')}>
-            <div className="game-card-content">
-              <div className="game-title">MINI</div>
-              <div className="game-subtitle">ROULETTE</div>
-            </div>
-          </div>
+          <GameCardWithImages 
+            gameType="dice"
+            title="SPACE"
+            subtitle="DICE"
+            onClick={() => openGame('space-dice')}
+            className="space-dice-card"
+          />
+          <GameCardWithImages 
+            gameType="cricket"
+            title="GOAL"
+            subtitle="WAVE"
+            onClick={() => openGame('goal-wave')}
+            className="goal-wave-card"
+          />
+          <GameCardWithImages 
+            gameType="wingo"
+            title="MINI"
+            subtitle="ROULETTE"
+            onClick={() => openGame('mini-roulette')}
+            className="mini-roulette-card"
+          />
         </div>
 
         {/* Slots Section */}
