@@ -48,9 +48,24 @@ export class GameEngine {
         multiplier = isWin ? 9 : 0;
         break;
       case 'color':
-        const colorMap: Record<number, string> = { 0: 'red', 1: 'green', 2: 'red', 3: 'green', 4: 'red', 5: 'violet', 6: 'red', 7: 'green', 8: 'red', 9: 'green' };
-        isWin = colorMap[result] === betValue;
-        multiplier = isWin ? (betValue === 'violet' ? 4.5 : 2) : 0;
+        // Correct WinGo color mapping: 0=red-violet, 5=green-violet, 1,3,7,9=green, 2,4,6,8=red
+        let resultColor = 'red';
+        if (result === 0) resultColor = 'red-violet';
+        else if (result === 5) resultColor = 'green-violet';
+        else if ([1, 3, 7, 9].includes(result)) resultColor = 'green';
+        else if ([2, 4, 6, 8].includes(result)) resultColor = 'red';
+        
+        // Check win conditions
+        if (betValue === 'violet' && (result === 0 || result === 5)) {
+          isWin = true;
+          multiplier = 4.5;
+        } else if (betValue === 'red' && (resultColor === 'red' || resultColor === 'red-violet')) {
+          isWin = true;
+          multiplier = 2;
+        } else if (betValue === 'green' && (resultColor === 'green' || resultColor === 'green-violet')) {
+          isWin = true;
+          multiplier = 2;
+        }
         break;
       case 'size':
         const size = result < 5 ? 'small' : 'big';
@@ -61,14 +76,22 @@ export class GameEngine {
     
     const winAmount = isWin ? betAmount * multiplier : 0;
     
-    // Update user balance properly
+    // Validate and update user balance
     const user = await storage.getUser(userId);
-    if (user) {
-      const currentBalance = Number(user.walletBalance || 0);
-      const newBalance = currentBalance - betAmount + winAmount;
-      console.log(`[WINGO] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}`);
-      await storage.updateUserWalletBalance(userId, newBalance.toString());
+    if (!user) {
+      throw new Error('User not found');
     }
+    
+    const currentBalance = Number(user.walletBalance || 0);
+    
+    // Prevent negative balance
+    if (currentBalance < betAmount) {
+      throw new Error('Insufficient balance');
+    }
+    
+    const newBalance = currentBalance - betAmount + winAmount;
+    console.log(`[WINGO] User ${userId}: ${currentBalance} - ${betAmount} + ${winAmount} = ${newBalance}`);
+    await storage.updateUserWalletBalance(userId, newBalance.toString());
     
     // Record game history
     await storage.addGameHistory({

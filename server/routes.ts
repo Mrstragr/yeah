@@ -102,6 +102,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { gameType } = req.params;
       const { betAmount } = req.body;
+      
+      // Validate bet amount
+      if (!betAmount || betAmount <= 0 || betAmount > 50000) {
+        return res.status(400).json({ error: 'Invalid bet amount' });
+      }
+      
       let result;
 
       switch (gameType) {

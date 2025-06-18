@@ -20,6 +20,14 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
       const token = localStorage.getItem('authToken');
       if (!token) {
         alert('Please login first');
+        setIsPlaying(false);
+        return;
+      }
+      
+      // Validate bet amount before sending
+      if (betAmount <= 0 || betAmount > 50000) {
+        alert('Invalid bet amount');
+        setIsPlaying(false);
         return;
       }
 

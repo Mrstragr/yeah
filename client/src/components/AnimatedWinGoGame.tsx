@@ -28,7 +28,8 @@ export const AnimatedWinGoGame = ({ betAmount, onGameResult, isPlaying }: Animat
     if (num === 0) return 'red-violet';
     if (num === 5) return 'green-violet';
     if ([1, 3, 7, 9].includes(num)) return 'green';
-    return 'red';
+    if ([2, 4, 6, 8].includes(num)) return 'red';
+    return 'red'; // fallback
   };
 
   const getColorClass = (color: string) => {
