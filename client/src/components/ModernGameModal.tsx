@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { AnimatedWinGoGame } from './AnimatedWinGoGame';
+import { SimpleWinGoGame } from './SimpleWinGoGame';
 import { AnimatedAviatorGame } from './AnimatedAviatorGame';
+import { SimpleAviatorGame } from './SimpleAviatorGame';
 import { AnimatedMinesGame } from './AnimatedMinesGame';
 import { AnimatedDragonTigerGame } from './AnimatedDragonTigerGame';
 

@@ -40,14 +40,14 @@ export const AnimatedAviatorGame = ({ betAmount, onGameResult, isPlaying }: Anim
     };
   }, []);
 
-  const startGame = async () => {
+  const startGame = () => {
     setGamePhase('flying');
     setCurrentMultiplier(1.0);
     setCashedOut(false);
     setPlanePosition({ x: 50, y: 250 });
     gameStartTime.current = Date.now();
     
-    // Generate crash point locally first, then sync with backend later
+    // Generate crash point locally
     setCrashPoint(generateCrashPoint());
     
     animateFlight();
