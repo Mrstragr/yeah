@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Volume2, VolumeX, TrendingUp, Gift, Star } from 'lucide-react';
+import { ImprovedWinGoGame } from './ImprovedWinGoGame';
+import { ImprovedAviatorGame } from './ImprovedAviatorGame';
+import { ImprovedMinesGame } from './ImprovedMinesGame';
+import { ImprovedDragonTigerGame } from './ImprovedDragonTigerGame';
 
 interface EnhancedGameInterfaceProps {
   gameType: string;
@@ -262,6 +266,23 @@ export const EnhancedGameInterface = ({ gameType, onClose, refreshBalance }: Enh
       <p className="text-gray-400">Quick play mode available</p>
     </div>
   );
+
+  // Use improved game components for specific games
+  if (gameType === 'wingo') {
+    return <ImprovedWinGoGame onClose={onClose} refreshBalance={refreshBalance} />;
+  }
+  
+  if (gameType === 'aviator') {
+    return <ImprovedAviatorGame onClose={onClose} refreshBalance={refreshBalance} />;
+  }
+  
+  if (gameType === 'mines') {
+    return <ImprovedMinesGame onClose={onClose} refreshBalance={refreshBalance} />;
+  }
+  
+  if (gameType === 'dragon-tiger') {
+    return <ImprovedDragonTigerGame onClose={onClose} refreshBalance={refreshBalance} />;
+  }
 
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
