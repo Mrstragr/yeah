@@ -577,48 +577,286 @@ export default function App() {
           </button>
         </div>
 
-        {/* Lottery Section */}
-        <div className="section-header">
-          <div className="section-title">
-            <div className="section-icon lottery-icon">8</div>
-            Lottery
-          </div>
-          <div className="nav-arrows">
-            <button className="nav-arrow">‹</button>
-            <button className="nav-arrow">›</button>
-          </div>
-        </div>
+        {/* Content based on active tab */}
+        {activeTab === 'lobby' && (
+          <>
+            {/* Lottery Section */}
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon lottery-icon">🎯</div>
+                Lottery
+              </div>
+              <div className="section-subtitle">The games are independently developed by our team, fun, fair, and safe</div>
+            </div>
+          </>
+        )}
 
-        <div className="game-grid">
-          <GameCardWithImages 
-            gameType="wingo"
-            title="WIN GO"
-            subtitle="TB GAME"
-            onClick={() => openGame('wingo')}
-            className="wingo-card"
-          />
-          <GameCardWithImages 
-            gameType="k3"
-            title="K3"
-            subtitle="TB GAME"
-            onClick={() => openGame('k3')}
-            className="k3-card"
-          />
-          <GameCardWithImages 
-            gameType="5d"
-            title="5D"
-            subtitle="TB GAME"
-            onClick={() => openGame('5d')}
-            className="fived-card"
-          />
-          <GameCardWithImages 
-            gameType="trx"
-            title="TRX WINGO"
-            subtitle="TB GAME"
-            onClick={() => openGame('trx')}
-            className="trx-card"
-          />
-        </div>
+        {activeTab === 'mini' && (
+          <>
+            {/* Featured Game */}
+            <div className="featured-game">
+              <div className="featured-content">
+                <div className="featured-bike">🏍️</div>
+                <div className="featured-number">7</div>
+              </div>
+            </div>
+
+            {/* Mini Games */}
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon mini-icon">🎮</div>
+                Mini game
+              </div>
+              <div className="nav-arrows">
+                <span>Detail</span>
+                <button className="nav-arrow">‹</button>
+                <button className="nav-arrow">›</button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'slots' && (
+          <>
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon slots-icon">🎰</div>
+                Slots
+              </div>
+              <div className="nav-arrows">
+                <span>Detail</span>
+                <button className="nav-arrow">‹</button>
+                <button className="nav-arrow">›</button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'card' && (
+          <>
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon card-icon">🃏</div>
+                Card
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'fishing' && (
+          <>
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon fishing-icon">🎣</div>
+                Fishing
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Game grids based on active tab */}
+        {activeTab === 'lobby' && (
+          <div className="game-grid lottery-grid">
+            <GameCardWithImages 
+              gameType="wingo"
+              title="WIN GO"
+              subtitle="TB GAME"
+              onClick={() => openGame('wingo')}
+              className="wingo-card"
+            />
+            <GameCardWithImages 
+              gameType="k3"
+              title="K3"
+              subtitle="TB GAME"
+              onClick={() => openGame('k3')}
+              className="k3-card"
+            />
+            <GameCardWithImages 
+              gameType="5d"
+              title="5D"
+              subtitle="TB GAME"
+              onClick={() => openGame('5d')}
+              className="fived-card"
+            />
+            <GameCardWithImages 
+              gameType="trx"
+              title="TRX WINGO"
+              subtitle="TB GAME"
+              onClick={() => openGame('trx')}
+              className="trx-card"
+            />
+          </div>
+        )}
+
+        {activeTab === 'mini' && (
+          <>
+            <div className="game-grid mini-grid">
+              <div className="game-card space-dice" onClick={() => openGame('dice')}>
+                <div className="game-content">
+                  <div className="game-title">SPACE DICE</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card goal-wave" onClick={() => openGame('goal')}>
+                <div className="game-content">
+                  <div className="game-title">GOAL WAVE</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card mini-roulette" onClick={() => openGame('roulette')}>
+                <div className="game-content">
+                  <div className="game-title">MINI ROULETTE</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon star-icon">⭐</div>
+                Recommended Games
+              </div>
+              <div className="nav-arrows">
+                <button className="nav-arrow">‹</button>
+                <button className="nav-arrow">›</button>
+              </div>
+            </div>
+
+            <div className="game-grid recommended-grid">
+              <div className="game-card dice-rec" onClick={() => openGame('dice')}>
+                <div className="game-content">
+                  <div className="game-title">DICE</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card plinko" onClick={() => openGame('plinko')}>
+                <div className="game-content">
+                  <div className="multiplier-badge">20x</div>
+                  <div className="game-title">PLINKO</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card hilo" onClick={() => openGame('hilo')}>
+                <div className="game-content">
+                  <div className="game-title">HILO</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon slots-icon">🎰</div>
+                Slots
+              </div>
+              <div className="nav-arrows">
+                <span>Detail</span>
+                <button className="nav-arrow">‹</button>
+                <button className="nav-arrow">›</button>
+              </div>
+            </div>
+
+            <div className="game-grid slots-grid">
+              <div className="game-card aviator-slot" onClick={() => openGame('aviator')}>
+                <div className="game-content">
+                  <div className="bonus-badge">+500%</div>
+                  <div className="game-title">AVIATOR</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card cricket-slot" onClick={() => openGame('cricket')}>
+                <div className="game-content">
+                  <div className="game-title">CRICKET</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+              <div className="game-card mines-slot" onClick={() => openGame('mines')}>
+                <div className="game-content">
+                  <div className="game-title">MINES</div>
+                  <div className="game-subtitle">TB GAME</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'slots' && (
+          <div className="game-grid slots-main-grid">
+            <div className="game-card aviator-main" onClick={() => openGame('aviator')}>
+              <div className="game-content">
+                <div className="bonus-badge">+500%</div>
+                <div className="game-title">AVIATOR</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card cricket-main" onClick={() => openGame('cricket')}>
+              <div className="game-content">
+                <div className="game-title">CRICKET</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card mines-main" onClick={() => openGame('mines')}>
+              <div className="game-content">
+                <div className="game-title">MINES</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card aviator-blue" onClick={() => openGame('aviator')}>
+              <div className="game-content">
+                <div className="game-title">AVIATOR</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card limbo-main" onClick={() => openGame('limbo')}>
+              <div className="game-content">
+                <div className="multiplier-badge">500x</div>
+                <div className="game-title">LIMBO</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card mines-pro" onClick={() => openGame('mines')}>
+              <div className="game-content">
+                <div className="game-title">MINES PRO</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card dragon-tiger-main" onClick={() => openGame('dragon-tiger')}>
+              <div className="game-content">
+                <div className="game-title">DRAGON TIGER</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card goal-main" onClick={() => openGame('goal')}>
+              <div className="game-content">
+                <div className="game-title">GOAL</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+            <div className="game-card dice-main" onClick={() => openGame('dice')}>
+              <div className="game-content">
+                <div className="game-title">DICE</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'card' && (
+          <div className="game-grid card-grid">
+            <div className="game-card dragon-tiger-card" onClick={() => openGame('dragon-tiger')}>
+              <div className="game-content">
+                <div className="game-title">DRAGON TIGER</div>
+                <div className="game-subtitle">TB GAME</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'fishing' && (
+          <div className="coming-soon-section">
+            <div className="coming-soon-text">Fishing Games Coming Soon</div>
+          </div>
+        )}
 
         {/* Mini Games Section */}
         <div className="section-header">
@@ -822,8 +1060,6 @@ export default function App() {
           className={`nav-item-bottom ${bottomNavActive === 'home' ? 'active' : ''}`}
           onClick={() => {
             setBottomNavActive('home');
-            setShowDashboard(false);
-            setShowLobby(false);
           }}
         >
           <div className="nav-icon">🏠</div>
@@ -844,8 +1080,6 @@ export default function App() {
           className={`nav-item-bottom ${bottomNavActive === 'activity' ? 'active' : ''}`}
           onClick={() => {
             setBottomNavActive('activity');
-            setShowDashboard(false);
-            setShowLobby(false);
           }}
         >
           <div className="nav-icon">📊</div>
@@ -865,8 +1099,6 @@ export default function App() {
           className={`nav-item-bottom ${bottomNavActive === 'account' ? 'active' : ''}`}
           onClick={() => {
             setBottomNavActive('account');
-            setShowDashboard(false);
-            setShowLobby(false);
           }}
         >
           <div className="nav-icon">👤</div>
