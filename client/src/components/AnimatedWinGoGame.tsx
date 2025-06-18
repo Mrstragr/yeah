@@ -86,45 +86,38 @@ export const AnimatedWinGoGame = ({ betAmount, onGameResult, isPlaying }: Animat
       setSpinning(false);
       setResultAnimation(true);
       
-      // Add to win streaks for visual effect
+      // Add to win streaks
       setWinStreaks(prev => [result, ...prev.slice(0, 9)]);
 
-      let isWin = false;
-      let multiplier = 0;
+      setTimeout(() => {
+        setResultAnimation(false);
+        startCountdown();
+      }, 3000);
+    }, 3000);
+  };
 
-      // Fixed WinGo win calculation logic to match backend
-      if (selectedNumber === result) {
-        isWin = true;
-        multiplier = 9; // Number bet always 9x
-      } else if (selectedColor) {
-        if (selectedColor === 'violet' && (result === 0 || result === 5)) {
-          isWin = true;
-          multiplier = 4.5;
-        } else if (selectedColor === 'red' && (resultColor === 'red' || resultColor === 'red-violet')) {
-          isWin = true;
-          multiplier = 2;
-        } else if (selectedColor === 'green' && (resultColor === 'green' || resultColor === 'green-violet')) {
-          isWin = true;
-          multiplier = 2;
-        }
-      }
+  const executeGameWithResult = (serverNumber: number, isWin: boolean) => {
+    setSpinning(true);
+    
+    const canvas = canvasRef.current;
+    if (canvas) {
+      animateWheel(canvas);
+    }
+
+    setTimeout(() => {
+      const resultColor = getNumberColor(serverNumber);
+      
+      setLastResult({ number: serverNumber, color: resultColor });
+      setSpinning(false);
+      setResultAnimation(true);
+      
+      // Add to win streaks
+      setWinStreaks(prev => [serverNumber, ...prev.slice(0, 9)]);
 
       if (isWin) {
         setShowParticles(true);
         setTimeout(() => setShowParticles(false), 3000);
       }
-
-      const gameData = {
-        betType: selectedNumber !== null ? 'number' : 'color',
-        betValue: selectedNumber !== null ? selectedNumber : selectedColor,
-        gameResult: {
-          number: result,
-          color: resultColor,
-          period: currentPeriod
-        }
-      };
-      
-      onGameResult(gameData);
 
       setTimeout(() => {
         setResultAnimation(false);
