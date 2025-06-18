@@ -5,6 +5,7 @@ import { GameCardWithImages } from './components/GameCardWithImages';
 import { EnhancedGameInterface } from './components/EnhancedGameInterface';
 import { ImprovedGameCards } from './components/ImprovedGameCards';
 import { GameDashboard } from './components/GameDashboard';
+import { GameLobby } from './components/GameLobby';
 
 interface User {
   id: number;
@@ -463,6 +464,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('lobby');
   const [bottomNavActive, setBottomNavActive] = useState('home');
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showLobby, setShowLobby] = useState(false);
 
   // Initialize user from localStorage
   useEffect(() => {
@@ -817,34 +819,37 @@ export default function App() {
       {/* Bottom Navigation */}
       <div className="bottom-nav">
         <button 
-          className={`nav-item-bottom ${bottomNavActive === 'activity' ? 'active' : ''}`}
+          className={`nav-item-bottom ${bottomNavActive === 'home' ? 'active' : ''}`}
           onClick={() => {
-            setBottomNavActive('activity');
+            setBottomNavActive('home');
+            setShowDashboard(false);
+            setShowLobby(false);
+          }}
+        >
+          <div className="nav-icon">🏠</div>
+          <div className="nav-label">Home</div>
+        </button>
+        <button 
+          className={`nav-item-bottom ${bottomNavActive === 'dashboard' ? 'active' : ''}`}
+          onClick={() => {
+            setBottomNavActive('lobby');
+            setShowLobby(true);
             setShowDashboard(false);
           }}
         >
-          <div className="nav-icon">📊</div>
-          <div className="nav-label">Activity</div>
+          <div className="nav-icon">🎮</div>
+          <div className="nav-label">Lobby</div>
         </button>
         <button 
           className={`nav-item-bottom ${bottomNavActive === 'dashboard' ? 'active' : ''}`}
           onClick={() => {
             setBottomNavActive('dashboard');
             setShowDashboard(true);
+            setShowLobby(false);
           }}
         >
-          <div className="nav-icon">🎮</div>
+          <div className="nav-icon">📊</div>
           <div className="nav-label">Dashboard</div>
-        </button>
-        <button 
-          className={`nav-item-bottom ${bottomNavActive === 'home' ? 'active' : ''}`}
-          onClick={() => {
-            setBottomNavActive('home');
-            setShowDashboard(false);
-          }}
-        >
-          <div className="nav-icon">🏠</div>
-          <div className="nav-label">Home</div>
         </button>
         <button 
           className={`nav-item-bottom ${bottomNavActive === 'wallet' ? 'active' : ''}`}
@@ -861,6 +866,7 @@ export default function App() {
           onClick={() => {
             setBottomNavActive('account');
             setShowDashboard(false);
+            setShowLobby(false);
           }}
         >
           <div className="nav-icon">👤</div>

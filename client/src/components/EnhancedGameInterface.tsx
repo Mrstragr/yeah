@@ -4,6 +4,7 @@ import { ImprovedWinGoGame } from './ImprovedWinGoGame';
 import { ImprovedAviatorGame } from './ImprovedAviatorGame';
 import { ImprovedMinesGame } from './ImprovedMinesGame';
 import { ImprovedDragonTigerGame } from './ImprovedDragonTigerGame';
+import { ImprovedDiceGame } from './ImprovedDiceGame';
 
 interface EnhancedGameInterfaceProps {
   gameType: string;
@@ -282,6 +283,10 @@ export const EnhancedGameInterface = ({ gameType, onClose, refreshBalance }: Enh
   
   if (gameType === 'dragon-tiger') {
     return <ImprovedDragonTigerGame onClose={onClose} refreshBalance={refreshBalance} />;
+  }
+  
+  if (gameType === 'dice') {
+    return <ImprovedDiceGame onClose={onClose} refreshBalance={refreshBalance} />;
   }
 
   return (
