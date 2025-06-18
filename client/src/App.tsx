@@ -817,22 +817,31 @@ export default function App() {
       {/* Bottom Navigation */}
       <div className="bottom-nav">
         <button 
-          className={`nav-item-bottom ${bottomNavActive === 'promotion' ? 'active' : ''}`}
-          onClick={() => setBottomNavActive('promotion')}
-        >
-          <div className="nav-icon">🎁</div>
-          <div className="nav-label">Promotion</div>
-        </button>
-        <button 
           className={`nav-item-bottom ${bottomNavActive === 'activity' ? 'active' : ''}`}
-          onClick={() => setBottomNavActive('activity')}
+          onClick={() => {
+            setBottomNavActive('activity');
+            setShowDashboard(false);
+          }}
         >
           <div className="nav-icon">📊</div>
           <div className="nav-label">Activity</div>
         </button>
         <button 
+          className={`nav-item-bottom ${bottomNavActive === 'dashboard' ? 'active' : ''}`}
+          onClick={() => {
+            setBottomNavActive('dashboard');
+            setShowDashboard(true);
+          }}
+        >
+          <div className="nav-icon">🎮</div>
+          <div className="nav-label">Dashboard</div>
+        </button>
+        <button 
           className={`nav-item-bottom ${bottomNavActive === 'home' ? 'active' : ''}`}
-          onClick={() => setBottomNavActive('home')}
+          onClick={() => {
+            setBottomNavActive('home');
+            setShowDashboard(false);
+          }}
         >
           <div className="nav-icon">🏠</div>
           <div className="nav-label">Home</div>
@@ -849,16 +858,19 @@ export default function App() {
         </button>
         <button 
           className={`nav-item-bottom ${bottomNavActive === 'account' ? 'active' : ''}`}
-          onClick={() => setBottomNavActive('account')}
+          onClick={() => {
+            setBottomNavActive('account');
+            setShowDashboard(false);
+          }}
         >
           <div className="nav-icon">👤</div>
           <div className="nav-label">Account</div>
         </button>
       </div>
 
-      {/* Modals */}
+      {/* Enhanced Game Interface */}
       {showGameModal && selectedGame && (
-        <ModernGameModal
+        <EnhancedGameInterface
           gameType={selectedGame}
           onClose={() => {
             setShowGameModal(false);
