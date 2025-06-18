@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ModernGameModal } from './components/ModernGameModal';
+import { GameCardWithImages } from './components/GameCardWithImages';
 
 interface User {
   id: number;
@@ -577,30 +578,34 @@ export default function App() {
         </div>
 
         <div className="game-grid">
-          <div className="game-card wingo-card" onClick={() => openGame('wingo')}>
-            <div className="game-card-content">
-              <div className="game-title">WIN GO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card k3-card" onClick={() => openGame('k3')}>
-            <div className="game-card-content">
-              <div className="game-title">K3</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card fived-card" onClick={() => openGame('5d')}>
-            <div className="game-card-content">
-              <div className="game-title">5D</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card trx-card" onClick={() => openGame('trx')}>
-            <div className="game-card-content">
-              <div className="game-title">TRX WINGO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
+          <GameCardWithImages 
+            gameType="wingo"
+            title="WIN GO"
+            subtitle="TB GAME"
+            onClick={() => openGame('wingo')}
+            className="wingo-card"
+          />
+          <GameCardWithImages 
+            gameType="k3"
+            title="K3"
+            subtitle="TB GAME"
+            onClick={() => openGame('k3')}
+            className="k3-card"
+          />
+          <GameCardWithImages 
+            gameType="5d"
+            title="5D"
+            subtitle="TB GAME"
+            onClick={() => openGame('5d')}
+            className="fived-card"
+          />
+          <GameCardWithImages 
+            gameType="trx"
+            title="TRX WINGO"
+            subtitle="TB GAME"
+            onClick={() => openGame('trx')}
+            className="trx-card"
+          />
         </div>
 
         {/* Mini Games Section */}
@@ -616,114 +621,132 @@ export default function App() {
         </div>
 
         <div className="game-grid">
-          <div className="game-card aviator-card" onClick={() => openGame('aviator')}>
-            <div className="game-card-content">
-              <div className="game-title">AVIATOR</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card cricket-card" onClick={() => openGame('cricket')}>
-            <div className="game-card-content">
-              <div className="game-title">CRICKET</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card mines-card" onClick={() => openGame('mines')}>
-            <div className="game-card-content">
-              <div className="game-title">MINES</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card aviator2-card" onClick={() => openGame('aviator2')}>
-            <div className="game-card-content">
-              <div className="game-title">AVIATOR</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card limbo-card" onClick={() => openGame('limbo')}>
-            <div className="game-card-content">
-              <div className="game-title">LIMBO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card mines-pro-card" onClick={() => openGame('mines-pro')}>
-            <div className="game-card-content">
-              <div className="game-title">MINES PRO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card dragon-tiger-card" onClick={() => openGame('dragon-tiger')}>
-            <div className="game-card-content">
-              <div className="game-title">DRAGON</div>
-              <div className="game-subtitle">TIGER</div>
-            </div>
-          </div>
-          <div className="game-card goal-card" onClick={() => openGame('goal')}>
-            <div className="game-card-content">
-              <div className="game-title">GOAL</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card dice-card" onClick={() => openGame('dice')}>
-            <div className="game-card-content">
-              <div className="game-title">DICE</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card king-pauper-card" onClick={() => openGame('king-pauper')}>
-            <div className="game-card-content">
-              <div className="game-title">KING AND</div>
-              <div className="game-subtitle">PAUPER</div>
-            </div>
-          </div>
-          <div className="game-card hilo-wave-card" onClick={() => openGame('hilo-wave')}>
-            <div className="game-card-content">
-              <div className="game-title">HILO WAVE</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card clash-hands-card" onClick={() => openGame('clash-hands')}>
-            <div className="game-card-content">
-              <div className="game-title">CLASH OF</div>
-              <div className="game-subtitle">HANDS</div>
-            </div>
-          </div>
-          <div className="game-card plinko-card" onClick={() => openGame('plinko')}>
-            <div className="game-card-content">
-              <div className="game-title">PLINKO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card bomb-wave-card" onClick={() => openGame('bomb-wave')}>
-            <div className="game-card-content">
-              <div className="game-title">BOMB</div>
-              <div className="game-subtitle">WAVE</div>
-            </div>
-          </div>
-          <div className="game-card hilo-card" onClick={() => openGame('hilo')}>
-            <div className="game-card-content">
-              <div className="game-title">HILO</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card treasure-wave-card" onClick={() => openGame('treasure-wave')}>
-            <div className="game-card-content">
-              <div className="game-title">TREASURE</div>
-              <div className="game-subtitle">WAVE</div>
-            </div>
-          </div>
-          <div className="game-card hotline-card" onClick={() => openGame('hotline')}>
-            <div className="game-card-content">
-              <div className="game-title">HOTLINE</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
-          <div className="game-card cryptos-card" onClick={() => openGame('cryptos')}>
-            <div className="game-card-content">
-              <div className="game-title">CRYPTOS</div>
-              <div className="game-subtitle">TB GAME</div>
-            </div>
-          </div>
+          <GameCardWithImages 
+            gameType="aviator"
+            title="AVIATOR"
+            subtitle="TB GAME"
+            onClick={() => openGame('aviator')}
+            className="aviator-card"
+          />
+          <GameCardWithImages 
+            gameType="cricket"
+            title="CRICKET"
+            subtitle="TB GAME"
+            onClick={() => openGame('cricket')}
+            className="cricket-card"
+          />
+          <GameCardWithImages 
+            gameType="mines"
+            title="MINES"
+            subtitle="TB GAME"
+            onClick={() => openGame('mines')}
+            className="mines-card"
+          />
+          <GameCardWithImages 
+            gameType="aviator"
+            title="AVIATOR"
+            subtitle="TB GAME"
+            onClick={() => openGame('aviator2')}
+            className="aviator2-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="LIMBO"
+            subtitle="TB GAME"
+            onClick={() => openGame('limbo')}
+            className="limbo-card"
+          />
+          <GameCardWithImages 
+            gameType="mines"
+            title="MINES PRO"
+            subtitle="TB GAME"
+            onClick={() => openGame('mines-pro')}
+            className="mines-pro-card"
+          />
+          <GameCardWithImages 
+            gameType="dragon-tiger"
+            title="DRAGON"
+            subtitle="TIGER"
+            onClick={() => openGame('dragon-tiger')}
+            className="dragon-tiger-card"
+          />
+          <GameCardWithImages 
+            gameType="cricket"
+            title="GOAL"
+            subtitle="TB GAME"
+            onClick={() => openGame('goal')}
+            className="goal-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="DICE"
+            subtitle="TB GAME"
+            onClick={() => openGame('dice')}
+            className="dice-card"
+          />
+          <GameCardWithImages 
+            gameType="dragon-tiger"
+            title="KING AND"
+            subtitle="PAUPER"
+            onClick={() => openGame('king-pauper')}
+            className="king-pauper-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="HILO WAVE"
+            subtitle="TB GAME"
+            onClick={() => openGame('hilo-wave')}
+            className="hilo-wave-card"
+          />
+          <GameCardWithImages 
+            gameType="dragon-tiger"
+            title="CLASH OF"
+            subtitle="HANDS"
+            onClick={() => openGame('clash-hands')}
+            className="clash-hands-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="PLINKO"
+            subtitle="TB GAME"
+            onClick={() => openGame('plinko')}
+            className="plinko-card"
+          />
+          <GameCardWithImages 
+            gameType="mines"
+            title="BOMB"
+            subtitle="WAVE"
+            onClick={() => openGame('bomb-wave')}
+            className="bomb-wave-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="HILO"
+            subtitle="TB GAME"
+            onClick={() => openGame('hilo')}
+            className="hilo-card"
+          />
+          <GameCardWithImages 
+            gameType="mines"
+            title="TREASURE"
+            subtitle="WAVE"
+            onClick={() => openGame('treasure-wave')}
+            className="treasure-wave-card"
+          />
+          <GameCardWithImages 
+            gameType="aviator"
+            title="HOTLINE"
+            subtitle="TB GAME"
+            onClick={() => openGame('hotline')}
+            className="hotline-card"
+          />
+          <GameCardWithImages 
+            gameType="dice"
+            title="CRYPTOS"
+            subtitle="TB GAME"
+            onClick={() => openGame('cryptos')}
+            className="cryptos-card"
+          />
           <div className="game-card space-dice-card" onClick={() => openGame('space-dice')}>
             <div className="game-card-content">
               <div className="game-title">SPACE</div>
