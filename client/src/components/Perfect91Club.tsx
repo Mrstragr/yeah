@@ -966,85 +966,33 @@ export const Perfect91Club = () => {
 
           {activeTab === 'slots' && (
             <div className="slots-section">
-              <div className="section-header">
-                <div className="section-icon">🎰</div>
-                <span>Slot Games</span>
-              </div>
-              <div className="section-description">
-                Spin to win with our collection of exciting slot machines
+              <div className="slots-header">
+                <div className="slots-icon">🎰</div>
+                <span className="slots-title">Slots</span>
+                <div className="slots-nav">
+                  <span className="nav-link">Detail</span>
+                  <span className="nav-arrow left">‹</span>
+                  <span className="nav-arrow right">›</span>
+                </div>
               </div>
               
-              <div className="games-grid">
-                <div className="game-card slot1">
-                  <div className="game-decoration">
-                    <div className="cherry">🍒</div>
+              <div className="slots-games-grid">
+                <div className="slot-game-card pharaoh-slot">
+                  <div className="slot-image">
+                    <div className="slot-character">👑</div>
                   </div>
-                  <div className="game-name">LUCKY FRUITS</div>
-                  <div className="game-period">3 Reels</div>
                 </div>
                 
-                <div className="game-card slot2">
-                  <div className="game-decoration">
-                    <div className="diamond">💎</div>
+                <div className="slot-game-card ocean-slot">
+                  <div className="slot-image">
+                    <div className="slot-character">🌊</div>
                   </div>
-                  <div className="game-name">DIAMOND RUSH</div>
-                  <div className="game-period">5 Reels</div>
                 </div>
                 
-                <div className="game-card slot3">
-                  <div className="game-decoration">
-                    <div className="star">⭐</div>
+                <div className="slot-game-card mystical-slot">
+                  <div className="slot-image">
+                    <div className="slot-character">🧙‍♀️</div>
                   </div>
-                  <div className="game-name">MEGA STARS</div>
-                  <div className="game-period">Jackpot</div>
-                </div>
-                
-                <div className="game-card slot4">
-                  <div className="game-decoration">
-                    <div className="coin">🪙</div>
-                  </div>
-                  <div className="game-name">COIN MASTER</div>
-                  <div className="game-period">Bonus</div>
-                </div>
-                
-                <div className="game-card slot5">
-                  <div className="game-decoration">
-                    <div className="pharaoh-slot">👑</div>
-                  </div>
-                  <div className="game-name">PHARAOH GOLD</div>
-                  <div className="game-period">Ancient</div>
-                </div>
-                
-                <div className="game-card slot6">
-                  <div className="game-decoration">
-                    <div className="treasure-slot">🏴‍☠️</div>
-                  </div>
-                  <div className="game-name">TREASURE HUNTER</div>
-                  <div className="game-period">Adventure</div>
-                </div>
-                
-                <div className="game-card slot7">
-                  <div className="game-decoration">
-                    <div className="dragon-slot">🐉</div>
-                  </div>
-                  <div className="game-name">DRAGON FORTUNE</div>
-                  <div className="game-period">Mythical</div>
-                </div>
-                
-                <div className="game-card slot8">
-                  <div className="game-decoration">
-                    <div className="space-slot">🚀</div>
-                  </div>
-                  <div className="game-name">SPACE ADVENTURE</div>
-                  <div className="game-period">Sci-Fi</div>
-                </div>
-                
-                <div className="game-card slot9">
-                  <div className="game-decoration">
-                    <div className="ocean-slot">🌊</div>
-                  </div>
-                  <div className="game-name">OCEAN TREASURE</div>
-                  <div className="game-period">Underwater</div>
                 </div>
               </div>
             </div>
