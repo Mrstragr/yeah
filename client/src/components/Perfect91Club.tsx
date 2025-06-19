@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { PromotionPage } from './PromotionPage';
 
 interface User {
   id: number;
@@ -25,6 +26,7 @@ export const Perfect91Club = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [betHistory, setBetHistory] = useState<any[]>([]);
+  const [showPromotion, setShowPromotion] = useState(false);
 
   // Auto login demo user
   useEffect(() => {
@@ -647,16 +649,17 @@ export const Perfect91Club = () => {
 
       {/* Main Content */}
       <div className="main-content">
-        <div className="lottery-section">
-          <div className="section-header">
-            <div className="section-icon">8</div>
-            <span>Lottery</span>
-          </div>
-          <div className="section-description">
-            The games are independently developed by our team, fun, fair, and safe
-          </div>
-          
-          <div className="games-grid">
+        {activeTab === 'lobby' && (
+          <div className="lottery-section">
+            <div className="section-header">
+              <div className="section-icon">8</div>
+              <span>Lottery</span>
+            </div>
+            <div className="section-description">
+              The games are independently developed by our team, fun, fair, and safe
+            </div>
+            
+            <div className="games-grid">
             <div className="game-card wingo" onClick={() => setSelectedGame('wingo')}>
               <div className="game-decoration">
                 <div className="sparkle">✨</div>
@@ -667,7 +670,7 @@ export const Perfect91Club = () => {
               <div className="game-period">1 Min</div>
             </div>
             
-            <div className="game-card k3">
+            <div className="game-card k3" onClick={() => setSelectedGame('k3')}>
               <div className="game-decoration">
                 <div className="dice">🎲</div>
               </div>
@@ -675,7 +678,7 @@ export const Perfect91Club = () => {
               <div className="game-period">3 Min</div>
             </div>
             
-            <div className="game-card fived">
+            <div className="game-card fived" onClick={() => setSelectedGame('5d')}>
               <div className="game-decoration">
                 <div className="numbers">01234</div>
               </div>
@@ -683,7 +686,7 @@ export const Perfect91Club = () => {
               <div className="game-period">5 Min</div>
             </div>
             
-            <div className="game-card trx">
+            <div className="game-card trx" onClick={() => setSelectedGame('trx')}>
               <div className="game-decoration">
                 <div className="crypto">₿</div>
               </div>
@@ -696,7 +699,7 @@ export const Perfect91Club = () => {
 
       {/* Bottom Navigation */}
       <div className="bottom-navigation">
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => setShowPromotion(true)}>
           <span>🎁</span>
           <span>Promotion</span>
         </div>
@@ -704,7 +707,7 @@ export const Perfect91Club = () => {
           <span>📊</span>
           <span>Activity</span>
         </div>
-        <div className="nav-item active">
+        <div className="nav-item active" onClick={() => setActiveTab('main')}>
           <span>🎮</span>
           <span>Main</span>
         </div>
@@ -717,6 +720,11 @@ export const Perfect91Club = () => {
           <span>Account</span>
         </div>
       </div>
+
+      {/* Promotion Modal */}
+      {showPromotion && (
+        <PromotionPage onClose={() => setShowPromotion(false)} />
+      )}
 
       <style jsx>{`
         .perfect-91club {
@@ -995,6 +1003,74 @@ export const Perfect91Club = () => {
           background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
         }
 
+        /* Mini Games */
+        .aviator {
+          background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        }
+
+        .mines {
+          background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+        }
+
+        .limbo {
+          background: linear-gradient(135deg, #FD79A8 0%, #E84393 100%);
+        }
+
+        .dice {
+          background: linear-gradient(135deg, #00B894 0%, #00CEC9 100%);
+        }
+
+        /* Slot Games */
+        .slot1 {
+          background: linear-gradient(135deg, #FF7675 0%, #E17055 100%);
+        }
+
+        .slot2 {
+          background: linear-gradient(135deg, #74B9FF 0%, #0984E3 100%);
+        }
+
+        .slot3 {
+          background: linear-gradient(135deg, #FDCB6E 0%, #E17055 100%);
+        }
+
+        .slot4 {
+          background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 100%);
+        }
+
+        /* Card Games */
+        .dragon-tiger {
+          background: linear-gradient(135deg, #E17055 0%, #D63031 100%);
+        }
+
+        .baccarat {
+          background: linear-gradient(135deg, #00B894 0%, #00A085 100%);
+        }
+
+        .teen-patti {
+          background: linear-gradient(135deg, #FDCB6E 0%, #F39C12 100%);
+        }
+
+        .blackjack {
+          background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
+        }
+
+        /* Fishing Games */
+        .fishing1 {
+          background: linear-gradient(135deg, #00CEC9 0%, #0984E3 100%);
+        }
+
+        .fishing2 {
+          background: linear-gradient(135deg, #A29BFE 0%, #74B9FF 100%);
+        }
+
+        .fishing3 {
+          background: linear-gradient(135deg, #FD79A8 0%, #FDCB6E 100%);
+        }
+
+        .fishing4 {
+          background: linear-gradient(135deg, #FDCB6E 0%, #E17055 100%);
+        }
+
         .game-decoration {
           position: absolute;
           top: 10px;
@@ -1013,7 +1089,9 @@ export const Perfect91Club = () => {
           50% { opacity: 1; transform: scale(1.2); }
         }
 
-        .dice, .crypto {
+        .dice, .crypto, .plane, .mine, .rocket, .dice-icon, 
+        .cherry, .diamond, .star, .coin, .dragon, .cards, 
+        .spade, .ace, .fish, .shark, .whale, .treasure {
           font-size: 16px;
           opacity: 0.8;
         }
