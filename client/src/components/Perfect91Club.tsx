@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PromotionPage } from './PromotionPage';
+import { WalletPage } from './WalletPage';
+import { AccountPage } from './AccountPage';
+import { AviatorGame } from './AviatorGame';
+import { ActivityPage } from './ActivityPage';
 
 interface User {
   id: number;
@@ -27,6 +31,9 @@ export const Perfect91Club = () => {
   const [result, setResult] = useState<any>(null);
   const [betHistory, setBetHistory] = useState<any[]>([]);
   const [showPromotion, setShowPromotion] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
 
   // Auto login demo user
   useEffect(() => {
@@ -91,7 +98,11 @@ export const Perfect91Club = () => {
     setIsPlaying(false);
   };
 
-  if (selectedGame === 'wingo') {
+  if (selectedGame === 'aviator') {
+    return <AviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
     return (
       <div className="wingo-game">
         {/* Header */}
@@ -99,8 +110,18 @@ export const Perfect91Club = () => {
           <div className="header-left">
             <button onClick={() => setSelectedGame(null)} className="back-btn">←</button>
             <div>
-              <h2>Win Go</h2>
-              <span className="game-timing">1 Min</span>
+              <h2>
+                {selectedGame === 'wingo' && 'Win Go'}
+                {selectedGame === 'k3' && 'K3 Lottery'}
+                {selectedGame === '5d' && '5D Lottery'}
+                {selectedGame === 'trx' && 'TRX WinGo'}
+              </h2>
+              <span className="game-timing">
+                {selectedGame === 'wingo' && '1 Min'}
+                {selectedGame === 'k3' && '3 Min'}
+                {selectedGame === '5d' && '5 Min'}
+                {selectedGame === 'trx' && '1 Min'}
+              </span>
             </div>
           </div>
           <div className="header-right">
@@ -703,7 +724,7 @@ export const Perfect91Club = () => {
           <span>🎁</span>
           <span>Promotion</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => setShowActivity(true)}>
           <span>📊</span>
           <span>Activity</span>
         </div>
@@ -711,11 +732,11 @@ export const Perfect91Club = () => {
           <span>🎮</span>
           <span>Main</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => setShowWallet(true)}>
           <span>💰</span>
           <span>Wallet</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => setShowAccount(true)}>
           <span>👤</span>
           <span>Account</span>
         </div>
@@ -724,6 +745,21 @@ export const Perfect91Club = () => {
       {/* Promotion Modal */}
       {showPromotion && (
         <PromotionPage onClose={() => setShowPromotion(false)} />
+      )}
+
+      {/* Wallet Modal */}
+      {showWallet && (
+        <WalletPage balance={walletBalance} onClose={() => setShowWallet(false)} />
+      )}
+
+      {/* Account Modal */}
+      {showAccount && (
+        <AccountPage user={user} balance={walletBalance} onClose={() => setShowAccount(false)} />
+      )}
+
+      {/* Activity Modal */}
+      {showActivity && (
+        <ActivityPage onClose={() => setShowActivity(false)} />
       )}
 
       <style jsx>{`
