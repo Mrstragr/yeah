@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { LiveStats } from './LiveStats';
 
 interface User {
   id: number;
@@ -24,17 +25,38 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
   const [result, setResult] = useState<any>(null);
   const [recentResults, setRecentResults] = useState([3, 7, 1, 9, 5]);
   const [betHistory, setBetHistory] = useState<any[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [showRules, setShowRules] = useState(false);
+  const [isCountingDown, setIsCountingDown] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prev => prev > 0 ? prev - 1 : 30);
+      setTimeLeft(prev => {
+        if (prev <= 5 && prev > 0) {
+          setIsCountingDown(true);
+        } else if (prev === 0) {
+          setIsCountingDown(false);
+          // Simulate new period
+          const newPeriodNum = parseInt(currentPeriod.slice(-3)) + 1;
+          setCurrentPeriod(`20250619${String(newPeriodNum).padStart(3, '0')}`);
+          return 30;
+        } else {
+          setIsCountingDown(false);
+        }
+        return prev > 0 ? prev - 1 : 30;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentPeriod]);
 
   const placeBet = async () => {
-    if (!selectedColor && selectedNumber === null) {
-      alert('Please select a color or number');
+    if (!selectedColor && selectedNumber === null && !selectedSize) {
+      alert('Please select a color, number, or size');
+      return;
+    }
+
+    if (timeLeft < 5) {
+      alert('Betting closed! Please wait for next round.');
       return;
     }
 
@@ -49,8 +71,8 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
         },
         body: JSON.stringify({
           betAmount,
-          betType: selectedColor ? 'color' : 'number',
-          betValue: selectedColor || selectedNumber
+          betType: selectedColor ? 'color' : selectedSize ? 'size' : 'number',
+          betValue: selectedColor || selectedSize || selectedNumber
         })
       });
 
@@ -74,9 +96,27 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
   return (
     <div className="wingo-game">
       <div className="game-header">
-        <h2>Win Go 1 Min</h2>
+        <div className="header-left">
+          <h2>Win Go 1 Min</h2>
+          <button onClick={() => setShowRules(!showRules)} className="rules-btn">📋</button>
+        </div>
         <button onClick={onClose} className="close-btn">×</button>
       </div>
+
+      {showRules && (
+        <div className="rules-panel">
+          <h3>Game Rules</h3>
+          <ul>
+            <li>Green: 1,3,7,9 pays 1:2</li>
+            <li>Red: 2,4,6,8 pays 1:2</li>
+            <li>Violet: 0,5 pays 1:4.5</li>
+            <li>Big: 5,6,7,8,9 pays 1:2</li>
+            <li>Small: 0,1,2,3,4 pays 1:2</li>
+            <li>Number: Direct hit pays 1:9</li>
+          </ul>
+          <p>Betting closes 5 seconds before result.</p>
+        </div>
+      )}
 
       <div className="game-info">
         <div className="period-info">
@@ -86,7 +126,9 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
           </div>
           <div className="countdown">
             <span>Count Down</span>
-            <span className="time-left">{String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}</span>
+            <span className={`time-left ${isCountingDown ? 'countdown-warning' : ''}`}>
+              {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
+            </span>
           </div>
         </div>
         
@@ -147,12 +189,18 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
         </div>
 
         <div className="size-section">
-          <button className="size-btn big">
+          <button 
+            className={`size-btn big ${selectedSize === 'big' ? 'selected' : ''}`}
+            onClick={() => setSelectedSize('big')}
+          >
             <span>Big</span>
             <span>5,6,7,8,9</span>
             <span>1:2</span>
           </button>
-          <button className="size-btn small">
+          <button 
+            className={`size-btn small ${selectedSize === 'small' ? 'selected' : ''}`}
+            onClick={() => setSelectedSize('small')}
+          >
             <span>Small</span>
             <span>0,1,2,3,4</span>
             <span>1:2</span>
@@ -216,7 +264,7 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
             <div className="result-details">
               <p>Period: {currentPeriod}</p>
               <p>Result: <span className={`result-num ${result.result.number === 0 || result.result.number === 5 ? 'violet-red' : result.result.number % 2 === 0 ? 'red' : 'green'}`}>{result.result.number}</span></p>
-              <p>Your bet: {selectedColor || selectedNumber}</p>
+              <p>Your bet: {selectedColor || selectedSize || selectedNumber}</p>
               {result.isWin ? (
                 <p className="win-amount">You won: ₹{result.winAmount}</p>
               ) : (
@@ -240,6 +288,44 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 20px;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .rules-btn {
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          font-size: 16px;
+          padding: 5px 8px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .rules-panel {
+          background: rgba(0,0,0,0.9);
+          padding: 20px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          font-size: 14px;
+        }
+
+        .rules-panel h3 {
+          margin: 0 0 15px 0;
+          color: #FFD700;
+        }
+
+        .rules-panel ul {
+          margin: 10px 0;
+          padding-left: 20px;
+        }
+
+        .rules-panel li {
+          margin-bottom: 5px;
         }
 
         .close-btn {
@@ -318,6 +404,19 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
           background: #ff4444;
           padding: 5px 10px;
           border-radius: 5px;
+          transition: all 0.3s;
+        }
+
+        .countdown-warning {
+          background: #ff0000 !important;
+          animation: pulse 1s infinite;
+          color: white;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
         }
 
         .color-options {
@@ -413,6 +512,12 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
           color: #FFD700;
         }
 
+        .size-btn.selected {
+          border-color: #FFD700;
+          background: rgba(255,215,0,0.2);
+          transform: scale(1.02);
+        }
+
         .bet-section {
           background: rgba(255,255,255,0.1);
           padding: 20px;
@@ -456,6 +561,11 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
         .confirm-btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        .confirm-btn.disabled {
+          background: #666;
+          color: #ccc;
         }
 
         .result-popup {
@@ -751,6 +861,13 @@ export const Authentic91Club = () => {
   const [activeTab, setActiveTab] = useState('lobby');
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [showStats, setShowStats] = useState(false);
+  const [notifications, setNotifications] = useState([
+    'User***123 won ₹15,430 in WinGo!',
+    'Lucky***789 hit 25.66x in Aviator!',
+    'Player***456 found treasure in Mines!'
+  ]);
+  const [currentNotification, setCurrentNotification] = useState(0);
 
   const { data: balanceData } = useQuery({
     queryKey: ['/api/wallet/balance'],
@@ -771,6 +888,13 @@ export const Authentic91Club = () => {
     }
   }, [balanceData]);
 
+  useEffect(() => {
+    const notificationTimer = setInterval(() => {
+      setCurrentNotification(prev => (prev + 1) % notifications.length);
+    }, 4000);
+    return () => clearInterval(notificationTimer);
+  }, [notifications]);
+
   const refreshBalance = () => {
     window.location.reload();
   };
@@ -789,7 +913,18 @@ export const Authentic91Club = () => {
               <div className="logo-circle">91</div>
               <span>CLUB</span>
             </div>
-            <div className="notification">🔔</div>
+            <div className="header-actions">
+              <button onClick={() => setShowStats(true)} className="stats-btn">📊</button>
+              <div className="notification">🔔</div>
+            </div>
+          </div>
+
+          {/* Live Notification Banner */}
+          <div className="live-notification">
+            <span className="live-indicator">🔴 LIVE</span>
+            <div className="notification-text">
+              {notifications[currentNotification]}
+            </div>
           </div>
 
           {/* Attendance Banner - Exact Design */}
@@ -960,6 +1095,11 @@ export const Authentic91Club = () => {
         />
       )}
 
+      {/* Live Stats Modal */}
+      {showStats && (
+        <LiveStats onClose={() => setShowStats(false)} />
+      )}
+
       <style jsx>{`
         .authentic-91club {
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -977,7 +1117,54 @@ export const Authentic91Club = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+        }
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .stats-btn {
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          font-size: 16px;
+          padding: 6px 8px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .live-notification {
+          background: rgba(0,0,0,0.4);
+          padding: 8px 12px;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          overflow: hidden;
+        }
+
+        .live-indicator {
+          font-size: 10px;
+          background: #ff4444;
+          padding: 2px 6px;
+          border-radius: 10px;
+          font-weight: bold;
+          white-space: nowrap;
+        }
+
+        .notification-text {
+          font-size: 12px;
+          animation: slideText 15s linear infinite;
+          white-space: nowrap;
+        }
+
+        @keyframes slideText {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
         }
 
         .logo {
