@@ -1,11 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ModernGameModal } from './components/ModernGameModal';
-import { GameCardWithImages } from './components/GameCardWithImages';
-import { EnhancedGameInterface } from './components/EnhancedGameInterface';
-import { ImprovedGameCards } from './components/ImprovedGameCards';
-import { GameDashboard } from './components/GameDashboard';
-import { GameLobby } from './components/GameLobby';
+import { AuthenticApp } from './components/AuthenticApp';
+import './authentic.css';
 
 interface User {
   id: number;
@@ -504,16 +498,33 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Top Header */}
+      {/* Top Header - Exact 91CLUB Design */}
       <div className="top-header">
         <div className="header-top">
           <div className="logo">
-            <div className="logo-icon">91</div>
-            91CLUB
+            <span className="logo-circle">91</span>
+            <span className="logo-text">CLUB</span>
           </div>
-          <div className="notification-icon">🔔</div>
+          <div className="header-icons">
+            <div className="notification-icon">🔔</div>
+          </div>
         </div>
         
+        {/* Special Attendance Banner */}
+        <div className="attendance-banner">
+          <div className="banner-content">
+            <div className="banner-left">
+              <div className="banner-title">SPECIAL ATTENDANCE BONUS</div>
+              <div className="banner-subtitle">PROVIDED BY 91CLUB</div>
+              <div className="banner-amount">up to 558RS</div>
+            </div>
+            <div className="banner-right">
+              <button className="claim-btn">CLAIM IT RIGHT AWAY</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Wallet Section */}
         <div className="wallet-section">
           <div className="wallet-header">
             <span className="wallet-label">Wallet balance</span>
@@ -529,29 +540,28 @@ export default function App() {
             </button>
           </div>
         </div>
+
+        {/* Quick Action Cards */}
+        <div className="quick-actions">
+          <div className="quick-card wheel-card" onClick={() => openGame('wheel')}>
+            <div className="quick-icon">🎡</div>
+            <div className="quick-text">
+              <div className="quick-title">Wheel</div>
+              <div className="quick-subtitle">of fortune</div>
+            </div>
+          </div>
+          <div className="quick-card vip-card" onClick={() => openGame('vip')}>
+            <div className="quick-icon">👑</div>
+            <div className="quick-text">
+              <div className="quick-title">VIP</div>
+              <div className="quick-subtitle">privileges</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="main-content">
-        {/* Promotional Banner */}
-        <div className="promo-banner">
-          <div className="promo-title">SPECIAL ATTENDANCE BONUS</div>
-          <div className="promo-subtitle">PROVIDED BY 91CLUB</div>
-          <div className="promo-amount">up to 558RS</div>
-          <button className="claim-btn">CLAIM IT RIGHT AWAY</button>
-        </div>
-
-        {/* Quick Games */}
-        <div className="quick-games">
-          <div className="quick-game-card" onClick={() => openGame('wheel')}>
-            <div className="quick-game-title">Wheel</div>
-            <div className="quick-game-subtitle">of fortune</div>
-          </div>
-          <div className="quick-game-card" onClick={() => openGame('vip')}>
-            <div className="quick-game-title">VIP</div>
-            <div className="quick-game-subtitle">privileges</div>
-          </div>
-        </div>
 
         {/* Game Categories Navigation */}
         <div className="game-nav">
@@ -654,38 +664,42 @@ export default function App() {
           </>
         )}
 
-        {/* Game grids based on active tab */}
+        {/* Lottery Section - Always Visible on Lobby */}
         {activeTab === 'lobby' && (
-          <div className="game-grid lottery-grid">
-            <GameCardWithImages 
-              gameType="wingo"
-              title="WIN GO"
-              subtitle="TB GAME"
-              onClick={() => openGame('wingo')}
-              className="wingo-card"
-            />
-            <GameCardWithImages 
-              gameType="k3"
-              title="K3"
-              subtitle="TB GAME"
-              onClick={() => openGame('k3')}
-              className="k3-card"
-            />
-            <GameCardWithImages 
-              gameType="5d"
-              title="5D"
-              subtitle="TB GAME"
-              onClick={() => openGame('5d')}
-              className="fived-card"
-            />
-            <GameCardWithImages 
-              gameType="trx"
-              title="TRX WINGO"
-              subtitle="TB GAME"
-              onClick={() => openGame('trx')}
-              className="trx-card"
-            />
-          </div>
+          <>
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon">🎯</div>
+                <span>Lottery</span>
+              </div>
+            </div>
+            <div className="section-subtitle">The games are independently developed by our team, fun, fair, and safe</div>
+            
+            <div className="lottery-grid">
+              <div className="lottery-card wingo-card" onClick={() => openGame('wingo')}>
+                <div className="card-icon">7</div>
+                <div className="card-content">
+                  <div className="card-title">WIN GO</div>
+                </div>
+              </div>
+              <div className="lottery-card k3-card" onClick={() => openGame('k3')}>
+                <div className="card-icon">🎲</div>
+                <div className="card-content">
+                  <div className="card-title">K3</div>
+                </div>
+              </div>
+              <div className="lottery-card fived-card" onClick={() => openGame('5d')}>
+                <div className="card-content">
+                  <div className="card-title">5D</div>
+                </div>
+              </div>
+              <div className="lottery-card trx-card" onClick={() => openGame('trx')}>
+                <div className="card-content">
+                  <div className="card-title">TRX WINGO</div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {activeTab === 'mini' && (
