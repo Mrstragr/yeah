@@ -7,6 +7,8 @@ import { AviatorGame } from './AviatorGame';
 import { ActivityPage } from './ActivityPage';
 import { MinesGame } from './MinesGame';
 import { DragonTigerGame } from './DragonTigerGame';
+import { TeenPattiGame } from './TeenPattiGame';
+import { SpaceDiceGame } from './SpaceDiceGame';
 
 interface User {
   id: number;
@@ -114,6 +116,14 @@ export const Perfect91Club = () => {
 
   if (selectedGame === 'dragon-tiger') {
     return <DragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'teen-patti') {
+    return <TeenPattiGame onClose={() => setSelectedGame(null)} />;
+  }
+
+  if (selectedGame === 'space-dice') {
+    return <SpaceDiceGame onClose={() => setSelectedGame(null)} />;
   }
 
   if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
