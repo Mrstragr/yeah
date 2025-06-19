@@ -5,8 +5,9 @@ import { WalletPage } from './WalletPage';
 import { AccountPage } from './AccountPage';
 import { EnhancedAviatorGame } from './EnhancedAviatorGame';
 import { ActivityPage } from './ActivityPage';
-import { MinesGame } from './MinesGame';
-import { DragonTigerGame } from './DragonTigerGame';
+import { EnhancedMinesGame } from './EnhancedMinesGame';
+import { EnhancedDragonTigerGame } from './EnhancedDragonTigerGame';
+import { EnhancedWinGoGame } from './EnhancedWinGoGame';
 import { TeenPattiGame } from './TeenPattiGame';
 import { SpaceDiceGame } from './SpaceDiceGame';
 
@@ -111,11 +112,11 @@ export const Perfect91Club = () => {
   }
 
   if (selectedGame === 'mines') {
-    return <MinesGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <EnhancedMinesGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'dragon-tiger') {
-    return <DragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <EnhancedDragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'teen-patti') {
@@ -127,6 +128,10 @@ export const Perfect91Club = () => {
   }
 
   if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
+    return <EnhancedWinGoGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'old-wingo' || selectedGame === 'old-k3' || selectedGame === 'old-5d' || selectedGame === 'old-trx') {
     return (
       <div className="wingo-game">
         {/* Header */}
