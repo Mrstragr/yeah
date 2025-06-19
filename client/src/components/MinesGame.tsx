@@ -235,7 +235,7 @@ export const MinesGame = ({ onClose, refreshBalance }: MinesGameProps) => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .mines-game {
           background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
           color: white;

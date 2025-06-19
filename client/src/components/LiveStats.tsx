@@ -79,7 +79,7 @@ export const LiveStats = ({ onClose }: LiveStatsProps) => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .live-stats {
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
           color: white;

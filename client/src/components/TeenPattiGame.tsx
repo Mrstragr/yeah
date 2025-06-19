@@ -226,7 +226,7 @@ export const TeenPattiGame: React.FC<TeenPattiGameProps> = ({ onClose }) => {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .teen-patti-game {
           position: fixed;
           top: 0;

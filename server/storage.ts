@@ -155,6 +155,37 @@ export class MemStorage implements IStorage {
   }
 
   async getUser(id: number): Promise<User | undefined> {
+    // Create demo user if requested
+    if (id === 10 && !this.users.has(10)) {
+      const demoUser: User = {
+        id: 10,
+        username: 'demo',
+        email: 'demo@91club.com',
+        password: 'demo123',
+        phone: '9876543210',
+        firstName: 'Demo',
+        lastName: 'User',
+        balance: '0.00',
+        walletBalance: '10000.00',
+        bonusBalance: '500.00',
+        kycStatus: 'verified',
+        avatar: null,
+        referralCode: 'DEMO91',
+        referredBy: null,
+        vipLevel: 1,
+        totalDeposit: '0.00',
+        totalWithdraw: '0.00',
+        totalBet: '0.00',
+        totalWin: '0.00',
+        loginBonus: true,
+        lastLoginAt: new Date(),
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.users.set(10, demoUser);
+      return demoUser;
+    }
     return this.users.get(id);
   }
 

@@ -228,7 +228,7 @@ export const SpaceDiceGame: React.FC<SpaceDiceGameProps> = ({ onClose }) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .space-dice-game {
           position: fixed;
           top: 0;

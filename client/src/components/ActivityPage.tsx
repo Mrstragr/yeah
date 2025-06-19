@@ -213,7 +213,7 @@ export const ActivityPage = ({ onClose }: ActivityPageProps) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .activity-page {
           background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
           color: white;

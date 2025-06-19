@@ -55,7 +55,7 @@ export const EnhancedGameInterface = ({ gameType, onClose, refreshBalance }: Enh
               <p>Coming Soon!</p>
               <button onClick={onClose} className="close-btn">Close</button>
             </div>
-            <style jsx>{`
+            <style>{`
               .game-placeholder {
                 display: flex;
                 align-items: center;
@@ -90,7 +90,7 @@ export const EnhancedGameInterface = ({ gameType, onClose, refreshBalance }: Enh
       <div className="game-content">
         {renderGame()}
       </div>
-      <style jsx>{`
+      <style>{`
         .enhanced-game-modal {
           position: fixed;
           inset: 0;

@@ -109,7 +109,7 @@ export const CricketGame: React.FC<CricketGameProps> = ({ onClose }) => {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .cricket-game {
           position: fixed;
           top: 0;

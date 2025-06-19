@@ -200,7 +200,7 @@ export const AviatorGame = ({ onClose, refreshBalance }: AviatorGameProps) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .aviator-game {
           background: linear-gradient(180deg, #87CEEB 0%, #4169E1 100%);
           min-height: 100vh;

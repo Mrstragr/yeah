@@ -128,7 +128,7 @@ export const PromotionPage = ({ onClose }: PromotionPageProps) => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .promotion-page {
           background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
           color: white;

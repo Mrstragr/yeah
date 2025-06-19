@@ -164,7 +164,7 @@ export const AccountPage = ({ user, balance, onClose }: AccountPageProps) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .account-page {
           background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
           color: white;

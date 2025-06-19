@@ -147,7 +147,7 @@ export const LimboGame: React.FC<LimboGameProps> = ({ onClose }) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .limbo-game {
           position: fixed;
           top: 0;

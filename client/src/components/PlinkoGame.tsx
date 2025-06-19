@@ -149,7 +149,7 @@ export const PlinkoGame: React.FC<PlinkoGameProps> = ({ onClose }) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .plinko-game {
           position: fixed;
           top: 0;

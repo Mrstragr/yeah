@@ -243,7 +243,7 @@ export const DragonTigerGame = ({ onClose, refreshBalance }: DragonTigerGameProp
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .dragon-tiger-game {
           background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
           color: white;

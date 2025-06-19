@@ -207,7 +207,7 @@ export const Cricket = ({ onClose, refreshBalance }: CricketProps) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .cricket-game {
           background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
           color: white;

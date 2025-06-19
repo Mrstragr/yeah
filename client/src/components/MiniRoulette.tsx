@@ -300,7 +300,7 @@ export const MiniRoulette = ({ onClose, refreshBalance }: MiniRouletteProps) => 
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .roulette-game {
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
           color: white;

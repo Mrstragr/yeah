@@ -208,7 +208,7 @@ export const HiloGame: React.FC<HiloGameProps> = ({ onClose }) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .hilo-game {
           position: fixed;
           top: 0;

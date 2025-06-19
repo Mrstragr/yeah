@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { PromotionPage } from './PromotionPage';
 import { WalletPage } from './WalletPage';
 import { AccountPage } from './AccountPage';
-import { AviatorGame } from './AviatorGame';
+import { EnhancedAviatorGame } from './EnhancedAviatorGame';
 import { ActivityPage } from './ActivityPage';
 import { MinesGame } from './MinesGame';
 import { DragonTigerGame } from './DragonTigerGame';
@@ -107,7 +107,7 @@ export const Perfect91Club = () => {
   };
 
   if (selectedGame === 'aviator') {
-    return <AviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <EnhancedAviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'mines') {

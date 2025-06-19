@@ -225,7 +225,7 @@ export const Limbo = ({ onClose, refreshBalance }: LimboProps) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .limbo-game {
           background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%);
           color: white;

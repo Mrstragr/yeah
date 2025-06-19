@@ -275,7 +275,7 @@ const WinGoGame = ({ onClose, refreshBalance }: GameModalProps) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .wingo-game {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
@@ -752,7 +752,7 @@ const LoginModal = ({ onLogin }: { onLogin: (user: User) => void }) => {
         </form>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .login-modal {
           position: fixed;
           inset: 0;
@@ -1100,7 +1100,7 @@ export const Authentic91Club = () => {
         <LiveStats onClose={() => setShowStats(false)} />
       )}
 
-      <style jsx>{`
+      <style>{`
         .authentic-91club {
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f5f5f5;

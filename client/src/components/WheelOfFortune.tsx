@@ -189,7 +189,7 @@ export const WheelOfFortune = ({ onClose, refreshBalance }: WheelOfFortuneProps)
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .wheel-game {
           background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
           color: white;
