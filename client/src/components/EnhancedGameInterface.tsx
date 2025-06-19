@@ -5,6 +5,12 @@ import { ImprovedAviatorGame } from './ImprovedAviatorGame';
 import { ImprovedMinesGame } from './ImprovedMinesGame';
 import { ImprovedDragonTigerGame } from './ImprovedDragonTigerGame';
 import { ImprovedDiceGame } from './ImprovedDiceGame';
+import { Cricket } from './Cricket';
+import { Limbo } from './Limbo';
+import { Goal } from './Goal';
+import { WheelOfFortune } from './WheelOfFortune';
+import { Plinko } from './Plinko';
+import { MiniRoulette } from './MiniRoulette';
 
 interface EnhancedGameInterfaceProps {
   gameType: string;
