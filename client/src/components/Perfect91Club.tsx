@@ -3,12 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { PromotionPage } from './PromotionPage';
 import { WalletPage } from './WalletPage';
 import { AccountPage } from './AccountPage';
-import { EnhancedAviatorGame } from './EnhancedAviatorGame';
+import { StandardAviatorGame } from './StandardAviatorGame';
 import { ActivityPage } from './ActivityPage';
-import { EnhancedMinesGame } from './EnhancedMinesGame';
-import { EnhancedDragonTigerGame } from './EnhancedDragonTigerGame';
-import { EnhancedWinGoGame } from './EnhancedWinGoGame';
-import { TeenPattiGame } from './TeenPattiGame';
+import { StandardMinesGame } from './StandardMinesGame';
+import { StandardDragonTigerGame } from './StandardDragonTigerGame';
+import { StandardWinGoGame } from './StandardWinGoGame';
+import { StandardTeenPattiGame } from './StandardTeenPattiGame';
 import { SpaceDiceGame } from './SpaceDiceGame';
 
 interface User {
@@ -108,19 +108,19 @@ export const Perfect91Club = () => {
   };
 
   if (selectedGame === 'aviator') {
-    return <EnhancedAviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <StandardAviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'mines') {
-    return <EnhancedMinesGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <StandardMinesGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'dragon-tiger') {
-    return <EnhancedDragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <StandardDragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'teen-patti') {
-    return <TeenPattiGame onClose={() => setSelectedGame(null)} />;
+    return <StandardTeenPattiGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'space-dice') {
@@ -128,7 +128,7 @@ export const Perfect91Club = () => {
   }
 
   if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
-    return <EnhancedWinGoGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+    return <StandardWinGoGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'old-wingo' || selectedGame === 'old-k3' || selectedGame === 'old-5d' || selectedGame === 'old-trx') {
