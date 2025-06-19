@@ -100,6 +100,10 @@ export const Perfect91Club = () => {
     setIsPlaying(false);
   };
 
+  const refreshBalance = () => {
+    setWalletBalance(prev => prev + Math.random() * 100);
+  };
+
   if (selectedGame === 'aviator') {
     return <AviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
@@ -730,173 +734,114 @@ export const Perfect91Club = () => {
 
           {activeTab === 'mini' && (
             <div className="mini-games-section">
-              <div className="section-header">
-                <div className="section-icon">🎮</div>
-                <span>Mini Games</span>
+              <div className="games-grid">
+                <div className="game-card space-dice">
+                  <div className="game-bg purple">
+                    <div className="game-icon">🎲</div>
+                  </div>
+                  <div className="game-name">SPACE DICE</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card goal-wave">
+                  <div className="game-bg blue">
+                    <div className="game-icon">⚽</div>
+                  </div>
+                  <div className="game-name">GOAL WAVE</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card mini-roulette">
+                  <div className="game-bg orange">
+                    <div className="game-icon">🎯</div>
+                  </div>
+                  <div className="game-name">MINI ROULETTE</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card dice">
+                  <div className="game-bg pink">
+                    <div className="game-icon">🎲</div>
+                  </div>
+                  <div className="game-name">DICE</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card plinko">
+                  <div className="game-bg purple">
+                    <div className="game-icon">🔴</div>
+                  </div>
+                  <div className="game-name">PLINKO</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card hilo">
+                  <div className="game-bg purple">
+                    <div className="game-icon">📊</div>
+                  </div>
+                  <div className="game-name">HILO</div>
+                  <div className="game-period">BT GAME</div>
+                </div>
               </div>
-              <div className="section-description">
-                Quick and exciting mini games with instant rewards
+              
+              <div className="section-header">
+                <div className="section-icon">⭐</div>
+                <span>Recommended Games</span>
+                <div className="nav-arrows">
+                  <span>‹</span>
+                  <span>›</span>
+                </div>
               </div>
               
               <div className="games-grid">
                 <div className="game-card aviator" onClick={() => setSelectedGame('aviator')}>
-                  <div className="game-decoration">
-                    <div className="plane">✈️</div>
+                  <div className="game-bg red">
+                    <div className="game-icon">✈️</div>
+                    <div className="game-multiplier">+500%</div>
                   </div>
                   <div className="game-name">AVIATOR</div>
-                  <div className="game-period">Crash Game</div>
+                  <div className="game-period">TB GAME</div>
+                </div>
+                
+                <div className="game-card cricket">
+                  <div className="game-bg green">
+                    <div className="game-icon">🏏</div>
+                  </div>
+                  <div className="game-name">CRICKET</div>
+                  <div className="game-period">TB GAME</div>
                 </div>
                 
                 <div className="game-card mines" onClick={() => setSelectedGame('mines')}>
-                  <div className="game-decoration">
-                    <div className="mine">💎</div>
+                  <div className="game-bg purple">
+                    <div className="game-icon">💎</div>
                   </div>
                   <div className="game-name">MINES</div>
-                  <div className="game-period">Strategy</div>
+                  <div className="game-period">TB GAME</div>
                 </div>
                 
-                <div className="game-card limbo" onClick={() => setSelectedGame('limbo')}>
-                  <div className="game-decoration">
-                    <div className="rocket">🚀</div>
+                <div className="game-card limbo">
+                  <div className="game-bg blue">
+                    <div className="game-icon">🚀</div>
+                    <div className="game-multiplier">500X</div>
                   </div>
                   <div className="game-name">LIMBO</div>
-                  <div className="game-period">High Risk</div>
+                  <div className="game-period">TB GAME</div>
                 </div>
                 
-                <div className="game-card dice" onClick={() => setSelectedGame('dice')}>
-                  <div className="game-decoration">
-                    <div className="dice-icon">🎲</div>
+                <div className="game-card dragon-tiger" onClick={() => setSelectedGame('dragon-tiger')}>
+                  <div className="game-bg teal">
+                    <div className="game-icon">🐉</div>
                   </div>
-                  <div className="game-name">DICE</div>
-                  <div className="game-period">Classic</div>
+                  <div className="game-name">DRAGON TIGER</div>
+                  <div className="game-period">TB GAME</div>
                 </div>
                 
-                <div className="game-card space-dice">
-                  <div className="game-decoration">
-                    <div className="space-dice">🎲</div>
+                <div className="game-card goal-wave-2">
+                  <div className="game-bg green">
+                    <div className="game-icon">⚽</div>
                   </div>
-                  <div className="game-name">SPACE DICE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card plinko" onClick={() => setSelectedGame('plinko')}>
-                  <div className="game-decoration">
-                    <div className="plinko-icon">🔴</div>
-                  </div>
-                  <div className="game-name">PLINKO</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card hilo" onClick={() => setSelectedGame('hilo')}>
-                  <div className="game-decoration">
-                    <div className="hilo-icon">📊</div>
-                  </div>
-                  <div className="game-name">HILO</div>
-                  <div className="game-period">BT Game</div>
-                </div>
-                
-                <div className="game-card cricket" onClick={() => setSelectedGame('cricket')}>
-                  <div className="game-decoration">
-                    <div className="cricket">🏏</div>
-                  </div>
-                  <div className="game-name">CRICKET</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card goal-wave">
-                  <div className="game-decoration">
-                    <div className="goal">⚽</div>
-                  </div>
-                  <div className="game-name">GOAL WAVE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card mini-roulette">
-                  <div className="game-decoration">
-                    <div className="roulette">🎯</div>
-                  </div>
-                  <div className="game-name">MINI ROULETTE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card king-pauper">
-                  <div className="game-decoration">
-                    <div className="king">👑</div>
-                  </div>
-                  <div className="game-name">KING AND PAUPER</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card hilo-wave">
-                  <div className="game-decoration">
-                    <div className="wave">🌊</div>
-                  </div>
-                  <div className="game-name">HILO WAVE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card clash-hands">
-                  <div className="game-decoration">
-                    <div className="clash">🤝</div>
-                  </div>
-                  <div className="game-name">CLASH OF HANDS</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card bomb-wave">
-                  <div className="game-decoration">
-                    <div className="bomb">💣</div>
-                  </div>
-                  <div className="game-name">BOMB WAVE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card treasure-wave">
-                  <div className="game-decoration">
-                    <div className="treasure">🏴‍☠️</div>
-                  </div>
-                  <div className="game-name">TREASURE WAVE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card hotline">
-                  <div className="game-decoration">
-                    <div className="hotline">🔥</div>
-                  </div>
-                  <div className="game-name">HOTLINE</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card cryptos">
-                  <div className="game-decoration">
-                    <div className="crypto">₿</div>
-                  </div>
-                  <div className="game-name">CRYPTOS</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card horse-racing">
-                  <div className="game-decoration">
-                    <div className="horse">🐎</div>
-                  </div>
-                  <div className="game-name">HORSE RACING</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card keno">
-                  <div className="game-decoration">
-                    <div className="keno">🎱</div>
-                  </div>
-                  <div className="game-name">KENO</div>
-                  <div className="game-period">TB Game</div>
-                </div>
-                
-                <div className="game-card keno80">
-                  <div className="game-decoration">
-                    <div className="keno80">80</div>
-                  </div>
-                  <div className="game-name">KENO 80</div>
-                  <div className="game-period">TB Game</div>
+                  <div className="game-name">GOAL</div>
+                  <div className="game-period">TB GAME</div>
                 </div>
               </div>
             </div>
