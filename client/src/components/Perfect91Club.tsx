@@ -678,55 +678,240 @@ export const Perfect91Club = () => {
         </button>
       </div>
 
-      {/* Main Content */}
-      <div className="main-content">
-        {activeTab === 'lobby' && (
-          <div className="lottery-section">
-            <div className="section-header">
-              <div className="section-icon">8</div>
-              <span>Lottery</span>
-            </div>
-            <div className="section-description">
-              The games are independently developed by our team, fun, fair, and safe
-            </div>
-            
-            <div className="games-grid">
-            <div className="game-card wingo" onClick={() => setSelectedGame('wingo')}>
-              <div className="game-decoration">
-                <div className="sparkle">✨</div>
-                <div className="sparkle">⭐</div>
+        {/* Main Content */}
+        <div className="main-content">
+          {activeTab === 'lobby' && (
+            <div className="lottery-section">
+              <div className="section-header">
+                <div className="section-icon">8</div>
+                <span>Lottery</span>
               </div>
-              <div className="game-number">7</div>
-              <div className="game-name">WIN GO</div>
-              <div className="game-period">1 Min</div>
-            </div>
-            
-            <div className="game-card k3" onClick={() => setSelectedGame('k3')}>
-              <div className="game-decoration">
-                <div className="dice">🎲</div>
+              <div className="section-description">
+                The games are independently developed by our team, fun, fair, and safe
               </div>
-              <div className="game-name">K3</div>
-              <div className="game-period">3 Min</div>
-            </div>
-            
-            <div className="game-card fived" onClick={() => setSelectedGame('5d')}>
-              <div className="game-decoration">
-                <div className="numbers">01234</div>
+              
+              <div className="games-grid">
+                <div className="game-card wingo" onClick={() => setSelectedGame('wingo')}>
+                  <div className="game-decoration">
+                    <div className="sparkle">✨</div>
+                    <div className="sparkle">⭐</div>
+                  </div>
+                  <div className="game-number">7</div>
+                  <div className="game-name">WIN GO</div>
+                  <div className="game-period">1 Min</div>
+                </div>
+                
+                <div className="game-card k3" onClick={() => setSelectedGame('k3')}>
+                  <div className="game-decoration">
+                    <div className="dice">🎲</div>
+                  </div>
+                  <div className="game-name">K3</div>
+                  <div className="game-period">3 Min</div>
+                </div>
+                
+                <div className="game-card fived" onClick={() => setSelectedGame('5d')}>
+                  <div className="game-decoration">
+                    <div className="numbers">01234</div>
+                  </div>
+                  <div className="game-name">5D</div>
+                  <div className="game-period">5 Min</div>
+                </div>
+                
+                <div className="game-card trx" onClick={() => setSelectedGame('trx')}>
+                  <div className="game-decoration">
+                    <div className="crypto">₿</div>
+                  </div>
+                  <div className="game-name">TRX WINGO</div>
+                  <div className="game-period">1 Min</div>
+                </div>
               </div>
-              <div className="game-name">5D</div>
-              <div className="game-period">5 Min</div>
             </div>
-            
-            <div className="game-card trx" onClick={() => setSelectedGame('trx')}>
-              <div className="game-decoration">
-                <div className="crypto">₿</div>
+          )}
+
+          {activeTab === 'mini' && (
+            <div className="mini-games-section">
+              <div className="section-header">
+                <div className="section-icon">🎮</div>
+                <span>Mini Games</span>
               </div>
-              <div className="game-name">TRX WINGO</div>
-              <div className="game-period">1 Min</div>
+              <div className="section-description">
+                Quick and exciting mini games with instant rewards
+              </div>
+              
+              <div className="games-grid">
+                <div className="game-card aviator" onClick={() => setSelectedGame('aviator')}>
+                  <div className="game-decoration">
+                    <div className="plane">✈️</div>
+                  </div>
+                  <div className="game-name">AVIATOR</div>
+                  <div className="game-period">Crash Game</div>
+                </div>
+                
+                <div className="game-card mines" onClick={() => setSelectedGame('mines')}>
+                  <div className="game-decoration">
+                    <div className="mine">💎</div>
+                  </div>
+                  <div className="game-name">MINES</div>
+                  <div className="game-period">Strategy</div>
+                </div>
+                
+                <div className="game-card limbo" onClick={() => setSelectedGame('limbo')}>
+                  <div className="game-decoration">
+                    <div className="rocket">🚀</div>
+                  </div>
+                  <div className="game-name">LIMBO</div>
+                  <div className="game-period">High Risk</div>
+                </div>
+                
+                <div className="game-card dice" onClick={() => setSelectedGame('dice')}>
+                  <div className="game-decoration">
+                    <div className="dice-icon">🎲</div>
+                  </div>
+                  <div className="game-name">DICE</div>
+                  <div className="game-period">Classic</div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {activeTab === 'slots' && (
+            <div className="slots-section">
+              <div className="section-header">
+                <div className="section-icon">🎰</div>
+                <span>Slot Games</span>
+              </div>
+              <div className="section-description">
+                Spin to win with our collection of exciting slot machines
+              </div>
+              
+              <div className="games-grid">
+                <div className="game-card slot1">
+                  <div className="game-decoration">
+                    <div className="cherry">🍒</div>
+                  </div>
+                  <div className="game-name">LUCKY FRUITS</div>
+                  <div className="game-period">3 Reels</div>
+                </div>
+                
+                <div className="game-card slot2">
+                  <div className="game-decoration">
+                    <div className="diamond">💎</div>
+                  </div>
+                  <div className="game-name">DIAMOND RUSH</div>
+                  <div className="game-period">5 Reels</div>
+                </div>
+                
+                <div className="game-card slot3">
+                  <div className="game-decoration">
+                    <div className="star">⭐</div>
+                  </div>
+                  <div className="game-name">MEGA STARS</div>
+                  <div className="game-period">Jackpot</div>
+                </div>
+                
+                <div className="game-card slot4">
+                  <div className="game-decoration">
+                    <div className="coin">🪙</div>
+                  </div>
+                  <div className="game-name">COIN MASTER</div>
+                  <div className="game-period">Bonus</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'card' && (
+            <div className="card-games-section">
+              <div className="section-header">
+                <div className="section-icon">🃏</div>
+                <span>Card Games</span>
+              </div>
+              <div className="section-description">
+                Classic card games with modern twists and big wins
+              </div>
+              
+              <div className="games-grid">
+                <div className="game-card dragon-tiger" onClick={() => setSelectedGame('dragon-tiger')}>
+                  <div className="game-decoration">
+                    <div className="dragon">🐉</div>
+                  </div>
+                  <div className="game-name">DRAGON TIGER</div>
+                  <div className="game-period">Live</div>
+                </div>
+                
+                <div className="game-card baccarat">
+                  <div className="game-decoration">
+                    <div className="cards">🎴</div>
+                  </div>
+                  <div className="game-name">BACCARAT</div>
+                  <div className="game-period">Classic</div>
+                </div>
+                
+                <div className="game-card teen-patti">
+                  <div className="game-decoration">
+                    <div className="spade">♠️</div>
+                  </div>
+                  <div className="game-name">TEEN PATTI</div>
+                  <div className="game-period">Indian</div>
+                </div>
+                
+                <div className="game-card blackjack">
+                  <div className="game-decoration">
+                    <div className="ace">🅰️</div>
+                  </div>
+                  <div className="game-name">BLACKJACK</div>
+                  <div className="game-period">21</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'fishing' && (
+            <div className="fishing-section">
+              <div className="section-header">
+                <div className="section-icon">🎣</div>
+                <span>Fishing Games</span>
+              </div>
+              <div className="section-description">
+                Catch fish and win amazing prizes in our underwater adventures
+              </div>
+              
+              <div className="games-grid">
+                <div className="game-card fishing1">
+                  <div className="game-decoration">
+                    <div className="fish">🐠</div>
+                  </div>
+                  <div className="game-name">OCEAN KING</div>
+                  <div className="game-period">Multiplayer</div>
+                </div>
+                
+                <div className="game-card fishing2">
+                  <div className="game-decoration">
+                    <div className="shark">🦈</div>
+                  </div>
+                  <div className="game-name">SHARK HUNTER</div>
+                  <div className="game-period">Action</div>
+                </div>
+                
+                <div className="game-card fishing3">
+                  <div className="game-decoration">
+                    <div className="whale">🐋</div>
+                  </div>
+                  <div className="game-name">WHALE CATCHER</div>
+                  <div className="game-period">Big Fish</div>
+                </div>
+                
+                <div className="game-card fishing4">
+                  <div className="game-decoration">
+                    <div className="treasure">💰</div>
+                  </div>
+                  <div className="game-name">TREASURE HUNT</div>
+                  <div className="game-period">Adventure</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
       {/* Bottom Navigation */}
       <div className="bottom-navigation">
