@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { EnhancedGameInterface } from './EnhancedGameInterface';
 
 interface User {
   id: number;
@@ -98,6 +99,7 @@ export const AuthenticApp = () => {
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState('lobby');
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [showGameModal, setShowGameModal] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
 
   const { data: balanceData } = useQuery({
@@ -121,6 +123,11 @@ export const AuthenticApp = () => {
 
   const openGame = (gameType: string) => {
     setSelectedGame(gameType);
+    setShowGameModal(true);
+  };
+
+  const refreshBalance = () => {
+    window.location.reload();
   };
 
   if (!user) {
@@ -345,6 +352,19 @@ export const AuthenticApp = () => {
           <span>Account</span>
         </div>
       </div>
+
+      {/* Game Modal */}
+      {showGameModal && selectedGame && (
+        <EnhancedGameInterface
+          gameType={selectedGame}
+          onClose={() => {
+            setShowGameModal(false);
+            setSelectedGame(null);
+            refreshBalance();
+          }}
+          refreshBalance={refreshBalance}
+        />
+      )}
     </div>
   );
 };
