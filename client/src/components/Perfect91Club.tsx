@@ -5,6 +5,8 @@ import { WalletPage } from './WalletPage';
 import { AccountPage } from './AccountPage';
 import { AviatorGame } from './AviatorGame';
 import { ActivityPage } from './ActivityPage';
+import { MinesGame } from './MinesGame';
+import { DragonTigerGame } from './DragonTigerGame';
 
 interface User {
   id: number;
@@ -100,6 +102,14 @@ export const Perfect91Club = () => {
 
   if (selectedGame === 'aviator') {
     return <AviatorGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'mines') {
+    return <MinesGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'dragon-tiger') {
+    return <DragonTigerGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
@@ -596,8 +606,8 @@ export const Perfect91Club = () => {
         <div className="header-content">
           <div className="top-bar">
             <div className="logo">
-              <div className="logo-circle">91</div>
-              <span className="logo-text">CLUB</span>
+              <div className="logo-circle">100x</div>
+              <span className="logo-text">WIN</span>
             </div>
             <div className="notification-icon">🔔</div>
           </div>
@@ -607,7 +617,7 @@ export const Perfect91Club = () => {
             <div className="banner-content">
               <div className="banner-text">
                 <div className="bonus-title">SPECIAL ATTENDANCE BONUS</div>
-                <div className="bonus-subtitle">PROVIDED BY 91CLUB</div>
+                <div className="bonus-subtitle">PROVIDED BY 100xWIN</div>
                 <div className="bonus-amount">up to 558RS</div>
               </div>
               <button className="claim-button">CLAIM IT RIGHT AWAY</button>
@@ -792,14 +802,14 @@ export const Perfect91Club = () => {
         .logo-circle {
           background: white;
           color: #ff6b6b;
-          width: 32px;
+          width: 40px;
           height: 32px;
-          border-radius: 50%;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: 16px;
+          font-size: 12px;
         }
 
         .logo-text {

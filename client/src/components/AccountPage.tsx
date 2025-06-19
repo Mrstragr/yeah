@@ -135,7 +135,7 @@ export const AccountPage = ({ user, balance, onClose }: AccountPageProps) => {
               <div className="support-icon">📧</div>
               <div className="support-info">
                 <div className="support-title">Email Support</div>
-                <div className="support-subtitle">support@91club.com</div>
+                <div className="support-subtitle">support@100xwin.com</div>
               </div>
               <button className="support-btn">Send Email</button>
             </div>
