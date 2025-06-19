@@ -1,5 +1,5 @@
-import { Authentic91Club } from './components/Authentic91Club';
+import { Perfect91Club } from './components/Perfect91Club';
 
 export default function App() {
-  return <Authentic91Club />;
+  return <Perfect91Club />;
 }
