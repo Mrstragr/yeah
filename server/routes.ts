@@ -147,23 +147,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
           result = await gameEngine.playDragonTiger(req.user!.id, betAmount, dragonTigerType);
           break;
         
-        default:
-          // Fallback for any unrecognized game types
-          const isWin = Math.random() > 0.45;
-          const multiplier = isWin ? 1.5 + Math.random() * 2 : 0;
-          const winAmount = isWin ? Math.floor(betAmount * multiplier) : 0;
+        case 'cricket':
+          const cricketOutcomes = ['four', 'six', 'wicket', 'dot', 'single'];
+          const cricketResult = cricketOutcomes[Math.floor(Math.random() * cricketOutcomes.length)];
+          const { betType: cricketBetType, betValue: cricketBetValue } = req.body;
+          const cricketMultiplier = cricketBetValue === cricketResult ? (cricketResult === 'six' ? 6 : cricketResult === 'four' ? 4 : 3) : 0;
+          result = {
+            gameId: Date.now(),
+            result: { outcome: cricketResult },
+            multiplier: cricketMultiplier,
+            winAmount: betAmount * cricketMultiplier,
+            isWin: cricketMultiplier > 0
+          };
+          break;
+        
+        case 'limbo':
+          const { targetMultiplier } = req.body;
+          const crashPoint = Math.random() * 100 + 1;
+          const limboMultiplier = targetMultiplier <= crashPoint ? targetMultiplier : 0;
+          result = {
+            gameId: Date.now(),
+            result: { crashPoint, targetMultiplier },
+            multiplier: limboMultiplier,
+            winAmount: betAmount * limboMultiplier,
+            isWin: limboMultiplier > 0
+          };
+          break;
+        
+        case 'goal':
+          const { betType: goalBetType, betValue: goalBetValue, homeScore, awayScore } = req.body;
+          const finalHomeScore = homeScore !== undefined ? homeScore : Math.floor(Math.random() * 4);
+          const finalAwayScore = awayScore !== undefined ? awayScore : Math.floor(Math.random() * 4);
+          let goalResult: 'home' | 'away' | 'draw';
+          if (finalHomeScore > finalAwayScore) goalResult = 'home';
+          else if (finalAwayScore > finalHomeScore) goalResult = 'away';
+          else goalResult = 'draw';
           
-          const currentUser = await storage.getUser(req.user!.id);
-          if (currentUser) {
-            const currentBalance = Number(currentUser.walletBalance || 0);
-            const newBalance = currentBalance - betAmount + winAmount;
-            await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+          const goalMultiplier = goalBetValue === goalResult ? (goalResult === 'draw' ? 3.5 : 2.2) : 0;
+          result = {
+            gameId: Date.now(),
+            result: { homeScore: finalHomeScore, awayScore: finalAwayScore, result: goalResult },
+            multiplier: goalMultiplier,
+            winAmount: betAmount * goalMultiplier,
+            isWin: goalMultiplier > 0
+          };
+          break;
+        
+        case 'wheel':
+          const { betValue: selectedSection, winningSection } = req.body;
+          const actualWinningSection = winningSection || Math.floor(Math.random() * 8) + 1;
+          const sectionMultipliers = [0, 2, 3, 5, 2, 10, 2, 7, 2];
+          const wheelMultiplier = selectedSection === actualWinningSection ? sectionMultipliers[actualWinningSection] : 0;
+          result = {
+            gameId: Date.now(),
+            result: { winningSection: actualWinningSection, selectedSection },
+            multiplier: wheelMultiplier,
+            winAmount: betAmount * wheelMultiplier,
+            isWin: wheelMultiplier > 0
+          };
+          break;
+        
+        case 'plinko':
+          const { riskLevel, multiplier } = req.body;
+          const finalPosition = Math.floor(Math.random() * 9);
+          const plinkoMultipliers = {
+            low: [1.5, 1.2, 1.1, 1.0, 0.5, 1.0, 1.1, 1.2, 1.5],
+            medium: [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+            high: [29, 4, 1.5, 1, 0.2, 1, 1.5, 4, 29]
+          };
+          const plinkoMultiplier = plinkoMultipliers[riskLevel as keyof typeof plinkoMultipliers][finalPosition];
+          result = {
+            gameId: Date.now(),
+            result: { finalPosition, riskLevel },
+            multiplier: plinkoMultiplier,
+            winAmount: betAmount * plinkoMultiplier,
+            isWin: plinkoMultiplier >= 1
+          };
+          break;
+        
+        case 'roulette':
+          const { betValue: rouletteBets, winningNumber } = req.body;
+          const rouletteWinning = winningNumber !== undefined ? winningNumber : Math.floor(Math.random() * 13);
+          const rouletteColors = ['green', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black'];
+          let rouletteWinAmount = 0;
+          
+          if (typeof rouletteBets === 'object') {
+            Object.entries(rouletteBets).forEach(([betType, amount]: [string, any]) => {
+              let betMultiplier = 0;
+              const winningColor = rouletteColors[rouletteWinning];
+              
+              if (betType === `number-${rouletteWinning}`) {
+                betMultiplier = 35;
+              } else if (betType === 'red' && winningColor === 'red') {
+                betMultiplier = 2;
+              } else if (betType === 'black' && winningColor === 'black') {
+                betMultiplier = 2;
+              } else if (betType === 'green' && winningColor === 'green') {
+                betMultiplier = 35;
+              } else if (betType === 'even' && rouletteWinning % 2 === 0 && rouletteWinning !== 0) {
+                betMultiplier = 2;
+              } else if (betType === 'odd' && rouletteWinning % 2 === 1) {
+                betMultiplier = 2;
+              } else if (betType === 'low' && rouletteWinning >= 1 && rouletteWinning <= 6) {
+                betMultiplier = 2;
+              } else if (betType === 'high' && rouletteWinning >= 7 && rouletteWinning <= 12) {
+                betMultiplier = 2;
+              }
+              
+              rouletteWinAmount += amount * betMultiplier;
+            });
           }
           
           result = {
             gameId: Date.now(),
+            result: { winningNumber: rouletteWinning, winningColor: rouletteColors[rouletteWinning] },
+            multiplier: rouletteWinAmount > 0 ? rouletteWinAmount / betAmount : 0,
+            winAmount: rouletteWinAmount,
+            isWin: rouletteWinAmount > 0
+          };
+          break;
+
+        default:
+          const isWin = Math.random() > 0.45;
+          const defaultMultiplier = isWin ? 1.5 + Math.random() * 2 : 0;
+          const winAmount = isWin ? Math.floor(betAmount * defaultMultiplier) : 0;
+          
+          result = {
+            gameId: Date.now(),
             result: Math.floor(Math.random() * 100),
-            multiplier: multiplier,
+            multiplier: defaultMultiplier,
             winAmount: winAmount,
             isWin: isWin
           };
