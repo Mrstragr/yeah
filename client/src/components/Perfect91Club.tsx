@@ -770,6 +770,134 @@ export const Perfect91Club = () => {
                   <div className="game-name">DICE</div>
                   <div className="game-period">Classic</div>
                 </div>
+                
+                <div className="game-card space-dice">
+                  <div className="game-decoration">
+                    <div className="space-dice">🎲</div>
+                  </div>
+                  <div className="game-name">SPACE DICE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card plinko" onClick={() => setSelectedGame('plinko')}>
+                  <div className="game-decoration">
+                    <div className="plinko-icon">🔴</div>
+                  </div>
+                  <div className="game-name">PLINKO</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card hilo" onClick={() => setSelectedGame('hilo')}>
+                  <div className="game-decoration">
+                    <div className="hilo-icon">📊</div>
+                  </div>
+                  <div className="game-name">HILO</div>
+                  <div className="game-period">BT Game</div>
+                </div>
+                
+                <div className="game-card cricket" onClick={() => setSelectedGame('cricket')}>
+                  <div className="game-decoration">
+                    <div className="cricket">🏏</div>
+                  </div>
+                  <div className="game-name">CRICKET</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card goal-wave">
+                  <div className="game-decoration">
+                    <div className="goal">⚽</div>
+                  </div>
+                  <div className="game-name">GOAL WAVE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card mini-roulette">
+                  <div className="game-decoration">
+                    <div className="roulette">🎯</div>
+                  </div>
+                  <div className="game-name">MINI ROULETTE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card king-pauper">
+                  <div className="game-decoration">
+                    <div className="king">👑</div>
+                  </div>
+                  <div className="game-name">KING AND PAUPER</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card hilo-wave">
+                  <div className="game-decoration">
+                    <div className="wave">🌊</div>
+                  </div>
+                  <div className="game-name">HILO WAVE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card clash-hands">
+                  <div className="game-decoration">
+                    <div className="clash">🤝</div>
+                  </div>
+                  <div className="game-name">CLASH OF HANDS</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card bomb-wave">
+                  <div className="game-decoration">
+                    <div className="bomb">💣</div>
+                  </div>
+                  <div className="game-name">BOMB WAVE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card treasure-wave">
+                  <div className="game-decoration">
+                    <div className="treasure">🏴‍☠️</div>
+                  </div>
+                  <div className="game-name">TREASURE WAVE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card hotline">
+                  <div className="game-decoration">
+                    <div className="hotline">🔥</div>
+                  </div>
+                  <div className="game-name">HOTLINE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card cryptos">
+                  <div className="game-decoration">
+                    <div className="crypto">₿</div>
+                  </div>
+                  <div className="game-name">CRYPTOS</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card horse-racing">
+                  <div className="game-decoration">
+                    <div className="horse">🐎</div>
+                  </div>
+                  <div className="game-name">HORSE RACING</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card keno">
+                  <div className="game-decoration">
+                    <div className="keno">🎱</div>
+                  </div>
+                  <div className="game-name">KENO</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card keno80">
+                  <div className="game-decoration">
+                    <div className="keno80">80</div>
+                  </div>
+                  <div className="game-name">KENO 80</div>
+                  <div className="game-period">TB Game</div>
+                </div>
               </div>
             </div>
           )}
@@ -815,6 +943,46 @@ export const Perfect91Club = () => {
                   </div>
                   <div className="game-name">COIN MASTER</div>
                   <div className="game-period">Bonus</div>
+                </div>
+                
+                <div className="game-card slot5">
+                  <div className="game-decoration">
+                    <div className="pharaoh-slot">👑</div>
+                  </div>
+                  <div className="game-name">PHARAOH GOLD</div>
+                  <div className="game-period">Ancient</div>
+                </div>
+                
+                <div className="game-card slot6">
+                  <div className="game-decoration">
+                    <div className="treasure-slot">🏴‍☠️</div>
+                  </div>
+                  <div className="game-name">TREASURE HUNTER</div>
+                  <div className="game-period">Adventure</div>
+                </div>
+                
+                <div className="game-card slot7">
+                  <div className="game-decoration">
+                    <div className="dragon-slot">🐉</div>
+                  </div>
+                  <div className="game-name">DRAGON FORTUNE</div>
+                  <div className="game-period">Mythical</div>
+                </div>
+                
+                <div className="game-card slot8">
+                  <div className="game-decoration">
+                    <div className="space-slot">🚀</div>
+                  </div>
+                  <div className="game-name">SPACE ADVENTURE</div>
+                  <div className="game-period">Sci-Fi</div>
+                </div>
+                
+                <div className="game-card slot9">
+                  <div className="game-decoration">
+                    <div className="ocean-slot">🌊</div>
+                  </div>
+                  <div className="game-name">OCEAN TREASURE</div>
+                  <div className="game-period">Underwater</div>
                 </div>
               </div>
             </div>
@@ -862,6 +1030,54 @@ export const Perfect91Club = () => {
                   <div className="game-name">BLACKJACK</div>
                   <div className="game-period">21</div>
                 </div>
+                
+                <div className="game-card draw-poker">
+                  <div className="game-decoration">
+                    <div className="poker">🃏</div>
+                  </div>
+                  <div className="game-name">DRAW POKER</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card pharaoh">
+                  <div className="game-decoration">
+                    <div className="pharaoh">👑</div>
+                  </div>
+                  <div className="game-name">PHARAOH</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card triple">
+                  <div className="game-decoration">
+                    <div className="triple">🎯</div>
+                  </div>
+                  <div className="game-name">TRIPLE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card coin-flip">
+                  <div className="game-decoration">
+                    <div className="coin">🪙</div>
+                  </div>
+                  <div className="game-name">COIN FLIP</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card coin-wave">
+                  <div className="game-decoration">
+                    <div className="coin-wave">💰</div>
+                  </div>
+                  <div className="game-name">COIN WAVE</div>
+                  <div className="game-period">TB Game</div>
+                </div>
+                
+                <div className="game-card javelin">
+                  <div className="game-decoration">
+                    <div className="javelin">🏹</div>
+                  </div>
+                  <div className="game-name">JAVELIN</div>
+                  <div className="game-period">TB Game</div>
+                </div>
               </div>
             </div>
           )}
@@ -907,6 +1123,38 @@ export const Perfect91Club = () => {
                   </div>
                   <div className="game-name">TREASURE HUNT</div>
                   <div className="game-period">Adventure</div>
+                </div>
+                
+                <div className="game-card fishing5">
+                  <div className="game-decoration">
+                    <div className="deep-sea">🐙</div>
+                  </div>
+                  <div className="game-name">DEEP SEA FISHING</div>
+                  <div className="game-period">Deep Sea</div>
+                </div>
+                
+                <div className="game-card fishing6">
+                  <div className="game-decoration">
+                    <div className="golden-fish">🐟</div>
+                  </div>
+                  <div className="game-name">GOLDEN CATCH</div>
+                  <div className="game-period">Premium</div>
+                </div>
+                
+                <div className="game-card fishing7">
+                  <div className="game-decoration">
+                    <div className="sea-dragon">🐲</div>
+                  </div>
+                  <div className="game-name">SEA DRAGON</div>
+                  <div className="game-period">Legendary</div>
+                </div>
+                
+                <div className="game-card fishing8">
+                  <div className="game-decoration">
+                    <div className="coral-reef">🪸</div>
+                  </div>
+                  <div className="game-name">CORAL REEF</div>
+                  <div className="game-period">Tropical</div>
                 </div>
               </div>
             </div>
