@@ -820,6 +820,95 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActivePromotions(): Promise<Promotion[]> {
+    return await db.select().from(promotions)
+      .where(and(
+        eq(promotions.isActive, true),
+        lte(promotions.startDate, new Date()),
+        gte(promotions.endDate, new Date())
+      ));
+  }
+
+  async getPromotion(id: number): Promise<Promotion | undefined> {
+    const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
+    return promotion || undefined;
+  }
+
+  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
+    const [newPromotion] = await db.insert(promotions).values(promotion).returning();
+    return newPromotion;
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 10): Promise<WalletTransaction[]> {
+    return await db.select().from(walletTransactions)
+      .where(eq(walletTransactions.userId, userId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    const [newTransaction] = await db.insert(walletTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
+    const updateData: any = { status, updatedAt: new Date() };
+    if (paymentId) updateData.razorpayPaymentId = paymentId;
+    
+    const [updatedTransaction] = await db.update(walletTransactions)
+      .set(updateData)
+      .where(eq(walletTransactions.id, transactionId))
+      .returning();
+    return updatedTransaction || undefined;
+  }
+
+  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
+    return await db.select().from(kycDocuments)
+      .where(eq(kycDocuments.userId, userId))
+      .orderBy(desc(kycDocuments.createdAt));
+  }
+
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    const [newDocument] = await db.insert(kycDocuments).values(document).returning();
+    return newDocument;
+  }
+
+  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set({ kycStatus: status, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser || undefined;
+  }
+
+  async updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set({ bonusBalance: newBalance, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser || undefined;
+  }
+      userId: userGameHistory.userId,
+      gameId: userGameHistory.gameId,
+      betAmount: userGameHistory.betAmount,
+      winAmount: userGameHistory.winAmount,
+      playedAt: userGameHistory.playedAt,
+      username: users.username,
+      gameTitle: games.title
+    })
+    .from(userGameHistory)
+    .innerJoin(users, eq(userGameHistory.userId, users.id))
+    .innerJoin(games, eq(userGameHistory.gameId, games.id))
+    .where(gte(userGameHistory.playedAt, today))
+    .orderBy(desc(userGameHistory.winAmount))
+    .limit(limit);
+  }
+
+  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
+    const [newHistory] = await db.insert(userGameHistory).values(history).returning();
+    return newHistory;
+  }
+
+  async getActivePromotions(): Promise<Promotion[]> {
     const now = new Date();
     return await db.select().from(promotions)
       .where(and(
@@ -999,4 +1088,7 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Use memory storage for development to avoid database issues
+const useMemoryStorage = process.env.NODE_ENV === 'development' || !process.env.DATABASE_URL;
+export const storage = useMemoryStorage ? new MemStorage() : new DatabaseStorage();
+console.log(`Using ${useMemoryStorage ? 'Memory' : 'Database'} storage`);

@@ -296,7 +296,7 @@ export const Perfect91Club = () => {
           </div>
         )}
 
-        <style jsx>{`
+        <style>{`
           .wingo-game {
             background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
             color: white;
@@ -1215,7 +1215,7 @@ export const Perfect91Club = () => {
         <ActivityPage onClose={() => setShowActivity(false)} />
       )}
 
-      <style jsx>{`
+      <style>{`
         .perfect-91club {
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f8f9fa;
