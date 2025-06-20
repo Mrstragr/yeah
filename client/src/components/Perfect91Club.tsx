@@ -9,6 +9,8 @@ import { StandardMinesGame } from './StandardMinesGame';
 import { StandardDragonTigerGame } from './StandardDragonTigerGame';
 import { StandardWinGoGame } from './StandardWinGoGame';
 import { StandardTeenPattiGame } from './StandardTeenPattiGame';
+import { StandardLimboGame } from './StandardLimboGame';
+import { StandardPlinkoGame } from './StandardPlinkoGame';
 import { SpaceDiceGame } from './SpaceDiceGame';
 
 interface User {
@@ -125,6 +127,14 @@ export const Perfect91Club = () => {
 
   if (selectedGame === 'space-dice') {
     return <SpaceDiceGame onClose={() => setSelectedGame(null)} />;
+  }
+
+  if (selectedGame === 'limbo') {
+    return <StandardLimboGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
+  }
+
+  if (selectedGame === 'plinko') {
+    return <StandardPlinkoGame onClose={() => setSelectedGame(null)} refreshBalance={refreshBalance} />;
   }
 
   if (selectedGame === 'wingo' || selectedGame === 'k3' || selectedGame === '5d' || selectedGame === 'trx') {
@@ -809,7 +819,7 @@ export const Perfect91Club = () => {
               </div>
               
               <div className="games-grid">
-                <div className="game-card dice-game">
+                <div className="game-card dice-game" onClick={() => setSelectedGame('space-dice')}>
                   <div className="game-bg coral">
                     <div className="game-icon">🎲</div>
                   </div>
@@ -817,7 +827,7 @@ export const Perfect91Club = () => {
                   <div className="game-period">TB GAME</div>
                 </div>
                 
-                <div className="game-card plinko-game">
+                <div className="game-card plinko-game" onClick={() => setSelectedGame('plinko')}>
                   <div className="game-bg purple-gradient">
                     <div className="game-icon">🔴</div>
                     <div className="game-multiplier">20X</div>
@@ -826,11 +836,11 @@ export const Perfect91Club = () => {
                   <div className="game-period">TB GAME</div>
                 </div>
                 
-                <div className="game-card hilo-game">
+                <div className="game-card hilo-game" onClick={() => setSelectedGame('limbo')}>
                   <div className="game-bg purple-blue">
                     <div className="game-icon">📊</div>
                   </div>
-                  <div className="game-name">HILO</div>
+                  <div className="game-name">LIMBO</div>
                   <div className="game-period">BT GAME</div>
                 </div>
               </div>
