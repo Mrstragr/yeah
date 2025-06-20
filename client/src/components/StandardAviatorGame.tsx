@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { SimpleAviatorChart } from './SimpleAviatorChart';
 
 interface StandardAviatorGameProps {
   onClose: () => void;
@@ -31,6 +32,9 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
     { user: 'Winner99', message: 'Good luck everyone!', time: '16:45:20' }
   ]);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [chartPoints, setChartPoints] = useState<Array<{x: number, y: number}>>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [myBetHistory, setMyBetHistory] = useState([
     { round: 12846, bet: 100, cashOut: 1.23, result: 123 },
     { round: 12845, bet: 200, cashOut: 15.67, result: 3134 },
@@ -80,6 +84,10 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
             setTimeout(() => cashOut(autoCashOut), 50);
           }
           
+          // Update chart points
+          const timeElapsed = Date.now() - (startTime || Date.now());
+          setChartPoints(prev => [...prev, {x: timeElapsed / 100, y: newMultiplier}]);
+          
           return newMultiplier;
         });
       }, 150); // Slightly slower for better UX
@@ -88,9 +96,100 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
     return () => clearInterval(interval);
   }, [gameState, countdown, autoCashOut, currentBet]);
 
+  // Draw chart function
+  const drawChart = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    if (chartPoints.length < 2) return;
+    
+    // Draw gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, 'rgba(56, 161, 105, 0.3)');
+    gradient.addColorStop(1, 'rgba(56, 161, 105, 0.05)');
+    
+    // Draw the curve
+    ctx.beginPath();
+    ctx.moveTo(0, height);
+    
+    chartPoints.forEach((point, index) => {
+      const x = (point.x / 100) * width;
+      const y = height - ((Math.log(point.y) / Math.log(50)) * height * 0.8);
+      
+      if (index === 0) {
+        ctx.lineTo(x, y);
+      } else {
+        const prevPoint = chartPoints[index - 1];
+        const prevX = (prevPoint.x / 100) * width;
+        const prevY = height - ((Math.log(prevPoint.y) / Math.log(50)) * height * 0.8);
+        
+        const cpX = (prevX + x) / 2;
+        ctx.quadraticCurveTo(cpX, prevY, x, y);
+      }
+    });
+    
+    // Fill area under curve
+    ctx.lineTo(chartPoints[chartPoints.length - 1].x / 100 * width, height);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    // Draw the line
+    ctx.beginPath();
+    chartPoints.forEach((point, index) => {
+      const x = (point.x / 100) * width;
+      const y = height - ((Math.log(point.y) / Math.log(50)) * height * 0.8);
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.strokeStyle = gameState === 'crashed' ? '#dc2626' : '#38a169';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Draw crash point if crashed
+    if (gameState === 'crashed' && chartPoints.length > 0) {
+      const lastPoint = chartPoints[chartPoints.length - 1];
+      const x = (lastPoint.x / 100) * width;
+      const y = height - ((Math.log(lastPoint.y) / Math.log(50)) * height * 0.8);
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#dc2626';
+      ctx.fill();
+      
+      // Add explosion effect
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, Math.PI * 2);
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  };
+
+  // Update chart when points change
+  useEffect(() => {
+    drawChart();
+  }, [chartPoints, gameState]);
+
   const startFlight = () => {
     setGameState('flying');
     setMultiplier(1.00);
+    setChartPoints([{x: 0, y: 1}]);
+    setStartTime(Date.now());
   };
 
   const crashPlane = async (finalMultiplier: number) => {
@@ -140,6 +239,8 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
       setCountdown(7);
       setCurrentBet(null);
       setMultiplier(1.00);
+      setChartPoints([]);
+      setStartTime(null);
       
       if (isAutoPlay && autoBetCount > 0) {
         setAutoBetCount(prev => prev - 1);
@@ -221,35 +322,16 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
             </div>
             
             <div className="graph-area">
-              <div className="multiplier-chart">
-                <svg className="chart-svg" viewBox="0 0 400 200">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#38a169" stopOpacity="0.8"/>
-                      <stop offset="100%" stopColor="#68d391" stopOpacity="0.3"/>
-                    </linearGradient>
-                  </defs>
-                  <path 
-                    className={`chart-line ${gameState === 'flying' ? 'drawing' : ''}`}
-                    d={`M 0 200 Q ${Math.min(multiplier * 50, 350)} ${200 - (multiplier * 15)} ${Math.min(multiplier * 60, 400)} ${200 - (multiplier * 20)}`}
-                    fill="none"
-                    stroke="url(#chartGradient)"
-                    strokeWidth="3"
-                  />
-                  {gameState === 'crashed' && (
-                    <circle 
-                      cx={Math.min(multiplier * 60, 400)} 
-                      cy={200 - (multiplier * 20)} 
-                      r="8" 
-                      fill="#e53e3e"
-                      className="crash-point"
-                    />
-                  )}
-                </svg>
-              </div>
+              <SimpleAviatorChart 
+                multiplier={multiplier}
+                gameState={gameState}
+                chartPoints={chartPoints}
+              />
+              
               <div className={`plane ${gameState === 'flying' ? 'flying' : ''} ${gameState === 'crashed' ? 'crashed' : ''}`}>
                 ✈️
               </div>
+              
               {gameState === 'flying' && (
                 <div className="multiplier-trail">
                   {Array(5).fill(0).map((_, i) => (
@@ -520,45 +602,12 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
         }
 
         .graph-area {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 200px;
-          background: linear-gradient(to top, rgba(22,163,74,0.05), transparent);
+          position: relative;
+          height: 300px;
+          background: linear-gradient(to bottom, #1a2c38, #0f212e);
+          border-radius: 12px;
           overflow: hidden;
-        }
-
-        .multiplier-chart {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 100%;
-        }
-
-        .chart-svg {
-          width: 100%;
-          height: 100%;
-        }
-
-        .chart-line {
-          stroke-dasharray: 1000;
-          stroke-dashoffset: 1000;
-          transition: stroke-dashoffset 0.1s linear;
-        }
-
-        .chart-line.drawing {
-          stroke-dashoffset: 0;
-        }
-
-        .crash-point {
-          animation: explode 0.5s ease-out;
-        }
-
-        @keyframes explode {
-          0% { r: 8; fill-opacity: 1; }
-          100% { r: 25; fill-opacity: 0; }
+          margin-bottom: 20px;
         }
 
         .plane {
@@ -574,8 +623,8 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
 
         .plane.flying {
           animation: fly 2s ease-in-out infinite;
-          left: calc(50px + ${multiplier * 15}px);
-          bottom: calc(20px + ${multiplier * 6}px);
+          left: calc(50px + ${Math.min(multiplier * 20, 200)}px);
+          bottom: calc(50px + ${Math.min(multiplier * 15, 150)}px);
         }
 
         .plane.crashed {
