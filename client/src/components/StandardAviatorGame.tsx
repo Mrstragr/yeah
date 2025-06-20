@@ -54,25 +54,33 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
     } else if (gameState === 'flying') {
       interval = setInterval(() => {
         setMultiplier(prev => {
-          const increment = 0.01 + (Math.random() * 0.01);
-          const newMultiplier = prev + increment;
+          // More realistic increment based on current multiplier
+          let increment = 0.01;
+          if (prev < 2) increment = 0.02;
+          else if (prev < 5) increment = 0.03;
+          else if (prev < 10) increment = 0.05;
+          else increment = 0.08;
           
-          // Crash probability increases with multiplier
-          const crashChance = Math.min(0.002 * Math.pow(prev, 1.3), 0.08);
+          const newMultiplier = parseFloat((prev + increment).toFixed(2));
+          
+          // Better crash probability algorithm
+          const baseCrashChance = 0.01;
+          const multiplierFactor = Math.pow(newMultiplier - 1, 1.8);
+          const crashChance = Math.min(baseCrashChance + (multiplierFactor * 0.001), 0.15);
           
           if (Math.random() < crashChance) {
             crashPlane(newMultiplier);
             return newMultiplier;
           }
           
-          // Auto cash out
+          // Auto cash out check
           if (autoCashOut && newMultiplier >= autoCashOut && currentBet) {
-            cashOut(autoCashOut);
+            setTimeout(() => cashOut(autoCashOut), 50);
           }
           
           return newMultiplier;
         });
-      }, 100);
+      }, 150); // Slightly slower for better UX
     }
 
     return () => clearInterval(interval);
@@ -83,20 +91,46 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
     setMultiplier(1.00);
   };
 
-  const crashPlane = (finalMultiplier: number) => {
+  const crashPlane = async (finalMultiplier: number) => {
     setGameState('crashed');
     
     // Update history
     const newRound = { round: history[0].round + 1, multiplier: finalMultiplier, players: 150 + Math.floor(Math.random() * 50) };
     setHistory(prev => [newRound, ...prev.slice(0, 4)]);
     
-    // Add to my bet history if I had a bet
+    // Process lost bet if any
     if (currentBet) {
-      const result = -currentBet; // Lost
-      setMyBetHistory(prev => [
-        { round: newRound.round, bet: currentBet, cashOut: null, result },
-        ...prev.slice(0, 9)
-      ]);
+      try {
+        const response = await fetch('/api/games/aviator/play', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer demo_token_' + Date.now()
+          },
+          body: JSON.stringify({
+            betAmount: currentBet,
+            cashOutMultiplier: null,
+            crashed: true,
+            finalMultiplier
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMyBetHistory(prev => [
+            { round: newRound.round, bet: currentBet, cashOut: null, result: -currentBet },
+            ...prev.slice(0, 9)
+          ]);
+          refreshBalance();
+        }
+      } catch (error) {
+        console.error('Crash processing error:', error);
+        // Still add to history for UI feedback
+        setMyBetHistory(prev => [
+          { round: newRound.round, bet: currentBet, cashOut: null, result: -currentBet },
+          ...prev.slice(0, 9)
+        ]);
+      }
     }
     
     setTimeout(() => {
@@ -185,10 +219,42 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
             </div>
             
             <div className="graph-area">
-              <div className={`flight-path ${gameState === 'flying' ? 'active' : ''}`}></div>
+              <div className="multiplier-chart">
+                <svg className="chart-svg" viewBox="0 0 400 200">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#38a169" stopOpacity="0.8"/>
+                      <stop offset="100%" stopColor="#68d391" stopOpacity="0.3"/>
+                    </linearGradient>
+                  </defs>
+                  <path 
+                    className={`chart-line ${gameState === 'flying' ? 'drawing' : ''}`}
+                    d={`M 0 200 Q ${Math.min(multiplier * 50, 350)} ${200 - (multiplier * 15)} ${Math.min(multiplier * 60, 400)} ${200 - (multiplier * 20)}`}
+                    fill="none"
+                    stroke="url(#chartGradient)"
+                    strokeWidth="3"
+                  />
+                  {gameState === 'crashed' && (
+                    <circle 
+                      cx={Math.min(multiplier * 60, 400)} 
+                      cy={200 - (multiplier * 20)} 
+                      r="8" 
+                      fill="#e53e3e"
+                      className="crash-point"
+                    />
+                  )}
+                </svg>
+              </div>
               <div className={`plane ${gameState === 'flying' ? 'flying' : ''} ${gameState === 'crashed' ? 'crashed' : ''}`}>
                 ✈️
               </div>
+              {gameState === 'flying' && (
+                <div className="multiplier-trail">
+                  {Array(5).fill(0).map((_, i) => (
+                    <div key={i} className="trail-dot" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -411,12 +477,31 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
           font-weight: bold;
           color: #16a34a;
           text-shadow: 0 0 20px rgba(22,163,74,0.5);
-          transition: all 0.1s;
+          transition: all 0.2s ease;
+          animation: ${gameState === 'flying' ? 'glow 1.5s ease-in-out infinite alternate' : 'none'};
         }
 
         .multiplier.crashed {
           color: #dc2626;
           text-shadow: 0 0 20px rgba(220,38,38,0.5);
+          animation: crashFlash 0.5s ease-out;
+        }
+
+        @keyframes glow {
+          0% { 
+            transform: scale(1);
+            text-shadow: 0 0 20px rgba(22,163,74,0.5);
+          }
+          100% { 
+            transform: scale(1.05);
+            text-shadow: 0 0 30px rgba(22,163,74,0.8), 0 0 40px rgba(104,211,145,0.4);
+          }
+        }
+
+        @keyframes crashFlash {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.2); color: #ff0000; }
+          100% { transform: scale(1); }
         }
 
         .next-round {
@@ -438,49 +523,129 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
           left: 0;
           right: 0;
           height: 200px;
-          background: linear-gradient(to top, rgba(22,163,74,0.1), transparent);
+          background: linear-gradient(to top, rgba(22,163,74,0.05), transparent);
+          overflow: hidden;
         }
 
-        .flight-path {
+        .multiplier-chart {
           position: absolute;
-          bottom: 20px;
-          left: 50px;
-          width: 3px;
-          height: 0;
-          background: #16a34a;
-          transition: height 0.1s;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 100%;
         }
 
-        .flight-path.active {
-          height: 150px;
+        .chart-svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        .chart-line {
+          stroke-dasharray: 1000;
+          stroke-dashoffset: 1000;
+          transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .chart-line.drawing {
+          stroke-dashoffset: 0;
+        }
+
+        .crash-point {
+          animation: explode 0.5s ease-out;
+        }
+
+        @keyframes explode {
+          0% { r: 8; fill-opacity: 1; }
+          100% { r: 25; fill-opacity: 0; }
         }
 
         .plane {
           position: absolute;
           bottom: 20px;
           left: 50px;
-          font-size: 24px;
-          transition: all 0.1s;
+          font-size: 28px;
+          z-index: 10;
+          transition: all 0.15s ease-out;
           transform: rotate(-20deg);
+          filter: drop-shadow(0 0 10px rgba(56,161,105,0.6));
         }
 
         .plane.flying {
-          animation: fly 0.1s ease-in-out infinite alternate;
+          animation: fly 2s ease-in-out infinite;
+          left: calc(50px + ${multiplier * 15}px);
+          bottom: calc(20px + ${multiplier * 6}px);
         }
 
         .plane.crashed {
           color: #dc2626;
-          animation: crash 0.5s ease-out;
+          animation: crash 0.8s ease-out;
+          filter: drop-shadow(0 0 15px rgba(220,38,38,0.8));
+        }
+
+        .multiplier-trail {
+          position: absolute;
+          bottom: 25px;
+          left: 55px;
+          display: flex;
+          gap: 10px;
+        }
+
+        .trail-dot {
+          width: 6px;
+          height: 6px;
+          background: #38a169;
+          border-radius: 50%;
+          animation: trail 1s ease-in-out infinite;
+          box-shadow: 0 0 8px rgba(56,161,105,0.8);
         }
 
         @keyframes fly {
-          0% { transform: rotate(-20deg) translateY(0px); }
-          100% { transform: rotate(-25deg) translateY(-2px); }
+          0% { 
+            transform: rotate(-20deg) translateY(0px) scale(1);
+            filter: drop-shadow(0 0 10px rgba(56,161,105,0.6));
+          }
+          50% { 
+            transform: rotate(-18deg) translateY(-3px) scale(1.05);
+            filter: drop-shadow(0 0 15px rgba(56,161,105,0.8));
+          }
+          100% { 
+            transform: rotate(-22deg) translateY(0px) scale(1);
+            filter: drop-shadow(0 0 10px rgba(56,161,105,0.6));
+          }
         }
 
         @keyframes crash {
-          0% { transform: rotate(-20deg); }
-          100% { transform: rotate(45deg) scale(1.5); }
+          0% { 
+            transform: rotate(-20deg) scale(1);
+          }
+          25% { 
+            transform: rotate(0deg) scale(1.2);
+          }
+          50% { 
+            transform: rotate(45deg) scale(0.8);
+          }
+          75% { 
+            transform: rotate(90deg) scale(1.3);
+          }
+          100% { 
+            transform: rotate(180deg) scale(0.5);
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes trail {
+          0% { 
+            opacity: 1; 
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 0.6; 
+            transform: scale(1.2);
+          }
+          100% { 
+            opacity: 0.2; 
+            transform: scale(0.8);
+          }
         }
 
         .betting-panel {
