@@ -184,19 +184,35 @@ export class GameEngine {
   }
 
   // Aviator Game Logic
-  async playAviator(userId: number, betAmount: number, cashOutMultiplier?: number): Promise<GameResult> {
+  async playAviator(userId: number, betAmount: number, cashOutMultiplier?: number, crashed?: boolean, finalMultiplier?: number): Promise<GameResult> {
     const sessionId = `aviator_${Date.now()}_${userId}`;
     const gameId = 3; // Aviator game ID
     
-    // Generate crash multiplier (realistic distribution)
-    const crashMultiplier = this.generateAviatorMultiplier();
+    // Use provided finalMultiplier or generate new crash multiplier
+    const crashMultiplier = finalMultiplier || this.generateAviatorMultiplier();
     
-    // Determine if player wins
-    const playerCashOut = cashOutMultiplier || 1;
-    const isWin = playerCashOut <= crashMultiplier;
-    const winAmount = isWin ? betAmount * playerCashOut : 0;
+    let winAmount = 0;
+    let isWin = false;
+    let multiplier = 1;
     
-    // Validate and update user balance
+    if (crashed) {
+      // Player's plane crashed
+      isWin = false;
+      multiplier = crashMultiplier;
+      winAmount = 0;
+    } else if (cashOutMultiplier && cashOutMultiplier <= crashMultiplier) {
+      // Player cashed out before crash
+      isWin = true;
+      multiplier = cashOutMultiplier;
+      winAmount = Math.floor(betAmount * cashOutMultiplier);
+    } else {
+      // Player crashed or didn't cash out in time
+      isWin = false;
+      multiplier = crashMultiplier;
+      winAmount = 0;
+    }
+    
+    // Update user balance
     const user = await storage.getUser(userId);
     if (!user) {
       throw new Error('User not found');

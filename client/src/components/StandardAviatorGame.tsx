@@ -54,19 +54,21 @@ export const StandardAviatorGame = ({ onClose, refreshBalance }: StandardAviator
     } else if (gameState === 'flying') {
       interval = setInterval(() => {
         setMultiplier(prev => {
-          // More realistic increment based on current multiplier
+          // Dynamic increment that feels more natural
           let increment = 0.01;
-          if (prev < 2) increment = 0.02;
-          else if (prev < 5) increment = 0.03;
-          else if (prev < 10) increment = 0.05;
+          if (prev < 1.5) increment = 0.01;
+          else if (prev < 2) increment = 0.02;
+          else if (prev < 3) increment = 0.03;
+          else if (prev < 5) increment = 0.04;
+          else if (prev < 10) increment = 0.06;
           else increment = 0.08;
           
           const newMultiplier = parseFloat((prev + increment).toFixed(2));
           
-          // Better crash probability algorithm
-          const baseCrashChance = 0.01;
-          const multiplierFactor = Math.pow(newMultiplier - 1, 1.8);
-          const crashChance = Math.min(baseCrashChance + (multiplierFactor * 0.001), 0.15);
+          // Realistic crash probability that increases smoothly
+          const baseCrashChance = 0.005;
+          const multiplierFactor = Math.pow(newMultiplier - 1, 1.5);
+          const crashChance = Math.min(baseCrashChance + (multiplierFactor * 0.002), 0.12);
           
           if (Math.random() < crashChance) {
             crashPlane(newMultiplier);
