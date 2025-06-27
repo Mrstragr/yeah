@@ -4,6 +4,7 @@ import { authenticateToken, AuthRequest } from './auth.js';
 import { storage } from './storage.js';
 import { gameEngine } from './gameEngine.js';
 import { analyticsService } from './analytics.js';
+import { paymentService } from './payments.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication Routes
