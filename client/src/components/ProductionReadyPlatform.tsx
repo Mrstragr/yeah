@@ -19,7 +19,7 @@ import { EnhancedBottomNav } from './EnhancedBottomNav';
 import { WalletPage } from './WalletPage';
 import { KYCPage } from './KYCPage';
 import { AdvancedLoginSystem } from './AdvancedLoginSystem';
-import { EnhancedWalletSystem } from './EnhancedWalletSystem';
+import { ComprehensiveWalletSystem } from './ComprehensiveWalletSystem';
 
 interface User {
   id: number;
@@ -246,7 +246,7 @@ export const ProductionReadyPlatform = () => {
         );
 
       case 'wallet':
-        return <EnhancedWalletSystem />;
+        return <ComprehensiveWalletSystem />;
 
       case 'promotion':
         return <PromotionPage onClose={() => setActiveTab('main')} />;

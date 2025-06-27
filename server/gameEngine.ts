@@ -237,8 +237,8 @@ export class GameEngine {
     
     return {
       gameId,
-      result: { crashMultiplier, playerCashOut },
-      multiplier: playerCashOut,
+      result: { crashMultiplier, playerCashOut: cashOutMultiplier },
+      multiplier: cashOutMultiplier || crashMultiplier,
       winAmount,
       isWin
     };
