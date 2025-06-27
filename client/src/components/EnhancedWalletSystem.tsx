@@ -1,557 +1,850 @@
-import { useState, useEffect } from 'react';
-import { apiRequest } from '@/lib/queryClient';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Wallet, 
+  CreditCard, 
+  IndianRupee, 
+  ArrowUpRight, 
+  ArrowDownLeft, 
+  QrCode,
+  Smartphone,
+  Building2,
+  Shield,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  Gift,
+  Star,
+  Crown,
+  History,
+  Plus,
+  Minus,
+  RefreshCw,
+  Copy,
+  ExternalLink,
+  Zap,
+  Award,
+  Target,
+  Users
+} from 'lucide-react';
 
-interface Transaction {
-  id: number;
-  type: string;
-  amount: string;
-  status: string;
-  createdAt: string;
-  description: string;
-  paymentMethod?: string;
-  razorpayPaymentId?: string;
+interface WalletSystemProps {
+  onClose: () => void;
 }
 
-interface WalletData {
-  balance: string;
-  transactions: Transaction[];
-  kycStatus: string;
-  depositLimits: {
-    daily: string;
-    monthly: string;
-  };
-}
-
-export const EnhancedWalletSystem = () => {
-  const [walletData, setWalletData] = useState<WalletData | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'history' | 'kyc'>('overview');
+export function EnhancedWalletSystem({ onClose }: WalletSystemProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'history'>('overview');
+  const [depositMethod, setDepositMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
+  const [withdrawMethod, setWithdrawMethod] = useState<'bank' | 'upi'>('upi');
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('upi');
+  const [bankDetails, setBankDetails] = useState({
+    accountNumber: '',
+    ifscCode: '',
+    accountHolderName: '',
+    upiId: ''
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Fetch wallet data
-  const fetchWalletData = async () => {
-    try {
-      const balanceResponse = await apiRequest('GET', '/api/wallet/balance');
-      const transactionsResponse = await apiRequest('GET', '/api/wallet/transactions');
+  // Wallet Balance Query
+  const { data: walletData, isLoading: walletLoading } = useQuery({
+    queryKey: ['/api/wallet/balance'],
+  });
+
+  // Transaction History Query
+  const { data: transactionHistory, isLoading: historyLoading } = useQuery({
+    queryKey: ['/api/wallet/transactions'],
+  });
+
+  // Deposit Mutation
+  const depositMutation = useMutation({
+    mutationFn: async (depositData: { amount: number; method: string }) => {
+      const response = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(depositData),
+      });
       
-      const balanceData = await balanceResponse.json();
-      const transactionsData = await transactionsResponse.json();
-      
-      setWalletData({
-        balance: balanceData.balance || '0',
-        transactions: transactionsData.transactions || [],
-        kycStatus: balanceData.kycStatus || 'pending',
-        depositLimits: {
-          daily: '50000',
-          monthly: '200000'
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching wallet data:', error);
-    }
-  };
-
-  // Handle deposit
-  const handleDeposit = async () => {
-    if (!depositAmount || parseFloat(depositAmount) < 100) {
-      toast({
-        title: "Invalid Amount",
-        description: "Minimum deposit amount is ₹100",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await apiRequest('POST', '/api/wallet/deposit', {
-        amount: parseFloat(depositAmount),
-        paymentMethod: selectedPaymentMethod
-      });
-
-      const data = await response.json();
-      if (data.razorpayOrderId) {
-        // Initialize Razorpay payment
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: data.amount,
-          currency: 'INR',
-          name: 'Perfect91Club',
-          description: 'Wallet Deposit',
-          order_id: data.razorpayOrderId,
-          prefill: {
-            name: data.userInfo?.name || '',
-            email: data.userInfo?.email || '',
-            contact: data.userInfo?.phone || ''
-          },
-          theme: {
-            color: '#2563eb'
-          },
-          handler: async (paymentResponse: any) => {
-            try {
-              await apiRequest('POST', '/api/wallet/verify-payment', {
-                razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                razorpay_order_id: paymentResponse.razorpay_order_id,
-                razorpay_signature: paymentResponse.razorpay_signature
-              });
-
-              toast({
-                title: "Deposit Successful",
-                description: `₹${depositAmount} added to your wallet`
-              });
-              
-              setDepositAmount('');
-              await fetchWalletData();
-            } catch (error) {
-              toast({
-                title: "Payment Verification Failed",
-                description: "Please contact support",
-                variant: "destructive"
-              });
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              toast({
-                title: "Payment Cancelled",
-                description: "Deposit was cancelled",
-                variant: "destructive"
-              });
-            }
-          }
-        };
-
-        // @ts-ignore
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+      if (!response.ok) {
+        throw new Error('Deposit failed');
       }
-    } catch (error) {
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
       toast({
-        title: "Deposit Failed",
-        description: "Unable to initiate payment",
-        variant: "destructive"
+        title: 'Deposit Initiated',
+        description: 'Your deposit request has been processed successfully',
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle withdrawal
-  const handleWithdraw = async () => {
-    if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
+      setDepositAmount('');
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet/transactions'] });
+    },
+    onError: (error: any) => {
       toast({
-        title: "Invalid Amount",
-        description: "Minimum withdrawal amount is ₹500",
-        variant: "destructive"
+        title: 'Deposit Failed',
+        description: error.message || 'Please try again',
+        variant: 'destructive',
       });
-      return;
-    }
+    },
+  });
 
-    if (walletData && parseFloat(withdrawAmount) > parseFloat(walletData.balance)) {
-      toast({
-        title: "Insufficient Balance",
-        description: "Not enough balance for withdrawal",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (walletData?.kycStatus !== 'verified') {
-      toast({
-        title: "KYC Required",
-        description: "Complete KYC verification to withdraw funds",
-        variant: "destructive"
-      });
-      setActiveTab('kyc');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await apiRequest('POST', '/api/wallet/withdraw', {
-        amount: parseFloat(withdrawAmount)
-      });
-
-      toast({
-        title: "Withdrawal Requested",
-        description: "Your withdrawal will be processed within 24 hours"
+  // Withdraw Mutation
+  const withdrawMutation = useMutation({
+    mutationFn: async (withdrawData: any) => {
+      const response = await fetch('/api/wallet/withdraw', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(withdrawData),
       });
       
-      setWithdrawAmount('');
-      await fetchWalletData();
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error('Withdrawal failed');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
       toast({
-        title: "Withdrawal Failed",
-        description: "Unable to process withdrawal",
-        variant: "destructive"
+        title: 'Withdrawal Initiated',
+        description: 'Your withdrawal request will be processed within 24 hours',
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setWithdrawAmount('');
+      setBankDetails({
+        accountNumber: '',
+        ifscCode: '',
+        accountHolderName: '',
+        upiId: ''
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet/transactions'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Withdrawal Failed',
+        description: error.message || 'Please try again',
+        variant: 'destructive',
+      });
+    },
+  });
 
   // Quick deposit amounts
-  const quickAmounts = [500, 1000, 2000, 5000, 10000];
+  const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
 
-  useEffect(() => {
-    fetchWalletData();
-  }, []);
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+        staggerChildren: 0.1
+      }
+    }
+  };
 
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
-        <h1 className="text-2xl font-bold">Wallet Management</h1>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-blue-100 text-sm">Current Balance</p>
-            <p className="text-2xl font-bold">₹{walletData?.balance || '0'}</p>
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const handleDeposit = () => {
+    if (!depositAmount || parseFloat(depositAmount) < 10) {
+      toast({
+        title: 'Invalid Amount',
+        description: 'Minimum deposit amount is ₹10',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    depositMutation.mutate({
+      amount: parseFloat(depositAmount),
+      method: depositMethod
+    });
+  };
+
+  const handleWithdraw = () => {
+    if (!withdrawAmount || parseFloat(withdrawAmount) < 100) {
+      toast({
+        title: 'Invalid Amount',
+        description: 'Minimum withdrawal amount is ₹100',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const currentBalance = parseFloat(walletData?.walletBalance || '0');
+    if (parseFloat(withdrawAmount) > currentBalance) {
+      toast({
+        title: 'Insufficient Balance',
+        description: 'You cannot withdraw more than your available balance',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (withdrawMethod === 'bank' && (!bankDetails.accountNumber || !bankDetails.ifscCode || !bankDetails.accountHolderName)) {
+      toast({
+        title: 'Missing Bank Details',
+        description: 'Please fill all bank details',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (withdrawMethod === 'upi' && !bankDetails.upiId) {
+      toast({
+        title: 'Missing UPI ID',
+        description: 'Please enter your UPI ID',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    withdrawMutation.mutate({
+      amount: parseFloat(withdrawAmount),
+      method: withdrawMethod,
+      ...bankDetails
+    });
+  };
+
+  // Wallet Overview Tab
+  const renderOverview = () => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="wallet-overview"
+    >
+      {/* Balance Cards */}
+      <div className="balance-cards">
+        <motion.div className="balance-card main" variants={itemVariants}>
+          <div className="balance-header">
+            <div className="balance-icon">
+              <Wallet />
+            </div>
+            <div className="balance-info">
+              <h3>Total Balance</h3>
+              <div className="balance-amount">
+                <IndianRupee className="currency-icon" />
+                <span>₹{walletData?.walletBalance || '0'}</span>
+              </div>
+            </div>
           </div>
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-blue-100 text-sm">KYC Status</p>
-            <p className="text-lg font-semibold capitalize">
-              {walletData?.kycStatus || 'Pending'}
-            </p>
+          <div className="balance-actions">
+            <motion.button
+              className="action-btn deposit"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveTab('deposit')}
+            >
+              <Plus className="btn-icon" />
+              Add Money
+            </motion.button>
+            <motion.button
+              className="action-btn withdraw"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveTab('withdraw')}
+            >
+              <Minus className="btn-icon" />
+              Withdraw
+            </motion.button>
           </div>
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-blue-100 text-sm">Daily Limit</p>
-            <p className="text-lg font-semibold">₹{walletData?.depositLimits.daily || '50,000'}</p>
+        </motion.div>
+
+        <motion.div className="balance-card bonus" variants={itemVariants}>
+          <div className="balance-header">
+            <div className="balance-icon bonus">
+              <Gift />
+            </div>
+            <div className="balance-info">
+              <h3>Bonus Balance</h3>
+              <div className="balance-amount">
+                <IndianRupee className="currency-icon" />
+                <span>₹{walletData?.bonusBalance || '0'}</span>
+              </div>
+            </div>
           </div>
-        </div>
+          <p className="bonus-note">Bonus funds from promotions and rewards</p>
+        </motion.div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white border-b">
-        <div className="flex overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'deposit', label: 'Deposit', icon: '💰' },
-            { id: 'withdraw', label: 'Withdraw', icon: '🏦' },
-            { id: 'history', label: 'History', icon: '📋' },
-            { id: 'kyc', label: 'KYC', icon: '🛡️' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-blue-600'
-              }`}
+      {/* Quick Stats */}
+      <motion.div className="quick-stats" variants={itemVariants}>
+        <h3>Quick Stats</h3>
+        <div className="stats-grid">
+          <div className="stat-item">
+            <div className="stat-icon deposits">
+              <ArrowDownLeft />
+            </div>
+            <div className="stat-content">
+              <h4>Total Deposits</h4>
+              <p>₹{walletData?.totalDeposits || '0'}</p>
+            </div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-icon withdrawals">
+              <ArrowUpRight />
+            </div>
+            <div className="stat-content">
+              <h4>Total Withdrawals</h4>
+              <p>₹{walletData?.totalWithdrawals || '0'}</p>
+            </div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-icon winnings">
+              <Trophy />
+            </div>
+            <div className="stat-content">
+              <h4>Total Winnings</h4>
+              <p>₹{walletData?.totalWinnings || '0'}</p>
+            </div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-icon transactions">
+              <History />
+            </div>
+            <div className="stat-content">
+              <h4>Transactions</h4>
+              <p>{transactionHistory?.transactions?.length || 0}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Recent Transactions */}
+      <motion.div className="recent-transactions" variants={itemVariants}>
+        <div className="section-header">
+          <h3>Recent Transactions</h3>
+          <motion.button
+            className="view-all-btn"
+            onClick={() => setActiveTab('history')}
+            whileHover={{ x: 5 }}
+          >
+            View All <ExternalLink className="icon" />
+          </motion.button>
+        </div>
+        <div className="transaction-list">
+          {transactionHistory?.transactions?.slice(0, 5).map((transaction: any, index: number) => (
+            <motion.div
+              key={transaction.id}
+              className="transaction-item"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <span>{tab.icon}</span>
-              {tab.label}
-            </button>
+              <div className="transaction-icon">
+                {transaction.type === 'deposit' ? (
+                  <ArrowDownLeft className="deposit-icon" />
+                ) : transaction.type === 'withdrawal' ? (
+                  <ArrowUpRight className="withdrawal-icon" />
+                ) : (
+                  <Target className="game-icon" />
+                )}
+              </div>
+              <div className="transaction-details">
+                <h4>{transaction.description || transaction.type}</h4>
+                <p>{new Date(transaction.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div className={`transaction-amount ${transaction.type}`}>
+                {transaction.type === 'withdrawal' ? '-' : '+'}₹{transaction.amount}
+              </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
+    </motion.div>
+  );
 
-      {/* Tab Content */}
-      <div className="bg-white p-6 rounded-b-xl shadow-lg">
+  // Deposit Tab
+  const renderDeposit = () => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="wallet-deposit"
+    >
+      <motion.div className="section-header" variants={itemVariants}>
+        <div className="header-content">
+          <div className="header-icon">
+            <Plus />
+          </div>
+          <div className="header-text">
+            <h2>Add Money</h2>
+            <p>Add funds to your wallet securely</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Deposit Methods */}
+      <motion.div className="payment-methods" variants={itemVariants}>
+        <h3>Select Payment Method</h3>
+        <div className="method-grid">
+          <motion.button
+            className={`method-card ${depositMethod === 'upi' ? 'active' : ''}`}
+            onClick={() => setDepositMethod('upi')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="method-icon upi">
+              <QrCode />
+            </div>
+            <div className="method-info">
+              <h4>UPI</h4>
+              <p>Pay with any UPI app</p>
+            </div>
+            <div className="method-badge instant">Instant</div>
+          </motion.button>
+
+          <motion.button
+            className={`method-card ${depositMethod === 'card' ? 'active' : ''}`}
+            onClick={() => setDepositMethod('card')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="method-icon card">
+              <CreditCard />
+            </div>
+            <div className="method-info">
+              <h4>Debit/Credit Card</h4>
+              <p>Visa, MasterCard, RuPay</p>
+            </div>
+            <div className="method-badge secure">Secure</div>
+          </motion.button>
+
+          <motion.button
+            className={`method-card ${depositMethod === 'netbanking' ? 'active' : ''}`}
+            onClick={() => setDepositMethod('netbanking')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="method-icon bank">
+              <Building2 />
+            </div>
+            <div className="method-info">
+              <h4>Net Banking</h4>
+              <p>All major banks supported</p>
+            </div>
+            <div className="method-badge reliable">Reliable</div>
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* Amount Selection */}
+      <motion.div className="amount-selection" variants={itemVariants}>
+        <h3>Select Amount</h3>
+        <div className="quick-amounts">
+          {quickAmounts.map(amount => (
+            <motion.button
+              key={amount}
+              className={`quick-amount ${depositAmount === amount.toString() ? 'active' : ''}`}
+              onClick={() => setDepositAmount(amount.toString())}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ₹{amount}
+            </motion.button>
+          ))}
+        </div>
         
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-2">Quick Deposit</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {quickAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => {
-                        setDepositAmount(amount.toString());
-                        setActiveTab('deposit');
-                      }}
-                      className="bg-green-600 text-white py-2 px-3 rounded text-sm hover:bg-green-700"
-                    >
-                      ₹{amount}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-800 mb-2">Recent Activity</h3>
-                <div className="space-y-2">
-                  {walletData?.transactions.slice(0, 3).map((transaction) => (
-                    <div key={transaction.id} className="flex justify-between text-sm">
-                      <span className={transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}>
-                        {transaction.type === 'deposit' ? '+' : '-'}₹{transaction.amount}
-                      </span>
-                      <span className="text-gray-600">
-                        {new Date(transaction.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Safety Features */}
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-yellow-800 mb-2">🔒 Safety Features</h3>
-              <ul className="text-sm text-yellow-700 space-y-1">
-                <li>• All transactions are encrypted and secure</li>
-                <li>• Instant deposits with UPI, cards, and net banking</li>
-                <li>• 24/7 customer support for any issues</li>
-                <li>• Responsible gaming limits available</li>
-              </ul>
-            </div>
+        <div className="custom-amount">
+          <label>Custom Amount</label>
+          <div className="amount-input">
+            <IndianRupee className="currency-icon" />
+            <input
+              type="number"
+              placeholder="Enter amount"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+              min="10"
+              max="100000"
+            />
           </div>
-        )}
+          <p className="amount-note">Minimum: ₹10 | Maximum: ₹1,00,000</p>
+        </div>
+      </motion.div>
 
-        {/* Deposit Tab */}
-        {activeTab === 'deposit' && (
-          <div className="space-y-6">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-4">Add Money to Wallet</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Deposit Amount
-                  </label>
-                  <input
-                    type="number"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter amount (Min: ₹100)"
-                    min="100"
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {quickAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setDepositAmount(amount.toString())}
-                      className="bg-gray-100 hover:bg-gray-200 py-2 px-3 rounded text-sm"
-                    >
-                      ₹{amount}
-                    </button>
-                  ))}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Payment Method
-                  </label>
-                  <div className="space-y-2">
-                    {[
-                      { id: 'upi', label: 'UPI / QR Code', icon: '📱' },
-                      { id: 'cards', label: 'Credit/Debit Cards', icon: '💳' },
-                      { id: 'netbanking', label: 'Net Banking', icon: '🏦' },
-                      { id: 'wallet', label: 'Digital Wallets', icon: '📲' }
-                    ].map((method) => (
-                      <label key={method.id} className="flex items-center">
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method.id}
-                          checked={selectedPaymentMethod === method.id}
-                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                          className="mr-2"
-                        />
-                        <span className="mr-2">{method.icon}</span>
-                        {method.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleDeposit}
-                  disabled={isLoading || !depositAmount}
-                  className={`w-full py-3 rounded-lg font-medium text-white ${
-                    isLoading || !depositAmount
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
-                  }`}
-                >
-                  {isLoading ? 'Processing...' : `Deposit ₹${depositAmount || '0'}`}
-                </button>
-              </div>
-
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-                <p>💡 <strong>Instant Deposits:</strong> Money will be added to your wallet immediately after successful payment</p>
-              </div>
+      {/* Deposit Button */}
+      <motion.div className="deposit-action" variants={itemVariants}>
+        <motion.button
+          className="deposit-btn"
+          onClick={handleDeposit}
+          disabled={!depositAmount || depositMutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {depositMutation.isPending ? (
+            <div className="loading-spinner">
+              <RefreshCw className="spin" />
+              Processing...
             </div>
+          ) : (
+            <>
+              <Shield className="btn-icon" />
+              Add ₹{depositAmount || '0'} Securely
+            </>
+          )}
+        </motion.button>
+        
+        <div className="security-info">
+          <div className="security-item">
+            <CheckCircle2 className="check-icon" />
+            <span>256-bit SSL Encryption</span>
           </div>
-        )}
+          <div className="security-item">
+            <CheckCircle2 className="check-icon" />
+            <span>PCI DSS Compliant</span>
+          </div>
+          <div className="security-item">
+            <CheckCircle2 className="check-icon" />
+            <span>Instant Credit</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
 
-        {/* Withdraw Tab */}
-        {activeTab === 'withdraw' && (
-          <div className="space-y-6">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-4">Withdraw Money</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Withdrawal Amount
-                  </label>
-                  <input
-                    type="number"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter amount (Min: ₹500)"
-                    min="500"
-                    max={walletData?.balance}
-                  />
-                </div>
+  // Withdraw Tab
+  const renderWithdraw = () => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="wallet-withdraw"
+    >
+      <motion.div className="section-header" variants={itemVariants}>
+        <div className="header-content">
+          <div className="header-icon">
+            <ArrowUpRight />
+          </div>
+          <div className="header-text">
+            <h2>Withdraw Money</h2>
+            <p>Withdraw your winnings safely</p>
+          </div>
+        </div>
+        <div className="available-balance">
+          <span>Available: ₹{walletData?.walletBalance || '0'}</span>
+        </div>
+      </motion.div>
 
-                <div className="p-3 bg-gray-50 rounded-lg text-sm">
-                  <p><strong>Available Balance:</strong> ₹{walletData?.balance || '0'}</p>
-                  <p><strong>Processing Time:</strong> 2-24 hours</p>
-                  <p><strong>Minimum Amount:</strong> ₹500</p>
-                </div>
-
-                <button
-                  onClick={handleWithdraw}
-                  disabled={isLoading || !withdrawAmount || walletData?.kycStatus !== 'verified'}
-                  className={`w-full py-3 rounded-lg font-medium text-white ${
-                    isLoading || !withdrawAmount || walletData?.kycStatus !== 'verified'
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
-                  }`}
-                >
-                  {isLoading ? 'Processing...' : `Withdraw ₹${withdrawAmount || '0'}`}
-                </button>
-
-                {walletData?.kycStatus !== 'verified' && (
-                  <div className="p-3 bg-yellow-50 rounded-lg text-sm text-yellow-700">
-                    <p>⚠️ <strong>KYC Required:</strong> Complete KYC verification to enable withdrawals</p>
-                    <button
-                      onClick={() => setActiveTab('kyc')}
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Complete KYC Now
-                    </button>
-                  </div>
-                )}
-              </div>
+      {/* Withdrawal Methods */}
+      <motion.div className="withdrawal-methods" variants={itemVariants}>
+        <h3>Select Withdrawal Method</h3>
+        <div className="method-grid">
+          <motion.button
+            className={`method-card ${withdrawMethod === 'upi' ? 'active' : ''}`}
+            onClick={() => setWithdrawMethod('upi')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="method-icon upi">
+              <Smartphone />
             </div>
-          </div>
-        )}
+            <div className="method-info">
+              <h4>UPI Transfer</h4>
+              <p>Direct to UPI ID</p>
+            </div>
+            <div className="method-badge fast">2-4 Hours</div>
+          </motion.button>
 
-        {/* History Tab */}
-        {activeTab === 'history' && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Transaction History</h3>
+          <motion.button
+            className={`method-card ${withdrawMethod === 'bank' ? 'active' : ''}`}
+            onClick={() => setWithdrawMethod('bank')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="method-icon bank">
+              <Building2 />
+            </div>
+            <div className="method-info">
+              <h4>Bank Transfer</h4>
+              <p>NEFT/IMPS to bank account</p>
+            </div>
+            <div className="method-badge standard">4-24 Hours</div>
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* Amount Input */}
+      <motion.div className="withdraw-amount" variants={itemVariants}>
+        <h3>Withdrawal Amount</h3>
+        <div className="amount-input">
+          <IndianRupee className="currency-icon" />
+          <input
+            type="number"
+            placeholder="Enter withdrawal amount"
+            value={withdrawAmount}
+            onChange={(e) => setWithdrawAmount(e.target.value)}
+            min="100"
+            max={walletData?.walletBalance || '0'}
+          />
+        </div>
+        <p className="amount-note">
+          Minimum: ₹100 | Maximum: ₹{walletData?.walletBalance || '0'}
+        </p>
+      </motion.div>
+
+      {/* Bank Details */}
+      <motion.div className="bank-details" variants={itemVariants}>
+        <h3>{withdrawMethod === 'upi' ? 'UPI Details' : 'Bank Account Details'}</h3>
+        
+        {withdrawMethod === 'upi' ? (
+          <div className="form-group">
+            <label>UPI ID</label>
+            <input
+              type="text"
+              placeholder="yourname@paytm"
+              value={bankDetails.upiId}
+              onChange={(e) => setBankDetails(prev => ({
+                ...prev,
+                upiId: e.target.value
+              }))}
+              required
+            />
+          </div>
+        ) : (
+          <>
+            <div className="form-group">
+              <label>Account Holder Name</label>
+              <input
+                type="text"
+                placeholder="Enter account holder name"
+                value={bankDetails.accountHolderName}
+                onChange={(e) => setBankDetails(prev => ({
+                  ...prev,
+                  accountHolderName: e.target.value
+                }))}
+                required
+              />
+            </div>
             
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border p-2 text-left">Date</th>
-                    <th className="border p-2 text-left">Type</th>
-                    <th className="border p-2 text-right">Amount</th>
-                    <th className="border p-2 text-center">Status</th>
-                    <th className="border p-2 text-left">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {walletData?.transactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td className="border p-2 text-sm">
-                        {new Date(transaction.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="border p-2">
-                        <span className={`inline-block px-2 py-1 rounded text-xs ${
-                          transaction.type === 'deposit' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {transaction.type}
-                        </span>
-                      </td>
-                      <td className="border p-2 text-right font-medium">
-                        {transaction.type === 'deposit' ? '+' : '-'}₹{transaction.amount}
-                      </td>
-                      <td className="border p-2 text-center">
-                        <span className={`inline-block px-2 py-1 rounded text-xs ${
-                          transaction.status === 'completed' 
-                            ? 'bg-green-100 text-green-800' 
-                            : transaction.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {transaction.status}
-                        </span>
-                      </td>
-                      <td className="border p-2 text-sm">{transaction.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              {!walletData?.transactions.length && (
-                <div className="text-center py-8 text-gray-500">
-                  No transactions found
-                </div>
-              )}
+            <div className="form-group">
+              <label>Account Number</label>
+              <input
+                type="text"
+                placeholder="Enter account number"
+                value={bankDetails.accountNumber}
+                onChange={(e) => setBankDetails(prev => ({
+                  ...prev,
+                  accountNumber: e.target.value
+                }))}
+                required
+              />
             </div>
-          </div>
+            
+            <div className="form-group">
+              <label>IFSC Code</label>
+              <input
+                type="text"
+                placeholder="Enter IFSC code"
+                value={bankDetails.ifscCode}
+                onChange={(e) => setBankDetails(prev => ({
+                  ...prev,
+                  ifscCode: e.target.value.toUpperCase()
+                }))}
+                required
+              />
+            </div>
+          </>
         )}
+      </motion.div>
 
-        {/* KYC Tab */}
-        {activeTab === 'kyc' && (
-          <div className="space-y-6">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-4">KYC Verification</h3>
-              
-              <div className="space-y-4">
-                <div className={`p-4 rounded-lg ${
-                  walletData?.kycStatus === 'verified' 
-                    ? 'bg-green-50 text-green-800' 
-                    : walletData?.kycStatus === 'pending'
-                    ? 'bg-yellow-50 text-yellow-800'
-                    : 'bg-red-50 text-red-800'
-                }`}>
-                  <p className="font-medium">
-                    Status: {walletData?.kycStatus === 'verified' ? '✅ Verified' : 
-                            walletData?.kycStatus === 'pending' ? '⏳ Under Review' : 
-                            '❌ Not Completed'}
+      {/* Withdraw Button */}
+      <motion.div className="withdraw-action" variants={itemVariants}>
+        <motion.button
+          className="withdraw-btn"
+          onClick={handleWithdraw}
+          disabled={!withdrawAmount || withdrawMutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {withdrawMutation.isPending ? (
+            <div className="loading-spinner">
+              <RefreshCw className="spin" />
+              Processing...
+            </div>
+          ) : (
+            <>
+              <ArrowUpRight className="btn-icon" />
+              Withdraw ₹{withdrawAmount || '0'}
+            </>
+          )}
+        </motion.button>
+        
+        <div className="withdrawal-info">
+          <div className="info-item">
+            <Clock className="info-icon" />
+            <span>Processing time: {withdrawMethod === 'upi' ? '2-4 hours' : '4-24 hours'}</span>
+          </div>
+          <div className="info-item">
+            <Shield className="info-icon" />
+            <span>Secure & encrypted transactions</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+
+  // Transaction History Tab
+  const renderHistory = () => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="wallet-history"
+    >
+      <motion.div className="section-header" variants={itemVariants}>
+        <div className="header-content">
+          <div className="header-icon">
+            <History />
+          </div>
+          <div className="header-text">
+            <h2>Transaction History</h2>
+            <p>Track all your wallet activities</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div className="transaction-filters" variants={itemVariants}>
+        <div className="filter-tabs">
+          <button className="filter-tab active">All</button>
+          <button className="filter-tab">Deposits</button>
+          <button className="filter-tab">Withdrawals</button>
+          <button className="filter-tab">Games</button>
+        </div>
+      </motion.div>
+
+      <motion.div className="transaction-history" variants={itemVariants}>
+        {historyLoading ? (
+          <div className="loading-state">
+            <RefreshCw className="spin" />
+            <p>Loading transactions...</p>
+          </div>
+        ) : transactionHistory?.transactions?.length > 0 ? (
+          <div className="transaction-list">
+            {transactionHistory.transactions.map((transaction: any, index: number) => (
+              <motion.div
+                key={transaction.id}
+                className="transaction-item detailed"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <div className="transaction-icon">
+                  {transaction.type === 'deposit' ? (
+                    <ArrowDownLeft className="deposit-icon" />
+                  ) : transaction.type === 'withdrawal' ? (
+                    <ArrowUpRight className="withdrawal-icon" />
+                  ) : (
+                    <Target className="game-icon" />
+                  )}
+                </div>
+                <div className="transaction-details">
+                  <h4>{transaction.description || transaction.type}</h4>
+                  <p className="transaction-date">
+                    {new Date(transaction.createdAt).toLocaleString()}
                   </p>
+                  <p className="transaction-id">ID: {transaction.id}</p>
                 </div>
-
-                {walletData?.kycStatus !== 'verified' && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-800 mb-2">Required Documents:</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Valid Government ID (Aadhaar/PAN/Passport)</li>
-                        <li>• Bank account details</li>
-                        <li>• Address proof</li>
-                        <li>• Selfie verification</li>
-                      </ul>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        toast({
-                          title: "KYC Portal",
-                          description: "Redirecting to KYC verification portal"
-                        });
-                      }}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700"
-                    >
-                      Start KYC Verification
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+                <div className="transaction-status">
+                  <span className={`status-badge ${transaction.status || 'completed'}`}>
+                    {transaction.status || 'Completed'}
+                  </span>
+                </div>
+                <div className={`transaction-amount ${transaction.type}`}>
+                  {transaction.type === 'withdrawal' ? '-' : '+'}₹{transaction.amount}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <History className="empty-icon" />
+            <h3>No Transactions Yet</h3>
+            <p>Your transaction history will appear here</p>
           </div>
         )}
-      </div>
+      </motion.div>
+    </motion.div>
+  );
+
+  return (
+    <div className="enhanced-wallet-overlay">
+      <motion.div
+        className="enhanced-wallet-modal"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.3 }}
+      >
+        {/* Header */}
+        <div className="wallet-header">
+          <div className="header-left">
+            <Wallet className="wallet-icon" />
+            <div className="header-info">
+              <h1>My Wallet</h1>
+              <p>Manage your funds securely</p>
+            </div>
+          </div>
+          <motion.button
+            className="close-btn"
+            onClick={onClose}
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            ×
+          </motion.button>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="wallet-nav">
+          {[
+            { id: 'overview', label: 'Overview', icon: Wallet },
+            { id: 'deposit', label: 'Deposit', icon: Plus },
+            { id: 'withdraw', label: 'Withdraw', icon: Minus },
+            { id: 'history', label: 'History', icon: History }
+          ].map(tab => (
+            <motion.button
+              key={tab.id}
+              className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id as any)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <tab.icon className="tab-icon" />
+              <span>{tab.label}</span>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="wallet-content">
+          <AnimatePresence mode="wait">
+            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'deposit' && renderDeposit()}
+            {activeTab === 'withdraw' && renderWithdraw()}
+            {activeTab === 'history' && renderHistory()}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
-};
+}

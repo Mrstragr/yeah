@@ -53,7 +53,7 @@ export function PremiumGamingPlatform() {
   // Wallet Balance Query
   const { data: walletData, isLoading: walletLoading } = useQuery({
     queryKey: ['/api/wallet/balance'],
-    enabled: !!userProfile?.user,
+    enabled: !!userProfile,
   });
 
   // Enhanced Game Categories with Indian Market Focus
@@ -282,7 +282,7 @@ export function PremiumGamingPlatform() {
         </div>
 
         <div className="header-center">
-          {userProfile?.user && (
+          {userProfile && (
             <motion.div 
               className="user-status"
               initial={{ opacity: 0 }}
@@ -488,7 +488,7 @@ export function PremiumGamingPlatform() {
       <div className="stats-grid">
         <motion.div className="stat-card" variants={itemVariants}>
           <div className="stat-icon games-played">
-            <GameController2 />
+            <Gamepad2 />
           </div>
           <div className="stat-content">
             <h3>Games Played</h3>
@@ -576,7 +576,7 @@ export function PremiumGamingPlatform() {
           whileTap={{ scale: 0.9 }}
           onClick={() => setActiveTab('home')}
         >
-          <GameController2 className="nav-icon" />
+          <Gamepad2 className="nav-icon" />
           <span>Games</span>
         </motion.button>
 
