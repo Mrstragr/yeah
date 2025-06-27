@@ -37,6 +37,7 @@ export const ProductionReadyPlatform = () => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('lobby');
   const [showKYC, setShowKYC] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const { toast } = useToast();
@@ -245,12 +246,7 @@ export const ProductionReadyPlatform = () => {
         );
 
       case 'wallet':
-        return (
-          <WalletPage 
-            onClose={() => setActiveTab('main')}
-            refreshBalance={refreshBalance}
-          />
-        );
+        return <EnhancedWalletSystem />;
 
       case 'promotion':
         return <PromotionPage onClose={() => setActiveTab('main')} />;
@@ -636,6 +632,21 @@ export const ProductionReadyPlatform = () => {
           }
         }
       `}</style>
+      
+      {/* Advanced Login System */}
+      <AdvancedLoginSystem
+        isOpen={showLoginDialog}
+        onClose={() => setShowLoginDialog(false)}
+        onLoginSuccess={(token) => {
+          localStorage.setItem('authToken', token);
+          setShowLoginDialog(false);
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/profile'] });
+          toast({
+            title: "Welcome to Perfect91Club!",
+            description: "You have successfully logged in"
+          });
+        }}
+      />
     </div>
   );
 };

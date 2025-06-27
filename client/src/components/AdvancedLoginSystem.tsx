@@ -132,9 +132,10 @@ export const AdvancedLoginSystem = ({ isOpen, onClose, onLoginSuccess }: Advance
       password: formData.password
     });
 
-    if (response.token) {
-      localStorage.setItem('authToken', response.token);
-      onLoginSuccess(response.token);
+    const data = await response.json();
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      onLoginSuccess(data.token);
       toast({
         title: "Login Successful",
         description: "Welcome back to Perfect91Club!"
@@ -198,9 +199,10 @@ export const AdvancedLoginSystem = ({ isOpen, onClose, onLoginSuccess }: Advance
       emailOtp: formData.otp
     });
 
-    if (response.token) {
-      localStorage.setItem('authToken', response.token);
-      onLoginSuccess(response.token);
+    const data = await response.json();
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      onLoginSuccess(data.token);
       toast({
         title: "Registration Successful",
         description: "Welcome to Perfect91Club!"
