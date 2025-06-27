@@ -38,10 +38,13 @@ export const EnhancedWalletSystem = () => {
       const balanceResponse = await apiRequest('GET', '/api/wallet/balance');
       const transactionsResponse = await apiRequest('GET', '/api/wallet/transactions');
       
+      const balanceData = await balanceResponse.json();
+      const transactionsData = await transactionsResponse.json();
+      
       setWalletData({
-        balance: balanceResponse.balance || '0',
-        transactions: transactionsResponse.transactions || [],
-        kycStatus: balanceResponse.kycStatus || 'pending',
+        balance: balanceData.balance || '0',
+        transactions: transactionsData.transactions || [],
+        kycStatus: balanceData.kycStatus || 'pending',
         depositLimits: {
           daily: '50000',
           monthly: '200000'
@@ -70,19 +73,20 @@ export const EnhancedWalletSystem = () => {
         paymentMethod: selectedPaymentMethod
       });
 
-      if (response.razorpayOrderId) {
+      const data = await response.json();
+      if (data.razorpayOrderId) {
         // Initialize Razorpay payment
         const options = {
           key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: response.amount,
+          amount: data.amount,
           currency: 'INR',
           name: 'Perfect91Club',
           description: 'Wallet Deposit',
-          order_id: response.razorpayOrderId,
+          order_id: data.razorpayOrderId,
           prefill: {
-            name: response.userInfo?.name || '',
-            email: response.userInfo?.email || '',
-            contact: response.userInfo?.phone || ''
+            name: data.userInfo?.name || '',
+            email: data.userInfo?.email || '',
+            contact: data.userInfo?.phone || ''
           },
           theme: {
             color: '#2563eb'
