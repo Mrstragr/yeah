@@ -20,6 +20,7 @@ import { WalletPage } from './WalletPage';
 import { KYCPage } from './KYCPage';
 import { AdvancedLoginSystem } from './AdvancedLoginSystem';
 import { ComprehensiveWalletSystem } from './ComprehensiveWalletSystem';
+import { EnhancedGameInterface } from './EnhancedGameInterface';
 
 interface User {
   id: number;
@@ -98,6 +99,7 @@ export const ProductionReadyPlatform = () => {
     }
 
     setSelectedGame(gameId);
+    setActiveTab('game');
   };
 
   const handleTabChange = (tab: string) => {
@@ -247,6 +249,33 @@ export const ProductionReadyPlatform = () => {
 
       case 'wallet':
         return <ComprehensiveWalletSystem />;
+
+      case 'game':
+        if (selectedGame) {
+          const gameNames: Record<string, string> = {
+            'aviator': 'Aviator',
+            'mines': 'Mines',
+            'dragon-tiger': 'Dragon Tiger',
+            'wingo': 'WinGo',
+            'teen-patti': 'Teen Patti',
+            'limbo': 'Limbo',
+            'plinko': 'Plinko'
+          };
+          
+          return (
+            <EnhancedGameInterface
+              gameId={selectedGame}
+              gameName={gameNames[selectedGame] || selectedGame}
+              onBack={() => {
+                setSelectedGame(null);
+                setActiveTab('main');
+              }}
+              userBalance={userProfile?.user?.walletBalance || '0'}
+              onBalanceUpdate={refreshBalance}
+            />
+          );
+        }
+        return null;
 
       case 'promotion':
         return <PromotionPage onClose={() => setActiveTab('main')} />;

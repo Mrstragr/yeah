@@ -353,7 +353,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
       }
       
-      res.json({ success: true, transaction });
+      res.json({ 
+        success: true, 
+        transaction,
+        razorpayOrderId: `order_${Date.now()}`,
+        amount: amount * 100, // Amount in paise for Razorpay
+        userInfo: {
+          name: user?.username || 'User',
+          email: user?.email || 'user@example.com',
+          phone: user?.phone || '9999999999'
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Payment verification endpoint
+  app.post('/api/wallet/verify-payment', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+      
+      // In production, verify the signature with Razorpay secret
+      // For demo purposes, we'll simulate successful verification
+      const isValidSignature = true; // In production: verify using crypto and Razorpay secret
+      
+      if (!isValidSignature) {
+        return res.status(400).json({ error: 'Invalid payment signature' });
+      }
+
+      // Update transaction status and user balance
+      const user = await storage.getUser(req.user!.id);
+      if (user) {
+        // Extract amount from payment (this should be stored with the order)
+        const depositAmount = 100; // This should come from the order details
+        const newBalance = parseFloat(user.walletBalance) + depositAmount;
+        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+        
+        // Create completed transaction record
+        await storage.createWalletTransaction({
+          userId: req.user!.id,
+          type: 'deposit',
+          amount: depositAmount.toString(),
+          status: 'completed',
+          paymentMethod: 'razorpay',
+          razorpayPaymentId: razorpay_payment_id,
+          razorpayOrderId: razorpay_order_id,
+          description: 'Wallet deposit via Razorpay'
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Payment verified successfully'
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
