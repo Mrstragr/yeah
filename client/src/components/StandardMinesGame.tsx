@@ -1,503 +1,441 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface StandardMinesGameProps {
   onClose: () => void;
-  refreshBalance: () => void;
+  refreshBalance: () => Promise<void>;
 }
 
 export const StandardMinesGame = ({ onClose, refreshBalance }: StandardMinesGameProps) => {
-  const [betAmount, setBetAmount] = useState(100);
+  const [betAmount, setBetAmount] = useState(10);
   const [mineCount, setMineCount] = useState(3);
-  const [gameState, setGameState] = useState<'betting' | 'playing' | 'ended'>('betting');
-  const [grid, setGrid] = useState<Array<Array<{ revealed: boolean; isMine: boolean; }>>>(
-    Array(5).fill(null).map(() => Array(5).fill({ revealed: false, isMine: false }))
-  );
-  const [safeSpots, setSafeSpots] = useState(0);
-  const [currentMultiplier, setCurrentMultiplier] = useState(1.0);
-  const [isAutoPlay, setIsAutoPlay] = useState(false);
-  const [autoPlayCount, setAutoPlayCount] = useState(0);
-  const [autoPickTiles, setAutoPickTiles] = useState(3);
-  const [history, setHistory] = useState([
-    { round: 15234, mines: 3, picks: 5, multiplier: 2.4, result: 240 },
-    { round: 15233, mines: 5, picks: 2, multiplier: 1.8, result: -100 },
-    { round: 15232, mines: 1, picks: 10, multiplier: 8.5, result: 850 }
-  ]);
-  const [statistics, setStatistics] = useState({
-    totalGames: 247,
-    winRate: 68.4,
-    totalWagered: 25780,
-    totalWon: 28940,
-    biggestWin: 5670,
-    currentStreak: 3
-  });
+  const [gameActive, setGameActive] = useState(false);
+  const [revealedTiles, setRevealedTiles] = useState<number[]>([]);
+  const [minePositions, setMinePositions] = useState<number[]>([]);
+  const [currentMultiplier, setCurrentMultiplier] = useState(1);
+  const [gameResult, setGameResult] = useState<any>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const multipliers = {
-    1: [1.03, 1.09, 1.17, 1.29, 1.46, 1.71, 2.09, 2.71, 3.77, 5.70, 9.43, 18.86, 56.57, 340.43, 4756.00],
-    2: [1.09, 1.20, 1.37, 1.62, 1.99, 2.53, 3.35, 4.61, 6.63, 10.12, 16.54, 29.75, 62.33, 165.96, 827.83],
-    3: [1.17, 1.34, 1.60, 1.99, 2.58, 3.49, 4.91, 7.26, 11.37, 19.04, 34.47, 69.95, 167.87, 503.60, 2515.00],
-    4: [1.29, 1.54, 1.92, 2.51, 3.43, 4.86, 7.26, 11.37, 18.90, 34.47, 69.95, 160.89, 482.68, 2034.50, 15217.50],
-    5: [1.46, 1.81, 2.36, 3.23, 4.65, 7.09, 11.37, 19.04, 34.47, 69.95, 160.89, 441.86, 1767.40, 10604.40]
-  };
+  const { toast } = useToast();
 
-  useEffect(() => {
-    initializeGrid();
-  }, [mineCount]);
+  const totalTiles = 25;
 
-  const initializeGrid = () => {
-    const newGrid = Array(5).fill(null).map(() => 
-      Array(5).fill(null).map(() => ({ 
-        revealed: false, 
-        isMine: false
-      }))
-    );
-    
-    // Place mines randomly
-    const minePositions = new Set();
-    while (minePositions.size < mineCount) {
-      const pos = Math.floor(Math.random() * 25);
-      minePositions.add(pos);
+  const startGame = async () => {
+    if (betAmount < 1) {
+      toast({
+        title: 'Invalid Bet',
+        description: 'Minimum bet amount is ₹1',
+        variant: 'destructive',
+      });
+      return;
     }
-    
-    minePositions.forEach(pos => {
-      const row = Math.floor(pos / 5);
-      const col = pos % 5;
-      newGrid[row][col].isMine = true;
-    });
-    
-    setGrid(newGrid);
+
+    setGameActive(true);
+    setRevealedTiles([]);
+    setMinePositions([]);
+    setCurrentMultiplier(1);
+    setGameResult(null);
+
+    // Generate random mine positions for demo
+    const mines = [];
+    while (mines.length < mineCount) {
+      const pos = Math.floor(Math.random() * totalTiles);
+      if (!mines.includes(pos)) {
+        mines.push(pos);
+      }
+    }
+    setMinePositions(mines);
   };
 
-  const startGame = () => {
-    setGameState('playing');
-    setSafeSpots(0);
-    setCurrentMultiplier(1.0);
-    initializeGrid();
-  };
+  const revealTile = async (tileIndex: number) => {
+    if (!gameActive || revealedTiles.includes(tileIndex) || isPlaying) return;
 
-  const revealTile = async (row: number, col: number) => {
-    if (gameState !== 'playing' || grid[row][col].revealed) return;
-    
-    const newGrid = [...grid];
-    newGrid[row][col].revealed = true;
-    setGrid(newGrid);
-    
-    if (newGrid[row][col].isMine) {
-      // Hit mine - game over
-      setGameState('ended');
+    setIsPlaying(true);
+
+    // Check if it's a mine
+    if (minePositions.includes(tileIndex)) {
+      // Hit a mine - game over
+      setGameActive(false);
+      setRevealedTiles([...revealedTiles, tileIndex]);
       
-      // Reveal all mines
-      setTimeout(() => {
-        const finalGrid = [...newGrid];
-        for (let i = 0; i < 5; i++) {
-          for (let j = 0; j < 5; j++) {
-            if (finalGrid[i][j].isMine) {
-              finalGrid[i][j].revealed = true;
-            }
-          }
-        }
-        setGrid(finalGrid);
-      }, 500);
-      
+      try {
+        const response = await apiRequest('POST', '/api/games/mines/play', {
+          betAmount,
+          mineCount,
+          revealedTiles: [...revealedTiles, tileIndex]
+        });
+
+        const result = await response.json();
+        setGameResult(result);
+        
+        toast({
+          title: 'Game Over!',
+          description: `You hit a mine and lost ₹${betAmount}`,
+          variant: 'destructive',
+        });
+
+        await refreshBalance();
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to process game',
+          variant: 'destructive',
+        });
+      }
     } else {
       // Safe tile
-      const newSafeSpots = safeSpots + 1;
-      setSafeSpots(newSafeSpots);
+      const newRevealed = [...revealedTiles, tileIndex];
+      setRevealedTiles(newRevealed);
       
-      const multiplierArray = multipliers[mineCount as keyof typeof multipliers];
-      const newMultiplier = multiplierArray[newSafeSpots - 1] || multiplierArray[multiplierArray.length - 1];
-      setCurrentMultiplier(newMultiplier);
+      // Calculate multiplier
+      const safeCount = newRevealed.length;
+      const multiplier = calculateMultiplier(safeCount, mineCount);
+      setCurrentMultiplier(multiplier);
+
+      toast({
+        title: 'Safe!',
+        description: `Current multiplier: ${multiplier.toFixed(2)}x`,
+      });
     }
+
+    setIsPlaying(false);
   };
 
   const cashOut = async () => {
-    if (gameState !== 'playing' || safeSpots === 0) return;
-    
+    if (!gameActive || revealedTiles.length === 0) return;
+
+    setIsPlaying(true);
+    setGameActive(false);
+
     try {
-      const response = await fetch('/api/games/mines/play', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer demo_token_' + Date.now()
-        },
-        body: JSON.stringify({
-          betAmount,
-          mineCount,
-          revealedTiles: safeSpots
-        })
+      const response = await apiRequest('POST', '/api/games/mines/play', {
+        betAmount,
+        mineCount,
+        revealedTiles
       });
 
-      if (response.ok) {
-        const winAmount = betAmount * currentMultiplier;
-        
-        // Add to history
-        setHistory(prev => [
-          { round: prev[0].round + 1, mines: mineCount, picks: safeSpots, multiplier: currentMultiplier, result: winAmount - betAmount },
-          ...prev.slice(0, 9)
-        ]);
-        
-        setGameState('ended');
-        refreshBalance();
-      }
-    } catch (error) {
-      console.error('Cash out error:', error);
+      const result = await response.json();
+      setGameResult(result);
+      
+      const winAmount = betAmount * currentMultiplier;
+      toast({
+        title: 'Cashed Out!',
+        description: `You won ₹${winAmount.toFixed(2)}!`,
+      });
+
+      await refreshBalance();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to cash out',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPlaying(false);
     }
   };
 
-  const resetGame = () => {
-    setGameState('betting');
-    setSafeSpots(0);
-    setCurrentMultiplier(1.0);
-    initializeGrid();
+  const calculateMultiplier = (safeCount: number, mines: number) => {
+    const safeTiles = totalTiles - mines;
+    let multiplier = 1;
+    
+    for (let i = 0; i < safeCount; i++) {
+      multiplier *= (safeTiles - i) / (totalTiles - mines - i);
+    }
+    
+    return Math.max(1, multiplier * 0.97); // House edge
   };
 
-  const getWinChance = () => {
-    const totalTiles = 25;
-    const safeTiles = totalTiles - mineCount;
-    const remainingTiles = totalTiles - safeSpots;
-    const remainingSafe = safeTiles - safeSpots;
-    return Math.round((remainingSafe / remainingTiles) * 100);
+  const getTileContent = (tileIndex: number) => {
+    if (!revealedTiles.includes(tileIndex)) {
+      return '?';
+    }
+    
+    if (minePositions.includes(tileIndex)) {
+      return '💣';
+    }
+    
+    return '💎';
+  };
+
+  const getTileClass = (tileIndex: number) => {
+    let className = 'mine-tile';
+    
+    if (revealedTiles.includes(tileIndex)) {
+      if (minePositions.includes(tileIndex)) {
+        className += ' mine';
+      } else {
+        className += ' safe';
+      }
+    }
+    
+    return className;
   };
 
   return (
-    <div className="standard-mines">
+    <div className="mines-game">
       <div className="game-header">
-        <button onClick={onClose} className="back-btn">←</button>
-        <div className="game-title">
-          <span>Mines</span>
-          <span className="provider">Spribe</span>
+        <button onClick={onClose} className="back-button">
+          ← Back
+        </button>
+        <h2>Mines</h2>
+        <div className="multiplier-display">
+          {currentMultiplier.toFixed(2)}x
         </div>
-        <div className="balance-display">₹8,807.50</div>
       </div>
 
-      <div className="game-layout">
-        <div className="main-game">
-          <div className="game-area">
-            <div className="mines-grid">
-              {grid.map((row, rowIndex) => (
-                <div key={rowIndex} className="grid-row">
-                  {row.map((cell, colIndex) => (
-                    <button
-                      key={`${rowIndex}-${colIndex}`}
-                      className={`mine-tile ${cell.revealed ? 'revealed' : ''} ${
-                        cell.revealed && cell.isMine ? 'mine' : ''
-                      } ${cell.revealed && !cell.isMine ? 'safe' : ''}`}
-                      onClick={() => revealTile(rowIndex, colIndex)}
-                      disabled={gameState !== 'playing'}
-                    >
-                      {cell.revealed ? (
-                        cell.isMine ? '💣' : '💎'
-                      ) : ''}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            <div className="game-info">
-              <div className="current-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Mines</span>
-                  <span className="stat-value">{mineCount}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Gems Found</span>
-                  <span className="stat-value">{safeSpots}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Next Tile Win Chance</span>
-                  <span className="stat-value">{getWinChance()}%</span>
-                </div>
-              </div>
-
-              <div className="multiplier-section">
-                <div className="current-multiplier">
-                  <span>Current Multiplier</span>
-                  <span className="multiplier-value">{currentMultiplier.toFixed(2)}x</span>
-                </div>
-                <div className="next-multiplier">
-                  <span>Next: {(multipliers[mineCount as keyof typeof multipliers][safeSpots] || 0).toFixed(2)}x</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="betting-panel">
+      <div className="game-content">
+        {/* Game Controls */}
+        <div className="controls-section">
+          <div className="control-group">
+            <label>Bet Amount</label>
             <div className="bet-controls">
-              <div className="bet-amount">
-                <label>Bet Amount</label>
-                <div className="amount-input">
-                  <button onClick={() => setBetAmount(Math.max(10, betAmount / 2))}>½</button>
-                  <input 
-                    type="number" 
-                    value={betAmount} 
-                    onChange={(e) => setBetAmount(Math.max(10, parseInt(e.target.value) || 10))}
-                    disabled={gameState === 'playing'}
-                  />
-                  <button onClick={() => setBetAmount(betAmount * 2)}>2×</button>
-                </div>
-              </div>
-
-              <div className="mine-selection">
-                <label>Mines</label>
-                <select 
-                  value={mineCount} 
-                  onChange={(e) => setMineCount(parseInt(e.target.value))}
-                  disabled={gameState === 'playing'}
-                >
-                  {[1,2,3,4,5,6,7,8,9,10].map(count => (
-                    <option key={count} value={count}>{count}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="auto-play">
-                <label>
-                  <input 
-                    type="checkbox" 
-                    checked={isAutoPlay} 
-                    onChange={(e) => setIsAutoPlay(e.target.checked)}
-                  />
-                  Auto Play
-                </label>
-                {isAutoPlay && (
-                  <div className="auto-settings">
-                    <input 
-                      type="number" 
-                      placeholder="Number of games"
-                      value={autoPlayCount || ''}
-                      onChange={(e) => setAutoPlayCount(parseInt(e.target.value) || 0)}
-                    />
-                    <input 
-                      type="number" 
-                      placeholder="Auto pick tiles"
-                      value={autoPickTiles}
-                      onChange={(e) => setAutoPickTiles(parseInt(e.target.value) || 3)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="action-buttons">
-              {gameState === 'betting' && (
-                <button className="play-btn" onClick={startGame}>
-                  Play ₹{betAmount}
-                </button>
-              )}
-              
-              {gameState === 'playing' && (
-                <>
-                  <button 
-                    className="cashout-btn" 
-                    onClick={cashOut}
-                    disabled={safeSpots === 0}
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                min="1"
+                max="100000"
+                disabled={gameActive}
+                className="bet-input"
+              />
+              <div className="quick-bets">
+                {[10, 50, 100, 500].map(amount => (
+                  <button
+                    key={amount}
+                    onClick={() => setBetAmount(amount)}
+                    disabled={gameActive}
+                    className={`quick-bet ${betAmount === amount ? 'active' : ''}`}
                   >
-                    Cash Out ₹{(betAmount * currentMultiplier).toFixed(2)}
+                    ₹{amount}
                   </button>
-                  <div className="potential-win">
-                    Potential: ₹{(betAmount * (multipliers[mineCount as keyof typeof multipliers][safeSpots] || currentMultiplier)).toFixed(2)}
-                  </div>
-                </>
-              )}
-              
-              {gameState === 'ended' && (
-                <button className="play-again-btn" onClick={resetGame}>
-                  Play Again
-                </button>
-              )}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="side-panel">
-          <div className="tabs">
-            <button className="tab active">History</button>
-            <button className="tab">Statistics</button>
-            <button className="tab">How to Play</button>
-          </div>
-
-          <div className="tab-content">
-            <div className="history-section">
-              <div className="history-header">
-                <span>Round</span>
-                <span>Mines</span>
-                <span>Result</span>
-              </div>
-              {history.map((game, idx) => (
-                <div key={idx} className="history-item">
-                  <span className="round-id">#{game.round}</span>
-                  <span className="mine-info">{game.mines}M/{game.picks}P</span>
-                  <span className={`result-amount ${game.result > 0 ? 'win' : 'lose'}`}>
-                    {game.result > 0 ? '+' : ''}₹{game.result}
-                  </span>
-                </div>
+          <div className="control-group">
+            <label>Mines Count</label>
+            <div className="mines-controls">
+              {[1, 3, 5, 7, 10].map(count => (
+                <button
+                  key={count}
+                  onClick={() => setMineCount(count)}
+                  disabled={gameActive}
+                  className={`mine-count-btn ${mineCount === count ? 'active' : ''}`}
+                >
+                  {count}
+                </button>
               ))}
             </div>
-
-            <div className="statistics-section">
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <span className="stat-number">{statistics.totalGames}</span>
-                  <span className="stat-label">Total Games</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-number">{statistics.winRate}%</span>
-                  <span className="stat-label">Win Rate</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-number">₹{statistics.totalWagered}</span>
-                  <span className="stat-label">Total Wagered</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-number">₹{statistics.totalWon}</span>
-                  <span className="stat-label">Total Won</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-number">₹{statistics.biggestWin}</span>
-                  <span className="stat-label">Biggest Win</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-number">{statistics.currentStreak}</span>
-                  <span className="stat-label">Current Streak</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rules-section">
-              <div className="rule-item">
-                <h4>How to Play</h4>
-                <p>Click tiles to reveal gems. Avoid mines to win!</p>
-              </div>
-              <div className="rule-item">
-                <h4>Multipliers</h4>
-                <p>Each safe tile increases your multiplier. More mines = higher multipliers.</p>
-              </div>
-              <div className="rule-item">
-                <h4>Cash Out</h4>
-                <p>Cash out anytime to secure your winnings before hitting a mine.</p>
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* Game Board */}
+        <div className="game-board">
+          <div className="mines-grid">
+            {Array.from({ length: totalTiles }, (_, index) => (
+              <button
+                key={index}
+                className={getTileClass(index)}
+                onClick={() => revealTile(index)}
+                disabled={!gameActive || revealedTiles.includes(index) || isPlaying}
+              >
+                {getTileContent(index)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="actions-section">
+          {!gameActive ? (
+            <button onClick={startGame} className="start-button">
+              Start Game - Bet ₹{betAmount}
+            </button>
+          ) : (
+            <div className="game-actions">
+              <button 
+                onClick={cashOut} 
+                disabled={revealedTiles.length === 0 || isPlaying}
+                className="cashout-button"
+              >
+                Cash Out - ₹{(betAmount * currentMultiplier).toFixed(2)}
+              </button>
+              <div className="game-stats">
+                <span>Revealed: {revealedTiles.length}</span>
+                <span>Mines: {mineCount}</span>
+                <span>Safe tiles left: {totalTiles - mineCount - revealedTiles.length}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Game Result */}
+        {gameResult && (
+          <div className="result-display">
+            <h3>Game Result</h3>
+            <div className="result-info">
+              <p className={gameResult.isWin ? 'win' : 'lose'}>
+                {gameResult.isWin ? 
+                  `Won ₹${gameResult.winAmount}` : 
+                  `Lost ₹${betAmount}`
+                }
+              </p>
+              <p>Multiplier: {gameResult.multiplier || currentMultiplier.toFixed(2)}x</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
-        .standard-mines {
-          background: #0f172a;
+        .mines-game {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
           color: white;
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+          z-index: 1000;
+          overflow-y: auto;
         }
 
         .game-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 15px 20px;
-          background: #1e293b;
-          border-bottom: 1px solid #334155;
+          padding: 20px;
+          background: rgba(255,255,255,0.1);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255,255,255,0.2);
+          position: sticky;
+          top: 0;
+          z-index: 10;
         }
 
-        .back-btn {
+        .back-button {
           background: none;
           border: none;
           color: white;
-          font-size: 20px;
+          font-size: 16px;
           cursor: pointer;
           padding: 8px;
         }
 
-        .game-title {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .game-title span:first-child {
-          font-size: 18px;
-          font-weight: bold;
-        }
-
-        .provider {
-          font-size: 12px;
-          color: #64748b;
-        }
-
-        .balance-display {
-          background: #059669;
+        .multiplier-display {
+          background: linear-gradient(45deg, #10b981, #059669);
+          color: white;
           padding: 8px 16px;
-          border-radius: 6px;
+          border-radius: 20px;
           font-weight: bold;
+          font-size: 16px;
         }
 
-        .game-layout {
-          display: grid;
-          grid-template-columns: 1fr 350px;
-          height: calc(100vh - 70px);
-        }
-
-        .main-game {
-          display: flex;
-          flex-direction: column;
+        .game-content {
           padding: 20px;
         }
 
-        .game-area {
-          flex: 1;
+        .controls-section {
+          margin-bottom: 30px;
+        }
+
+        .control-group {
+          margin-bottom: 20px;
+        }
+
+        .control-group label {
+          display: block;
+          margin-bottom: 10px;
+          color: #fbbf24;
+          font-weight: 500;
+        }
+
+        .bet-controls, .mines-controls {
           display: flex;
-          gap: 20px;
+          gap: 10px;
           align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .bet-input {
+          padding: 10px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 8px;
+          color: white;
+          font-size: 16px;
+          width: 120px;
+        }
+
+        .quick-bets, .mines-controls {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .quick-bet, .mine-count-btn {
+          padding: 8px 16px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 20px;
+          color: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 14px;
+        }
+
+        .quick-bet.active, .mine-count-btn.active {
+          background: linear-gradient(45deg, #10b981, #059669);
+          border-color: #10b981;
+        }
+
+        .game-board {
+          margin-bottom: 30px;
         }
 
         .mines-grid {
           display: grid;
-          grid-template-rows: repeat(5, 1fr);
-          gap: 4px;
-          background: #1e293b;
-          padding: 20px;
-          border-radius: 12px;
-        }
-
-        .grid-row {
-          display: grid;
           grid-template-columns: repeat(5, 1fr);
-          gap: 4px;
+          gap: 8px;
+          max-width: 400px;
+          margin: 0 auto;
         }
 
         .mine-tile {
-          width: 60px;
-          height: 60px;
-          background: #475569;
-          border: 2px solid #64748b;
+          aspect-ratio: 1;
+          background: rgba(255,255,255,0.1);
+          border: 2px solid rgba(255,255,255,0.2);
           border-radius: 8px;
           color: white;
-          font-size: 24px;
+          font-size: 16px;
           cursor: pointer;
-          transition: all 0.2s;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(5px);
         }
 
-        .mine-tile:hover:not(.revealed):not(:disabled) {
-          background: #64748b;
-          border-color: #94a3b8;
+        .mine-tile:hover:not(:disabled) {
+          background: rgba(255,255,255,0.2);
           transform: scale(1.05);
         }
 
-        .mine-tile.revealed {
+        .mine-tile:disabled {
           cursor: not-allowed;
         }
 
         .mine-tile.safe {
-          background: #059669;
+          background: linear-gradient(45deg, #10b981, #059669);
           border-color: #10b981;
         }
 
         .mine-tile.mine {
-          background: #dc2626;
-          border-color: #ef4444;
-          animation: explode 0.3s ease-out;
+          background: linear-gradient(45deg, #dc2626, #ef4444);
+          border-color: #dc2626;
+          animation: explode 0.5s ease-out;
         }
 
         @keyframes explode {
@@ -506,349 +444,85 @@ export const StandardMinesGame = ({ onClose, refreshBalance }: StandardMinesGame
           100% { transform: scale(1); }
         }
 
-        .mine-tile:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .game-info {
-          flex: 1;
-          margin-left: 40px;
-        }
-
-        .current-stats {
-          background: #1e293b;
-          border-radius: 12px;
-          padding: 20px;
+        .actions-section {
           margin-bottom: 20px;
         }
 
-        .stat-item {
-          display: flex;
-          justify-content: space-between;
+        .start-button, .cashout-button {
+          width: 100%;
+          padding: 16px;
+          background: linear-gradient(45deg, #10b981, #059669);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 18px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
           margin-bottom: 15px;
         }
 
-        .stat-item:last-child {
-          margin-bottom: 0;
+        .start-button:hover, .cashout-button:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
 
-        .stat-label {
-          color: #94a3b8;
-        }
-
-        .stat-value {
-          font-weight: bold;
-          color: white;
-        }
-
-        .multiplier-section {
-          background: #1e293b;
-          border-radius: 12px;
-          padding: 20px;
-          text-align: center;
-        }
-
-        .current-multiplier {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-
-        .multiplier-value {
-          font-size: 36px;
-          font-weight: bold;
-          color: #10b981;
-          margin-top: 5px;
-        }
-
-        .next-multiplier {
-          color: #64748b;
-          font-size: 14px;
-        }
-
-        .betting-panel {
-          background: #1e293b;
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 20px;
-        }
-
-        .bet-controls {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .bet-amount label,
-        .mine-selection label {
-          display: block;
-          margin-bottom: 8px;
-          color: #94a3b8;
-          font-size: 14px;
-        }
-
-        .amount-input {
-          display: flex;
-          background: #334155;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-
-        .amount-input button {
-          background: #475569;
-          border: none;
-          color: white;
-          padding: 10px 12px;
-          cursor: pointer;
-          font-size: 12px;
-        }
-
-        .amount-input input {
-          flex: 1;
-          background: none;
-          border: none;
-          color: white;
-          text-align: center;
-          padding: 10px;
-        }
-
-        .mine-selection select {
-          width: 100%;
-          background: #334155;
-          border: 1px solid #475569;
-          color: white;
-          padding: 10px;
-          border-radius: 6px;
-        }
-
-        .auto-play label {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #94a3b8;
-          font-size: 14px;
-          margin-bottom: 10px;
-        }
-
-        .auto-play input[type="checkbox"] {
-          accent-color: #10b981;
-        }
-
-        .auto-settings {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .auto-settings input {
-          background: #334155;
-          border: 1px solid #475569;
-          color: white;
-          padding: 8px;
-          border-radius: 4px;
-          font-size: 12px;
-        }
-
-        .action-buttons {
-          text-align: center;
-        }
-
-        .play-btn,
-        .cashout-btn,
-        .play-again-btn {
-          width: 100%;
-          padding: 15px;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .play-btn {
-          background: #10b981;
-          color: white;
-        }
-
-        .play-btn:hover {
-          background: #059669;
-        }
-
-        .cashout-btn {
-          background: #f59e0b;
-          color: white;
-          margin-bottom: 10px;
-        }
-
-        .cashout-btn:hover {
-          background: #d97706;
-        }
-
-        .cashout-btn:disabled {
-          background: #6b7280;
+        .cashout-button:disabled {
+          background: #374151;
           cursor: not-allowed;
         }
 
-        .play-again-btn {
-          background: #3b82f6;
-          color: white;
-        }
-
-        .play-again-btn:hover {
-          background: #2563eb;
-        }
-
-        .potential-win {
-          color: #94a3b8;
-          font-size: 14px;
-          text-align: center;
-        }
-
-        .side-panel {
-          background: #1e293b;
-          border-left: 1px solid #334155;
+        .game-stats {
           display: flex;
-          flex-direction: column;
-        }
-
-        .tabs {
-          display: flex;
-          background: #334155;
-        }
-
-        .tab {
-          flex: 1;
-          background: none;
-          border: none;
-          color: #94a3b8;
-          padding: 15px 10px;
-          cursor: pointer;
-          font-size: 14px;
-          border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-          color: white;
-          border-bottom-color: #10b981;
-        }
-
-        .tab-content {
-          flex: 1;
-          overflow-y: auto;
-          padding: 15px;
-        }
-
-        .history-header {
-          display: grid;
-          grid-template-columns: 1fr 80px 80px;
-          gap: 10px;
-          padding: 10px 0;
-          border-bottom: 1px solid #334155;
-          font-size: 12px;
-          color: #94a3b8;
-          font-weight: bold;
-        }
-
-        .history-item {
-          display: grid;
-          grid-template-columns: 1fr 80px 80px;
-          gap: 10px;
-          padding: 8px 0;
-          border-bottom: 1px solid #334155;
-          font-size: 14px;
-        }
-
-        .round-id {
-          color: #64748b;
-          font-size: 12px;
-        }
-
-        .mine-info {
-          color: #94a3b8;
-          font-size: 12px;
-        }
-
-        .result-amount.win {
-          color: #10b981;
-          font-weight: bold;
-        }
-
-        .result-amount.lose {
-          color: #ef4444;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 15px;
-        }
-
-        .stat-card {
-          background: #334155;
-          padding: 15px;
+          justify-content: space-between;
+          align-items: center;
+          background: rgba(255,255,255,0.1);
+          padding: 12px;
           border-radius: 8px;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .stat-number {
-          font-size: 18px;
-          font-weight: bold;
-          color: #10b981;
-          margin-bottom: 5px;
-        }
-
-        .stat-label {
-          color: #94a3b8;
-          font-size: 12px;
-        }
-
-        .rules-section {
-          padding-top: 10px;
-        }
-
-        .rule-item {
-          margin-bottom: 20px;
-        }
-
-        .rule-item h4 {
-          color: #10b981;
-          margin-bottom: 8px;
-        }
-
-        .rule-item p {
-          color: #94a3b8;
           font-size: 14px;
-          line-height: 1.4;
+        }
+
+        .result-display {
+          background: rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
+        }
+
+        .result-display h3 {
+          margin-bottom: 15px;
+          color: #fbbf24;
+        }
+
+        .result-info p {
+          margin: 8px 0;
+          font-size: 16px;
+        }
+
+        .result-info p.win {
+          color: #10b981;
+          font-weight: bold;
+        }
+
+        .result-info p.lose {
+          color: #dc2626;
+          font-weight: bold;
         }
 
         @media (max-width: 768px) {
-          .game-layout {
-            grid-template-columns: 1fr;
+          .mines-grid {
+            max-width: 300px;
+            gap: 6px;
           }
-          
-          .game-area {
-            flex-direction: column;
-          }
-          
-          .game-info {
-            margin-left: 0;
-            margin-top: 20px;
-          }
-          
-          .bet-controls {
-            grid-template-columns: 1fr;
-          }
-          
+
           .mine-tile {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+            font-size: 14px;
+          }
+
+          .game-stats {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
           }
         }
       `}</style>

@@ -1,763 +1,575 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface StandardPlinkoGameProps {
   onClose: () => void;
-  refreshBalance: () => void;
+  refreshBalance: () => Promise<void>;
 }
 
 export const StandardPlinkoGame = ({ onClose, refreshBalance }: StandardPlinkoGameProps) => {
-  const [betAmount, setBetAmount] = useState(100);
+  const [betAmount, setBetAmount] = useState(10);
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('medium');
-  const [ballCount, setBallCount] = useState(10);
-  const [gameState, setGameState] = useState<'betting' | 'playing' | 'ended'>('betting');
-  const [droppingBalls, setDroppingBalls] = useState<number[]>([]);
-  const [results, setResults] = useState<number[]>([]);
-  const [totalWin, setTotalWin] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(false);
-  const [autoPlayCount, setAutoPlayCount] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [gameResult, setGameResult] = useState<any>(null);
+  const [ballPosition, setBallPosition] = useState<number | null>(null);
+
+  const { toast } = useToast();
 
   const multipliers = {
-    low: [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
-    medium: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-    high: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29]
+    low: [1.5, 1.2, 1.1, 1.0, 0.5, 0.3, 0.5, 1.0, 1.1, 1.2, 1.5],
+    medium: [5.6, 2.1, 1.1, 1.0, 0.5, 0.2, 0.5, 1.0, 1.1, 2.1, 5.6],
+    high: [29, 8.1, 3.0, 1.5, 1.0, 0.2, 1.0, 1.5, 3.0, 8.1, 29]
   };
 
-  const [history, setHistory] = useState([
-    { round: 8934, balls: 10, risk: 'medium', payout: 240 },
-    { round: 8933, balls: 5, risk: 'high', payout: -100 },
-    { round: 8932, balls: 20, risk: 'low', payout: 180 }
-  ]);
+  const getMultiplierColor = (multiplier: number) => {
+    if (multiplier >= 10) return '#dc2626'; // Red for high
+    if (multiplier >= 2) return '#ea580c'; // Orange for medium
+    if (multiplier >= 1) return '#10b981'; // Green for win
+    return '#6b7280'; // Gray for loss
+  };
 
   const playGame = async () => {
-    if (gameState !== 'betting') return;
-    
-    setGameState('playing');
-    setResults([]);
-    setTotalWin(0);
-    
-    // Simulate balls dropping
-    const ballResults: number[] = [];
-    for (let i = 0; i < ballCount; i++) {
-      setTimeout(() => {
-        const slot = Math.floor(Math.random() * 9);
-        const multiplier = multipliers[riskLevel][slot];
-        const winAmount = betAmount * multiplier;
-        
-        ballResults.push(winAmount);
-        setResults(prev => [...prev, winAmount]);
-        setTotalWin(prev => prev + winAmount);
-        
-        if (ballResults.length === ballCount) {
-          setTimeout(() => finishGame(ballResults), 1000);
-        }
-      }, i * 200);
+    if (betAmount < 1) {
+      toast({
+        title: 'Invalid Bet',
+        description: 'Minimum bet amount is ₹1',
+        variant: 'destructive',
+      });
+      return;
     }
-  };
 
-  const finishGame = async (ballResults: number[]) => {
-    setGameState('ended');
-    
-    const totalPayout = ballResults.reduce((sum, result) => sum + result, 0);
-    const totalBet = betAmount * ballCount;
-    
-    try {
-      const response = await fetch('/api/games/plinko/play', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer demo_token_' + Date.now()
-        },
-        body: JSON.stringify({
-          betAmount: totalBet,
-          ballCount,
-          riskLevel,
-          results: ballResults
-        })
+    setIsPlaying(true);
+    setGameResult(null);
+    setBallPosition(null);
+
+    // Simulate ball drop
+    setTimeout(() => {
+      const randomSlot = Math.floor(Math.random() * multipliers[riskLevel].length);
+      const multiplier = multipliers[riskLevel][randomSlot];
+      const winAmount = betAmount * multiplier;
+      const isWin = multiplier >= 1;
+
+      setBallPosition(randomSlot);
+
+      const result = {
+        isWin,
+        winAmount,
+        multiplier,
+        slot: randomSlot
+      };
+
+      setGameResult(result);
+
+      if (isWin && multiplier > 1) {
+        toast({
+          title: 'Congratulations!',
+          description: `You won ₹${winAmount.toFixed(2)} with ${multiplier}x!`,
+        });
+      } else if (multiplier === 1) {
+        toast({
+          title: 'Break Even',
+          description: 'You got your bet back!',
+        });
+      } else {
+        toast({
+          title: 'Try Again',
+          description: `${multiplier}x - Better luck next time!`,
+          variant: 'destructive',
+        });
+      }
+
+      // Call API
+      apiRequest('POST', '/api/games/plinko/play', {
+        betAmount,
+        riskLevel
+      }).then(async () => {
+        await refreshBalance();
+      }).catch((error) => {
+        console.error('API error:', error);
       });
 
-      if (response.ok) {
-        refreshBalance();
-      }
-    } catch (error) {
-      console.error('Game error:', error);
-    }
-    
-    setHistory(prev => [
-      { round: prev[0].round + 1, balls: ballCount, risk: riskLevel, payout: totalPayout - totalBet },
-      ...prev.slice(0, 19)
-    ]);
-    
-    setTimeout(() => {
-      setGameState('betting');
-      setResults([]);
-      setTotalWin(0);
-      
-      if (isAutoPlay && autoPlayCount > 0) {
-        setAutoPlayCount(prev => prev - 1);
-        setTimeout(playGame, 1000);
-      }
+      setIsPlaying(false);
     }, 3000);
   };
 
   return (
-    <div className="standard-plinko">
+    <div className="plinko-game">
       <div className="game-header">
-        <button onClick={onClose} className="back-btn">←</button>
-        <div className="game-title">
-          <span>Plinko</span>
-          <span className="provider">Spribe</span>
-        </div>
-        <div className="balance-display">₹8,807.50</div>
+        <button onClick={onClose} className="back-button">
+          ← Back
+        </button>
+        <h2>Plinko</h2>
+        <div className="risk-display">{riskLevel.toUpperCase()}</div>
       </div>
 
-      <div className="game-layout">
-        <div className="main-game">
-          <div className="plinko-board">
-            <div className="pegs-container">
-              {Array(8).fill(0).map((_, row) => (
-                <div key={row} className="peg-row" style={{ marginLeft: `${row * 20}px` }}>
-                  {Array(row + 1).fill(0).map((_, col) => (
+      <div className="game-content">
+        {/* Plinko Board */}
+        <div className="plinko-board">
+          <div className="board-container">
+            {/* Pegs */}
+            <div className="pegs">
+              {Array.from({ length: 8 }, (_, row) => (
+                <div key={row} className="peg-row" style={{ left: `${50 - (row * 12.5)}%` }}>
+                  {Array.from({ length: row + 3 }, (_, col) => (
                     <div key={col} className="peg"></div>
                   ))}
                 </div>
               ))}
             </div>
-            
-            <div className="multiplier-slots">
-              {multipliers[riskLevel].map((mult, idx) => (
-                <div key={idx} className={`slot ${mult >= 5 ? 'high' : mult >= 2 ? 'medium' : 'low'}`}>
-                  <div className="multiplier">{mult}x</div>
-                  <div className="ball-count">
-                    {results.filter((_, i) => i % 9 === idx).length}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {gameState === 'playing' && (
-              <div className="dropping-balls">
-                {droppingBalls.map((ball, idx) => (
-                  <div key={idx} className="ball" style={{ left: `${50 + (Math.random() - 0.5) * 20}%` }}>
-                    ⚪
-                  </div>
-                ))}
+
+            {/* Ball */}
+            {isPlaying && (
+              <div className="ball-container">
+                <div className="ball dropping"></div>
               </div>
             )}
-          </div>
 
-          <div className="control-panel">
-            <div className="bet-controls">
-              <div className="bet-amount">
-                <label>Bet per Ball</label>
-                <div className="amount-input">
-                  <button onClick={() => setBetAmount(Math.max(10, betAmount / 2))}>½</button>
-                  <input 
-                    type="number" 
-                    value={betAmount} 
-                    onChange={(e) => setBetAmount(Math.max(10, parseInt(e.target.value) || 10))}
-                    disabled={gameState === 'playing'}
-                  />
-                  <button onClick={() => setBetAmount(betAmount * 2)}>2×</button>
-                </div>
-              </div>
-
-              <div className="risk-selection">
-                <label>Risk Level</label>
-                <div className="risk-buttons">
-                  {(['low', 'medium', 'high'] as const).map(risk => (
-                    <button
-                      key={risk}
-                      className={`risk-btn ${riskLevel === risk ? 'active' : ''}`}
-                      onClick={() => setRiskLevel(risk)}
-                      disabled={gameState === 'playing'}
-                    >
-                      {risk.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="ball-count-section">
-                <label>Number of Balls</label>
-                <div className="ball-input">
-                  <button onClick={() => setBallCount(Math.max(1, ballCount - 1))}>-</button>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    max="100"
-                    value={ballCount} 
-                    onChange={(e) => setBallCount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
-                    disabled={gameState === 'playing'}
-                  />
-                  <button onClick={() => setBallCount(Math.min(100, ballCount + 1))}>+</button>
-                </div>
-                <div className="quick-balls">
-                  {[1, 10, 50, 100].map(count => (
-                    <button 
-                      key={count}
-                      onClick={() => setBallCount(count)}
-                      className={ballCount === count ? 'active' : ''}
-                      disabled={gameState === 'playing'}
-                    >
-                      {count}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="auto-play">
-                <label>
-                  <input 
-                    type="checkbox" 
-                    checked={isAutoPlay} 
-                    onChange={(e) => setIsAutoPlay(e.target.checked)}
-                  />
-                  Auto Play
-                </label>
-                {isAutoPlay && (
-                  <input 
-                    type="number" 
-                    placeholder="Rounds"
-                    value={autoPlayCount || ''}
-                    onChange={(e) => setAutoPlayCount(parseInt(e.target.value) || 0)}
-                  />
-                )}
-              </div>
+            {/* Drop zone indicator */}
+            <div className="drop-zone">
+              <div className="drop-arrow">⬇</div>
+              <span>DROP</span>
             </div>
 
-            <div className="game-info">
-              <div className="total-bet">
-                Total Bet: ₹{betAmount * ballCount}
-              </div>
-              <div className="current-win">
-                Current Win: ₹{totalWin.toFixed(2)}
-              </div>
-              <button 
-                className={`play-btn ${gameState === 'playing' ? 'playing' : ''}`}
-                onClick={playGame}
-                disabled={gameState === 'playing'}
-              >
-                {gameState === 'playing' ? 'Dropping...' : 'Drop Balls'}
-              </button>
+            {/* Multiplier slots */}
+            <div className="multiplier-slots">
+              {multipliers[riskLevel].map((multiplier, index) => (
+                <div
+                  key={index}
+                  className={`slot ${ballPosition === index ? 'active' : ''}`}
+                  style={{ backgroundColor: getMultiplierColor(multiplier) }}
+                >
+                  <span className="multiplier-value">{multiplier}x</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="side-panel">
-          <div className="tabs">
-            <button className="tab active">History</button>
-            <button className="tab">Payouts</button>
-          </div>
-
-          <div className="tab-content">
-            <div className="history-section">
-              <div className="history-header">
-                <span>Round</span>
-                <span>Balls</span>
-                <span>Payout</span>
-              </div>
-              {history.map((game, idx) => (
-                <div key={idx} className="history-item">
-                  <span className="round-id">#{game.round}</span>
-                  <span className="ball-info">{game.balls}B</span>
-                  <span className={`payout ${game.payout > 0 ? 'win' : 'lose'}`}>
-                    {game.payout > 0 ? '+' : ''}₹{game.payout}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="payouts-section">
-              <div className="payout-header">Multipliers ({riskLevel})</div>
-              <div className="payout-grid">
-                {multipliers[riskLevel].map((mult, idx) => (
-                  <div key={idx} className={`payout-item ${mult >= 5 ? 'high' : mult >= 2 ? 'medium' : 'low'}`}>
-                    {mult}x
-                  </div>
+        {/* Controls */}
+        <div className="controls-section">
+          <div className="control-group">
+            <label>Bet Amount</label>
+            <div className="bet-controls">
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                min="1"
+                max="100000"
+                disabled={isPlaying}
+                className="bet-input"
+              />
+              <div className="quick-bets">
+                {[10, 50, 100, 500].map(amount => (
+                  <button
+                    key={amount}
+                    onClick={() => setBetAmount(amount)}
+                    disabled={isPlaying}
+                    className={`quick-bet ${betAmount === amount ? 'active' : ''}`}
+                  >
+                    ₹{amount}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
+
+          <div className="control-group">
+            <label>Risk Level</label>
+            <div className="risk-controls">
+              {(['low', 'medium', 'high'] as const).map(risk => (
+                <button
+                  key={risk}
+                  onClick={() => setRiskLevel(risk)}
+                  disabled={isPlaying}
+                  className={`risk-btn ${riskLevel === risk ? 'active' : ''}`}
+                >
+                  {risk.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="multiplier-info">
+            <h4>Multipliers ({riskLevel})</h4>
+            <div className="multiplier-preview">
+              {multipliers[riskLevel].map((mult, index) => (
+                <span
+                  key={index}
+                  className="mult-chip"
+                  style={{ backgroundColor: getMultiplierColor(mult) }}
+                >
+                  {mult}x
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <button 
+          onClick={playGame} 
+          disabled={isPlaying}
+          className="play-button"
+        >
+          {isPlaying ? 'Dropping Ball...' : `Drop Ball - ₹${betAmount}`}
+        </button>
+
+        {gameResult && (
+          <div className="result-display">
+            <h3>Result</h3>
+            <div className="result-info">
+              <p>Slot: {gameResult.slot + 1}</p>
+              <p>Multiplier: {gameResult.multiplier}x</p>
+              <p className={gameResult.multiplier >= 1 ? 'win' : 'lose'}>
+                {gameResult.multiplier >= 1 ? 
+                  `Won ₹${gameResult.winAmount.toFixed(2)}` : 
+                  `Lost ₹${betAmount}`
+                }
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
-        .standard-plinko {
-          background: #1a1f36;
+        .plinko-game {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
           color: white;
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+          z-index: 1000;
+          overflow-y: auto;
         }
 
         .game-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 15px 20px;
-          background: #252a44;
-          border-bottom: 1px solid #3a3f5c;
+          padding: 20px;
+          background: rgba(255,255,255,0.1);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255,255,255,0.2);
         }
 
-        .back-btn {
+        .back-button {
           background: none;
           border: none;
           color: white;
-          font-size: 20px;
+          font-size: 16px;
           cursor: pointer;
-          padding: 8px;
         }
 
-        .game-title {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .game-title span:first-child {
-          font-size: 18px;
-          font-weight: bold;
-        }
-
-        .provider {
-          font-size: 12px;
-          color: #8b92b5;
-        }
-
-        .balance-display {
-          background: #f6ad55;
+        .risk-display {
+          background: linear-gradient(45deg, #1e40af, #3b82f6);
           padding: 8px 16px;
-          border-radius: 6px;
-          color: #1a202c;
+          border-radius: 20px;
           font-weight: bold;
+          font-size: 14px;
         }
 
-        .game-layout {
-          display: grid;
-          grid-template-columns: 1fr 300px;
-          height: calc(100vh - 70px);
-        }
-
-        .main-game {
-          display: flex;
-          flex-direction: column;
+        .game-content {
           padding: 20px;
         }
 
         .plinko-board {
-          flex: 1;
-          background: #252a44;
-          border-radius: 15px;
-          padding: 30px;
-          margin-bottom: 20px;
-          position: relative;
-          overflow: hidden;
+          margin-bottom: 30px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 20px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
         }
 
-        .pegs-container {
+        .board-container {
           position: relative;
           height: 300px;
-          margin-bottom: 20px;
+          max-width: 400px;
+          margin: 0 auto;
+        }
+
+        .pegs {
+          position: relative;
+          height: 240px;
         }
 
         .peg-row {
+          position: absolute;
           display: flex;
-          gap: 40px;
-          margin-bottom: 30px;
+          gap: 25px;
+          top: calc(var(--row) * 30px);
         }
+
+        .peg-row:nth-child(1) { --row: 0; }
+        .peg-row:nth-child(2) { --row: 1; }
+        .peg-row:nth-child(3) { --row: 2; }
+        .peg-row:nth-child(4) { --row: 3; }
+        .peg-row:nth-child(5) { --row: 4; }
+        .peg-row:nth-child(6) { --row: 5; }
+        .peg-row:nth-child(7) { --row: 6; }
+        .peg-row:nth-child(8) { --row: 7; }
 
         .peg {
           width: 8px;
           height: 8px;
-          background: #f6ad55;
+          background: #6b7280;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(246,173,85,0.5);
+          box-shadow: 0 0 5px rgba(107, 114, 128, 0.5);
         }
 
-        .multiplier-slots {
-          display: grid;
-          grid-template-columns: repeat(9, 1fr);
-          gap: 5px;
-          margin-top: 20px;
-        }
-
-        .slot {
-          background: #1a1f36;
-          border-radius: 8px;
-          padding: 15px 5px;
-          text-align: center;
-          border: 2px solid;
-          transition: all 0.3s;
-        }
-
-        .slot.low {
-          border-color: #e53e3e;
-          background: linear-gradient(180deg, #1a1f36, rgba(229,62,62,0.1));
-        }
-
-        .slot.medium {
-          border-color: #f6ad55;
-          background: linear-gradient(180deg, #1a1f36, rgba(246,173,85,0.1));
-        }
-
-        .slot.high {
-          border-color: #48bb78;
-          background: linear-gradient(180deg, #1a1f36, rgba(72,187,120,0.1));
-        }
-
-        .multiplier {
-          font-size: 14px;
-          font-weight: bold;
-          margin-bottom: 5px;
-        }
-
-        .slot.low .multiplier { color: #e53e3e; }
-        .slot.medium .multiplier { color: #f6ad55; }
-        .slot.high .multiplier { color: #48bb78; }
-
-        .ball-count {
-          font-size: 12px;
-          color: #8b92b5;
-          background: #3a3f5c;
-          border-radius: 10px;
-          padding: 2px 6px;
-          min-height: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .dropping-balls {
+        .ball-container {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 100%;
-          pointer-events: none;
+          top: -20px;
+          left: 50%;
+          transform: translateX(-50%);
         }
 
         .ball {
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(45deg, #fbbf24, #f59e0b);
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .ball.dropping {
+          animation: ballDrop 3s ease-in-out forwards;
+        }
+
+        @keyframes ballDrop {
+          0% { transform: translateY(0) translateX(0); }
+          10% { transform: translateY(30px) translateX(-5px); }
+          20% { transform: translateY(60px) translateX(8px); }
+          30% { transform: translateY(90px) translateX(-12px); }
+          40% { transform: translateY(120px) translateX(15px); }
+          50% { transform: translateY(150px) translateX(-8px); }
+          60% { transform: translateY(180px) translateX(10px); }
+          70% { transform: translateY(210px) translateX(-6px); }
+          80% { transform: translateY(240px) translateX(4px); }
+          90% { transform: translateY(270px) translateX(-2px); }
+          100% { transform: translateY(300px) translateX(0); }
+        }
+
+        .drop-zone {
           position: absolute;
-          top: 0;
+          top: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          color: #fbbf24;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .drop-arrow {
           font-size: 16px;
-          animation: drop 2s ease-in;
+          animation: bounce 2s infinite;
         }
 
-        @keyframes drop {
-          0% { 
-            top: 0; 
-            transform: translateX(0);
-          }
-          25% { 
-            transform: translateX(-10px);
-          }
-          50% { 
-            transform: translateX(10px);
-          }
-          75% { 
-            transform: translateX(-5px);
-          }
-          100% { 
-            top: 350px; 
-            transform: translateX(0);
-          }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-5px); }
+          60% { transform: translateY(-3px); }
         }
 
-        .control-panel {
-          background: #252a44;
-          border-radius: 15px;
-          padding: 20px;
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 30px;
+        .multiplier-slots {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          gap: 2px;
+        }
+
+        .slot {
+          flex: 1;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          border: 2px solid transparent;
+          transition: all 0.3s ease;
+        }
+
+        .slot.active {
+          border-color: #fbbf24;
+          box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+          animation: slotPulse 0.5s ease-out;
+        }
+
+        @keyframes slotPulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+
+        .multiplier-value {
+          color: white;
+          font-size: 10px;
+          font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .controls-section {
+          margin-bottom: 30px;
+        }
+
+        .control-group {
+          margin-bottom: 20px;
+        }
+
+        .control-group label {
+          display: block;
+          margin-bottom: 10px;
+          color: #fbbf24;
+          font-weight: 500;
         }
 
         .bet-controls {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-        }
-
-        .bet-amount label,
-        .risk-selection label,
-        .ball-count-section label {
-          display: block;
-          margin-bottom: 8px;
-          color: #8b92b5;
-          font-size: 14px;
-        }
-
-        .amount-input,
-        .ball-input {
-          display: flex;
-          background: #1a1f36;
-          border-radius: 6px;
-          overflow: hidden;
-          margin-bottom: 8px;
-        }
-
-        .amount-input button,
-        .ball-input button {
-          background: #3a3f5c;
-          border: none;
-          color: white;
-          padding: 10px 12px;
-          cursor: pointer;
-        }
-
-        .amount-input input,
-        .ball-input input {
-          flex: 1;
-          background: none;
-          border: none;
-          color: white;
-          text-align: center;
-          padding: 10px;
-        }
-
-        .risk-buttons {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 5px;
-        }
-
-        .risk-btn {
-          background: #1a1f36;
-          border: 1px solid #3a3f5c;
-          color: white;
-          padding: 8px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12px;
-        }
-
-        .risk-btn.active {
-          background: #f6ad55;
-          color: #1a202c;
-          border-color: #f6ad55;
-        }
-
-        .quick-balls {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 3px;
-        }
-
-        .quick-balls button {
-          background: #1a1f36;
-          border: 1px solid #3a3f5c;
-          color: white;
-          padding: 6px;
-          border-radius: 3px;
-          cursor: pointer;
-          font-size: 11px;
-        }
-
-        .quick-balls button.active {
-          background: #f6ad55;
-          color: #1a202c;
-          border-color: #f6ad55;
-        }
-
-        .auto-play label {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #8b92b5;
-          font-size: 14px;
-          margin-bottom: 8px;
-        }
-
-        .auto-play input[type="checkbox"] {
-          accent-color: #f6ad55;
-        }
-
-        .auto-play input[type="number"] {
-          background: #1a1f36;
-          border: 1px solid #3a3f5c;
-          color: white;
-          padding: 6px;
-          border-radius: 4px;
-          width: 100%;
-        }
-
-        .game-info {
           display: flex;
           flex-direction: column;
           gap: 15px;
-          justify-content: center;
-          text-align: center;
         }
 
-        .total-bet,
-        .current-win {
+        .bet-input {
+          padding: 12px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 8px;
+          color: white;
           font-size: 16px;
+          width: 200px;
+        }
+
+        .quick-bets, .risk-controls {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .quick-bet, .risk-btn {
+          padding: 8px 16px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 20px;
+          color: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 14px;
+        }
+
+        .quick-bet.active {
+          background: linear-gradient(45deg, #1e40af, #3b82f6);
+          border-color: #1e40af;
+        }
+
+        .risk-btn.active {
+          background: linear-gradient(45deg, #1e40af, #3b82f6);
+          border-color: #1e40af;
+        }
+
+        .multiplier-info {
+          background: rgba(255,255,255,0.1);
+          padding: 15px;
+          border-radius: 12px;
+          backdrop-filter: blur(10px);
+        }
+
+        .multiplier-info h4 {
+          margin-bottom: 10px;
+          color: #fbbf24;
+          font-size: 14px;
+        }
+
+        .multiplier-preview {
+          display: flex;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+
+        .mult-chip {
+          padding: 4px 8px;
+          border-radius: 8px;
+          color: white;
+          font-size: 10px;
           font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .total-bet {
-          color: #8b92b5;
-        }
-
-        .current-win {
-          color: #48bb78;
-        }
-
-        .play-btn {
-          background: linear-gradient(45deg, #f6ad55, #ed8936);
+        .play-button {
+          width: 100%;
+          padding: 16px;
+          background: linear-gradient(45deg, #1e40af, #3b82f6);
           border: none;
-          color: #1a202c;
-          padding: 15px 25px;
-          border-radius: 10px;
-          font-size: 16px;
+          border-radius: 12px;
+          color: white;
+          font-size: 18px;
           font-weight: bold;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.3s ease;
+          margin-bottom: 20px;
         }
 
-        .play-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(246,173,85,0.4);
-        }
-
-        .play-btn:disabled {
-          opacity: 0.7;
+        .play-button:disabled {
+          background: #374151;
           cursor: not-allowed;
         }
 
-        .play-btn.playing {
-          background: #e53e3e;
-          color: white;
-          animation: pulse 1s infinite;
+        .play-button:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(30, 64, 175, 0.3);
         }
 
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.02); }
+        .result-display {
+          background: rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
         }
 
-        .side-panel {
-          background: #252a44;
-          border-left: 1px solid #3a3f5c;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .tabs {
-          display: flex;
-          background: #3a3f5c;
-        }
-
-        .tab {
-          flex: 1;
-          background: none;
-          border: none;
-          color: #8b92b5;
-          padding: 15px;
-          cursor: pointer;
-          font-size: 14px;
-          border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-          color: white;
-          border-bottom-color: #f6ad55;
-        }
-
-        .tab-content {
-          flex: 1;
-          overflow-y: auto;
-          padding: 15px;
-        }
-
-        .history-header {
-          display: grid;
-          grid-template-columns: 1fr 50px 70px;
-          gap: 10px;
-          padding: 10px 0;
-          border-bottom: 1px solid #3a3f5c;
-          font-size: 12px;
-          color: #8b92b5;
-          font-weight: bold;
-        }
-
-        .history-item {
-          display: grid;
-          grid-template-columns: 1fr 50px 70px;
-          gap: 10px;
-          padding: 8px 0;
-          border-bottom: 1px solid #3a3f5c;
-          font-size: 14px;
-        }
-
-        .round-id {
-          color: #8b92b5;
-          font-size: 12px;
-        }
-
-        .ball-info {
-          color: #f6ad55;
-          text-align: center;
-          font-size: 12px;
-        }
-
-        .payout.win {
-          color: #48bb78;
-          font-weight: bold;
-          text-align: right;
-        }
-
-        .payout.lose {
-          color: #e53e3e;
-          text-align: right;
-        }
-
-        .payout-header {
-          font-weight: bold;
+        .result-display h3 {
           margin-bottom: 15px;
-          color: #f6ad55;
+          color: #fbbf24;
         }
 
-        .payout-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
+        .result-info p {
+          margin: 8px 0;
+          font-size: 16px;
         }
 
-        .payout-item {
-          padding: 10px;
-          border-radius: 6px;
-          text-align: center;
+        .result-info p.win {
+          color: #10b981;
           font-weight: bold;
-          font-size: 14px;
         }
 
-        .payout-item.low {
-          background: rgba(229,62,62,0.2);
-          color: #e53e3e;
-        }
-
-        .payout-item.medium {
-          background: rgba(246,173,85,0.2);
-          color: #f6ad55;
-        }
-
-        .payout-item.high {
-          background: rgba(72,187,120,0.2);
-          color: #48bb78;
+        .result-info p.lose {
+          color: #dc2626;
+          font-weight: bold;
         }
 
         @media (max-width: 768px) {
-          .game-layout {
-            grid-template-columns: 1fr;
+          .board-container {
+            height: 250px;
+            max-width: 350px;
           }
-          
-          .bet-controls {
-            grid-template-columns: 1fr 1fr;
+
+          .pegs {
+            height: 190px;
           }
-          
-          .control-panel {
-            grid-template-columns: 1fr;
+
+          .peg-row {
             gap: 20px;
+          }
+
+          .bet-input {
+            width: 100%;
+          }
+
+          .multiplier-preview {
+            justify-content: center;
           }
         }
       `}</style>

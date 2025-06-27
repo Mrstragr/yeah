@@ -134,7 +134,7 @@ export const ProductionReadyPlatform = () => {
       case 'wingo':
       case 'k3':
       case '5d':
-        return <StandardWinGoGame {...gameProps} gameType={selectedGame} />;
+        return <StandardWinGoGame {...gameProps} />;
       case 'teen-patti':
         return <StandardTeenPattiGame {...gameProps} />;
       case 'limbo':

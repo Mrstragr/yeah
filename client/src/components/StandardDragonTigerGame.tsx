@@ -1,975 +1,750 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface StandardDragonTigerGameProps {
   onClose: () => void;
-  refreshBalance: () => void;
+  refreshBalance: () => Promise<void>;
 }
 
 export const StandardDragonTigerGame = ({ onClose, refreshBalance }: StandardDragonTigerGameProps) => {
-  const [betAmount, setBetAmount] = useState(100);
-  const [selectedBets, setSelectedBets] = useState<{[key: string]: number}>({});
-  const [gameState, setGameState] = useState<'betting' | 'dealing' | 'result'>('betting');
-  const [countdown, setCountdown] = useState(15);
-  const [cards, setCards] = useState({ dragon: null, tiger: null });
-  const [result, setResult] = useState<any>(null);
-  const [history, setHistory] = useState([
-    { round: 8745, dragon: 'K♠', tiger: '9♥', winner: 'Dragon', players: 156 },
-    { round: 8744, dragon: '7♣', tiger: '7♦', winner: 'Tie', players: 143 },
-    { round: 8743, dragon: '3♥', tiger: 'Q♠', winner: 'Tiger', players: 167 }
-  ]);
-  const [statistics, setStatistics] = useState({
-    dragon: 42,
-    tiger: 45,
-    tie: 13,
-    totalHands: 8745
-  });
-  const [roadMap, setRoadMap] = useState([
-    'D', 'T', 'D', 'D', 'T', 'Tie', 'T', 'D', 'T', 'D', 'D', 'T', 'T', 'D', 'Tie'
-  ]);
-  const [isAutoPlay, setIsAutoPlay] = useState(false);
-  const [players, setPlayers] = useState([
-    { name: 'Player1', bet: 'Dragon', amount: 500 },
-    { name: 'VIP_User', bet: 'Tiger', amount: 2000 },
-    { name: 'Lucky777', bet: 'Tie', amount: 100 }
-  ]);
+  const [betAmount, setBetAmount] = useState(10);
+  const [selectedBet, setSelectedBet] = useState<'dragon' | 'tiger' | 'tie' | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [gameResult, setGameResult] = useState<any>(null);
+  const [gameHistory, setGameHistory] = useState<string[]>(['D', 'T', 'D', 'T', 'D']);
+  const [cards, setCards] = useState<{dragon: string, tiger: string} | null>(null);
 
-  const suits = ['♠', '♥', '♦', '♣'];
-  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-  const cardValues = { 'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13 };
+  const { toast } = useToast();
 
-  useEffect(() => {
-    let interval: any;
-    
-    if (gameState === 'betting' && countdown > 0) {
-      interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev === 1) {
-            startDealing();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+  const cardSuits = ['♠', '♥', '♦', '♣'];
+  const cardValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-    return () => clearInterval(interval);
-  }, [gameState, countdown]);
-
-  const generateCard = () => {
-    const suit = suits[Math.floor(Math.random() * suits.length)];
-    const rank = ranks[Math.floor(Math.random() * ranks.length)];
-    return { suit, rank, value: cardValues[rank as keyof typeof cardValues], display: rank + suit };
+  const getRandomCard = () => {
+    const suit = cardSuits[Math.floor(Math.random() * cardSuits.length)];
+    const value = cardValues[Math.floor(Math.random() * cardValues.length)];
+    return `${value}${suit}`;
   };
 
-  const startDealing = () => {
-    setGameState('dealing');
-    
+  const getCardValue = (card: string) => {
+    const value = card.slice(0, -1);
+    if (value === 'A') return 1;
+    if (value === 'J') return 11;
+    if (value === 'Q') return 12;
+    if (value === 'K') return 13;
+    return parseInt(value);
+  };
+
+  const getCardColor = (suit: string) => {
+    return suit === '♥' || suit === '♦' ? '#dc2626' : '#000000';
+  };
+
+  const playGame = async () => {
+    if (!selectedBet) {
+      toast({
+        title: 'Select a bet',
+        description: 'Please choose Dragon, Tiger, or Tie',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (betAmount < 1) {
+      toast({
+        title: 'Invalid Bet',
+        description: 'Minimum bet amount is ₹1',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsPlaying(true);
+    setCards(null);
+    setGameResult(null);
+
+    // Simulate card dealing
     setTimeout(() => {
-      const dragonCard = generateCard();
-      const tigerCard = generateCard();
-      
+      const dragonCard = getRandomCard();
+      const tigerCard = getRandomCard();
       setCards({ dragon: dragonCard, tiger: tigerCard });
+
+      // Determine winner
+      const dragonValue = getCardValue(dragonCard);
+      const tigerValue = getCardValue(tigerCard);
       
-      setTimeout(() => {
-        showResult(dragonCard, tigerCard);
-      }, 1000);
-    }, 500);
-  };
-
-  const showResult = async (dragon: any, tiger: any) => {
-    setGameState('result');
-    
-    let winner;
-    if (dragon.value > tiger.value) winner = 'Dragon';
-    else if (tiger.value > dragon.value) winner = 'Tiger';
-    else winner = 'Tie';
-    
-    // Calculate winnings
-    let totalWin = 0;
-    Object.entries(selectedBets).forEach(([bet, amount]) => {
-      if (bet === winner) {
-        const multiplier = bet === 'Tie' ? 8 : 1.95;
-        totalWin += amount * multiplier;
+      let winner: 'dragon' | 'tiger' | 'tie';
+      if (dragonValue > tigerValue) {
+        winner = 'dragon';
+      } else if (tigerValue > dragonValue) {
+        winner = 'tiger';
+      } else {
+        winner = 'tie';
       }
-    });
-    
-    const totalBet = Object.values(selectedBets).reduce((sum, amount) => sum + amount, 0);
-    
-    if (totalBet > 0) {
-      try {
-        const response = await fetch('/api/games/dragon-tiger/play', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer demo_token_' + Date.now()
-          },
-          body: JSON.stringify({
-            betAmount: totalBet,
-            betType: Object.keys(selectedBets)[0] || 'dragon'
-          })
+
+      // Calculate result
+      const isWin = selectedBet === winner;
+      let multiplier = 1;
+      if (isWin) {
+        multiplier = selectedBet === 'tie' ? 11 : 2;
+      }
+
+      const winAmount = isWin ? betAmount * multiplier : 0;
+
+      const result = {
+        isWin,
+        winAmount,
+        multiplier: isWin ? multiplier : 0,
+        cards: { dragon: dragonCard, tiger: tigerCard },
+        winner
+      };
+
+      setGameResult(result);
+      
+      // Update history
+      setGameHistory(prev => [winner.charAt(0).toUpperCase(), ...prev.slice(0, 9)]);
+
+      if (isWin) {
+        toast({
+          title: 'Congratulations!',
+          description: `You won ₹${winAmount}!`,
         });
-
-        if (response.ok) {
-          refreshBalance();
-        }
-      } catch (error) {
-        console.error('Game error:', error);
+      } else {
+        toast({
+          title: 'Better luck next time',
+          description: `${winner.charAt(0).toUpperCase() + winner.slice(1)} wins`,
+          variant: 'destructive',
+        });
       }
-    }
-    
-    setResult({ winner, totalWin, totalBet });
-    
-    // Update history and statistics
-    const newRound = {
-      round: history[0].round + 1,
-      dragon: dragon.display,
-      tiger: tiger.display,
-      winner,
-      players: 150 + Math.floor(Math.random() * 50)
-    };
-    
-    setHistory(prev => [newRound, ...prev.slice(0, 19)]);
-    setRoadMap(prev => [winner === 'Dragon' ? 'D' : winner === 'Tiger' ? 'T' : 'Tie', ...prev.slice(0, 14)]);
-    
+
+      // Call API
+      apiRequest('POST', '/api/games/dragon-tiger/play', {
+        betAmount,
+        betType: selectedBet
+      }).then(async (response) => {
+        await refreshBalance();
+      }).catch((error) => {
+        console.error('API call failed:', error);
+      });
+
+    }, 2000);
+
     setTimeout(() => {
-      setGameState('betting');
-      setCountdown(15);
-      setSelectedBets({});
-      setResult(null);
-      setCards({ dragon: null, tiger: null });
-    }, 5000);
+      setIsPlaying(false);
+    }, 3000);
   };
 
-  const placeBet = (betType: string, amount: number) => {
-    if (gameState !== 'betting' || countdown < 3) return;
-    
-    setSelectedBets(prev => ({
-      ...prev,
-      [betType]: (prev[betType] || 0) + amount
-    }));
+  const resetGame = () => {
+    setSelectedBet(null);
+    setGameResult(null);
+    setCards(null);
   };
 
-  const clearBets = () => {
-    setSelectedBets({});
-  };
-
-  const getTotalBetAmount = () => {
-    return Object.values(selectedBets).reduce((sum, amount) => sum + amount, 0);
-  };
+  const betOptions = [
+    {
+      id: 'dragon' as const,
+      label: 'Dragon',
+      color: '#dc2626',
+      multiplier: '1:1',
+      description: 'Dragon wins'
+    },
+    {
+      id: 'tiger' as const,
+      label: 'Tiger',
+      color: '#ea580c',
+      multiplier: '1:1',
+      description: 'Tiger wins'
+    },
+    {
+      id: 'tie' as const,
+      label: 'Tie',
+      color: '#7c3aed',
+      multiplier: '11:1',
+      description: 'Both cards equal'
+    }
+  ];
 
   return (
-    <div className="standard-dragon-tiger">
+    <div className="dragon-tiger-game">
       <div className="game-header">
-        <button onClick={onClose} className="back-btn">←</button>
-        <div className="game-title">
-          <span>Dragon Tiger</span>
-          <span className="provider">Evolution Gaming</span>
+        <button onClick={onClose} className="back-button">
+          ← Back
+        </button>
+        <h2>Dragon Tiger</h2>
+        <div className="balance-display">
+          Playing for ₹{betAmount}
         </div>
-        <div className="balance-display">₹8,807.50</div>
       </div>
 
-      <div className="game-layout">
-        <div className="main-game">
-          <div className="table-area">
-            <div className="cards-section">
-              <div className="card-area dragon-area">
-                <div className="card-label">DRAGON</div>
-                <div className="card-display">
-                  {cards.dragon ? (
-                    <div className={`playing-card ${cards.dragon.suit === '♥' || cards.dragon.suit === '♦' ? 'red' : 'black'}`}>
-                      <div className="card-rank">{cards.dragon.rank}</div>
-                      <div className="card-suit">{cards.dragon.suit}</div>
-                    </div>
-                  ) : (
-                    <div className="card-back"></div>
-                  )}
+      <div className="game-content">
+        {/* Game History */}
+        <div className="history-section">
+          <h3>Recent Results</h3>
+          <div className="history-track">
+            {gameHistory.map((result, index) => (
+              <div
+                key={index}
+                className={`history-item ${result === 'D' ? 'dragon' : result === 'T' ? 'tiger' : 'tie'}`}
+              >
+                {result}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Card Area */}
+        <div className="cards-section">
+          <div className="card-container dragon-side">
+            <h3>🐉 Dragon</h3>
+            <div className="card-slot">
+              {cards ? (
+                <div className="playing-card">
+                  <span 
+                    className="card-value"
+                    style={{ color: getCardColor(cards.dragon.slice(-1)) }}
+                  >
+                    {cards.dragon}
+                  </span>
                 </div>
-              </div>
-
-              <div className="vs-section">
-                <div className="vs-text">VS</div>
-                {gameState === 'betting' && (
-                  <div className="countdown">{countdown}s</div>
-                )}
-                {result && (
-                  <div className={`winner-announcement ${result.winner.toLowerCase()}`}>
-                    {result.winner} WINS!
-                  </div>
-                )}
-              </div>
-
-              <div className="card-area tiger-area">
-                <div className="card-label">TIGER</div>
-                <div className="card-display">
-                  {cards.tiger ? (
-                    <div className={`playing-card ${cards.tiger.suit === '♥' || cards.tiger.suit === '♦' ? 'red' : 'black'}`}>
-                      <div className="card-rank">{cards.tiger.rank}</div>
-                      <div className="card-suit">{cards.tiger.suit}</div>
-                    </div>
-                  ) : (
-                    <div className="card-back"></div>
-                  )}
+              ) : isPlaying ? (
+                <div className="card-back dealing">
+                  <div className="card-pattern"></div>
                 </div>
-              </div>
-            </div>
-
-            <div className="betting-area">
-              <div 
-                className={`bet-zone dragon-zone ${selectedBets.Dragon ? 'has-bet' : ''}`}
-                onClick={() => placeBet('Dragon', betAmount)}
-              >
-                <div className="bet-label">DRAGON</div>
-                <div className="bet-odds">1:0.95</div>
-                {selectedBets.Dragon && (
-                  <div className="bet-chips">₹{selectedBets.Dragon}</div>
-                )}
-              </div>
-
-              <div 
-                className={`bet-zone tie-zone ${selectedBets.Tie ? 'has-bet' : ''}`}
-                onClick={() => placeBet('Tie', betAmount)}
-              >
-                <div className="bet-label">TIE</div>
-                <div className="bet-odds">1:8</div>
-                {selectedBets.Tie && (
-                  <div className="bet-chips">₹{selectedBets.Tie}</div>
-                )}
-              </div>
-
-              <div 
-                className={`bet-zone tiger-zone ${selectedBets.Tiger ? 'has-bet' : ''}`}
-                onClick={() => placeBet('Tiger', betAmount)}
-              >
-                <div className="bet-label">TIGER</div>
-                <div className="bet-odds">1:0.95</div>
-                {selectedBets.Tiger && (
-                  <div className="bet-chips">₹{selectedBets.Tiger}</div>
-                )}
-              </div>
+              ) : (
+                <div className="empty-card">?</div>
+              )}
             </div>
           </div>
 
-          <div className="control-panel">
-            <div className="bet-controls">
-              <div className="chip-selection">
-                <div className="chips">
-                  {[10, 50, 100, 500, 1000].map(amount => (
-                    <button
-                      key={amount}
-                      className={`chip chip-${amount} ${betAmount === amount ? 'selected' : ''}`}
-                      onClick={() => setBetAmount(amount)}
-                    >
-                      ₹{amount}
-                    </button>
-                  ))}
-                </div>
+          <div className="vs-section">
+            <div className="vs-text">VS</div>
+            {gameResult && (
+              <div className="winner-display">
+                {gameResult.winner === 'tie' ? 'TIE!' : 
+                 gameResult.winner === 'dragon' ? '🐉 WINS!' : '🐅 WINS!'}
               </div>
+            )}
+          </div>
 
-              <div className="bet-info">
-                <div className="total-bet">
-                  Total Bet: ₹{getTotalBetAmount()}
+          <div className="card-container tiger-side">
+            <h3>🐅 Tiger</h3>
+            <div className="card-slot">
+              {cards ? (
+                <div className="playing-card">
+                  <span 
+                    className="card-value"
+                    style={{ color: getCardColor(cards.tiger.slice(-1)) }}
+                  >
+                    {cards.tiger}
+                  </span>
                 </div>
-                {result && (
-                  <div className={`result-info ${result.totalWin > result.totalBet ? 'win' : 'lose'}`}>
-                    {result.totalWin > result.totalBet ? 
-                      `Won: ₹${result.totalWin - result.totalBet}` : 
-                      `Lost: ₹${result.totalBet}`
-                    }
-                  </div>
-                )}
-              </div>
-
-              <div className="action-buttons">
-                <button 
-                  className="clear-btn" 
-                  onClick={clearBets}
-                  disabled={Object.keys(selectedBets).length === 0}
-                >
-                  Clear Bets
-                </button>
-                <button 
-                  className="repeat-btn"
-                  disabled={gameState !== 'betting'}
-                >
-                  Repeat Bet
-                </button>
-              </div>
+              ) : isPlaying ? (
+                <div className="card-back dealing">
+                  <div className="card-pattern"></div>
+                </div>
+              ) : (
+                <div className="empty-card">?</div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="side-panel">
-          <div className="tabs">
-            <button className="tab active">Statistics</button>
-            <button className="tab">Roadmap</button>
-            <button className="tab">Players</button>
-          </div>
-
-          <div className="tab-content">
-            <div className="statistics-panel">
-              <div className="stats-header">Last {statistics.totalHands} Hands</div>
-              <div className="stats-grid">
-                <div className="stat-item dragon">
-                  <div className="stat-icon">🐉</div>
-                  <div className="stat-info">
-                    <div className="stat-label">Dragon</div>
-                    <div className="stat-value">{statistics.dragon}%</div>
-                  </div>
-                </div>
-                <div className="stat-item tiger">
-                  <div className="stat-icon">🐅</div>
-                  <div className="stat-info">
-                    <div className="stat-label">Tiger</div>
-                    <div className="stat-value">{statistics.tiger}%</div>
-                  </div>
-                </div>
-                <div className="stat-item tie">
-                  <div className="stat-icon">🤝</div>
-                  <div className="stat-info">
-                    <div className="stat-label">Tie</div>
-                    <div className="stat-value">{statistics.tie}%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="roadmap-panel">
-              <div className="roadmap-header">Road Map</div>
-              <div className="roadmap-grid">
-                {roadMap.map((outcome, idx) => (
-                  <div key={idx} className={`roadmap-cell ${outcome.toLowerCase()}`}>
-                    {outcome === 'Dragon' ? 'D' : outcome === 'Tiger' ? 'T' : 'Tie'}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="players-panel">
-              <div className="players-header">Live Players</div>
-              <div className="players-list">
-                {players.map((player, idx) => (
-                  <div key={idx} className="player-item">
-                    <div className="player-name">{player.name}</div>
-                    <div className="player-bet">{player.bet} - ₹{player.amount}</div>
-                  </div>
+        {/* Betting Section */}
+        <div className="betting-section">
+          <div className="bet-amount-controls">
+            <label>Bet Amount</label>
+            <div className="amount-controls">
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                min="1"
+                max="100000"
+                disabled={isPlaying}
+                className="amount-input"
+              />
+              <div className="quick-amounts">
+                {[10, 50, 100, 500, 1000].map(amount => (
+                  <button
+                    key={amount}
+                    className={`amount-btn ${betAmount === amount ? 'active' : ''}`}
+                    onClick={() => setBetAmount(amount)}
+                    disabled={isPlaying}
+                  >
+                    ₹{amount}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="history-section">
-            <div className="history-header">Recent Results</div>
-            <div className="history-list">
-              {history.slice(0, 8).map((game, idx) => (
-                <div key={idx} className="history-item">
-                  <div className="round-number">#{game.round}</div>
-                  <div className="cards-result">
-                    <span className="dragon-card">{game.dragon}</span>
-                    <span className="vs">vs</span>
-                    <span className="tiger-card">{game.tiger}</span>
-                  </div>
-                  <div className={`winner ${game.winner.toLowerCase()}`}>
-                    {game.winner}
-                  </div>
-                </div>
+          <div className="bet-options">
+            <h3>Choose Your Bet</h3>
+            <div className="options-grid">
+              {betOptions.map(option => (
+                <button
+                  key={option.id}
+                  className={`bet-option ${selectedBet === option.id ? 'selected' : ''}`}
+                  style={{ 
+                    backgroundColor: option.color,
+                    borderColor: selectedBet === option.id ? '#fbbf24' : 'transparent'
+                  }}
+                  onClick={() => setSelectedBet(option.id)}
+                  disabled={isPlaying}
+                >
+                  <div className="option-label">{option.label}</div>
+                  <div className="option-multiplier">{option.multiplier}</div>
+                  <div className="option-description">{option.description}</div>
+                </button>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="actions-section">
+          {!isPlaying && !gameResult ? (
+            <button onClick={playGame} className="play-button">
+              Place Bet - ₹{betAmount}
+            </button>
+          ) : isPlaying ? (
+            <div className="dealing-status">
+              <div className="spinner"></div>
+              <span>Dealing cards...</span>
+            </div>
+          ) : (
+            <div className="game-complete">
+              <button onClick={resetGame} className="play-again-button">
+                Play Again
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Game Result */}
+        {gameResult && (
+          <div className="result-display">
+            <h3>Game Result</h3>
+            <div className="result-info">
+              <p>Dragon: {cards?.dragon} (Value: {cards ? getCardValue(cards.dragon) : 0})</p>
+              <p>Tiger: {cards?.tiger} (Value: {cards ? getCardValue(cards.tiger) : 0})</p>
+              <p>Winner: {gameResult.winner.charAt(0).toUpperCase() + gameResult.winner.slice(1)}</p>
+              <p className={gameResult.isWin ? 'win' : 'lose'}>
+                {gameResult.isWin ? 
+                  `Won ₹${gameResult.winAmount}` : 
+                  `Lost ₹${betAmount}`
+                }
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
-        .standard-dragon-tiger {
-          background: #0d1421;
+        .dragon-tiger-game {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
           color: white;
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+          z-index: 1000;
+          overflow-y: auto;
         }
 
         .game-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 15px 20px;
-          background: #1a2332;
-          border-bottom: 1px solid #2d3748;
+          padding: 20px;
+          background: rgba(255,255,255,0.1);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255,255,255,0.2);
+          position: sticky;
+          top: 0;
+          z-index: 10;
         }
 
-        .back-btn {
+        .back-button {
           background: none;
           border: none;
           color: white;
-          font-size: 20px;
+          font-size: 16px;
           cursor: pointer;
           padding: 8px;
         }
 
-        .game-title {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .game-title span:first-child {
-          font-size: 18px;
-          font-weight: bold;
-        }
-
-        .provider {
-          font-size: 12px;
-          color: #718096;
-        }
-
         .balance-display {
-          background: #38a169;
+          background: linear-gradient(45deg, #10b981, #059669);
+          color: white;
           padding: 8px 16px;
-          border-radius: 6px;
+          border-radius: 20px;
           font-weight: bold;
+          font-size: 14px;
         }
 
-        .game-layout {
-          display: grid;
-          grid-template-columns: 1fr 350px;
-          height: calc(100vh - 70px);
+        .game-content {
+          padding: 20px;
         }
 
-        .main-game {
+        .history-section {
+          margin-bottom: 30px;
+        }
+
+        .history-section h3 {
+          margin-bottom: 15px;
+          color: #fbbf24;
+          text-align: center;
+        }
+
+        .history-track {
           display: flex;
-          flex-direction: column;
-        }
-
-        .table-area {
-          flex: 1;
-          background: #1a2332;
-          padding: 30px;
-          display: flex;
-          flex-direction: column;
           justify-content: center;
+          gap: 8px;
+          overflow-x: auto;
+          padding-bottom: 10px;
+        }
+
+        .history-item {
+          min-width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 12px;
+        }
+
+        .history-item.dragon {
+          background: #dc2626;
+        }
+
+        .history-item.tiger {
+          background: #ea580c;
+        }
+
+        .history-item.tie {
+          background: #7c3aed;
         }
 
         .cards-section {
           display: grid;
           grid-template-columns: 1fr auto 1fr;
-          gap: 60px;
+          gap: 20px;
           align-items: center;
           margin-bottom: 40px;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        .card-area {
+        .card-container {
           text-align: center;
         }
 
-        .card-label {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 20px;
-          color: #ffd700;
+        .card-container h3 {
+          margin-bottom: 15px;
+          font-size: 18px;
         }
 
-        .card-display {
+        .card-slot {
+          height: 120px;
           display: flex;
+          align-items: center;
           justify-content: center;
         }
 
         .playing-card {
-          width: 120px;
-          height: 180px;
+          width: 80px;
+          height: 110px;
           background: white;
-          border-radius: 12px;
+          border-radius: 8px;
           display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 12px;
-          box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-          position: relative;
-        }
-
-        .playing-card.red {
-          color: #dc2626;
-        }
-
-        .playing-card.black {
-          color: #1f2937;
-        }
-
-        .card-rank {
-          font-size: 24px;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
           font-weight: bold;
-          align-self: flex-start;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          animation: flipCard 0.5s ease-out;
         }
 
-        .card-suit {
-          font-size: 36px;
-          align-self: center;
-          margin-top: -30px;
+        @keyframes flipCard {
+          0% { transform: rotateY(180deg); }
+          100% { transform: rotateY(0deg); }
         }
 
         .card-back {
-          width: 120px;
-          height: 180px;
-          background: linear-gradient(45deg, #4299e1, #3182ce);
-          border-radius: 12px;
-          border: 2px solid #2d3748;
+          width: 80px;
+          height: 110px;
+          background: linear-gradient(45deg, #1e40af, #3b82f6);
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .card-back::before {
-          content: '';
-          position: absolute;
-          inset: 10px;
-          border: 2px solid white;
-          border-radius: 8px;
+        .card-back.dealing {
+          animation: dealCard 1s ease-in-out;
+        }
+
+        @keyframes dealCard {
+          0% { transform: translateX(-200px) rotate(-90deg); }
+          100% { transform: translateX(0) rotate(0deg); }
+        }
+
+        .card-pattern {
+          width: 100%;
+          height: 100%;
           background: repeating-linear-gradient(
             45deg,
-            transparent,
-            transparent 4px,
-            rgba(255,255,255,0.1) 4px,
-            rgba(255,255,255,0.1) 8px
+            rgba(255,255,255,0.1),
+            rgba(255,255,255,0.1) 5px,
+            transparent 5px,
+            transparent 10px
           );
         }
 
+        .empty-card {
+          width: 80px;
+          height: 110px;
+          background: rgba(255,255,255,0.1);
+          border: 2px dashed rgba(255,255,255,0.3);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          color: rgba(255,255,255,0.5);
+        }
+
         .vs-section {
-          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
         }
 
         .vs-text {
-          font-size: 32px;
-          font-weight: bold;
-          color: #ffd700;
-          margin-bottom: 10px;
-        }
-
-        .countdown {
           font-size: 24px;
-          color: #f56565;
           font-weight: bold;
-          background: rgba(245,101,101,0.2);
-          padding: 10px 20px;
-          border-radius: 25px;
-          border: 2px solid #f56565;
+          color: #fbbf24;
+          text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
         }
 
-        .winner-announcement {
-          font-size: 20px;
+        .winner-display {
+          background: linear-gradient(45deg, #10b981, #059669);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 20px;
           font-weight: bold;
-          padding: 15px 25px;
-          border-radius: 25px;
-          animation: announce 0.5s ease-out;
+          font-size: 14px;
+          animation: celebration 0.5s ease-out;
         }
 
-        .winner-announcement.dragon {
-          background: #dc2626;
-          color: white;
-        }
-
-        .winner-announcement.tiger {
-          background: #f59e0b;
-          color: white;
-        }
-
-        .winner-announcement.tie {
-          background: #8b5cf6;
-          color: white;
-        }
-
-        @keyframes announce {
-          0% { transform: scale(0); }
+        @keyframes celebration {
+          0% { transform: scale(0.8); opacity: 0; }
           50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
+          100% { transform: scale(1); opacity: 1; }
         }
 
-        .betting-area {
-          display: grid;
-          grid-template-columns: 1fr 200px 1fr;
-          gap: 20px;
+        .betting-section {
+          margin-bottom: 30px;
         }
 
-        .bet-zone {
-          background: rgba(255,255,255,0.1);
-          border: 3px solid transparent;
-          border-radius: 15px;
-          padding: 30px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.3s;
-          position: relative;
-          min-height: 120px;
+        .bet-amount-controls {
+          margin-bottom: 20px;
+        }
+
+        .bet-amount-controls label {
+          display: block;
+          margin-bottom: 10px;
+          color: #fbbf24;
+          font-weight: 500;
+        }
+
+        .amount-controls {
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          gap: 15px;
         }
 
-        .bet-zone:hover {
-          background: rgba(255,255,255,0.2);
-          transform: translateY(-5px);
-        }
-
-        .bet-zone.has-bet {
-          border-color: #ffd700;
-          background: rgba(255,215,0,0.2);
-        }
-
-        .dragon-zone.has-bet {
-          border-color: #dc2626;
-          background: rgba(220,38,38,0.2);
-        }
-
-        .tiger-zone.has-bet {
-          border-color: #f59e0b;
-          background: rgba(245,158,11,0.2);
-        }
-
-        .tie-zone.has-bet {
-          border-color: #8b5cf6;
-          background: rgba(139,92,246,0.2);
-        }
-
-        .bet-label {
-          font-size: 20px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-
-        .bet-odds {
+        .amount-input {
+          padding: 12px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 8px;
+          color: white;
           font-size: 16px;
-          color: #68d391;
-          font-weight: bold;
+          width: 150px;
         }
 
-        .bet-chips {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background: #ffd700;
-          color: #1a202c;
-          padding: 5px 10px;
-          border-radius: 15px;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .control-panel {
-          background: #2d3748;
-          padding: 20px;
-          border-top: 1px solid #4a5568;
-        }
-
-        .bet-controls {
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          gap: 30px;
-          align-items: center;
-        }
-
-        .chips {
+        .quick-amounts {
           display: flex;
           gap: 10px;
+          flex-wrap: wrap;
         }
 
-        .chip {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          border: 3px solid;
+        .amount-btn {
+          padding: 8px 16px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 20px;
           color: white;
-          font-weight: bold;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-          font-size: 12px;
+          transition: all 0.3s ease;
         }
 
-        .chip-10 { background: #9f7aea; border-color: #805ad5; }
-        .chip-50 { background: #4299e1; border-color: #3182ce; }
-        .chip-100 { background: #48bb78; border-color: #38a169; }
-        .chip-500 { background: #ed8936; border-color: #dd6b20; }
-        .chip-1000 { background: #f56565; border-color: #e53e3e; }
-
-        .chip.selected {
-          transform: scale(1.1);
-          box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        .amount-btn.active {
+          background: linear-gradient(45deg, #10b981, #059669);
+          border-color: #10b981;
         }
 
-        .bet-info {
-          text-align: center;
-        }
-
-        .total-bet {
-          font-size: 18px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-
-        .result-info.win {
-          color: #68d391;
-          font-weight: bold;
-        }
-
-        .result-info.lose {
-          color: #f56565;
-          font-weight: bold;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 15px;
-        }
-
-        .clear-btn,
-        .repeat-btn {
-          background: #4a5568;
-          border: 1px solid #718096;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: bold;
-          transition: all 0.2s;
-        }
-
-        .clear-btn:hover:not(:disabled) {
-          background: #e53e3e;
-          border-color: #e53e3e;
-        }
-
-        .repeat-btn:hover:not(:disabled) {
-          background: #38a169;
-          border-color: #38a169;
-        }
-
-        .clear-btn:disabled,
-        .repeat-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .side-panel {
-          background: #1a2332;
-          border-left: 1px solid #2d3748;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .tabs {
-          display: flex;
-          background: #2d3748;
-        }
-
-        .tab {
-          flex: 1;
-          background: none;
-          border: none;
-          color: #a0aec0;
-          padding: 15px 8px;
-          cursor: pointer;
-          font-size: 13px;
-          border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-          color: white;
-          border-bottom-color: #38a169;
-        }
-
-        .tab-content {
-          flex: 1;
-          overflow-y: auto;
-          padding: 15px;
-        }
-
-        .stats-header {
-          font-weight: bold;
+        .bet-options h3 {
           margin-bottom: 15px;
-          color: #a0aec0;
-          text-align: center;
+          color: #fbbf24;
         }
 
-        .stats-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-        }
-
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          background: #2d3748;
-          padding: 15px;
-          border-radius: 8px;
-        }
-
-        .stat-icon {
-          font-size: 24px;
-        }
-
-        .stat-info {
-          flex: 1;
-        }
-
-        .stat-label {
-          color: #a0aec0;
-          font-size: 14px;
-        }
-
-        .stat-value {
-          font-size: 20px;
-          font-weight: bold;
-          color: white;
-        }
-
-        .roadmap-header {
-          font-weight: bold;
-          margin-bottom: 15px;
-          color: #a0aec0;
-        }
-
-        .roadmap-grid {
+        .options-grid {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 15px;
+        }
+
+        .bet-option {
+          padding: 20px 15px;
+          border: 3px solid transparent;
+          border-radius: 12px;
+          color: white;
+          cursor: pointer;
+          text-align: center;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
           gap: 5px;
         }
 
-        .roadmap-cell {
-          aspect-ratio: 1;
-          border-radius: 6px;
+        .bet-option.selected {
+          border-color: #fbbf24;
+          transform: scale(1.05);
+          box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .option-label {
+          font-size: 16px;
+          font-weight: bold;
+        }
+
+        .option-multiplier {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+
+        .option-description {
+          font-size: 12px;
+          opacity: 0.8;
+        }
+
+        .actions-section {
+          margin-bottom: 20px;
+        }
+
+        .play-button, .play-again-button {
+          width: 100%;
+          padding: 16px;
+          background: linear-gradient(45deg, #10b981, #059669);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 18px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .play-button:hover, .play-again-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .dealing-status {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
-          font-size: 12px;
+          gap: 15px;
+          padding: 20px;
+          background: rgba(255,255,255,0.1);
+          border-radius: 12px;
+          font-size: 16px;
         }
 
-        .roadmap-cell.d {
-          background: #dc2626;
-          color: white;
+        .spinner {
+          width: 24px;
+          height: 24px;
+          border: 3px solid rgba(255,255,255,0.3);
+          border-left: 3px solid white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
         }
 
-        .roadmap-cell.t {
-          background: #f59e0b;
-          color: white;
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
-        .roadmap-cell.tie {
-          background: #8b5cf6;
-          color: white;
+        .result-display {
+          background: rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
         }
 
-        .players-header {
-          font-weight: bold;
+        .result-display h3 {
           margin-bottom: 15px;
-          color: #a0aec0;
+          color: #fbbf24;
         }
 
-        .players-list {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .player-item {
-          background: #2d3748;
-          padding: 12px;
-          border-radius: 8px;
-        }
-
-        .player-name {
-          font-weight: bold;
-          color: white;
-          margin-bottom: 5px;
-        }
-
-        .player-bet {
-          color: #a0aec0;
+        .result-info p {
+          margin: 8px 0;
           font-size: 14px;
         }
 
-        .history-section {
-          border-top: 1px solid #2d3748;
-          padding: 15px;
-          max-height: 300px;
-          overflow-y: auto;
-        }
-
-        .history-header {
+        .result-info p.win {
+          color: #10b981;
           font-weight: bold;
-          margin-bottom: 15px;
-          color: #a0aec0;
+          font-size: 16px;
         }
 
-        .history-item {
-          background: #2d3748;
-          padding: 12px;
-          border-radius: 8px;
-          margin-bottom: 8px;
-        }
-
-        .round-number {
-          color: #718096;
-          font-size: 12px;
-          margin-bottom: 5px;
-        }
-
-        .cards-result {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 5px;
-          font-size: 14px;
-        }
-
-        .vs {
-          color: #a0aec0;
-          font-size: 12px;
-        }
-
-        .winner.dragon {
+        .result-info p.lose {
           color: #dc2626;
           font-weight: bold;
-        }
-
-        .winner.tiger {
-          color: #f59e0b;
-          font-weight: bold;
-        }
-
-        .winner.tie {
-          color: #8b5cf6;
-          font-weight: bold;
+          font-size: 16px;
         }
 
         @media (max-width: 768px) {
-          .game-layout {
-            grid-template-columns: 1fr;
-          }
-          
           .cards-section {
             grid-template-columns: 1fr;
             gap: 30px;
           }
-          
-          .betting-area {
+
+          .vs-section {
+            order: -1;
+          }
+
+          .options-grid {
             grid-template-columns: 1fr;
           }
-          
-          .bet-controls {
-            grid-template-columns: 1fr;
-            gap: 20px;
+
+          .amount-controls {
+            align-items: center;
           }
-          
-          .chips {
+
+          .quick-amounts {
             justify-content: center;
-          }
-          
-          .chip {
-            width: 50px;
-            height: 50px;
           }
         }
       `}</style>

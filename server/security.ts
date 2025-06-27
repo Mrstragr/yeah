@@ -1,7 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors';
-import { Express } from 'express';
+import express, { Express } from 'express';
 
 // Rate limiting configurations
 export const createRateLimiter = (windowMs: number, max: number, message: string) => {
