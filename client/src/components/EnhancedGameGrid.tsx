@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { gameThumbnails, categoryIcons } from '../assets/game-thumbnails';
+import { gameThumbnails } from '../assets/game-thumbnails';
+import { MaintenanceDialog } from './MaintenanceDialog';
 
 interface Game {
   id: string;
@@ -10,6 +11,7 @@ interface Game {
   isNew?: boolean;
   jackpot?: string;
   players?: number;
+  isPriority?: boolean;
 }
 
 interface EnhancedGameGridProps {
@@ -19,7 +21,14 @@ interface EnhancedGameGridProps {
 
 export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGameGridProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [maintenanceDialog, setMaintenanceDialog] = useState<{isOpen: boolean, gameName: string}>({
+    isOpen: false,
+    gameName: ''
+  });
 
+  // Priority games that are fully functional
+  const priorityGames = ['aviator', 'mines', 'dragon-tiger', 'wingo'];
+  
   const allGames: Game[] = [
     {
       id: 'aviator',
@@ -28,7 +37,8 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
       thumbnail: gameThumbnails.aviator,
       isHot: true,
       jackpot: '₹2,45,678',
-      players: 1247
+      players: 1247,
+      isPriority: true
     },
     {
       id: 'mines',
@@ -36,14 +46,16 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
       category: 'casino',
       thumbnail: gameThumbnails.mines,
       isHot: true,
-      players: 892
+      players: 892,
+      isPriority: true
     },
     {
       id: 'dragon-tiger',
       title: 'Dragon Tiger',
       category: 'casino',
       thumbnail: gameThumbnails.dragonTiger,
-      players: 567
+      players: 567,
+      isPriority: true
     },
     {
       id: 'wingo',
@@ -51,7 +63,8 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
       category: 'lottery',
       thumbnail: gameThumbnails.wingo,
       isNew: true,
-      players: 2156
+      players: 2156,
+      isPriority: true
     },
     {
       id: 'k3',
@@ -86,14 +99,14 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
       id: 'dice',
       title: 'Dice',
       category: 'casino',
-      thumbnail: gameThumbnails.dice,
+      thumbnail: gameThumbnails.limbo, // Use limbo as placeholder
       players: 456
     },
     {
       id: 'cricket',
       title: 'Cricket',
       category: 'sports',
-      thumbnail: gameThumbnails.cricket,
+      thumbnail: gameThumbnails.plinko, // Use plinko as placeholder
       isHot: true,
       players: 1890
     },
@@ -101,7 +114,7 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
       id: 'roulette',
       title: 'Roulette',
       category: 'casino',
-      thumbnail: gameThumbnails.roulette,
+      thumbnail: gameThumbnails.dragonTiger, // Use dragon tiger as placeholder
       players: 234
     },
     {
