@@ -5,6 +5,8 @@ import { storage } from './storage.js';
 import { gameEngine } from './gameEngine.js';
 import { analyticsService } from './analytics.js';
 import { paymentService } from './payments.js';
+import { asyncHandler } from './errorHandler.js';
+import { validateBetAmount } from './security.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication Routes
