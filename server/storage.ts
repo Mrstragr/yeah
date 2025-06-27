@@ -8,6 +8,9 @@ import {
   promotions,
   achievements,
   userAchievements,
+  gameAnalytics,
+  playerSessions,
+  gameEvents,
   type User,
   type InsertUser,
   type Game,
@@ -86,6 +89,436 @@ export interface IStorage {
   unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement>;
   updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined>;
   checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return undefined;
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by username:', error);
+      return undefined;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by email:', error);
+      return undefined;
+    }
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.phone, phone));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by phone:', error);
+      return undefined;
+    }
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+      const [user] = await db.insert(users).values({
+        ...insertUser,
+        password: hashedPassword,
+        referralCode: insertUser.referralCode || this.generateReferralCode(),
+      }).returning();
+      return user;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  private generateReferralCode(): string {
+    return 'P91' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ balance: newBalance, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user balance:', error);
+      return undefined;
+    }
+  }
+
+  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ walletBalance: newBalance, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user wallet balance:', error);
+      return undefined;
+    }
+  }
+
+  async updateUserLastLogin(userId: number): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user last login:', error);
+      return undefined;
+    }
+  }
+
+  async getAllGames(): Promise<Game[]> {
+    try {
+      return await db.select().from(games).where(eq(games.isActive, true));
+    } catch (error) {
+      console.error('Error getting all games:', error);
+      return [];
+    }
+  }
+
+  async getGamesByCategory(category: string): Promise<Game[]> {
+    try {
+      return await db.select().from(games).where(
+        and(eq(games.isActive, true), eq(games.category, category))
+      );
+    } catch (error) {
+      console.error('Error getting games by category:', error);
+      return [];
+    }
+  }
+
+  async getGame(id: number): Promise<Game | undefined> {
+    try {
+      const [game] = await db.select().from(games).where(eq(games.id, id));
+      return game;
+    } catch (error) {
+      console.error('Error getting game:', error);
+      return undefined;
+    }
+  }
+
+  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
+    try {
+      return await db.select().from(games).where(eq(games.isActive, true)).limit(limit);
+    } catch (error) {
+      console.error('Error getting recommended games:', error);
+      return [];
+    }
+  }
+
+  async createGame(insertGame: InsertGame): Promise<Game> {
+    try {
+      const [game] = await db.insert(games).values(insertGame).returning();
+      return game;
+    } catch (error) {
+      console.error('Error creating game:', error);
+      throw error;
+    }
+  }
+
+  async getAllGameCategories(): Promise<GameCategory[]> {
+    try {
+      return await db.select().from(gameCategories).where(eq(gameCategories.isActive, true));
+    } catch (error) {
+      console.error('Error getting game categories:', error);
+      return [];
+    }
+  }
+
+  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
+    try {
+      const [category] = await db.select().from(gameCategories).where(eq(gameCategories.slug, slug));
+      return category;
+    } catch (error) {
+      console.error('Error getting game category:', error);
+      return undefined;
+    }
+  }
+
+  async createGameCategory(insertCategory: InsertGameCategory): Promise<GameCategory> {
+    try {
+      const [category] = await db.insert(gameCategories).values(insertCategory).returning();
+      return category;
+    } catch (error) {
+      console.error('Error creating game category:', error);
+      throw error;
+    }
+  }
+
+  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
+    try {
+      return await db.select().from(userGameHistory)
+        .where(eq(userGameHistory.userId, userId))
+        .orderBy(desc(userGameHistory.playedAt));
+    } catch (error) {
+      console.error('Error getting user game history:', error);
+      return [];
+    }
+  }
+
+  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const results = await db
+        .select({
+          id: userGameHistory.id,
+          userId: userGameHistory.userId,
+          gameId: userGameHistory.gameId,
+          betAmount: userGameHistory.betAmount,
+          winAmount: userGameHistory.winAmount,
+          playedAt: userGameHistory.playedAt,
+          username: users.username,
+          gameTitle: games.title,
+        })
+        .from(userGameHistory)
+        .innerJoin(users, eq(userGameHistory.userId, users.id))
+        .innerJoin(games, eq(userGameHistory.gameId, games.id))
+        .where(gte(userGameHistory.playedAt, today))
+        .orderBy(desc(userGameHistory.winAmount))
+        .limit(limit);
+
+      return results;
+    } catch (error) {
+      console.error('Error getting top earners:', error);
+      return [];
+    }
+  }
+
+  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
+    try {
+      const [gameHistory] = await db.insert(userGameHistory).values(history).returning();
+      return gameHistory;
+    } catch (error) {
+      console.error('Error adding game history:', error);
+      throw error;
+    }
+  }
+
+  async getActivePromotions(): Promise<Promotion[]> {
+    try {
+      const now = new Date();
+      return await db.select().from(promotions).where(
+        and(
+          eq(promotions.isActive, true),
+          lte(promotions.startDate, now),
+          gte(promotions.endDate, now)
+        )
+      );
+    } catch (error) {
+      console.error('Error getting active promotions:', error);
+      return [];
+    }
+  }
+
+  async getPromotion(id: number): Promise<Promotion | undefined> {
+    try {
+      const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
+      return promotion;
+    } catch (error) {
+      console.error('Error getting promotion:', error);
+      return undefined;
+    }
+  }
+
+  async createPromotion(insertPromotion: InsertPromotion): Promise<Promotion> {
+    try {
+      const [promotion] = await db.insert(promotions).values(insertPromotion).returning();
+      return promotion;
+    } catch (error) {
+      console.error('Error creating promotion:', error);
+      throw error;
+    }
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 10): Promise<WalletTransaction[]> {
+    try {
+      return await db.select().from(walletTransactions)
+        .where(eq(walletTransactions.userId, userId))
+        .orderBy(desc(walletTransactions.createdAt))
+        .limit(limit);
+    } catch (error) {
+      console.error('Error getting wallet transactions:', error);
+      return [];
+    }
+  }
+
+  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    try {
+      const [walletTransaction] = await db.insert(walletTransactions).values(transaction).returning();
+      return walletTransaction;
+    } catch (error) {
+      console.error('Error creating wallet transaction:', error);
+      throw error;
+    }
+  }
+
+  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
+    try {
+      const updateData: any = { status, updatedAt: new Date() };
+      if (paymentId) updateData.razorpayPaymentId = paymentId;
+      
+      const [transaction] = await db
+        .update(walletTransactions)
+        .set(updateData)
+        .where(eq(walletTransactions.id, transactionId))
+        .returning();
+      return transaction;
+    } catch (error) {
+      console.error('Error updating wallet transaction status:', error);
+      return undefined;
+    }
+  }
+
+  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
+    try {
+      return await db.select().from(kycDocuments)
+        .where(eq(kycDocuments.userId, userId))
+        .orderBy(desc(kycDocuments.createdAt));
+    } catch (error) {
+      console.error('Error getting KYC documents:', error);
+      return [];
+    }
+  }
+
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    try {
+      const [kycDoc] = await db.insert(kycDocuments).values(document).returning();
+      return kycDoc;
+    } catch (error) {
+      console.error('Error creating KYC document:', error);
+      throw error;
+    }
+  }
+
+  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ kycStatus: status, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating KYC status:', error);
+      return undefined;
+    }
+  }
+
+  async updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ bonusBalance: newBalance, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user bonus balance:', error);
+      return undefined;
+    }
+  }
+
+  async getAllAchievements(): Promise<Achievement[]> {
+    try {
+      return await db.select().from(achievements).where(eq(achievements.isActive, true));
+    } catch (error) {
+      console.error('Error getting achievements:', error);
+      return [];
+    }
+  }
+
+  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
+    try {
+      const results = await db
+        .select()
+        .from(userAchievements)
+        .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+        .where(eq(userAchievements.userId, userId));
+      
+      return results.map(result => ({
+        ...result.user_achievements,
+        achievement: result.achievements
+      }));
+    } catch (error) {
+      console.error('Error getting user achievements:', error);
+      return [];
+    }
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    try {
+      const [newAchievement] = await db.insert(achievements).values(achievement).returning();
+      return newAchievement;
+    } catch (error) {
+      console.error('Error creating achievement:', error);
+      throw error;
+    }
+  }
+
+  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
+    try {
+      const [userAchievement] = await db.insert(userAchievements).values({
+        userId,
+        achievementId,
+        isCompleted: true,
+        progress: 100
+      }).returning();
+      return userAchievement;
+    } catch (error) {
+      console.error('Error unlocking achievement:', error);
+      throw error;
+    }
+  }
+
+  async updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
+    try {
+      const [userAchievement] = await db
+        .update(userAchievements)
+        .set({ progress, isCompleted: progress >= 100 })
+        .where(and(
+          eq(userAchievements.userId, userId),
+          eq(userAchievements.achievementId, achievementId)
+        ))
+        .returning();
+      return userAchievement;
+    } catch (error) {
+      console.error('Error updating achievement progress:', error);
+      return undefined;
+    }
+  }
+
+  async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
+    // Implementation for achievement checking logic
+    return [];
+  }
 }
 
 export class MemStorage implements IStorage {
