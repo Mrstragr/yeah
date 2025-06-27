@@ -150,6 +150,20 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
     return count.toString();
   };
 
+  // Handle game click - check if priority or show maintenance popup
+  const handleGameClick = (game: Game) => {
+    if (game.isPriority || priorityGames.includes(game.id)) {
+      // Start the game normally
+      onGameSelect(game.id);
+    } else {
+      // Show maintenance popup
+      setMaintenanceDialog({
+        isOpen: true,
+        gameName: game.title
+      });
+    }
+  };
+
   return (
     <div className="enhanced-game-grid">
       {/* Search Bar */}
@@ -175,7 +189,7 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
               <div
                 key={game.id}
                 className="hot-game-card"
-                onClick={() => onGameSelect(game.id)}
+                onClick={() => handleGameClick(game)}
               >
                 <div className="hot-game-thumbnail">
                   <img src={game.thumbnail} alt={game.title} />
@@ -207,8 +221,8 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
           {filteredGames.map(game => (
             <div
               key={game.id}
-              className="game-card"
-              onClick={() => onGameSelect(game.id)}
+              className={`game-card ${game.isPriority || priorityGames.includes(game.id) ? 'priority-game' : 'maintenance-game'}`}
+              onClick={() => handleGameClick(game)}
             >
               <div className="game-thumbnail">
                 <img src={game.thumbnail} alt={game.title} />
@@ -567,7 +581,50 @@ export const EnhancedGameGrid = ({ onGameSelect, selectedCategory }: EnhancedGam
             font-size: 18px;
           }
         }
+
+        /* Maintenance Game Styling */
+        .maintenance-game {
+          position: relative;
+        }
+        
+        .maintenance-game::after {
+          content: '🔧 MAINTENANCE';
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: linear-gradient(45deg, #f59e0b, #d97706);
+          color: white;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 8px;
+          font-weight: bold;
+          z-index: 10;
+        }
+
+        .maintenance-game .game-thumbnail::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(245, 158, 11, 0.2);
+          z-index: 5;
+          border-radius: 12px;
+        }
+
+        .priority-game {
+          border: 2px solid #10b981;
+          box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
       `}</style>
+      
+      {/* Maintenance Dialog */}
+      <MaintenanceDialog
+        isOpen={maintenanceDialog.isOpen}
+        onClose={() => setMaintenanceDialog({ isOpen: false, gameName: '' })}
+        gameName={maintenanceDialog.gameName}
+      />
     </div>
   );
 };

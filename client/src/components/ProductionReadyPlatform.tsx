@@ -18,6 +18,8 @@ import { EnhancedGameGrid } from './EnhancedGameGrid';
 import { EnhancedBottomNav } from './EnhancedBottomNav';
 import { WalletPage } from './WalletPage';
 import { KYCPage } from './KYCPage';
+import { AdvancedLoginSystem } from './AdvancedLoginSystem';
+import { EnhancedWalletSystem } from './EnhancedWalletSystem';
 
 interface User {
   id: number;
@@ -175,7 +177,10 @@ export const ProductionReadyPlatform = () => {
                       </div>
                     </div>
                   ) : (
-                    <button className="login-button">
+                    <button 
+                      className="login-button"
+                      onClick={() => setShowLoginDialog(true)}
+                    >
                       Login
                     </button>
                   )}
