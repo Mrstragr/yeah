@@ -36,7 +36,7 @@ export class PaymentService {
         amount: amount * 100, // Convert to paise
         currency: 'INR',
         receipt,
-        payment_capture: 1,
+        payment_capture: true,
       });
 
       // Store transaction in database
@@ -47,13 +47,18 @@ export class PaymentService {
         currency: 'INR',
         status: 'pending',
         paymentMethod: 'razorpay',
-        razorpayOrderId: order.id,
         description: `Deposit of ₹${amount}`,
         balanceBefore: null,
         balanceAfter: null,
       });
 
-      return order;
+      return {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        receipt: order.receipt,
+        status: order.status
+      };
     } catch (error) {
       console.error('Error creating deposit order:', error);
       throw new Error('Failed to create payment order');
@@ -81,7 +86,7 @@ export class PaymentService {
         return { success: false, message: 'Payment not captured' };
       }
 
-      const amount = payment.amount / 100; // Convert from paise to rupees
+      const amount = Number(payment.amount) / 100; // Convert from paise to rupees
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -95,9 +100,9 @@ export class PaymentService {
       await storage.updateUserWalletBalance(userId, newBalance);
 
       // Update transaction status
-      const transactions = await storage.getUserWalletTransactions(userId, 1);
+      const transactions = await storage.getUserWalletTransactions(userId, 10);
       const pendingTransaction = transactions.find(t => 
-        t.razorpayOrderId === verification.razorpay_order_id && t.status === 'pending'
+        t.status === 'pending' && t.type === 'deposit'
       );
 
       if (pendingTransaction) {
