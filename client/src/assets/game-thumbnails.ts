@@ -39,7 +39,7 @@ export const gameThumbnails = {
             isMine ? '#dc2626' : isRevealed ? '#10b981' : '#374151'
           }" stroke="#6b7280" stroke-width="0.5" rx="1"/>
           ${isMine ? `<circle cx="${x+6}" cy="${y+5}" r="2" fill="#fbbf24"/>` : ''}
-          ${isRevealed && !isMine ? `<text x="${x+6}" y="${y+7}" text-anchor="middle" fill="white" font-size="6">💎</text>` : ''}`;
+          ${isRevealed && !isMine ? `<circle cx="${x+6}" cy="${y+5}" r="1.5" fill="#10b981"/>` : ''}`;
         }).join('')}
       </g>
       <text x="60" y="75" text-anchor="middle" fill="white" font-family="Arial" font-size="10" font-weight="bold">MINES</text>
