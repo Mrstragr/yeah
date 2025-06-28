@@ -211,6 +211,12 @@ export function Perfect91ClubMain() {
 
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Only proceed if this is actually a form submission (not a keystroke)
+    if (e.type !== 'submit') {
+      return;
+    }
     
     if (authMode === 'login') {
       if (!authData.phone || !authData.password) {
@@ -744,7 +750,11 @@ export function Perfect91ClubMain() {
                     type="tel"
                     placeholder="+91 98765 43210"
                     value={authData.phone}
-                    onChange={(e) => setAuthData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      setAuthData(prev => ({ ...prev, phone: e.target.value }));
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
                     required
                   />
                 </div>
@@ -759,7 +769,11 @@ export function Perfect91ClubMain() {
                       type="email"
                       placeholder="your@email.com"
                       value={authData.email}
-                      onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setAuthData(prev => ({ ...prev, email: e.target.value }));
+                      }}
+                      onKeyDown={(e) => e.stopPropagation()}
                       required
                     />
                   </div>
@@ -774,7 +788,11 @@ export function Perfect91ClubMain() {
                     type="password"
                     placeholder="Enter password"
                     value={authData.password}
-                    onChange={(e) => setAuthData(prev => ({ ...prev, password: e.target.value }))}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      setAuthData(prev => ({ ...prev, password: e.target.value }));
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
                     required
                   />
                 </div>
@@ -789,7 +807,11 @@ export function Perfect91ClubMain() {
                       type="password"
                       placeholder="Confirm password"
                       value={authData.confirmPassword}
-                      onChange={(e) => setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                      }}
+                      onKeyDown={(e) => e.stopPropagation()}
                       required
                     />
                   </div>
