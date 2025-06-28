@@ -6,6 +6,7 @@ import {
   Plus, Minus, Play, Home,
   Settings, LogOut, Bell
 } from 'lucide-react';
+import { TeenPattiGame, AviatorGame } from './MarketStandardGames';
 
 // Copied from successful Indian gaming apps - exact patterns
 interface User {
@@ -52,6 +53,8 @@ export default function MarketStandardPlatform() {
   const [showWallet, setShowWallet] = useState(false);
   const [depositAmount, setDepositAmount] = useState(500);
   const [loading, setLoading] = useState(false);
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [activeGameId, setActiveGameId] = useState<string | null>(null);
 
   // Market-standard authentication - exact flow from Teen Patti Gold
   const handleAuth = async () => {
@@ -409,6 +412,18 @@ export default function MarketStandardPlatform() {
 
               <div className="space-y-3">
                 <motion.button
+                  onClick={() => {
+                    // Show actual game based on selected game ID
+                    if (selectedGame.id === 'teen-patti' || selectedGame.id === 'aviator') {
+                      setActiveGameId(selectedGame.id);
+                      setShowGameModal(true);
+                      setSelectedGame(null);
+                    } else {
+                      // For other games, show coming soon
+                      alert('Game coming soon!');
+                      setSelectedGame(null);
+                    }
+                  }}
                   className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -424,6 +439,39 @@ export default function MarketStandardPlatform() {
                 </button>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Game Modal - functional games */}
+      <AnimatePresence>
+        {showGameModal && activeGameId && (
+          <motion.div 
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {activeGameId === 'teen-patti' && (
+              <TeenPattiGame 
+                user={user} 
+                onClose={() => {
+                  setShowGameModal(false);
+                  setActiveGameId(null);
+                }} 
+                gameId={activeGameId}
+              />
+            )}
+            {activeGameId === 'aviator' && (
+              <AviatorGame 
+                user={user} 
+                onClose={() => {
+                  setShowGameModal(false);
+                  setActiveGameId(null);
+                }} 
+                gameId={activeGameId}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
