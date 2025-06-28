@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import RazorpayWalletSystem from './RazorpayWalletSystem';
 import { WinGoGame, AviatorGame, MinesGame } from './PlayableGames';
+import { EnhancedWinGoGame, EnhancedAviatorGame, EnhancedMinesGame } from './EnhancedGameAnimations';
 
 interface User {
   id: number;
@@ -697,21 +698,21 @@ export default function Perfect91ClubPlatform() {
               exit={{ opacity: 0 }}
             >
               {selectedGame.id.startsWith('wingo') && (
-                <WinGoGame 
+                <EnhancedWinGoGame 
                   user={user} 
                   onClose={() => setShowGameModal(false)} 
                   gameType={selectedGame.id}
                 />
               )}
               {selectedGame.id === 'aviator' && (
-                <AviatorGame 
+                <EnhancedAviatorGame 
                   user={user} 
                   onClose={() => setShowGameModal(false)} 
                   gameType={selectedGame.id}
                 />
               )}
               {selectedGame.id === 'mines' && (
-                <MinesGame 
+                <EnhancedMinesGame 
                   user={user} 
                   onClose={() => setShowGameModal(false)} 
                   gameType={selectedGame.id}
