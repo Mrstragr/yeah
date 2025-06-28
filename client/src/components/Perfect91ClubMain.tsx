@@ -748,13 +748,20 @@ export function Perfect91ClubMain() {
                   <Phone className="input-icon" />
                   <input
                     type="tel"
-                    placeholder="+91 98765 43210"
+                    placeholder="9876543210 (Demo)"
                     value={authData.phone}
                     onChange={(e) => {
-                      e.stopPropagation();
-                      setAuthData(prev => ({ ...prev, phone: e.target.value }));
+                      const newValue = e.target.value;
+                      setAuthData(prev => ({ ...prev, phone: newValue }));
                     }}
-                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      // Allow all normal typing
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAuthSubmit(e as any);
+                      }
+                    }}
+                    autoComplete="tel"
                     required
                   />
                 </div>
@@ -769,11 +776,8 @@ export function Perfect91ClubMain() {
                       type="email"
                       placeholder="your@email.com"
                       value={authData.email}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        setAuthData(prev => ({ ...prev, email: e.target.value }));
-                      }}
-                      onKeyDown={(e) => e.stopPropagation()}
+                      onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
+                      autoComplete="email"
                       required
                     />
                   </div>
@@ -786,13 +790,19 @@ export function Perfect91ClubMain() {
                   <Lock className="input-icon" />
                   <input
                     type="password"
-                    placeholder="Enter password"
+                    placeholder="demo123 (Demo Password)"
                     value={authData.password}
                     onChange={(e) => {
-                      e.stopPropagation();
-                      setAuthData(prev => ({ ...prev, password: e.target.value }));
+                      const newValue = e.target.value;
+                      setAuthData(prev => ({ ...prev, password: newValue }));
                     }}
-                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAuthSubmit(e as any);
+                      }
+                    }}
+                    autoComplete="current-password"
                     required
                   />
                 </div>
@@ -807,11 +817,8 @@ export function Perfect91ClubMain() {
                       type="password"
                       placeholder="Confirm password"
                       value={authData.confirmPassword}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }));
-                      }}
-                      onKeyDown={(e) => e.stopPropagation()}
+                      onChange={(e) => setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      autoComplete="new-password"
                       required
                     />
                   </div>
@@ -831,6 +838,31 @@ export function Perfect91ClubMain() {
                   authMode === 'login' ? 'Login' : 'Register'
                 )}
               </motion.button>
+
+              {authMode === 'login' && (
+                <div className="demo-info">
+                  <div className="demo-card">
+                    <h4>Demo Account</h4>
+                    <p>Phone: 9876543210</p>
+                    <p>Password: demo123</p>
+                    <motion.button
+                      type="button"
+                      className="demo-login-btn"
+                      onClick={() => {
+                        setAuthData(prev => ({
+                          ...prev,
+                          phone: '9876543210',
+                          password: 'demo123'
+                        }));
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Fill Demo Details
+                    </motion.button>
+                  </div>
+                </div>
+              )}
 
               <div className="auth-switch">
                 <p>
