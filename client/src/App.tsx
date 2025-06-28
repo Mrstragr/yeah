@@ -1,4 +1,4 @@
-import MarketStandardPlatform from './components/MarketStandardPlatform';
+import { Perfect91Club } from './components/Perfect91Club';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -46,7 +46,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MarketStandardPlatform />
+      <Perfect91Club />
       <Toaster />
     </QueryClientProvider>
   );
