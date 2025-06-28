@@ -5233,3 +5233,63 @@ body {
     flex-direction: column;
   }
 }
+
+/* Critical Fix for Input Typing Issues */
+.auth-form input,
+.auth-form input:focus,
+.input-group input,
+.input-group input:focus,
+.form-group input,
+.form-group input:focus {
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  touch-action: manipulation !important;
+  cursor: text !important;
+  z-index: 999 !important;
+  position: relative !important;
+}
+
+.auth-form .input-group,
+.form-group .input-group {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 999 !important;
+}
+
+/* Ensure modal and form components allow input interaction */
+.auth-modal,
+.auth-form,
+.form-group,
+.auth-overlay {
+  pointer-events: auto !important;
+}
+
+.auth-overlay {
+  pointer-events: auto !important;
+}
+
+/* Prevent overlay blocking */
+* {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Specifically for inputs */
+input[type="text"],
+input[type="email"], 
+input[type="tel"],
+input[type="password"] {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  pointer-events: auto !important;
+  cursor: text !important;
+}
