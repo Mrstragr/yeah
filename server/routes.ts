@@ -338,76 +338,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/wallet/deposit', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { amount, method } = req.body;
-      const transaction = await storage.createWalletTransaction({
-        userId: req.user!.id,
-        type: 'deposit',
-        amount: amount.toString(),
-        status: 'completed',
-        paymentMethod: method || 'demo'
-      });
+      const { amount, paymentMethod } = req.body;
       
-      const user = await storage.getUser(req.user!.id);
-      if (user) {
-        const newBalance = parseFloat(user.walletBalance) + amount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      if (!amount || amount < 10) {
+        return res.status(400).json({ error: 'Minimum deposit amount is ₹10' });
       }
+
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Create Razorpay order
+      const razorpayOrder = await paymentService.createDepositOrder(req.user!.id, amount);
       
       res.json({ 
         success: true, 
-        transaction,
-        razorpayOrderId: `order_${Date.now()}`,
-        amount: amount * 100, // Amount in paise for Razorpay
+        order: razorpayOrder,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
         userInfo: {
-          name: user?.username || 'User',
-          email: user?.email || 'user@example.com',
-          phone: user?.phone || '9999999999'
+          name: user.username || 'User',
+          email: user.email || 'user@example.com',
+          phone: user.phone || '9999999999'
         }
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error('Deposit error:', error);
+      res.status(500).json({ error: error.message });;
     }
   });
 
   // Payment verification endpoint
   app.post('/api/wallet/verify-payment', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+      const { orderId, paymentId, signature } = req.body;
       
-      // In production, verify the signature with Razorpay secret
-      // For demo purposes, we'll simulate successful verification
-      const isValidSignature = true; // In production: verify using crypto and Razorpay secret
-      
-      if (!isValidSignature) {
-        return res.status(400).json({ error: 'Invalid payment signature' });
-      }
+      // Verify payment with Razorpay and process deposit
+      const result = await paymentService.verifyAndProcessDeposit(
+        req.user!.id,
+        { 
+          razorpay_order_id: orderId,
+          razorpay_payment_id: paymentId, 
+          razorpay_signature: signature 
+        }
+      );
 
-      // Update transaction status and user balance
-      const user = await storage.getUser(req.user!.id);
-      if (user) {
-        // Extract amount from payment (this should be stored with the order)
-        const depositAmount = 100; // This should come from the order details
-        const newBalance = parseFloat(user.walletBalance) + depositAmount;
-        await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
-        
-        // Create completed transaction record
-        await storage.createWalletTransaction({
-          userId: req.user!.id,
-          type: 'deposit',
-          amount: depositAmount.toString(),
-          status: 'completed',
-          paymentMethod: 'razorpay',
-          razorpayPaymentId: razorpay_payment_id,
-          razorpayOrderId: razorpay_order_id,
-          description: 'Wallet deposit via Razorpay'
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: 'Payment verified and wallet credited successfully',
+          newBalance: result.newBalance
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: result.error || 'Payment verification failed'
         });
       }
-
-      res.json({ 
-        success: true, 
-        message: 'Payment verified successfully'
-      });
     } catch (error: any) {
+      console.error('Payment verification error:', error);
       res.status(500).json({ error: error.message });
     }
   });

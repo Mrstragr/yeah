@@ -1,10 +1,11 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { storage } from './storage';
-import type { Request, Response, NextFunction } from 'express';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { storage } from "./storage";
+import type { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_change_in_production';
-const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET =
+  process.env.JWT_SECRET || "fallback_secret_key_change_in_production";
+const JWT_EXPIRES_IN = "7d";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -17,16 +18,21 @@ export interface AuthRequest extends Request {
 
 export class AuthService {
   // Generate JWT token
-  generateToken(user: { id: number; username: string; email: string; phone: string }): string {
+  generateToken(user: {
+    id: number;
+    username: string;
+    email: string;
+    phone: string;
+  }): string {
     return jwt.sign(
-      { 
-        id: user.id, 
-        username: user.username, 
+      {
+        id: user.id,
+        username: user.username,
         email: user.email,
-        phone: user.phone 
+        phone: user.phone,
       },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN },
     );
   }
 
@@ -45,7 +51,10 @@ export class AuthService {
   }
 
   // Compare password
-  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
   }
 
@@ -60,13 +69,13 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await storage.getUserByPhone(userData.phone);
     if (existingUser) {
-      throw new Error('User already exists with this phone number');
+      throw new Error("User already exists with this phone number");
     }
 
     if (userData.email) {
       const existingEmail = await storage.getUserByEmail(userData.email);
       if (existingEmail) {
-        throw new Error('User already exists with this email');
+        throw new Error("User already exists with this email");
       }
     }
 
@@ -82,14 +91,14 @@ export class AuthService {
     // Create user
     const user = await storage.createUser({
       username,
-      email: userData.email || '',
+      email: userData.email || "",
       phone: userData.phone,
       password: hashedPassword,
       referralCode,
       referredBy: userData.referralCode || null,
-      balance: '0.00',
-      walletBalance: '500.00', // Welcome bonus
-      bonusBalance: '100.00'
+      balance: "0.00",
+      walletBalance: "500.00", // Welcome bonus
+      bonusBalance: "100.00",
     });
 
     // Generate token
@@ -97,7 +106,7 @@ export class AuthService {
       id: user.id,
       username: user.username,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     });
 
     // Update last login
@@ -113,9 +122,9 @@ export class AuthService {
         walletBalance: user.walletBalance,
         bonusBalance: user.bonusBalance,
         vipLevel: user.vipLevel,
-        kycStatus: user.kycStatus
+        kycStatus: user.kycStatus,
       },
-      token
+      token,
     };
   }
 
@@ -125,31 +134,43 @@ export class AuthService {
     email?: string;
     password: string;
   }): Promise<{ user: any; token: string }> {
-    console.log('🔐 Login attempt:', { phone: credentials.phone, email: credentials.email });
-    
+    console.log("🔐 Login attempt:", {
+      phone: credentials.phone,
+      email: credentials.email,
+    });
+
     // Find user by phone or email
     let user;
     if (credentials.phone) {
       user = await storage.getUserByPhone(credentials.phone);
-      console.log('📱 User found by phone:', user ? `ID: ${user.id}, Username: ${user.username}` : 'Not found');
+      console.log(
+        "📱 User found by phone:",
+        user ? `ID: ${user.id}, Username: ${user.username}` : "Not found",
+      );
     } else if (credentials.email) {
       user = await storage.getUserByEmail(credentials.email);
-      console.log('📧 User found by email:', user ? `ID: ${user.id}, Username: ${user.username}` : 'Not found');
+      console.log(
+        "📧 User found by email:",
+        user ? `ID: ${user.id}, Username: ${user.username}` : "Not found",
+      );
     }
 
     if (!user) {
-      console.log('❌ No user found');
-      throw new Error('Invalid credentials');
+      console.log("❌ No user found");
+      throw new Error("Invalid credentials");
     }
 
     // Check password
-    console.log('🔒 Checking password for user:', user.id);
-    const isValidPassword = await this.comparePassword(credentials.password, user.password);
-    console.log('🔓 Password valid:', isValidPassword);
-    
+    console.log("🔒 Checking password for user:", user.id);
+    const isValidPassword = await this.comparePassword(
+      credentials.password,
+      user.password,
+    );
+    console.log("🔓 Password valid:", isValidPassword);
+
     if (!isValidPassword) {
-      console.log('❌ Invalid password');
-      throw new Error('Invalid credentials');
+      console.log("❌ Invalid password");
+      throw new Error("Invalid credentials");
     }
 
     // Generate token
@@ -157,7 +178,7 @@ export class AuthService {
       id: user.id,
       username: user.username,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     });
 
     // Update last login
@@ -177,9 +198,9 @@ export class AuthService {
         totalDeposit: user.totalDeposit,
         totalWithdraw: user.totalWithdraw,
         totalBet: user.totalBet,
-        totalWin: user.totalWin
+        totalWin: user.totalWin,
       },
-      token
+      token,
     };
   }
 
@@ -192,7 +213,7 @@ export class AuthService {
   async getProfile(userId: number): Promise<any> {
     const user = await storage.getUser(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     return {
@@ -212,28 +233,32 @@ export class AuthService {
       totalWin: user.totalWin,
       avatar: user.avatar,
       createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt
+      lastLoginAt: user.lastLoginAt,
     };
   }
 }
 
 // Middleware to authenticate requests
-export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+export const authenticateToken = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
+    return res.status(401).json({ error: "Access token required" });
   }
 
   try {
     // Handle demo tokens
-    if (token.startsWith('demo_token_')) {
+    if (token.startsWith("demo_token_")) {
       req.user = {
         id: 10,
-        username: 'demo',
-        email: 'demo@91club.com',
-        phone: '9876543210'
+        username: "demo",
+        email: "demo@91club.com",
+        phone: "9876543210",
       };
       next();
       return;
@@ -243,37 +268,41 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const decoded = authService.verifyToken(token);
 
     if (!decoded) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
+      return res.status(403).json({ error: "Invalid or expired token" });
     }
 
     // Get user from database
     const user = await storage.getUser(decoded.id);
     if (!user) {
-      return res.status(403).json({ error: 'User not found or inactive' });
+      return res.status(403).json({ error: "User not found or inactive" });
     }
 
     req.user = {
       id: user.id,
       username: user.username,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     };
 
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    return res.status(403).json({ error: "Invalid or expired token" });
   }
 };
 
 // Optional authentication (for public endpoints that benefit from user context)
-export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+export const optionalAuth = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (token) {
     const authService = new AuthService();
     const decoded = authService.verifyToken(token);
-    
+
     if (decoded) {
       const user = await storage.getUser(decoded.id);
       if (user && user.isActive) {
@@ -281,7 +310,7 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
           id: user.id,
           username: user.username,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
         };
       }
     }
