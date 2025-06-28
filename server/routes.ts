@@ -392,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(400).json({ 
           success: false, 
-          error: result.error || 'Payment verification failed'
+          error: 'Payment verification failed'
         });
       }
     } catch (error: any) {

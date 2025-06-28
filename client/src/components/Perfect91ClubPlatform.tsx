@@ -8,6 +8,7 @@ import {
   Plus, Minus, Play, RefreshCw, Target,
   Award, Calendar, Bell, Settings, LogOut
 } from 'lucide-react';
+import RazorpayWalletSystem from './RazorpayWalletSystem';
 
 interface User {
   id: number;
@@ -68,6 +69,7 @@ export default function Perfect91ClubPlatform() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [gameCategory, setGameCategory] = useState('all');
   const [showPassword, setShowPassword] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
   
   const [authData, setAuthData] = useState({
     phone: '',
@@ -337,7 +339,7 @@ export default function Perfect91ClubPlatform() {
           </div>
           <div className="flex space-x-3">
             <motion.button 
-              onClick={() => setCurrentTab('wallet')}
+              onClick={() => setShowWallet(true)}
               className="flex-1 bg-white/20 backdrop-blur-sm py-3 rounded-lg font-semibold flex items-center justify-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -346,7 +348,7 @@ export default function Perfect91ClubPlatform() {
               <span>Deposit</span>
             </motion.button>
             <motion.button 
-              onClick={() => setCurrentTab('wallet')}
+              onClick={() => setShowWallet(true)}
               className="flex-1 bg-white/20 backdrop-blur-sm py-3 rounded-lg font-semibold flex items-center justify-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -423,104 +425,10 @@ export default function Perfect91ClubPlatform() {
     </div>
   );
 
-  // Render Wallet Tab
-  const renderWallet = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Wallet</h2>
-        <Settings className="w-6 h-6 text-gray-400" />
-      </div>
-
-      {isLoggedIn && user ? (
-        <>
-          {/* Balance Overview */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <div className="text-center mb-6">
-              <p className="text-gray-400 text-sm mb-2">Available Balance</p>
-              <p className="text-4xl font-bold text-white">₹{user.walletBalance}</p>
-              <p className="text-emerald-400 text-sm mt-1">+ ₹{user.bonusBalance} Bonus</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <motion.button 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-lg font-semibold flex items-center justify-center space-x-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ArrowDownLeft className="w-5 h-5" />
-                <span>Deposit</span>
-              </motion.button>
-              <motion.button 
-                className="bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-lg font-semibold flex items-center justify-center space-x-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ArrowUpRight className="w-5 h-5" />
-                <span>Withdraw</span>
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Payment Methods */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 className="text-white font-semibold mb-4">Payment Methods</h3>
-            <div className="space-y-3">
-              {[
-                { name: 'UPI', icon: '📱', available: true },
-                { name: 'Paytm', icon: '💳', available: true },
-                { name: 'PhonePe', icon: '📲', available: true },
-                { name: 'Bank Transfer', icon: '🏦', available: true },
-                { name: 'Credit/Debit Card', icon: '💳', available: true }
-              ].map((method) => (
-                <div key={method.name} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{method.icon}</span>
-                    <span className="text-white font-medium">{method.name}</span>
-                  </div>
-                  <span className={`text-sm font-medium ${method.available ? 'text-emerald-400' : 'text-gray-400'}`}>
-                    {method.available ? 'Available' : 'Coming Soon'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Transaction History */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 className="text-white font-semibold mb-4">Recent Transactions</h3>
-            <div className="space-y-3">
-              {[
-                { type: 'deposit', amount: '₹1,000', time: '2 hours ago', status: 'success' },
-                { type: 'withdraw', amount: '₹500', time: '1 day ago', status: 'pending' },
-                { type: 'deposit', amount: '₹2,000', time: '3 days ago', status: 'success' }
-              ].map((transaction, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      transaction.type === 'deposit' ? 'bg-emerald-600' : 'bg-red-600'
-                    }`}>
-                      {transaction.type === 'deposit' ? 
-                        <ArrowDownLeft className="w-4 h-4 text-white" /> : 
-                        <ArrowUpRight className="w-4 h-4 text-white" />
-                      }
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{transaction.amount}</p>
-                      <p className="text-gray-400 text-sm">{transaction.time}</p>
-                    </div>
-                  </div>
-                  <span className={`text-sm font-medium ${
-                    transaction.status === 'success' ? 'text-emerald-400' : 
-                    transaction.status === 'pending' ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
-                    {transaction.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      ) : (
+  // Render Wallet Tab - Now opens the full Razorpay wallet system
+  const renderWallet = () => {
+    if (!isLoggedIn || !user) {
+      return (
         <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 text-center">
           <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-white font-semibold mb-2">Login Required</h3>
@@ -534,9 +442,13 @@ export default function Perfect91ClubPlatform() {
             Login Now
           </motion.button>
         </div>
-      )}
-    </div>
-  );
+      );
+    }
+
+    // Open the full Razorpay wallet system
+    setShowWallet(true);
+    return null;
+  };
 
   // Render Account Tab
   const renderAccount = () => (
@@ -686,6 +598,92 @@ export default function Perfect91ClubPlatform() {
 
         {/* Auth Modal */}
         {renderAuthModal()}
+
+        {/* Razorpay Wallet Modal */}
+        <AnimatePresence>
+          {showWallet && isLoggedIn && user && (
+            <motion.div 
+              className="fixed inset-0 z-50 bg-black"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <RazorpayWalletSystem 
+                user={user} 
+                onClose={() => setShowWallet(false)} 
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Game Modal */}
+        <AnimatePresence>
+          {showGameModal && selectedGame && (
+            <motion.div 
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-emerald-500/20"
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-white">{selectedGame.name}</h2>
+                  <button 
+                    onClick={() => setShowGameModal(false)}
+                    className="text-gray-400 hover:text-white text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <div className="text-6xl mb-4">{selectedGame.thumbnail}</div>
+                  <p className="text-gray-300">
+                    {selectedGame.type === 'lottery' ? 'Predict colors and numbers to win big!' :
+                     selectedGame.type === 'crash' ? 'Cash out before the crash for maximum wins!' :
+                     selectedGame.type === 'cards' ? 'Beat the dealer with skill and luck!' :
+                     'Try your luck in this exciting game!'}
+                  </p>
+                  
+                  <div className="bg-slate-700 rounded-lg p-4 text-left">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-400">Min Bet:</span>
+                      <span className="text-white font-semibold">₹{selectedGame.minBet}</span>
+                    </div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-400">Max Bet:</span>
+                      <span className="text-white font-semibold">₹{selectedGame.maxBet}</span>
+                    </div>
+                    {selectedGame.rtp && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">RTP:</span>
+                        <span className="text-emerald-400 font-semibold">{selectedGame.rtp}%</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <motion.button
+                    onClick={() => {
+                      setShowGameModal(false);
+                      alert(`${selectedGame.name} will launch soon! Full game integration coming in next update.`);
+                    }}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-semibold flex items-center justify-center space-x-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Play className="w-5 h-5" />
+                    <span>Play Now</span>
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Login Prompt */}
         {!isLoggedIn && (
