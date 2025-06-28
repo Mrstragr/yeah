@@ -9,6 +9,7 @@ import {
   Award, Calendar, Bell, Settings, LogOut
 } from 'lucide-react';
 import RazorpayWalletSystem from './RazorpayWalletSystem';
+import { WinGoGame, AviatorGame, MinesGame } from './PlayableGames';
 
 interface User {
   id: number;
@@ -143,8 +144,17 @@ export default function Perfect91ClubPlatform() {
       setShowAuth(true);
       return;
     }
-    setSelectedGame(game);
-    setShowGameModal(true);
+    
+    // Check if game is fully playable
+    const playableGames = ['wingo-1min', 'wingo-3min', 'wingo-5min', 'wingo-10min', 'aviator', 'mines'];
+    
+    if (playableGames.includes(game.id)) {
+      setSelectedGame(game);
+      setShowGameModal(true);
+    } else {
+      // Show maintenance message for games under development
+      alert(`🚧 ${game.name} is under maintenance. We're working to bring you an amazing gaming experience! Expected update: Next week.`);
+    }
   };
 
   // Render Auth Modal
@@ -387,40 +397,71 @@ export default function Perfect91ClubPlatform() {
 
       {/* Games Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {filteredGames.map((game) => (
-          <motion.div
-            key={game.id}
-            onClick={() => playGame(game)}
-            className="bg-slate-800 rounded-xl p-4 border border-slate-700 hover:border-emerald-500/50 cursor-pointer relative overflow-hidden"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {game.isHot && (
-              <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                HOT
-              </div>
-            )}
-            {game.isNew && (
-              <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                NEW
-              </div>
-            )}
-            
-            <div className="text-center">
-              <div className="text-4xl mb-3">{game.thumbnail}</div>
-              <h3 className="text-white font-semibold mb-1">{game.name}</h3>
-              <p className="text-gray-400 text-sm mb-2">Min: ₹{game.minBet}</p>
-              {game.rtp && (
-                <div className="flex items-center justify-center space-x-1">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400 text-sm font-medium">{game.rtp}% RTP</span>
+        {filteredGames.map((game) => {
+          const playableGames = ['wingo-1min', 'wingo-3min', 'wingo-5min', 'wingo-10min', 'aviator', 'mines'];
+          const isPlayable = playableGames.includes(game.id);
+          
+          return (
+            <motion.div
+              key={game.id}
+              onClick={() => playGame(game)}
+              className={`bg-slate-800 rounded-xl p-4 border cursor-pointer relative overflow-hidden ${
+                isPlayable 
+                  ? 'border-slate-700 hover:border-emerald-500/50' 
+                  : 'border-orange-500/30 hover:border-orange-500/50'
+              }`}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {/* Status Badges */}
+              {!isPlayable && (
+                <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  🚧 SOON
                 </div>
               )}
-            </div>
-          </motion.div>
-        ))}
+              {game.isHot && isPlayable && (
+                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  HOT
+                </div>
+              )}
+              {game.isNew && isPlayable && (
+                <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  NEW
+                </div>
+              )}
+              {isPlayable && !game.isHot && !game.isNew && (
+                <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  PLAY
+                </div>
+              )}
+              
+              <div className="text-center">
+                <div className={`text-4xl mb-3 ${!isPlayable ? 'opacity-60' : ''}`}>
+                  {game.thumbnail}
+                </div>
+                <h3 className={`font-semibold mb-1 ${isPlayable ? 'text-white' : 'text-gray-400'}`}>
+                  {game.name}
+                </h3>
+                <p className="text-gray-400 text-sm mb-2">Min: ₹{game.minBet}</p>
+                {game.rtp && (
+                  <div className="flex items-center justify-center space-x-1">
+                    <TrendingUp className={`w-4 h-4 ${isPlayable ? 'text-emerald-400' : 'text-gray-500'}`} />
+                    <span className={`text-sm font-medium ${isPlayable ? 'text-emerald-400' : 'text-gray-500'}`}>
+                      {game.rtp}% RTP
+                    </span>
+                  </div>
+                )}
+                {!isPlayable && (
+                  <div className="text-orange-400 text-xs mt-1 font-medium">
+                    Under Development
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
@@ -429,25 +470,55 @@ export default function Perfect91ClubPlatform() {
   const renderWallet = () => {
     if (!isLoggedIn || !user) {
       return (
-        <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 text-center">
-          <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-white font-semibold mb-2">Login Required</h3>
-          <p className="text-gray-400 mb-4">Please login to access your wallet</p>
-          <motion.button 
-            onClick={() => setShowAuth(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Login Now
-          </motion.button>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white">Wallet</h2>
+            <Settings className="w-6 h-6 text-gray-400" />
+          </div>
+          <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 text-center">
+            <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-white font-semibold mb-2">Login Required</h3>
+            <p className="text-gray-400 mb-4">Please login to access your wallet</p>
+            <motion.button 
+              onClick={() => setShowAuth(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Login Now
+            </motion.button>
+          </div>
         </div>
       );
     }
 
-    // Open the full Razorpay wallet system
-    setShowWallet(true);
-    return null;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">Wallet</h2>
+          <Settings className="w-6 h-6 text-gray-400" />
+        </div>
+        
+        {/* Quick Access */}
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+          <div className="text-center mb-6">
+            <p className="text-gray-400 text-sm mb-2">Available Balance</p>
+            <p className="text-4xl font-bold text-white">₹{user.walletBalance}</p>
+            <p className="text-emerald-400 text-sm mt-1">+ ₹{user.bonusBalance} Bonus</p>
+          </div>
+          
+          <motion.button 
+            onClick={() => setShowWallet(true)}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-lg font-semibold flex items-center justify-center space-x-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Wallet className="w-5 h-5" />
+            <span>Open Full Wallet</span>
+          </motion.button>
+        </div>
+      </div>
+    );
   };
 
   // Render Account Tab
@@ -616,71 +687,36 @@ export default function Perfect91ClubPlatform() {
           )}
         </AnimatePresence>
 
-        {/* Game Modal */}
+        {/* Game Modal - Full Playable Games */}
         <AnimatePresence>
           {showGameModal && selectedGame && (
             <motion.div 
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+              className="fixed inset-0 z-50 bg-black"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <motion.div 
-                className="bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-emerald-500/20"
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">{selectedGame.name}</h2>
-                  <button 
-                    onClick={() => setShowGameModal(false)}
-                    className="text-gray-400 hover:text-white text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div className="text-center space-y-4">
-                  <div className="text-6xl mb-4">{selectedGame.thumbnail}</div>
-                  <p className="text-gray-300">
-                    {selectedGame.type === 'lottery' ? 'Predict colors and numbers to win big!' :
-                     selectedGame.type === 'crash' ? 'Cash out before the crash for maximum wins!' :
-                     selectedGame.type === 'cards' ? 'Beat the dealer with skill and luck!' :
-                     'Try your luck in this exciting game!'}
-                  </p>
-                  
-                  <div className="bg-slate-700 rounded-lg p-4 text-left">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-400">Min Bet:</span>
-                      <span className="text-white font-semibold">₹{selectedGame.minBet}</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-400">Max Bet:</span>
-                      <span className="text-white font-semibold">₹{selectedGame.maxBet}</span>
-                    </div>
-                    {selectedGame.rtp && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">RTP:</span>
-                        <span className="text-emerald-400 font-semibold">{selectedGame.rtp}%</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <motion.button
-                    onClick={() => {
-                      setShowGameModal(false);
-                      alert(`${selectedGame.name} will launch soon! Full game integration coming in next update.`);
-                    }}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-semibold flex items-center justify-center space-x-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Play className="w-5 h-5" />
-                    <span>Play Now</span>
-                  </motion.button>
-                </div>
-              </motion.div>
+              {selectedGame.id.startsWith('wingo') && (
+                <WinGoGame 
+                  user={user} 
+                  onClose={() => setShowGameModal(false)} 
+                  gameType={selectedGame.id}
+                />
+              )}
+              {selectedGame.id === 'aviator' && (
+                <AviatorGame 
+                  user={user} 
+                  onClose={() => setShowGameModal(false)} 
+                  gameType={selectedGame.id}
+                />
+              )}
+              {selectedGame.id === 'mines' && (
+                <MinesGame 
+                  user={user} 
+                  onClose={() => setShowGameModal(false)} 
+                  gameType={selectedGame.id}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
