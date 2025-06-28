@@ -3757,6 +3757,13 @@ body {
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
+  z-index: 10;
+  position: relative;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .input-group input:focus {
