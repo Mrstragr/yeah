@@ -1,4 +1,4 @@
-import { ProductionReadyPlatform } from './components/ProductionReadyPlatform';
+import { Perfect91ClubMain } from './components/Perfect91ClubMain';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -29,13 +29,15 @@ export default function App() {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
         color: 'white',
         fontFamily: 'Arial, sans-serif'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', marginBottom: '20px' }}>Perfect91Club</div>
-          <div>Loading platform...</div>
+          <div style={{ fontSize: '24px', marginBottom: '20px', fontWeight: 'bold' }}>
+            👑 Perfect91Club
+          </div>
+          <div>Loading premium gaming platform...</div>
           {error && <div style={{ color: '#ff6b6b', marginTop: '10px' }}>Connection issue: {error}</div>}
         </div>
       </div>
@@ -44,7 +46,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ProductionReadyPlatform />
+      <Perfect91ClubMain />
       <Toaster />
     </QueryClientProvider>
   );
