@@ -6,7 +6,7 @@ import {
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
-import AviatorGame from './AviatorGame';
+import EnhancedAviatorGame from './EnhancedAviatorGame';
 import ColorPredictionGame from './ColorPredictionGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything

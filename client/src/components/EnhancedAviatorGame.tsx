@@ -1,695 +1,627 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, TrendingUp, Users, Clock, Zap, Target, Trophy, DollarSign, Plane } from 'lucide-react';
 
-interface EnhancedAviatorGameProps {
-  onClose: () => void;
-  refreshBalance: () => void;
+interface User {
+  id: number;
+  username: string;
+  phone: string;
+  email: string;
+  walletBalance: string;
+  isVerified: boolean;
 }
 
-export const EnhancedAviatorGame = ({ onClose, refreshBalance }: EnhancedAviatorGameProps) => {
-  const [betAmount, setBetAmount] = useState(100);
-  const [multiplier, setMultiplier] = useState(1.00);
-  const [isFlying, setIsFlying] = useState(false);
+interface AviatorGameProps {
+  onBack: () => void;
+  user: User;
+  onBalanceUpdate: () => void;
+}
+
+interface BetResult {
+  multiplier: number;
+  won: boolean;
+  amount: number;
+  winAmount: number;
+}
+
+interface LiveBet {
+  id: string;
+  username: string;
+  amount: number;
+  cashOut?: number;
+  status: 'active' | 'cashed' | 'lost';
+}
+
+interface GameHistory {
+  multiplier: number;
+  timestamp: Date;
+  crashed: boolean;
+}
+
+export default function EnhancedAviatorGame({ onBack, user, onBalanceUpdate }: AviatorGameProps) {
+  const [betAmount, setBetAmount] = useState(10);
+  const [autoCashOut, setAutoCashOut] = useState(2.0);
+  const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
   const [gameState, setGameState] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
-  const [currentBet, setCurrentBet] = useState<number | null>(null);
-  const [autoCashOut, setAutoCashOut] = useState<number | null>(null);
-  const [result, setResult] = useState<any>(null);
-  const [history, setHistory] = useState([2.45, 1.23, 15.67, 1.05, 3.28]);
+  const [hasBet, setHasBet] = useState(false);
+  const [hasCashedOut, setHasCashedOut] = useState(false);
+  const [cashOutMultiplier, setCashOutMultiplier] = useState(0);
   const [countdown, setCountdown] = useState(5);
-  const [planePosition, setPlanePosition] = useState({ x: 0, y: 0 });
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState(parseFloat(user.walletBalance));
+  const [liveBets, setLiveBets] = useState<LiveBet[]>([]);
+  const [totalPlayers, setTotalPlayers] = useState(1234);
+  const [totalWagered, setTotalWagered] = useState(45678);
+  const [lastResult, setLastResult] = useState<BetResult | null>(null);
+  const [showWinAnimation, setShowWinAnimation] = useState(false);
+  const [roundId, setRoundId] = useState('');
+  const [planePath, setPlanePath] = useState({ x: 10, y: 50 });
+  const [planeTrail, setPlaneTrail] = useState<{x: number, y: number}[]>([]);
 
-  // Enhanced plane animation
+  // Sound effects simulation
+  const playSound = (type: 'bet' | 'cashout' | 'crash' | 'flying') => {
+    // In real implementation, would play actual sounds
+    console.log(`Playing ${type} sound`);
+  };
+
+  // Generate realistic game history
   useEffect(() => {
-    if (gameState === 'flying') {
-      const animate = () => {
-        setPlanePosition(prev => ({
-          x: prev.x + 2 + (multiplier * 0.5),
-          y: prev.y - 1 - (multiplier * 0.1)
-        }));
-        animationRef.current = requestAnimationFrame(animate);
-      };
-      animate();
-    } else {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    }
+    const generateHistory = () => {
+      const history: GameHistory[] = [];
+      for (let i = 0; i < 20; i++) {
+        const rand = Math.random();
+        let multiplier;
+        
+        if (rand < 0.3) {
+          multiplier = 1.0 + Math.random() * 0.5; // 30% chance of 1.0-1.5x
+        } else if (rand < 0.6) {
+          multiplier = 1.5 + Math.random() * 1.5; // 30% chance of 1.5-3.0x
+        } else if (rand < 0.85) {
+          multiplier = 3.0 + Math.random() * 7.0; // 25% chance of 3.0-10.0x
+        } else {
+          multiplier = 10.0 + Math.random() * 90.0; // 15% chance of 10x+
+        }
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+        history.push({
+          multiplier: Math.round(multiplier * 100) / 100,
+          timestamp: new Date(Date.now() - i * 30000),
+          crashed: true
+        });
       }
+      setGameHistory(history.reverse());
     };
-  }, [gameState, multiplier]);
 
-  // Game countdown and multiplier logic
-  useEffect(() => {
-    let interval: any;
+    generateHistory();
+    generateLiveBets();
+  }, []);
+
+  // Generate realistic live bets
+  const generateLiveBets = () => {
+    const usernames = ['Player1', 'Ace', 'Winner99', 'Lucky7', 'Pro123', 'Beast', 'King', 'Warrior'];
+    const bets: LiveBet[] = [];
     
-    if (gameState === 'waiting' && countdown > 0) {
+    for (let i = 0; i < 8; i++) {
+      bets.push({
+        id: `bet_${i}`,
+        username: usernames[i] || `Player${i}`,
+        amount: Math.floor(Math.random() * 500) + 10,
+        status: 'active'
+      });
+    }
+    setLiveBets(bets);
+  };
+
+  // Advanced multiplier calculation with realistic crash probability
+  const calculateCrashPoint = () => {
+    const rand = Math.random();
+    
+    // Weighted probability distribution
+    if (rand < 0.25) return 1.0 + Math.random() * 0.5; // 25% crash between 1.0-1.5x
+    if (rand < 0.45) return 1.5 + Math.random() * 1.5; // 20% crash between 1.5-3.0x
+    if (rand < 0.65) return 3.0 + Math.random() * 2.0; // 20% crash between 3.0-5.0x
+    if (rand < 0.80) return 5.0 + Math.random() * 5.0; // 15% crash between 5.0-10.0x
+    if (rand < 0.90) return 10.0 + Math.random() * 10.0; // 10% crash between 10.0-20.0x
+    if (rand < 0.96) return 20.0 + Math.random() * 30.0; // 6% crash between 20.0-50.0x
+    return 50.0 + Math.random() * 950.0; // 4% crash between 50.0-1000.0x
+  };
+
+  // Game loop with realistic timing
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let animationFrame: number;
+
+    if (gameState === 'waiting') {
       interval = setInterval(() => {
         setCountdown(prev => {
-          if (prev === 1) {
-            startGame();
-            return 0;
+          if (prev <= 1) {
+            startNewRound();
+            return 5;
           }
           return prev - 1;
         });
       }, 1000);
     } else if (gameState === 'flying') {
-      interval = setInterval(() => {
-        setMultiplier(prev => {
-          const increment = 0.01 + (Math.random() * 0.02);
-          const newMultiplier = prev + increment;
-          
-          // Progressive crash probability
-          const crashChance = Math.min(0.001 * Math.pow(prev, 1.5), 0.1);
-          
-          if (Math.random() < crashChance) {
-            crashGame(newMultiplier);
-            return newMultiplier;
-          }
-          
-          // Auto cash out check
-          if (autoCashOut && newMultiplier >= autoCashOut && currentBet) {
-            cashOut(autoCashOut);
-          }
-          
-          return newMultiplier;
+      const crashPoint = calculateCrashPoint();
+      const startTime = Date.now();
+      
+      const updateMultiplier = () => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const newMultiplier = 1 + (elapsed / 2); // Slower progression
+        
+        // Update plane position
+        setPlanePath(prev => ({
+          x: Math.min(90, 10 + (elapsed * 8)),
+          y: Math.max(10, 50 - (elapsed * 4))
+        }));
+
+        // Add to trail
+        setPlaneTrail(prev => {
+          const newTrail = [...prev, planePath];
+          return newTrail.slice(-20); // Keep last 20 points
         });
-      }, 50); // Faster updates for smoother animation
+
+        if (newMultiplier >= crashPoint) {
+          crashGame(crashPoint);
+          return;
+        }
+
+        setCurrentMultiplier(newMultiplier);
+
+        // Auto cash out check
+        if (hasBet && !hasCashedOut && autoCashOut > 0 && newMultiplier >= autoCashOut) {
+          handleCashOut();
+          return;
+        }
+
+        // Update live bets with cash outs
+        setLiveBets(prev => prev.map(bet => {
+          if (bet.status === 'active' && Math.random() < 0.02) {
+            return {
+              ...bet,
+              cashOut: newMultiplier,
+              status: 'cashed'
+            };
+          }
+          return bet;
+        }));
+
+        animationFrame = requestAnimationFrame(updateMultiplier);
+      };
+
+      updateMultiplier();
     }
 
-    return () => clearInterval(interval);
-  }, [gameState, countdown, autoCashOut, currentBet]);
+    return () => {
+      if (interval) clearInterval(interval);
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    };
+  }, [gameState, hasBet, hasCashedOut, autoCashOut]);
 
-  const startGame = () => {
+  const startNewRound = () => {
+    const newRoundId = `aviator_${Date.now()}`;
+    setRoundId(newRoundId);
     setGameState('flying');
-    setIsFlying(true);
-    setMultiplier(1.00);
-    setPlanePosition({ x: 0, y: 100 });
+    setCurrentMultiplier(1.00);
+    setHasCashedOut(false);
+    setCashOutMultiplier(0);
+    setPlanePath({ x: 10, y: 50 });
+    setPlaneTrail([]);
+    generateLiveBets();
+    playSound('flying');
   };
 
-  const crashGame = (finalMultiplier: number) => {
+  const crashGame = (crashPoint: number) => {
     setGameState('crashed');
-    setIsFlying(false);
+    setCurrentMultiplier(crashPoint);
     
-    if (currentBet) {
-      setResult({
-        crashed: true,
-        finalMultiplier,
-        isWin: false,
+    // Add to history
+    setGameHistory(prev => [{
+      multiplier: crashPoint,
+      timestamp: new Date(),
+      crashed: true
+    }, ...prev.slice(0, 19)]);
+
+    // Mark all remaining bets as lost
+    setLiveBets(prev => prev.map(bet => 
+      bet.status === 'active' ? { ...bet, status: 'lost' } : bet
+    ));
+
+    // Check if player lost
+    if (hasBet && !hasCashedOut) {
+      setLastResult({
+        multiplier: crashPoint,
+        won: false,
+        amount: betAmount,
         winAmount: 0
       });
     }
+
+    playSound('crash');
     
+    // Reset for next round
     setTimeout(() => {
       setGameState('waiting');
       setCountdown(5);
-      setMultiplier(1.00);
-      setCurrentBet(null);
-      setResult(null);
-      setPlanePosition({ x: 0, y: 0 });
+      setHasBet(false);
+      setLastResult(null);
     }, 3000);
   };
 
   const placeBet = async () => {
-    if (gameState !== 'waiting') return;
-    setCurrentBet(betAmount);
-  };
+    if (gameState !== 'waiting' || hasBet || betAmount > balance) return;
 
-  const cashOut = async (cashOutMultiplier?: number) => {
-    if (!currentBet || gameState !== 'flying') return;
-    
-    const finalMultiplier = cashOutMultiplier || multiplier;
-    
+    setLoading(true);
     try {
-      const response = await fetch('/api/games/aviator/play', {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/games/bet', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer demo_token_' + Date.now()
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          betAmount: currentBet,
-          cashOutMultiplier: finalMultiplier
-        })
+          gameType: 'aviator',
+          betAmount,
+          betData: {
+            autoCashOut,
+            roundId
+          }
+        }),
       });
 
       if (response.ok) {
-        const winAmount = Math.floor(currentBet * finalMultiplier);
-        
-        setResult({
-          crashed: false,
-          finalMultiplier,
-          isWin: true,
-          winAmount
-        });
-        
-        setHistory(prev => [finalMultiplier, ...prev.slice(0, 4)]);
-        setCurrentBet(null);
-        refreshBalance();
+        setHasBet(true);
+        setBalance(prev => prev - betAmount);
+        onBalanceUpdate();
+        playSound('bet');
+
+        // Add player bet to live bets
+        setLiveBets(prev => [{
+          id: `player_${Date.now()}`,
+          username: user.username,
+          amount: betAmount,
+          status: 'active'
+        }, ...prev.slice(0, 7)]);
       }
     } catch (error) {
-      console.error('Cash out error:', error);
+      console.error('Bet error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleCashOut = async () => {
+    if (!hasBet || hasCashedOut || gameState !== 'flying') return;
+
+    setHasCashedOut(true);
+    setCashOutMultiplier(currentMultiplier);
+    const winAmount = betAmount * currentMultiplier;
+    
+    setBalance(prev => prev + winAmount);
+    setLastResult({
+      multiplier: currentMultiplier,
+      won: true,
+      amount: betAmount,
+      winAmount
+    });
+
+    setShowWinAnimation(true);
+    setTimeout(() => setShowWinAnimation(false), 2000);
+
+    // Update live bets
+    setLiveBets(prev => prev.map(bet => 
+      bet.username === user.username && bet.status === 'active' 
+        ? { ...bet, cashOut: currentMultiplier, status: 'cashed' }
+        : bet
+    ));
+
+    onBalanceUpdate();
+    playSound('cashout');
+  };
+
+  const getMultiplierColor = (multiplier: number) => {
+    if (multiplier < 2) return 'text-green-400';
+    if (multiplier < 5) return 'text-yellow-400';
+    if (multiplier < 10) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const getHistoryColor = (multiplier: number) => {
+    if (multiplier < 2) return 'bg-red-500';
+    if (multiplier < 5) return 'bg-yellow-500';
+    if (multiplier < 10) return 'bg-green-500';
+    return 'bg-purple-500';
+  };
+
   return (
-    <div className="enhanced-aviator-game">
-      <div className="game-header">
-        <button onClick={onClose} className="close-btn">← Back</button>
-        <h2>Aviator</h2>
-        <div className="balance">₹8,807</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-black/30">
+        <button onClick={onBack} className="text-white p-2">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <div className="text-center">
+          <div className="text-white font-bold text-lg flex items-center">
+            <Plane className="w-5 h-5 mr-2" />
+            AVIATOR
+          </div>
+          <div className="text-blue-300 text-sm">Round: {roundId.slice(-6)}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-blue-300 text-sm">Balance</div>
+          <div className="text-white font-bold">₹{balance.toFixed(2)}</div>
+        </div>
       </div>
 
-      <div className="game-canvas-container">
-        <canvas ref={canvasRef} className="game-canvas" width={800} height={400}></canvas>
-        
-        {/* Enhanced visual elements */}
-        <div className="sky-background">
-          <div className="clouds"></div>
-          <div className="mountains"></div>
+      {/* Game Stats */}
+      <div className="px-4 py-2 bg-black/20">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-green-400 font-bold text-lg">{totalPlayers}</div>
+            <div className="text-gray-400 text-xs">Players</div>
+          </div>
+          <div>
+            <div className="text-yellow-400 font-bold text-lg">₹{totalWagered.toLocaleString()}</div>
+            <div className="text-gray-400 text-xs">Total Bet</div>
+          </div>
+          <div>
+            <div className="text-blue-400 font-bold text-lg">
+              {gameHistory.length > 0 ? `${gameHistory[0].multiplier}x` : '---'}
+            </div>
+            <div className="text-gray-400 text-xs">Last Crash</div>
+          </div>
         </div>
-        
-        <div 
-          className={`plane ${isFlying ? 'flying' : ''} ${gameState === 'crashed' ? 'crashed' : ''}`}
+      </div>
+
+      {/* Main Game Area */}
+      <div className="relative h-80 mx-4 my-4 bg-gradient-to-br from-blue-900/50 to-purple-900/50 rounded-2xl overflow-hidden border border-blue-500/30">
+        {/* Game Grid Background */}
+        <div className="absolute inset-0 opacity-20">
+          <svg width="100%" height="100%">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f6" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        {/* Plane Trail */}
+        <svg className="absolute inset-0 w-full h-full">
+          <path
+            d={`M ${planeTrail.map((point, i) => 
+              `${i === 0 ? 'M' : 'L'} ${point.x}% ${point.y}%`
+            ).join(' ')}`}
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="3"
+            opacity="0.6"
+          />
+        </svg>
+
+        {/* Plane */}
+        <motion.div
+          className="absolute w-12 h-12 text-4xl"
           style={{
-            transform: `translate(${planePosition.x}px, ${planePosition.y}px)`,
-            transition: gameState === 'crashed' ? 'all 0.5s ease-out' : 'none'
+            left: `${planePath.x}%`,
+            top: `${planePath.y}%`,
+            transform: 'translate(-50%, -50%)'
           }}
+          animate={gameState === 'crashed' ? { 
+            rotate: [0, 180, 360],
+            scale: [1, 0.5, 0]
+          } : {
+            rotate: gameState === 'flying' ? -15 : 0
+          }}
+          transition={{ duration: gameState === 'crashed' ? 1 : 0.5 }}
         >
           ✈️
-        </div>
-        
-        <div className="multiplier-display">
-          <div className={`multiplier ${gameState === 'crashed' ? 'crashed' : ''}`}>
-            {multiplier.toFixed(2)}x
-          </div>
-          {gameState === 'waiting' && (
-            <div className="countdown">
-              Starting in {countdown}s
+        </motion.div>
+
+        {/* Multiplier Display */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            className="text-center"
+            animate={gameState === 'crashed' ? { scale: [1, 1.5, 0] } : { scale: 1 }}
+          >
+            <div className={`text-6xl font-bold ${
+              gameState === 'crashed' ? 'text-red-500' : 
+              gameState === 'flying' ? getMultiplierColor(currentMultiplier) : 'text-white'
+            }`}>
+              {gameState === 'waiting' ? countdown : 
+               gameState === 'crashed' ? 'CRASHED!' : 
+               `${currentMultiplier.toFixed(2)}x`}
             </div>
+            {gameState === 'waiting' && (
+              <div className="text-white text-lg mt-2">Next round in...</div>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Win Animation */}
+        <AnimatePresence>
+          {showWinAnimation && lastResult?.won && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center bg-green-500/20"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+            >
+              <div className="text-center text-white">
+                <div className="text-4xl font-bold">WON!</div>
+                <div className="text-2xl">₹{lastResult.winAmount.toFixed(2)}</div>
+                <div className="text-lg">{lastResult.multiplier.toFixed(2)}x</div>
+              </div>
+            </motion.div>
           )}
-        </div>
-        
-        <div className="trajectory-line"></div>
+        </AnimatePresence>
       </div>
 
-      <div className="game-stats">
-        <div className="stat">
-          <span>Max Win:</span>
-          <span className="highlight">₹2,50,000</span>
-        </div>
-        <div className="stat">
-          <span>Players Online:</span>
-          <span className="highlight">1,247</span>
-        </div>
-        <div className="stat">
-          <span>Round:</span>
-          <span className="highlight">#12847</span>
-        </div>
-      </div>
-
-      <div className="history-bar">
-        <span>Recent: </span>
-        {history.map((mult, idx) => (
-          <span key={idx} className={`history-multiplier ${mult >= 2 ? 'good' : mult >= 1.5 ? 'normal' : 'low'}`}>
-            {mult.toFixed(2)}x
-          </span>
-        ))}
-      </div>
-
-      <div className="betting-panel">
-        <div className="bet-controls">
-          <div className="bet-input">
-            <label>Bet Amount</label>
-            <div className="amount-selector">
-              <button onClick={() => setBetAmount(Math.max(10, betAmount - 10))}>-</button>
-              <input 
-                type="number" 
-                value={betAmount} 
-                onChange={(e) => setBetAmount(Math.max(10, parseInt(e.target.value) || 10))}
-                min="10"
-              />
-              <button onClick={() => setBetAmount(betAmount + 10)}>+</button>
+      {/* Betting Controls */}
+      <div className="px-4 mb-4">
+        <div className="bg-black/30 rounded-2xl p-4">
+          {/* Bet Amount */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white font-semibold">Bet Amount</span>
+              <span className="text-blue-400 text-sm">Min: ₹10 | Max: ₹10,000</span>
             </div>
-            <div className="quick-amounts">
-              {[100, 500, 1000, 5000].map(amount => (
-                <button 
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => setBetAmount(Math.max(10, betAmount - 10))}
+                className="bg-red-500 p-3 rounded-lg text-white font-bold"
+                disabled={gameState === 'flying'}
+              >
+                -10
+              </button>
+              <div className="text-white text-2xl font-bold">₹{betAmount}</div>
+              <button
+                onClick={() => setBetAmount(Math.min(10000, betAmount + 10))}
+                className="bg-green-500 p-3 rounded-lg text-white font-bold"
+                disabled={gameState === 'flying'}
+              >
+                +10
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[10, 50, 100, 500].map(amount => (
+                <button
                   key={amount}
-                  className={betAmount === amount ? 'active' : ''}
                   onClick={() => setBetAmount(amount)}
+                  disabled={gameState === 'flying'}
+                  className={`py-2 rounded-lg font-medium ${
+                    betAmount === amount 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-700 text-gray-300'
+                  }`}
                 >
                   ₹{amount}
                 </button>
               ))}
             </div>
           </div>
-          
-          <div className="auto-cashout">
-            <label>Auto Cash Out</label>
-            <input 
-              type="number" 
-              step="0.01" 
-              min="1.01"
-              placeholder="2.00x"
-              value={autoCashOut || ''}
-              onChange={(e) => setAutoCashOut(parseFloat(e.target.value) || null)}
-            />
-          </div>
-        </div>
 
-        <div className="action-buttons">
-          {!currentBet && gameState === 'waiting' && (
-            <button className="bet-btn" onClick={placeBet}>
-              Place Bet ₹{betAmount}
-            </button>
-          )}
-          
-          {currentBet && gameState === 'flying' && (
-            <button className="cashout-btn" onClick={() => cashOut()}>
-              Cash Out {multiplier.toFixed(2)}x
-              <div className="potential-win">₹{Math.floor(currentBet * multiplier)}</div>
-            </button>
-          )}
-          
-          {gameState === 'crashed' && result && (
-            <div className={`game-result ${result.isWin ? 'win' : 'lose'}`}>
-              {result.isWin ? (
-                <>
-                  <div className="result-title">You Won!</div>
-                  <div className="result-amount">₹{result.winAmount}</div>
-                </>
-              ) : (
-                <>
-                  <div className="result-title">Crashed at {result.finalMultiplier.toFixed(2)}x</div>
-                  <div className="result-amount">Try again!</div>
-                </>
-              )}
+          {/* Auto Cash Out */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white font-semibold">Auto Cash Out</span>
+              <button
+                onClick={() => setAutoCashOut(0)}
+                className={`text-sm px-2 py-1 rounded ${
+                  autoCashOut === 0 ? 'bg-red-500 text-white' : 'bg-gray-600 text-gray-300'
+                }`}
+              >
+                OFF
+              </button>
             </div>
-          )}
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => setAutoCashOut(Math.max(1.1, autoCashOut - 0.1))}
+                className="bg-orange-500 p-2 rounded-lg text-white"
+                disabled={gameState === 'flying'}
+              >
+                -0.1
+              </button>
+              <div className="text-white text-xl font-bold">
+                {autoCashOut > 0 ? `${autoCashOut.toFixed(1)}x` : 'OFF'}
+              </div>
+              <button
+                onClick={() => setAutoCashOut(autoCashOut + 0.1)}
+                className="bg-orange-500 p-2 rounded-lg text-white"
+                disabled={gameState === 'flying'}
+              >
+                +0.1
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={placeBet}
+              disabled={gameState !== 'waiting' || hasBet || loading || betAmount > balance}
+              className={`py-4 rounded-xl font-bold text-lg ${
+                gameState !== 'waiting' || hasBet || betAmount > balance
+                  ? 'bg-gray-600 text-gray-400'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
+            >
+              {loading ? 'Placing...' : 
+               hasBet ? 'Bet Placed' : 
+               `Bet ₹${betAmount}`}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCashOut}
+              disabled={!hasBet || hasCashedOut || gameState !== 'flying'}
+              className={`py-4 rounded-xl font-bold text-lg ${
+                !hasBet || hasCashedOut || gameState !== 'flying'
+                  ? 'bg-gray-600 text-gray-400'
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
+              }`}
+            >
+              {hasCashedOut ? `Cashed ${cashOutMultiplier.toFixed(2)}x` : 
+               hasBet && gameState === 'flying' ? `Cash Out ${currentMultiplier.toFixed(2)}x` :
+               'Cash Out'}
+            </motion.button>
+          </div>
         </div>
       </div>
 
-      <style>{`
-        .enhanced-aviator-game {
-          background: linear-gradient(135deg, #0f4c75 0%, #3282b8 50%, #bbe1fa 100%);
-          color: white;
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          position: relative;
-          overflow: hidden;
-        }
+      {/* Live Bets */}
+      <div className="px-4 mb-4">
+        <div className="bg-black/30 rounded-2xl p-4">
+          <div className="text-white font-semibold mb-3 flex items-center">
+            <Users className="w-5 h-5 mr-2" />
+            Live Bets
+          </div>
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {liveBets.map(bet => (
+              <div key={bet.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="text-blue-300">{bet.username}</div>
+                  <div className="text-yellow-400">₹{bet.amount}</div>
+                </div>
+                <div className={`font-bold ${
+                  bet.status === 'cashed' ? 'text-green-400' :
+                  bet.status === 'lost' ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                  {bet.status === 'cashed' ? `${bet.cashOut?.toFixed(2)}x` :
+                   bet.status === 'lost' ? 'Lost' : 'Active'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        .game-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-          background: rgba(0,0,0,0.3);
-          backdrop-filter: blur(10px);
-        }
-
-        .close-btn {
-          background: none;
-          border: none;
-          color: white;
-          font-size: 18px;
-          cursor: pointer;
-          padding: 10px;
-          border-radius: 8px;
-          transition: background 0.3s;
-        }
-
-        .close-btn:hover {
-          background: rgba(255,255,255,0.1);
-        }
-
-        .balance {
-          background: linear-gradient(45deg, #FFD700, #FFA500);
-          padding: 10px 20px;
-          border-radius: 25px;
-          color: #333;
-          font-weight: bold;
-          font-size: 18px;
-        }
-
-        .game-canvas-container {
-          position: relative;
-          height: 400px;
-          margin: 20px;
-          border-radius: 15px;
-          overflow: hidden;
-          background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
-          box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
-        }
-
-        .sky-background {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="3" fill="white" opacity="0.6"/><circle cx="80" cy="30" r="5" fill="white" opacity="0.4"/><circle cx="60" cy="15" r="2" fill="white" opacity="0.7"/></svg>');
-        }
-
-        .clouds::before {
-          content: '☁️☁️☁️☁️☁️';
-          position: absolute;
-          top: 10%;
-          left: 0;
-          width: 200%;
-          font-size: 24px;
-          animation: drift 20s linear infinite;
-          opacity: 0.7;
-        }
-
-        .mountains {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 100px;
-          background: linear-gradient(to top, #2F4F4F 0%, #708090 50%, #87CEEB 100%);
-          clip-path: polygon(0 100%, 20% 60%, 40% 80%, 60% 40%, 80% 70%, 100% 50%, 100% 100%);
-        }
-
-        @keyframes drift {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0%); }
-        }
-
-        .plane {
-          position: absolute;
-          font-size: 32px;
-          transform-origin: center;
-          transition: all 0.1s ease-out;
-          filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-          z-index: 10;
-        }
-
-        .plane.flying {
-          animation: fly 0.2s ease-in-out infinite alternate;
-        }
-
-        .plane.crashed {
-          animation: crash 0.5s ease-out forwards;
-          filter: drop-shadow(2px 2px 8px rgba(255,0,0,0.8));
-        }
-
-        @keyframes fly {
-          0% { transform: rotate(-5deg) scale(1); }
-          100% { transform: rotate(5deg) scale(1.1); }
-        }
-
-        @keyframes crash {
-          0% { transform: rotate(0deg) scale(1); }
-          50% { transform: rotate(180deg) scale(1.5); }
-          100% { transform: rotate(360deg) scale(0.5) translateY(50px); }
-        }
-
-        .multiplier-display {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
-          z-index: 5;
-        }
-
-        .multiplier {
-          font-size: 48px;
-          font-weight: bold;
-          color: #FFD700;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-          animation: pulse 1s ease-in-out infinite;
-        }
-
-        .multiplier.crashed {
-          color: #ff4444;
-          animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-
-        .countdown {
-          font-size: 24px;
-          color: white;
-          margin-top: 10px;
-          background: rgba(0,0,0,0.5);
-          padding: 10px 20px;
-          border-radius: 25px;
-        }
-
-        .trajectory-line {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background: linear-gradient(to right, transparent, #FFD700, transparent);
-          animation: glow 2s ease-in-out infinite;
-        }
-
-        @keyframes glow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-
-        .game-stats {
-          display: flex;
-          justify-content: space-around;
-          padding: 15px 20px;
-          background: rgba(0,0,0,0.2);
-          margin: 0 20px;
-          border-radius: 10px;
-        }
-
-        .stat {
-          text-align: center;
-        }
-
-        .stat .highlight {
-          color: #FFD700;
-          font-weight: bold;
-          font-size: 18px;
-        }
-
-        .history-bar {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 15px 20px;
-          overflow-x: auto;
-        }
-
-        .history-multiplier {
-          padding: 8px 12px;
-          border-radius: 20px;
-          font-weight: bold;
-          font-size: 14px;
-          white-space: nowrap;
-        }
-
-        .history-multiplier.good {
-          background: #4CAF50;
-          color: white;
-        }
-
-        .history-multiplier.normal {
-          background: #FF9800;
-          color: white;
-        }
-
-        .history-multiplier.low {
-          background: #f44336;
-          color: white;
-        }
-
-        .betting-panel {
-          padding: 20px;
-          background: rgba(0,0,0,0.3);
-          backdrop-filter: blur(10px);
-          margin: 20px;
-          border-radius: 15px;
-        }
-
-        .bet-controls {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .bet-input label,
-        .auto-cashout label {
-          display: block;
-          margin-bottom: 10px;
-          font-weight: bold;
-        }
-
-        .amount-selector {
-          display: flex;
-          align-items: center;
-          background: rgba(255,255,255,0.1);
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .amount-selector button {
-          background: rgba(255,255,255,0.2);
-          border: none;
-          color: white;
-          padding: 15px 20px;
-          cursor: pointer;
-          font-size: 18px;
-          font-weight: bold;
-        }
-
-        .amount-selector input {
-          flex: 1;
-          background: none;
-          border: none;
-          color: white;
-          text-align: center;
-          font-size: 18px;
-          font-weight: bold;
-          padding: 15px;
-        }
-
-        .quick-amounts {
-          display: flex;
-          gap: 10px;
-          margin-top: 10px;
-        }
-
-        .quick-amounts button {
-          background: rgba(255,255,255,0.1);
-          border: 1px solid rgba(255,255,255,0.3);
-          color: white;
-          padding: 8px 15px;
-          border-radius: 20px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .quick-amounts button.active,
-        .quick-amounts button:hover {
-          background: #FFD700;
-          color: #333;
-          transform: scale(1.05);
-        }
-
-        .auto-cashout input {
-          width: 100%;
-          background: rgba(255,255,255,0.1);
-          border: 1px solid rgba(255,255,255,0.3);
-          color: white;
-          padding: 15px;
-          border-radius: 10px;
-          font-size: 16px;
-        }
-
-        .action-buttons {
-          text-align: center;
-        }
-
-        .bet-btn,
-        .cashout-btn {
-          background: linear-gradient(45deg, #4CAF50, #45a049);
-          border: none;
-          color: white;
-          padding: 20px 40px;
-          border-radius: 50px;
-          font-size: 18px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.3s;
-          box-shadow: 0 4px 15px rgba(76,175,80,0.4);
-        }
-
-        .cashout-btn {
-          background: linear-gradient(45deg, #FFD700, #FFA500);
-          color: #333;
-          box-shadow: 0 4px 15px rgba(255,215,0,0.4);
-          position: relative;
-        }
-
-        .bet-btn:hover,
-        .cashout-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(76,175,80,0.6);
-        }
-
-        .cashout-btn:hover {
-          box-shadow: 0 6px 20px rgba(255,215,0,0.6);
-        }
-
-        .potential-win {
-          position: absolute;
-          top: -30px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(0,0,0,0.8);
-          padding: 5px 10px;
-          border-radius: 15px;
-          font-size: 12px;
-          white-space: nowrap;
-        }
-
-        .game-result {
-          background: rgba(0,0,0,0.8);
-          padding: 30px;
-          border-radius: 15px;
-          text-align: center;
-        }
-
-        .game-result.win {
-          border: 2px solid #4CAF50;
-          box-shadow: 0 0 20px rgba(76,175,80,0.5);
-        }
-
-        .game-result.lose {
-          border: 2px solid #f44336;
-          box-shadow: 0 0 20px rgba(244,67,54,0.5);
-        }
-
-        .result-title {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-
-        .result-amount {
-          font-size: 32px;
-          font-weight: bold;
-          color: #FFD700;
-        }
-
-        @media (max-width: 768px) {
-          .bet-controls {
-            grid-template-columns: 1fr;
-          }
-          
-          .game-canvas-container {
-            height: 300px;
-            margin: 10px;
-          }
-          
-          .multiplier {
-            font-size: 36px;
-          }
-        }
-      `}</style>
+      {/* Game History */}
+      <div className="px-4 pb-20">
+        <div className="bg-black/30 rounded-2xl p-4">
+          <div className="text-white font-semibold mb-3 flex items-center">
+            <Trophy className="w-5 h-5 mr-2" />
+            Recent Results
+          </div>
+          <div className="flex space-x-2 overflow-x-auto">
+            {gameHistory.slice(0, 10).map((game, index) => (
+              <div
+                key={index}
+                className={`min-w-[60px] h-12 rounded-lg flex items-center justify-center text-white font-bold text-sm ${
+                  getHistoryColor(game.multiplier)
+                }`}
+              >
+                {game.multiplier.toFixed(2)}x
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
+}
