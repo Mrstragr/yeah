@@ -8,6 +8,9 @@ import {
 import WinGoGame from './WinGoGame';
 import OfficialAviatorGame from './OfficialAviatorGame';
 import OfficialColorPrediction from './OfficialColorPrediction';
+import OfficialWinGo from './OfficialWinGo';
+import OfficialDice from './OfficialDice';
+import OfficialK3 from './OfficialK3';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -403,6 +406,39 @@ export function Perfect91Club() {
   if (currentGameView === 'color-prediction' && user) {
     return (
       <OfficialColorPrediction 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Official WinGo game if selected
+  if (currentGameView === 'wingo' && user) {
+    return (
+      <OfficialWinGo 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Official Dice game if selected
+  if (currentGameView === 'dice-game' && user) {
+    return (
+      <OfficialDice 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Official K3 game if selected
+  if (currentGameView === 'k3' && user) {
+    return (
+      <OfficialK3 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
