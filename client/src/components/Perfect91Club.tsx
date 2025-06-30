@@ -11,6 +11,10 @@ import OfficialColorPrediction from './OfficialColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
+import PromotionSection from './PromotionSection';
+import ActivitySection from './ActivitySection';
+import WalletSection from './WalletSection';
+import AccountSection from './AccountSection';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -44,6 +48,7 @@ export function Perfect91Club() {
   const [realTimeBalance, setRealTimeBalance] = useState<string>('0.00');
   const [showProfile, setShowProfile] = useState(false);
   const [currentGameView, setCurrentGameView] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState<'home' | 'promotion' | 'activity' | 'wallet' | 'account'>('home');
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -442,6 +447,53 @@ export function Perfect91Club() {
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Handle logout
+  const handleLogout = () => {
+    setUser(null);
+    setRealTimeBalance('0.00');
+    localStorage.removeItem('authToken');
+    setCurrentTab('home');
+  };
+
+  // Show different sections based on current tab
+  if (user && currentTab === 'promotion') {
+    return (
+      <PromotionSection 
+        user={user}
+        balance={realTimeBalance}
+      />
+    );
+  }
+
+  if (user && currentTab === 'activity') {
+    return (
+      <ActivitySection 
+        user={user}
+        balance={realTimeBalance}
+      />
+    );
+  }
+
+  if (user && currentTab === 'wallet') {
+    return (
+      <WalletSection 
+        user={user}
+        balance={realTimeBalance}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  if (user && currentTab === 'account') {
+    return (
+      <AccountSection 
+        user={user}
+        balance={realTimeBalance}
+        onLogout={handleLogout}
       />
     );
   }
@@ -978,29 +1030,41 @@ export function Perfect91Club() {
       </AnimatePresence>
 
       {/* EXACT Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 max-w-md mx-auto">
         <div className="grid grid-cols-5 gap-1">
-          <button className="flex flex-col items-center py-3 text-gray-400">
+          <button 
+            onClick={() => setCurrentTab('promotion')}
+            className={`flex flex-col items-center py-3 ${currentTab === 'promotion' ? 'text-red-500' : 'text-gray-400'}`}
+          >
             <Gift className="w-5 h-5 mb-1" />
             <span className="text-xs">Promotion</span>
           </button>
-          <button className="flex flex-col items-center py-3 text-gray-400">
+          <button 
+            onClick={() => setCurrentTab('activity')}
+            className={`flex flex-col items-center py-3 ${currentTab === 'activity' ? 'text-red-500' : 'text-gray-400'}`}
+          >
             <Trophy className="w-5 h-5 mb-1" />
             <span className="text-xs">Activity</span>
           </button>
-          <button className="flex flex-col items-center py-3 text-red-500">
-            <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center mb-1">
+          <button 
+            onClick={() => setCurrentTab('home')}
+            className={`flex flex-col items-center py-3 ${currentTab === 'home' ? 'text-red-500' : 'text-gray-400'}`}
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-1 ${currentTab === 'home' ? 'bg-red-500' : 'bg-gray-400'}`}>
               <Gamepad2 className="w-5 h-5 text-white" />
             </div>
             <span className="text-xs font-bold">Game</span>
           </button>
-          <button className="flex flex-col items-center py-3 text-gray-400">
+          <button 
+            onClick={() => setCurrentTab('wallet')}
+            className={`flex flex-col items-center py-3 ${currentTab === 'wallet' ? 'text-red-500' : 'text-gray-400'}`}
+          >
             <Wallet className="w-5 h-5 mb-1" />
             <span className="text-xs">Wallet</span>
           </button>
           <button 
-            onClick={() => setShowProfile(true)}
-            className="flex flex-col items-center py-3 text-gray-400"
+            onClick={() => setCurrentTab('account')}
+            className={`flex flex-col items-center py-3 ${currentTab === 'account' ? 'text-red-500' : 'text-gray-400'}`}
           >
             <User className="w-5 h-5 mb-1" />
             <span className="text-xs">Account</span>
