@@ -351,6 +351,7 @@ export function Perfect91Club() {
     setUser(null);
     setShowProfile(false);
     setRealTimeBalance('0.00');
+    setCurrentTab('home');
   };
 
   // Check for existing auth token on component mount
@@ -451,13 +452,7 @@ export function Perfect91Club() {
     );
   }
 
-  // Handle logout
-  const handleLogout = () => {
-    setUser(null);
-    setRealTimeBalance('0.00');
-    localStorage.removeItem('authToken');
-    setCurrentTab('home');
-  };
+
 
   // Show different sections based on current tab
   if (user && currentTab === 'promotion') {
