@@ -98,7 +98,7 @@ export default function OfficialDice({ onBack, user, onBalanceUpdate }: DiceGame
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-900 via-red-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-orange-900 via-red-900 to-black text-white max-w-md mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-red-600 p-4 flex items-center justify-between">
         <button onClick={onBack} className="flex items-center space-x-2 text-white">

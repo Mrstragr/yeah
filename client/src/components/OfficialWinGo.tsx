@@ -172,7 +172,7 @@ export default function OfficialWinGo({ onBack, user, onBalanceUpdate }: WinGoGa
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 via-indigo-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-900 via-indigo-900 to-black text-white max-w-md mx-auto">
       {/* Header - WinGo 1Min Style */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center justify-between">
         <button 

@@ -200,7 +200,7 @@ export default function OfficialK3({ onBack, user, onBalanceUpdate }: K3GameProp
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-900 via-purple-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-pink-900 via-purple-900 to-black text-white max-w-md mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-4 flex items-center justify-between">
         <button onClick={onBack} className="flex items-center space-x-2 text-white">

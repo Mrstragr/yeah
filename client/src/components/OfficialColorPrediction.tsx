@@ -171,7 +171,7 @@ export default function OfficialColorPrediction({ onBack, user, onBalanceUpdate 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black text-white max-w-md mx-auto">
       {/* Header - bg-678 Style */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 flex items-center justify-between">
         <button 
