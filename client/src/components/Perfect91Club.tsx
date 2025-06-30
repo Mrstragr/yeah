@@ -45,6 +45,13 @@ export function Perfect91Club() {
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
     {
+      id: 'color-prediction',
+      name: 'COLOR\nPREDICTION',
+      bgColor: 'linear-gradient(135deg, #dc2626 0%, #f59e0b 50%, #16a34a 100%)',
+      icon: '🎨',
+      description: '3 Min'
+    },
+    {
       id: 'wingo',
       name: 'WIN GO',
       bgColor: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
@@ -403,6 +410,17 @@ export function Perfect91Club() {
     );
   }
 
+  // Show Color Prediction game if selected
+  if (currentGameView === 'color-prediction' && user) {
+    return (
+      <ColorPredictionGame 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
   // Show auth screen if not logged in
   if (!user) {
     return (
@@ -623,6 +641,8 @@ export function Perfect91Club() {
                   setCurrentGameView('wingo');
                 } else if (game.name === 'AVIATOR') {
                   setCurrentGameView('aviator');
+                } else if (game.name === 'COLOR\nPREDICTION') {
+                  setCurrentGameView('color-prediction');
                 } else {
                   setSelectedGame(game);
                 }
