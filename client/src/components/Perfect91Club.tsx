@@ -510,7 +510,7 @@ export function Perfect91Club() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
       {/* EXACT 91CLUB Header */}
       <div className="bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between">
