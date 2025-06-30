@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
 import OfficialAviatorGame from './OfficialAviatorGame';
-import ColorPredictionGame from './ColorPredictionGame';
+import OfficialColorPrediction from './OfficialColorPrediction';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -399,10 +399,10 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Color Prediction game if selected
+  // Show Official Color Prediction game if selected
   if (currentGameView === 'color-prediction' && user) {
     return (
-      <ColorPredictionGame 
+      <OfficialColorPrediction 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
