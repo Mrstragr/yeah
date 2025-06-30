@@ -6,7 +6,7 @@ import {
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
-import EnhancedAviatorGame from './EnhancedAviatorGame';
+import OfficialAviatorGame from './OfficialAviatorGame';
 import ColorPredictionGame from './ColorPredictionGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
@@ -388,10 +388,10 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Enhanced Aviator game if selected
+  // Show Official Aviator game if selected
   if (currentGameView === 'aviator' && user) {
     return (
-      <EnhancedAviatorGame 
+      <OfficialAviatorGame 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
