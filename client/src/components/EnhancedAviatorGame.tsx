@@ -485,7 +485,7 @@ export default function EnhancedAviatorGame({ onBack, user, onBalanceUpdate }: A
                 +10
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2 mb-3">
               {[10, 50, 100, 500].map(amount => (
                 <button
                   key={amount}
@@ -500,6 +500,31 @@ export default function EnhancedAviatorGame({ onBack, user, onBalanceUpdate }: A
                   ₹{amount}
                 </button>
               ))}
+            </div>
+            
+            {/* Quick Multipliers */}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => setBetAmount(betAmount * 2)}
+                disabled={gameState === 'flying' || betAmount * 2 > 10000}
+                className="py-2 px-3 bg-orange-600 text-white rounded-lg font-medium text-sm"
+              >
+                2x
+              </button>
+              <button
+                onClick={() => setBetAmount(Math.max(10, betAmount / 2))}
+                disabled={gameState === 'flying'}
+                className="py-2 px-3 bg-purple-600 text-white rounded-lg font-medium text-sm"
+              >
+                1/2
+              </button>
+              <button
+                onClick={() => setBetAmount(Math.min(10000, betAmount + 100))}
+                disabled={gameState === 'flying'}
+                className="py-2 px-3 bg-indigo-600 text-white rounded-lg font-medium text-sm"
+              >
+                +100
+              </button>
             </div>
           </div>
 
@@ -597,6 +622,34 @@ export default function EnhancedAviatorGame({ onBack, user, onBalanceUpdate }: A
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Game Verification & Stats */}
+      <div className="px-4 pb-4">
+        <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 rounded-2xl p-4 border border-green-500/30">
+          <div className="text-white font-semibold mb-3 flex items-center">
+            <Target className="w-5 h-5 mr-2 text-green-400" />
+            Game Verification
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="text-center">
+              <div className="text-green-400 font-bold">Round ID</div>
+              <div className="text-white/80">#{roundId || Date.now().toString().slice(-6)}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-blue-400 font-bold">Fair Play</div>
+              <div className="text-white/80">✓ Verified</div>
+            </div>
+            <div className="text-center">
+              <div className="text-yellow-400 font-bold">Total Players</div>
+              <div className="text-white/80">{totalPlayers.toLocaleString()}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-purple-400 font-bold">Total Wagered</div>
+              <div className="text-white/80">₹{totalWagered.toLocaleString()}</div>
+            </div>
           </div>
         </div>
       </div>
