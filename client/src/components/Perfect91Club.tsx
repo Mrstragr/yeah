@@ -391,6 +391,17 @@ export function Perfect91Club() {
     );
   }
 
+  // Show Aviator game if selected
+  if (currentGameView === 'aviator' && user) {
+    return (
+      <AviatorGame 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
   // Show auth screen if not logged in
   if (!user) {
     return (
@@ -609,6 +620,8 @@ export function Perfect91Club() {
               onClick={() => {
                 if (game.name === 'WIN GO') {
                   setCurrentGameView('wingo');
+                } else if (game.name === 'AVIATOR') {
+                  setCurrentGameView('aviator');
                 } else {
                   setSelectedGame(game);
                 }
@@ -624,6 +637,50 @@ export function Perfect91Club() {
               <div className="absolute top-2 right-2">
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">7</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* EXACT Recommended Games Section */}
+      <div className="px-4 mb-6">
+        <div className="flex items-center mb-3">
+          <span className="text-yellow-500 text-lg mr-2">👑</span>
+          <span className="font-bold text-lg">Recommended</span>
+        </div>
+        <div className="text-gray-600 text-sm mb-4">
+          Popular games trending now
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {recommendedGames.map((game) => (
+            <motion.div
+              key={game.id}
+              className="rounded-2xl p-6 text-white relative overflow-hidden cursor-pointer"
+              style={{ background: game.bgColor }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                if (game.name === 'WIN GO') {
+                  setCurrentGameView('wingo');
+                } else if (game.name === 'AVIATOR') {
+                  setCurrentGameView('aviator');
+                } else {
+                  setSelectedGame(game);
+                }
+              }}
+            >
+              <div className="text-3xl mb-2">{game.icon}</div>
+              <div className="font-bold text-xl whitespace-pre-line">
+                {game.name}
+              </div>
+              <div className="text-sm opacity-90 mt-1">
+                {game.description}
+              </div>
+              <div className="absolute top-2 right-2">
+                <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">🔥</span>
                 </div>
               </div>
             </motion.div>
