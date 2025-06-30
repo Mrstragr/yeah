@@ -388,21 +388,10 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Aviator game if selected
+  // Show Enhanced Aviator game if selected
   if (currentGameView === 'aviator' && user) {
     return (
-      <AviatorGame 
-        onBack={() => setCurrentGameView(null)}
-        user={user}
-        onBalanceUpdate={fetchBalance}
-      />
-    );
-  }
-
-  // Show Aviator game if selected
-  if (currentGameView === 'aviator' && user) {
-    return (
-      <AviatorGame 
+      <EnhancedAviatorGame 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
