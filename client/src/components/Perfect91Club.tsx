@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
 import AviatorGame from './AviatorGame';
+import ColorPredictionGame from './ColorPredictionGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
