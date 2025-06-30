@@ -5,6 +5,7 @@ import {
   Gift, Wallet, Trophy, User, Gamepad2,
   Plus, Minus, Play
 } from 'lucide-react';
+import WinGoGame from './WinGoGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -37,6 +38,7 @@ export function Perfect91Club() {
   const [amount, setAmount] = useState(500);
   const [realTimeBalance, setRealTimeBalance] = useState<string>('0.00');
   const [showProfile, setShowProfile] = useState(false);
+  const [currentGameView, setCurrentGameView] = useState<string | null>(null);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -359,6 +361,17 @@ export function Perfect91Club() {
     }
   }, [user]);
 
+  // Show WinGo game if selected
+  if (currentGameView === 'wingo' && user) {
+    return (
+      <WinGoGame 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
   // Show auth screen if not logged in
   if (!user) {
     return (
@@ -574,7 +587,13 @@ export function Perfect91Club() {
               style={{ background: game.bgColor }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedGame(game)}
+              onClick={() => {
+                if (game.name === 'WIN GO') {
+                  setCurrentGameView('wingo');
+                } else {
+                  setSelectedGame(game);
+                }
+              }}
             >
               <div className="text-3xl mb-2">{game.icon}</div>
               <div className="font-bold text-xl whitespace-pre-line">
