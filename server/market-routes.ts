@@ -248,13 +248,13 @@ export async function setupMarketRoutes(app: Express) {
     }
   });
 
-  // Standard game routes
+  // Enhanced game betting for WinGo and other games
   app.post('/api/games/bet', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
-      const { gameId, amount, betType } = req.body;
+      const { gameType, period, bets, totalAmount } = req.body;
       const userId = req.user?.id;
 
-      if (!userId || !amount || amount < 1) {
+      if (!userId || !totalAmount || totalAmount <= 0) {
         return res.status(400).json({ 
           success: false, 
           error: 'Invalid bet amount' 
@@ -262,45 +262,42 @@ export async function setupMarketRoutes(app: Express) {
       }
 
       const currentBalance = parseFloat(req.user?.walletBalance || '0');
-      if (amount > currentBalance) {
+      if (totalAmount > currentBalance) {
         return res.status(400).json({ 
           success: false, 
           error: 'Insufficient balance' 
         });
       }
 
-      // Record bet
-      const betTransaction = marketPaymentService.recordBet(userId, amount);
+      // Record bet transaction
+      const betTransaction = marketPaymentService.recordBet(userId, totalAmount);
       
-      // Simulate game result (demo mode)
-      const isWin = Math.random() > 0.5;
-      const multiplier = isWin ? 1.5 + Math.random() * 2 : 0;
-      const winAmount = isWin ? amount * multiplier : 0;
-
-      let newBalance = currentBalance - amount;
-      
-      if (isWin) {
-        const winTransaction = marketPaymentService.recordWin(userId, winAmount);
-        newBalance += winAmount;
-      }
-
+      // Update user balance (deduct bet amount)
+      const newBalance = currentBalance - totalAmount;
       await marketAuthService.updateUserBalance(userId, newBalance);
+
+      // Store bet data for period result (in real app, this would go to a bets table)
+      console.log(`${gameType?.toUpperCase() || 'GAME'} bet placed:`, {
+        userId,
+        period,
+        bets,
+        totalAmount,
+        transactionId: betTransaction.id
+      });
 
       res.json({
         success: true,
-        result: {
-          isWin,
-          multiplier: multiplier.toFixed(2),
-          winAmount: winAmount.toFixed(2),
-          betAmount: amount,
-          newBalance: newBalance.toFixed(2)
-        }
+        message: 'Bet placed successfully!',
+        transactionId: betTransaction.id,
+        newBalance: newBalance.toFixed(2),
+        period,
+        totalBetAmount: totalAmount
       });
     } catch (error: any) {
       console.error('Game bet error:', error);
       res.status(500).json({ 
         success: false, 
-        error: 'Failed to process bet' 
+        error: 'Failed to place bet' 
       });
     }
   });

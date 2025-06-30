@@ -1,419 +1,347 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Plane, DollarSign, Timer } from 'lucide-react';
 
 interface AviatorGameProps {
-  onClose: () => void;
-  refreshBalance: () => void;
+  onBack: () => void;
+  user: any;
+  onBalanceUpdate: () => void;
 }
 
-export const AviatorGame = ({ onClose, refreshBalance }: AviatorGameProps) => {
-  const [betAmount, setBetAmount] = useState(100);
-  const [multiplier, setMultiplier] = useState(1.00);
-  const [isFlying, setIsFlying] = useState(false);
-  const [gameState, setGameState] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
-  const [currentBet, setCurrentBet] = useState<number | null>(null);
-  const [autoCashOut, setAutoCashOut] = useState<number | null>(null);
-  const [result, setResult] = useState<any>(null);
-  const [history, setHistory] = useState([2.45, 1.23, 15.67, 1.05, 3.28]);
+interface GameRound {
+  roundId: string;
+  multiplier: number;
+  crashed: boolean;
+  timeStarted: number;
+  duration: number;
+}
 
+export default function AviatorGame({ onBack, user, onBalanceUpdate }: AviatorGameProps) {
+  const [betAmount, setBetAmount] = useState(10);
+  const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
+  const [gameState, setGameState] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
+  const [hasBet, setHasBet] = useState(false);
+  const [hasCashedOut, setHasCashedOut] = useState(false);
+  const [cashOutMultiplier, setCashOutMultiplier] = useState(0);
+  const [countdown, setCountdown] = useState(5);
+  const [gameHistory, setGameHistory] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Game loop effect
   useEffect(() => {
-    let interval: any;
-    
-    if (gameState === 'flying') {
+    let interval: NodeJS.Timeout;
+
+    if (gameState === 'waiting') {
+      // Countdown to next round
       interval = setInterval(() => {
-        setMultiplier(prev => {
-          const newMultiplier = prev + 0.01 + (Math.random() * 0.02);
-          
-          // Random crash logic
-          if (Math.random() < 0.001 * prev) {
-            setGameState('crashed');
-            setIsFlying(false);
-            
-            if (currentBet) {
-              // Check if player cashed out
-              setResult({
-                crashed: true,
-                finalMultiplier: newMultiplier,
-                isWin: false,
-                winAmount: 0
-              });
-            }
-            
-            setTimeout(() => {
-              setGameState('waiting');
-              setMultiplier(1.00);
-              setCurrentBet(null);
-              setResult(null);
-            }, 3000);
-            
-            return newMultiplier;
+        setCountdown(prev => {
+          if (prev <= 1) {
+            startNewRound();
+            return 5;
           }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (gameState === 'flying') {
+      // Increase multiplier
+      interval = setInterval(() => {
+        setCurrentMultiplier(prev => {
+          const newMultiplier = prev + 0.01;
           
-          // Auto cash out
-          if (autoCashOut && newMultiplier >= autoCashOut && currentBet) {
-            cashOut(newMultiplier);
+          // Random crash probability that increases with multiplier
+          const crashProbability = Math.min(0.02 + (newMultiplier - 1) * 0.03, 0.15);
+          
+          if (Math.random() < crashProbability) {
+            crashPlane(newMultiplier);
+            return newMultiplier;
           }
           
           return newMultiplier;
         });
       }, 100);
     }
-    
-    return () => clearInterval(interval);
-  }, [gameState, currentBet, autoCashOut]);
 
-  const startGame = () => {
-    if (gameState === 'waiting') {
-      setGameState('flying');
-      setIsFlying(true);
-      setMultiplier(1.00);
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  const startNewRound = () => {
+    setGameState('flying');
+    setCurrentMultiplier(1.00);
+    setHasBet(false);
+    setHasCashedOut(false);
+    setCashOutMultiplier(0);
+    setCountdown(5);
+  };
+
+  const crashPlane = (crashMultiplier: number) => {
+    setGameState('crashed');
+    setGameHistory(prev => [crashMultiplier, ...prev.slice(0, 9)]);
+    
+    // Auto payout if user hasn't cashed out and has bet
+    if (hasBet && !hasCashedOut) {
+      // User loses the bet
+      console.log(`Plane crashed at ${crashMultiplier.toFixed(2)}x - Bet lost`);
     }
+    
+    // Wait 3 seconds then start new round
+    setTimeout(() => {
+      setGameState('waiting');
+      setCountdown(5);
+    }, 3000);
   };
 
   const placeBet = async () => {
-    if (gameState !== 'waiting') return;
+    if (gameState !== 'waiting' || betAmount <= 0) return;
     
-    setCurrentBet(betAmount);
-    startGame();
-  };
-
-  const cashOut = async (cashOutMultiplier?: number) => {
-    if (!currentBet || gameState !== 'flying') return;
-    
-    const finalMultiplier = cashOutMultiplier || multiplier;
-    
+    setLoading(true);
     try {
-      const response = await fetch('/api/games/aviator/play', {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/games/bet', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer demo_token_1750315135559'
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          betAmount: currentBet,
-          cashOutMultiplier: finalMultiplier
-        })
+          gameType: 'aviator',
+          period: Date.now().toString(),
+          bets: [{
+            type: 'aviator_bet',
+            amount: betAmount,
+            multiplier: 1.0
+          }],
+          totalAmount: betAmount
+        }),
       });
 
       if (response.ok) {
+        setHasBet(true);
+        onBalanceUpdate();
+      } else {
         const data = await response.json();
-        const winAmount = Math.floor(currentBet * finalMultiplier);
-        
-        setResult({
-          crashed: false,
-          finalMultiplier,
-          isWin: true,
-          winAmount
-        });
-        
-        setHistory(prev => [finalMultiplier, ...prev.slice(0, 4)]);
-        refreshBalance();
-        
-        setTimeout(() => {
-          setGameState('waiting');
-          setMultiplier(1.00);
-          setCurrentBet(null);
-          setResult(null);
-        }, 3000);
+        alert(data.error || 'Bet failed');
       }
     } catch (error) {
-      console.error('Aviator error:', error);
+      alert('Connection error');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const cashOut = async () => {
+    if (!hasBet || hasCashedOut || gameState !== 'flying') return;
     
-    setGameState('crashed');
-    setIsFlying(false);
+    setLoading(true);
+    try {
+      const winAmount = betAmount * currentMultiplier;
+      const token = localStorage.getItem('authToken');
+      
+      // In a real implementation, this would call a cashout endpoint
+      // For demo, we'll simulate instant cashout
+      setHasCashedOut(true);
+      setCashOutMultiplier(currentMultiplier);
+      
+      console.log(`Cashed out at ${currentMultiplier.toFixed(2)}x for ₹${winAmount.toFixed(2)}`);
+      alert(`Cashed out successfully! Won ₹${winAmount.toFixed(2)}`);
+      
+      // Update balance (this would be handled by backend in real app)
+      onBalanceUpdate();
+    } catch (error) {
+      alert('Cashout failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMultiplierColor = () => {
+    if (currentMultiplier < 2) return 'text-green-400';
+    if (currentMultiplier < 5) return 'text-yellow-400';
+    if (currentMultiplier < 10) return 'text-orange-400';
+    return 'text-red-400';
   };
 
   return (
-    <div className="aviator-game">
-      <div className="game-header">
-        <button onClick={onClose} className="back-btn">←</button>
-        <h2>Aviator</h2>
-        <div className="game-status">
-          {gameState === 'waiting' && '✈️ Ready to Fly'}
-          {gameState === 'flying' && '🚀 Flying'}
-          {gameState === 'crashed' && '💥 Crashed'}
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button onClick={onBack} className="flex items-center text-white">
+          <ArrowLeft className="w-6 h-6 mr-2" />
+          <span className="font-medium">Aviator</span>
+        </button>
+        <div className="text-right">
+          <div className="text-sm opacity-80">Balance</div>
+          <div className="font-bold">₹{user.walletBalance}</div>
         </div>
       </div>
 
-      <div className="game-area">
-        <div className="sky-background">
-          <div className={`plane ${isFlying ? 'flying' : ''}`}>✈️</div>
-          <div className="multiplier-display">
-            <span className={`multiplier ${gameState === 'flying' ? 'active' : ''}`}>
-              {multiplier.toFixed(2)}x
-            </span>
+      {/* Game Area */}
+      <div className="relative h-96 mx-4 mb-6 bg-gradient-to-b from-sky-400 to-blue-600 rounded-xl overflow-hidden">
+        {/* Clouds Background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-16 h-8 bg-white/20 rounded-full blur-sm"></div>
+          <div className="absolute top-20 right-20 w-20 h-10 bg-white/15 rounded-full blur-sm"></div>
+          <div className="absolute bottom-20 left-1/3 w-24 h-12 bg-white/10 rounded-full blur-sm"></div>
+        </div>
+
+        {/* Multiplier Display */}
+        <div className="absolute top-6 left-6 z-10">
+          <div className={`text-6xl font-bold ${getMultiplierColor()}`}>
+            {gameState === 'crashed' ? 'CRASHED!' : `${currentMultiplier.toFixed(2)}x`}
           </div>
-        </div>
-      </div>
-
-      <div className="history-bar">
-        <span>Recent: </span>
-        {history.map((mult, idx) => (
-          <span key={idx} className={`history-multiplier ${mult >= 2 ? 'good' : 'normal'}`}>
-            {mult.toFixed(2)}x
-          </span>
-        ))}
-      </div>
-
-      <div className="betting-panel">
-        <div className="bet-controls">
-          <div className="bet-input">
-            <label>Bet Amount</label>
-            <div className="amount-selector">
-              <button onClick={() => setBetAmount(Math.max(10, betAmount - 10))}>-</button>
-              <span>₹{betAmount}</span>
-              <button onClick={() => setBetAmount(betAmount + 10)}>+</button>
+          {gameState === 'waiting' && (
+            <div className="text-2xl text-white/80">
+              Next round in {countdown}s
             </div>
-          </div>
-          
-          <div className="auto-cashout">
-            <label>Auto Cash Out</label>
-            <input 
-              type="number" 
-              step="0.01" 
-              min="1.01"
-              placeholder="2.00x"
-              value={autoCashOut || ''}
-              onChange={(e) => setAutoCashOut(parseFloat(e.target.value) || null)}
-            />
-          </div>
+          )}
         </div>
 
-        <div className="action-buttons">
-          {!currentBet && gameState === 'waiting' && (
-            <button className="bet-btn" onClick={placeBet}>
-              Bet ₹{betAmount}
-            </button>
+        {/* Plane */}
+        <AnimatePresence>
+          {gameState === 'flying' && (
+            <motion.div
+              className="absolute bottom-10 left-10"
+              initial={{ x: 0, y: 0, rotate: 0 }}
+              animate={{ 
+                x: 300, 
+                y: -200, 
+                rotate: -15,
+                transition: { 
+                  duration: Math.min(currentMultiplier * 2, 20),
+                  ease: "easeOut"
+                }
+              }}
+            >
+              <Plane className="w-12 h-12 text-white" />
+            </motion.div>
           )}
-          
-          {currentBet && gameState === 'flying' && (
-            <button className="cashout-btn" onClick={() => cashOut()}>
-              Cash Out {multiplier.toFixed(2)}x
-            </button>
-          )}
-          
+        </AnimatePresence>
+
+        {/* Crash Effect */}
+        <AnimatePresence>
           {gameState === 'crashed' && (
-            <div className="game-over">
-              {result?.isWin ? `Won ₹${result.winAmount}!` : 'Crashed!'}
+            <motion.div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.5, 1] }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="text-6xl">💥</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Game History */}
+      <div className="mx-4 mb-6">
+        <div className="text-sm text-white/60 mb-2">Recent Multipliers</div>
+        <div className="flex space-x-2 overflow-x-auto">
+          {gameHistory.map((mult, index) => (
+            <div
+              key={index}
+              className={`px-3 py-1 rounded-full text-sm font-bold flex-shrink-0 ${
+                mult < 2 ? 'bg-red-500/20 text-red-400' :
+                mult < 5 ? 'bg-yellow-500/20 text-yellow-400' :
+                'bg-green-500/20 text-green-400'
+              }`}
+            >
+              {mult.toFixed(2)}x
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Betting Panel */}
+      <div className="mx-4 bg-white/10 rounded-xl p-4">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Bet Amount */}
+          <div>
+            <div className="text-sm text-white/60 mb-2">Bet Amount</div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setBetAmount(Math.max(1, betAmount - 10))}
+                className="bg-red-500 p-2 rounded-lg"
+                disabled={gameState === 'flying'}
+              >
+                -
+              </button>
+              <div className="flex-1 text-center text-xl font-bold">₹{betAmount}</div>
+              <button
+                onClick={() => setBetAmount(betAmount + 10)}
+                className="bg-green-500 p-2 rounded-lg"
+                disabled={gameState === 'flying'}
+              >
+                +
+              </button>
+            </div>
+            <div className="flex space-x-1 mt-2">
+              {[10, 50, 100, 500].map(amount => (
+                <button
+                  key={amount}
+                  onClick={() => setBetAmount(amount)}
+                  disabled={gameState === 'flying'}
+                  className={`flex-1 py-1 rounded text-xs ${
+                    betAmount === amount 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-white/20 text-white/60'
+                  }`}
+                >
+                  ₹{amount}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Auto Cashout */}
+          <div>
+            <div className="text-sm text-white/60 mb-2">Auto Cashout</div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold">2.00x</div>
+              <div className="text-xs text-white/60">Auto cashout at</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-4 space-y-2">
+          {!hasBet && gameState === 'waiting' && (
+            <button
+              onClick={placeBet}
+              disabled={loading || betAmount > parseFloat(user.walletBalance)}
+              className={`w-full py-3 rounded-lg font-bold text-xl ${
+                loading || betAmount > parseFloat(user.walletBalance)
+                  ? 'bg-gray-600 text-gray-400'
+                  : 'bg-green-500 hover:bg-green-600 text-white'
+              }`}
+            >
+              {loading ? 'Placing Bet...' : 
+               betAmount > parseFloat(user.walletBalance) ? 'Insufficient Balance' :
+               `Bet ₹${betAmount}`}
+            </button>
+          )}
+
+          {hasBet && gameState === 'flying' && !hasCashedOut && (
+            <button
+              onClick={cashOut}
+              disabled={loading}
+              className="w-full py-3 rounded-lg font-bold text-xl bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {loading ? 'Cashing Out...' : `Cash Out ₹${(betAmount * currentMultiplier).toFixed(2)}`}
+            </button>
+          )}
+
+          {hasBet && hasCashedOut && (
+            <div className="w-full py-3 rounded-lg font-bold text-xl bg-green-500 text-white text-center">
+              Cashed Out at {cashOutMultiplier.toFixed(2)}x
+            </div>
+          )}
+
+          {gameState === 'waiting' && hasBet && (
+            <div className="w-full py-3 rounded-lg font-bold text-xl bg-blue-500 text-white text-center">
+              Bet Placed - ₹{betAmount}
             </div>
           )}
         </div>
       </div>
-
-      <style>{`
-        .aviator-game {
-          background: linear-gradient(180deg, #87CEEB 0%, #4169E1 100%);
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        .game-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 15px 20px;
-          background: rgba(0,0,0,0.2);
-          color: white;
-        }
-
-        .back-btn {
-          background: none;
-          border: none;
-          color: white;
-          font-size: 24px;
-          cursor: pointer;
-        }
-
-        .game-header h2 {
-          margin: 0;
-          font-size: 20px;
-        }
-
-        .game-status {
-          font-size: 14px;
-          background: rgba(255,255,255,0.2);
-          padding: 5px 10px;
-          border-radius: 15px;
-        }
-
-        .game-area {
-          height: 400px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .sky-background {
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
-          position: relative;
-        }
-
-        .plane {
-          position: absolute;
-          bottom: 50px;
-          left: 50px;
-          font-size: 32px;
-          transition: all 0.1s ease;
-          z-index: 2;
-        }
-
-        .plane.flying {
-          animation: fly 0.1s ease infinite;
-        }
-
-        @keyframes fly {
-          0% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-5px) rotate(5deg); }
-          100% { transform: translateY(0) rotate(0deg); }
-        }
-
-        .multiplier-display {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 3;
-        }
-
-        .multiplier {
-          font-size: 48px;
-          font-weight: bold;
-          color: white;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-          transition: all 0.1s ease;
-        }
-
-        .multiplier.active {
-          animation: pulse 0.5s ease infinite;
-          color: #FFD700;
-        }
-
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-
-        .history-bar {
-          padding: 15px 20px;
-          background: rgba(0,0,0,0.1);
-          color: white;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .history-multiplier {
-          background: rgba(255,255,255,0.2);
-          padding: 4px 8px;
-          border-radius: 8px;
-          font-size: 12px;
-          font-weight: bold;
-        }
-
-        .history-multiplier.good {
-          background: #4CAF50;
-        }
-
-        .betting-panel {
-          padding: 20px;
-          background: white;
-          border-top-left-radius: 20px;
-          border-top-right-radius: 20px;
-        }
-
-        .bet-controls {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .bet-input label, .auto-cashout label {
-          display: block;
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 8px;
-        }
-
-        .amount-selector {
-          display: flex;
-          align-items: center;
-          background: #f5f5f5;
-          border-radius: 8px;
-          padding: 5px;
-        }
-
-        .amount-selector button {
-          background: #ddd;
-          border: none;
-          width: 30px;
-          height: 30px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: bold;
-        }
-
-        .amount-selector span {
-          flex: 1;
-          text-align: center;
-          font-weight: bold;
-        }
-
-        .auto-cashout input {
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          font-size: 16px;
-        }
-
-        .action-buttons {
-          text-align: center;
-        }
-
-        .bet-btn, .cashout-btn {
-          width: 100%;
-          padding: 15px;
-          border: none;
-          border-radius: 10px;
-          font-size: 18px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .bet-btn {
-          background: #4CAF50;
-          color: white;
-        }
-
-        .bet-btn:hover {
-          background: #45a049;
-        }
-
-        .cashout-btn {
-          background: #FF6B6B;
-          color: white;
-          animation: pulse-red 1s ease infinite;
-        }
-
-        @keyframes pulse-red {
-          0% { background: #FF6B6B; }
-          50% { background: #ff5252; }
-          100% { background: #FF6B6B; }
-        }
-
-        .game-over {
-          font-size: 18px;
-          font-weight: bold;
-          padding: 15px;
-          border-radius: 10px;
-          background: #f5f5f5;
-          color: #333;
-        }
-      `}</style>
     </div>
   );
-};
+}

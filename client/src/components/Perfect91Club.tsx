@@ -6,6 +6,7 @@ import {
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
+import AviatorGame from './AviatorGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -97,6 +98,13 @@ export function Perfect91Club() {
   ];
 
   const recommendedGames: Game[] = [
+    {
+      id: 'aviator',
+      name: 'AVIATOR',
+      bgColor: 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%)',
+      icon: '✈️',
+      description: 'CRASH GAME'
+    },
     {
       id: 'dice-game',
       name: 'DICE',
@@ -365,6 +373,17 @@ export function Perfect91Club() {
   if (currentGameView === 'wingo' && user) {
     return (
       <WinGoGame 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Aviator game if selected
+  if (currentGameView === 'aviator' && user) {
+    return (
+      <AviatorGame 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
