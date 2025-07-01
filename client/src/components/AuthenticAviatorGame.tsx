@@ -407,7 +407,7 @@ export default function AuthenticAviatorGame({ onBack, user, onBalanceUpdate }: 
               animate={{ scale: 1 }}
               exit={{ scale: 0.5 }}
             >
-              <div className="text-white text-2xl mb-2">УЛЕТЕЛ!</div>
+              <div className="text-white text-2xl mb-2">FLEW AWAY!</div>
               <div className="text-red-500 text-4xl font-bold mb-4">
                 {lastCrashMultiplier.toFixed(2)}x
               </div>
