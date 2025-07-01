@@ -11,7 +11,8 @@ import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
-import PromotionSection from './PromotionSection';
+import EnhancedPromotion from './EnhancedPromotion';
+import EnhancedWallet from './EnhancedWallet';
 import ActivitySection from './ActivitySection';
 import WalletSection from './WalletSection';
 import AccountSection from './AccountSection';
@@ -457,9 +458,9 @@ export function Perfect91Club() {
   // Show different sections based on current tab
   if (user && currentTab === 'promotion') {
     return (
-      <PromotionSection 
+      <EnhancedPromotion 
+        onBack={() => setCurrentTab('home')}
         user={user}
-        balance={realTimeBalance}
       />
     );
   }
@@ -475,9 +476,9 @@ export function Perfect91Club() {
 
   if (user && currentTab === 'wallet') {
     return (
-      <WalletSection 
+      <EnhancedWallet 
+        onBack={() => setCurrentTab('home')}
         user={user}
-        balance={realTimeBalance}
         onBalanceUpdate={fetchBalance}
       />
     );
