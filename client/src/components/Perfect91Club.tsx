@@ -6,7 +6,7 @@ import {
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
-import OfficialAviatorGame from './OfficialAviatorGame';
+import AuthenticAviatorGame from './AuthenticAviatorGame';
 import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
@@ -397,10 +397,10 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Official Aviator game if selected
+  // Show Authentic Aviator game if selected
   if (currentGameView === 'aviator' && user) {
     return (
-      <OfficialAviatorGame 
+      <AuthenticAviatorGame 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
