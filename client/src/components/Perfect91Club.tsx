@@ -13,6 +13,7 @@ import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
 import EnhancedPromotion from './EnhancedPromotion';
 import EnhancedWallet from './EnhancedWallet';
+import EnhancedActivity from './EnhancedActivity';
 import ActivitySection from './ActivitySection';
 import WalletSection from './WalletSection';
 import AccountSection from './AccountSection';
@@ -467,7 +468,7 @@ export function Perfect91Club() {
 
   if (user && currentTab === 'activity') {
     return (
-      <ActivitySection 
+      <EnhancedActivity 
         user={user}
         balance={realTimeBalance}
       />
