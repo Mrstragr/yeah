@@ -471,6 +471,7 @@ export function Perfect91Club() {
       <EnhancedActivity 
         user={user}
         balance={realTimeBalance}
+        onBack={() => setCurrentTab('home')}
       />
     );
   }

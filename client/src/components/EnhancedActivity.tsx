@@ -15,6 +15,7 @@ interface User {
 interface Props {
   user: User;
   balance: string;
+  onBack?: () => void;
 }
 
 interface Achievement {
@@ -38,7 +39,7 @@ interface GameActivity {
   timestamp: Date;
 }
 
-export default function EnhancedActivity({ user, balance }: Props) {
+export default function EnhancedActivity({ user, balance, onBack }: Props) {
   const [activeTab, setActiveTab] = useState<'recent' | 'achievements' | 'leaderboard'>('recent');
 
   const achievements: Achievement[] = [
@@ -202,7 +203,17 @@ export default function EnhancedActivity({ user, balance }: Props) {
     <div className="min-h-screen bg-gray-900 text-white max-w-md mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-purple-600">
-        <h1 className="text-xl font-bold">Activity</h1>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+          )}
+          <h1 className="text-xl font-bold">Activity</h1>
+        </div>
         <div className="flex items-center gap-2">
           <Medal className="w-5 h-5 text-yellow-400" />
           <span className="text-sm font-semibold">Rank #5</span>
