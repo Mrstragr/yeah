@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
 import OfficialAviatorGame from './OfficialAviatorGame';
-import OfficialColorPrediction from './OfficialColorPrediction';
+import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
@@ -408,10 +408,10 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Official Color Prediction game if selected
+  // Show BG678 Color Prediction game if selected
   if (currentGameView === 'color-prediction' && user) {
     return (
-      <OfficialColorPrediction 
+      <BG678ColorPrediction 
         onBack={() => setCurrentGameView(null)}
         user={user}
         onBalanceUpdate={fetchBalance}
