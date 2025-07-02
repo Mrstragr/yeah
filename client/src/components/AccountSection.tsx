@@ -21,9 +21,9 @@ export default function AccountSection({ user, balance, onLogout }: AccountSecti
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'help'>('profile');
   const [editing, setEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    username: user.username,
-    email: user.email,
-    phone: user.phone,
+    username: user?.username || 'Guest User',
+    email: user?.email || 'guest@91club.com',
+    phone: user?.phone || '9876543210',
     birthdate: '1990-01-01',
     location: 'Mumbai, India'
   });

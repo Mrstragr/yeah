@@ -18,6 +18,7 @@ import EnhancedWallet from './EnhancedWallet';
 import EnhancedActivity from './EnhancedActivity';
 import { ErrorBoundary } from './ErrorBoundary';
 import ActivitySection from './ActivitySection';
+import { useSmartBalance } from '../hooks/useSmartBalance';
 import WalletSection from './WalletSection';
 import AccountSection from './AccountSection';
 
@@ -50,15 +51,8 @@ export function Perfect91Club() {
   const [showWallet, setShowWallet] = useState(false);
   const [walletAction, setWalletAction] = useState<'deposit' | 'withdraw' | null>(null);
   const [amount, setAmount] = useState(500);
-  // Balance management  
-  const [balance, setBalance] = useState('10000.00');
-  const updateLocalBalance = (amount: number, type: 'add' | 'subtract' = 'subtract') => {
-    setBalance(prev => {
-      const current = parseFloat(prev);
-      const newBalance = type === 'add' ? current + amount : Math.max(0, current - amount);
-      return newBalance.toFixed(2);
-    });
-  };
+  // Smart balance management with caching
+  const { balance, isLoading: balanceLoading, updateBalance: updateLocalBalance } = useSmartBalance();
   const [showProfile, setShowProfile] = useState(false);
   const [currentGameView, setCurrentGameView] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<'home' | 'promotion' | 'activity' | 'wallet' | 'account'>('home');
@@ -256,7 +250,7 @@ export function Perfect91Club() {
 
       if (response.ok) {
         const data = await response.json();
-        setBalance(data.balance);
+        updateLocalBalance(data.balance);
         setUser(prev => prev ? { ...prev, walletBalance: data.balance } : null);
       }
     } catch (error) {
@@ -363,7 +357,7 @@ export function Perfect91Club() {
     localStorage.removeItem('authToken');
     setUser(null);
     setShowProfile(false);
-    setBalance('0.00');
+    updateLocalBalance('0.00');
     setCurrentTab('home');
   };
 
@@ -381,7 +375,7 @@ export function Perfect91Club() {
       .then(userData => {
         if (userData) {
           setUser(userData);
-          setBalance(userData.walletBalance);
+          updateLocalBalance(userData.walletBalance);
         }
       })
       .catch(() => {
@@ -395,7 +389,7 @@ export function Perfect91Club() {
   React.useEffect(() => {
     if (user) {
       fetchBalance();
-      setBalance(user.walletBalance);
+      updateLocalBalance(user.walletBalance);
     }
   }, [user]);
 
