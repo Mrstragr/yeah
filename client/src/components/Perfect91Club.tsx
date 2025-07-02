@@ -21,6 +21,10 @@ import ActivitySection from './ActivitySection';
 import { useSmartBalance } from '../hooks/useSmartBalance';
 import WalletSection from './WalletSection';
 import AccountSection from './AccountSection';
+import AdvancedWithdrawalHistory from './AdvancedWithdrawalHistory';
+import VIPMemberProfile from './VIPMemberProfile';
+import EnhancedBG678Interface from './EnhancedBG678Interface';
+import CongratulationsPopup from './CongratulationsPopup';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -56,6 +60,9 @@ export function Perfect91Club() {
   const [showProfile, setShowProfile] = useState(false);
   const [currentGameView, setCurrentGameView] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<'home' | 'promotion' | 'activity' | 'wallet' | 'account'>('home');
+  const [showWithdrawalHistory, setShowWithdrawalHistory] = useState(false);
+  const [showVIPProfile, setShowVIPProfile] = useState(false);
+  const [showBG678, setShowBG678] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
