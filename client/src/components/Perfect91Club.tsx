@@ -50,8 +50,15 @@ export function Perfect91Club() {
   const [showWallet, setShowWallet] = useState(false);
   const [walletAction, setWalletAction] = useState<'deposit' | 'withdraw' | null>(null);
   const [amount, setAmount] = useState(500);
-  // Use optimized balance hook
-  const { balance: optimizedBalance, updateLocalBalance } = useOptimizedBalance();
+  // Balance management  
+  const [balance, setBalance] = useState('10000.00');
+  const updateLocalBalance = (amount: number, type: 'add' | 'subtract' = 'subtract') => {
+    setBalance(prev => {
+      const current = parseFloat(prev);
+      const newBalance = type === 'add' ? current + amount : Math.max(0, current - amount);
+      return newBalance.toFixed(2);
+    });
+  };
   const [showProfile, setShowProfile] = useState(false);
   const [currentGameView, setCurrentGameView] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<'home' | 'promotion' | 'activity' | 'wallet' | 'account'>('home');
@@ -249,7 +256,7 @@ export function Perfect91Club() {
 
       if (response.ok) {
         const data = await response.json();
-        setRealTimeBalance(data.balance);
+        setBalance(data.balance);
         setUser(prev => prev ? { ...prev, walletBalance: data.balance } : null);
       }
     } catch (error) {
@@ -356,7 +363,7 @@ export function Perfect91Club() {
     localStorage.removeItem('authToken');
     setUser(null);
     setShowProfile(false);
-    setRealTimeBalance('0.00');
+    setBalance('0.00');
     setCurrentTab('home');
   };
 
