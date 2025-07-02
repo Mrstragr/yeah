@@ -47,6 +47,16 @@ export interface IStorage {
   updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined>;
   updateUserLastLogin(userId: number): Promise<User | undefined>;
 
+  // Transaction methods
+  createTransaction(transaction: any): Promise<any>;
+  getTransactionByOrderId(orderId: string): Promise<any>;
+  updateTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<any>;
+  getUserTransactions(userId: number, page: number, limit: number, type?: string): Promise<any[]>;
+  
+  // Wallet transaction methods
+  createWalletTransaction(transaction: any): Promise<any>;
+  getWalletTransactions(userId: number, page: number, limit: number): Promise<any[]>;
+
   // Game methods
   getAllGames(): Promise<Game[]>;
   getGamesByCategory(category: string): Promise<Game[]>;
@@ -531,6 +541,8 @@ export class MemStorage implements IStorage {
   private kycDocuments: Map<number, KycDocument>;
   private achievements: Map<number, Achievement>;
   private userAchievements: Map<number, UserAchievement>;
+  private transactions: Map<number, any>;
+  private walletHistory: Map<number, any>;
   private currentUserId: number;
   private currentGameId: number;
   private currentCategoryId: number;
@@ -551,6 +563,8 @@ export class MemStorage implements IStorage {
     this.kycDocuments = new Map();
     this.achievements = new Map();
     this.userAchievements = new Map();
+    this.transactions = new Map();
+    this.walletHistory = new Map();
     this.currentUserId = 1;
     this.currentGameId = 1;
     this.currentCategoryId = 1;
