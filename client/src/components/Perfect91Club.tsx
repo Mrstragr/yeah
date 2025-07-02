@@ -381,7 +381,7 @@ export function Perfect91Club() {
       .then(userData => {
         if (userData) {
           setUser(userData);
-          setRealTimeBalance(userData.walletBalance);
+          setBalance(userData.walletBalance);
         }
       })
       .catch(() => {
@@ -395,7 +395,7 @@ export function Perfect91Club() {
   React.useEffect(() => {
     if (user) {
       fetchBalance();
-      setRealTimeBalance(user.walletBalance);
+      setBalance(user.walletBalance);
     }
   }, [user]);
 
@@ -503,7 +503,7 @@ export function Perfect91Club() {
     return (
       <EnhancedActivity 
         user={user}
-        balance={realTimeBalance}
+        balance={balance}
         onBack={() => setCurrentTab('home')}
       />
     );
@@ -523,7 +523,7 @@ export function Perfect91Club() {
     return (
       <AccountSection 
         user={user}
-        balance={realTimeBalance}
+        balance={balance}
         onLogout={handleLogout}
       />
     );
@@ -650,7 +650,7 @@ export function Perfect91Club() {
               🟡 Wallet balance
             </div>
             <div className="text-2xl font-bold text-black flex items-center">
-              ₹{realTimeBalance || user.walletBalance}
+              ₹{balance || user.walletBalance}
               <button 
                 onClick={fetchBalance}
                 className="ml-2 text-gray-400 hover:text-gray-600"
@@ -909,9 +909,9 @@ export function Perfect91Club() {
 
                 <button
                   onClick={walletAction === 'deposit' ? handleDeposit : handleWithdraw}
-                  disabled={loading || (walletAction === 'withdraw' && amount > parseFloat(realTimeBalance || user.walletBalance))}
+                  disabled={loading || (walletAction === 'withdraw' && amount > parseFloat(balance || user.walletBalance))}
                   className={`w-full py-3 rounded-lg font-bold ${
-                    loading || (walletAction === 'withdraw' && amount > parseFloat(realTimeBalance || user.walletBalance))
+                    loading || (walletAction === 'withdraw' && amount > parseFloat(balance || user.walletBalance))
                       ? 'bg-gray-400 text-gray-600'
                       : walletAction === 'deposit'
                       ? 'bg-red-500 text-white hover:bg-red-600'
@@ -920,7 +920,7 @@ export function Perfect91Club() {
                 >
                   {loading 
                     ? 'Processing...' 
-                    : walletAction === 'withdraw' && amount > parseFloat(realTimeBalance || user.walletBalance)
+                    : walletAction === 'withdraw' && amount > parseFloat(balance || user.walletBalance)
                     ? 'Insufficient Balance'
                     : walletAction === 'deposit' 
                     ? `Deposit ₹${amount}` 
@@ -972,7 +972,7 @@ export function Perfect91Club() {
 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-black">₹{realTimeBalance || user.walletBalance}</div>
+                    <div className="text-2xl font-bold text-black">₹{balance || user.walletBalance}</div>
                     <div className="text-gray-600 text-sm">Current Balance</div>
                   </div>
                 </div>
