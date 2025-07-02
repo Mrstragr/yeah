@@ -11,9 +11,12 @@ import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
+import Official5D from './Official5D';
+import OfficialTRXWinGo from './OfficialTRXWinGo';
 import EnhancedPromotion from './EnhancedPromotion';
 import EnhancedWallet from './EnhancedWallet';
 import EnhancedActivity from './EnhancedActivity';
+import { ErrorBoundary } from './ErrorBoundary';
 import ActivitySection from './ActivitySection';
 import WalletSection from './WalletSection';
 import AccountSection from './AccountSection';
@@ -454,6 +457,28 @@ export function Perfect91Club() {
     );
   }
 
+  // Show Official 5D game if selected
+  if (currentGameView === '5d' && user) {
+    return (
+      <Official5D 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Official TRX WinGo game if selected
+  if (currentGameView === 'trx-wingo' && user) {
+    return (
+      <OfficialTRXWinGo 
+        onBack={() => setCurrentGameView(null)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
 
 
   // Show different sections based on current tab
@@ -718,6 +743,12 @@ export function Perfect91Club() {
                   setCurrentGameView('aviator');
                 } else if (game.name === 'COLOR\nPREDICTION') {
                   setCurrentGameView('color-prediction');
+                } else if (game.name === 'K3') {
+                  setCurrentGameView('k3');
+                } else if (game.name === '5D') {
+                  setCurrentGameView('5d');
+                } else if (game.name === 'TRX WINGO') {
+                  setCurrentGameView('trx-wingo');
                 } else {
                   setSelectedGame(game);
                 }
