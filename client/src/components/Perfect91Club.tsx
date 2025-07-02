@@ -100,6 +100,13 @@ export function Perfect91Club() {
       bgColor: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
       icon: '⚡',
       description: 'TRX'
+    },
+    {
+      id: 'bg678',
+      name: 'BG678',
+      bgColor: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      icon: '🎯',
+      description: '3 Min'
     }
   ];
 
@@ -488,7 +495,18 @@ export function Perfect91Club() {
     );
   }
 
+  // Show advanced features
+  if (showWithdrawalHistory) {
+    return <AdvancedWithdrawalHistory onBack={() => setShowWithdrawalHistory(false)} />;
+  }
 
+  if (showVIPProfile) {
+    return <VIPMemberProfile onBack={() => setShowVIPProfile(false)} balance={balance} />;
+  }
+
+  if (showBG678) {
+    return <EnhancedBG678Interface onBack={() => setShowBG678(false)} balance={balance} updateBalance={updateLocalBalance} />;
+  }
 
   // Show different sections based on current tab
   if (user && currentTab === 'promotion') {
@@ -661,15 +679,23 @@ export function Perfect91Club() {
             </div>
           </div>
           <div className="flex space-x-3">
-            <button 
-              onClick={() => {
-                setWalletAction('withdraw');
-                setShowWallet(true);
-              }}
-              className="bg-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-600"
-            >
-              Withdraw
-            </button>
+            <div className="flex flex-col space-y-2">
+              <button 
+                onClick={() => {
+                  setWalletAction('withdraw');
+                  setShowWallet(true);
+                }}
+                className="bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600"
+              >
+                Withdraw
+              </button>
+              <button 
+                onClick={() => setShowWithdrawalHistory(true)}
+                className="bg-blue-500 text-white px-6 py-1 rounded-lg text-sm hover:bg-blue-600"
+              >
+                History
+              </button>
+            </div>
             <button 
               onClick={() => {
                 setWalletAction('deposit');
@@ -694,8 +720,9 @@ export function Perfect91Club() {
               <div className="text-sm">of fortune</div>
             </div>
           </div>
-          <div 
-            className="rounded-2xl p-4 flex items-center justify-center"
+          <button 
+            onClick={() => setShowVIPProfile(true)}
+            className="rounded-2xl p-4 flex items-center justify-center hover:scale-105 transition-transform"
             style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)' }}
           >
             <div className="text-center text-white">
@@ -703,7 +730,7 @@ export function Perfect91Club() {
               <div className="font-bold text-lg">VIP</div>
               <div className="text-sm">privileges</div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -758,6 +785,8 @@ export function Perfect91Club() {
                   setCurrentGameView('5d');
                 } else if (game.name === 'TRX WINGO') {
                   setCurrentGameView('trx-wingo');
+                } else if (game.name === 'BG678') {
+                  setShowBG678(true);
                 } else {
                   setSelectedGame(game);
                 }
