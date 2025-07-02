@@ -50,7 +50,8 @@ export function Perfect91Club() {
   const [showWallet, setShowWallet] = useState(false);
   const [walletAction, setWalletAction] = useState<'deposit' | 'withdraw' | null>(null);
   const [amount, setAmount] = useState(500);
-  const [realTimeBalance, setRealTimeBalance] = useState<string>('0.00');
+  // Use optimized balance hook
+  const { balance: optimizedBalance, updateLocalBalance } = useOptimizedBalance();
   const [showProfile, setShowProfile] = useState(false);
   const [currentGameView, setCurrentGameView] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<'home' | 'promotion' | 'activity' | 'wallet' | 'account'>('home');
