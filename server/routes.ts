@@ -7,12 +7,20 @@ import { analyticsService } from './analytics.js';
 import { paymentService } from './payments.js';
 import { asyncHandler } from './errorHandler.js';
 import { validateBetAmount } from './security.js';
+import realAuthRoutes from './real-auth.js';
+import realPaymentRoutes from './real-payments.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get('/api/test', (req, res) => {
     res.json({ status: 'ok', message: 'API is working' });
   });
+
+  // Real Authentication Routes
+  app.use('/api/auth', realAuthRoutes);
+
+  // Real Payment Routes  
+  app.use('/api/payments', realPaymentRoutes);
 
   // Authentication Routes
   app.post('/api/auth/register', async (req, res) => {
