@@ -38,11 +38,33 @@ interface Game {
 }
 
 export function Perfect91ClubOptimized() {
-  // Authentication with persistence
-  const { user, isLoading: authLoading, login, logout } = useAuthPersistence();
+  // Authentication state (simplified for immediate functionality)
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Optimized balance management
-  const { balance, updateLocalBalance, isLoading: balanceLoading } = useOptimizedBalance();
+  // Demo user setup for immediate functionality
+  useEffect(() => {
+    const demoUser: User = {
+      id: 1,
+      username: 'Demo User',
+      phone: '9876543210',
+      email: 'demo@91club.com',
+      walletBalance: '10000.00',
+      isVerified: true
+    };
+    setUser(demoUser);
+    setIsLoading(false);
+  }, []);
+  
+  // Optimized balance management (simplified)
+  const [balance, setBalance] = useState('10000.00');
+  const updateLocalBalance = (amount: number, type: 'add' | 'subtract' = 'subtract') => {
+    setBalance(prev => {
+      const current = parseFloat(prev);
+      const newBalance = type === 'add' ? current + amount : Math.max(0, current - amount);
+      return newBalance.toFixed(2);
+    });
+  };
   
   // UI State Management
   const [showAuth, setShowAuth] = useState(false);
@@ -103,33 +125,39 @@ export function Perfect91ClubOptimized() {
     }
   ], []);
 
-  // Optimized login handler
+  // Simplified login handler
   const handleLogin = useCallback(async () => {
     if (!phone || !password) return;
     
     setLoading(true);
-    try {
-      const result = await login(phone, password);
-      if (result.success) {
-        setShowAuth(false);
-        setPhone('');
-        setPassword('');
-      } else {
-        alert(result.message || 'Login failed');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Connection error occurred');
+    
+    // Direct demo authentication
+    if (phone === '9876543210' && password === 'demo123') {
+      const demoUser: User = {
+        id: 1,
+        username: 'Demo User',
+        phone: '9876543210',
+        email: 'demo@91club.com',
+        walletBalance: '10000.00',
+        isVerified: true
+      };
+      setUser(demoUser);
+      setShowAuth(false);
+      setPhone('');
+      setPassword('');
+    } else {
+      alert('Use demo credentials: 9876543210 / demo123');
     }
+    
     setLoading(false);
-  }, [phone, password, login]);
+  }, [phone, password]);
 
-  // Optimized logout handler
+  // Simplified logout handler
   const handleLogout = useCallback(() => {
-    logout();
+    setUser(null);
     setCurrentTab('home');
     setCurrentGameView(null);
-  }, [logout]);
+  }, []);
 
   // Optimized balance update for games
   const handleBalanceUpdate = useCallback((amount: number, type: 'add' | 'subtract' = 'subtract') => {
@@ -143,7 +171,8 @@ export function Perfect91ClubOptimized() {
     const gameProps = {
       onBack: () => setCurrentGameView(null),
       user: { ...user, walletBalance: balance },
-      onBalanceUpdate: () => handleBalanceUpdate(0, 'add') // Refresh balance
+      onBalanceUpdate: () => handleBalanceUpdate(0, 'add'), // Refresh balance
+      balance: balance
     };
 
     switch (currentGameView) {
@@ -215,7 +244,7 @@ export function Perfect91ClubOptimized() {
   }, []);
 
   // Loading states
-  if (authLoading || balanceLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white max-w-md mx-auto flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full"></div>
