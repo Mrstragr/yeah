@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
 import AuthenticAviatorGame from './AuthenticAviatorGame';
+import AdvancedAviatorGame from './AdvancedAviatorGame';
 import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
@@ -418,14 +419,21 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Authentic Aviator game if selected
+  // Show Advanced Aviator game if selected
   if (currentGameView === 'aviator' && user) {
     return (
-      <AuthenticAviatorGame 
-        onBack={() => setCurrentGameView(null)}
-        user={user}
-        onBalanceUpdate={fetchBalance}
-      />
+      <div className="min-h-screen bg-gray-900 max-w-md mx-auto">
+        <div className="flex items-center p-4 border-b border-gray-700">
+          <button
+            onClick={() => setCurrentGameView(null)}
+            className="text-white mr-3"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-bold text-white">Advanced Aviator</h1>
+        </div>
+        <AdvancedAviatorGame />
+      </div>
     );
   }
 
