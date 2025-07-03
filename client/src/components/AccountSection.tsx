@@ -85,15 +85,15 @@ export default function AccountSection({ user, balance, onLogout }: AccountSecti
           <div className="flex items-center space-x-4 mb-4">
             <div className="relative">
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {user.username.charAt(0).toUpperCase()}
+                {user?.username?.charAt(0)?.toUpperCase() || 'G'}
               </div>
               <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg">
                 <Camera className="w-4 h-4" />
               </button>
             </div>
             <div className="flex-1">
-              <div className="text-xl font-bold text-gray-800">{user.username}</div>
-              <div className="text-sm text-gray-600">{user.phone}</div>
+              <div className="text-xl font-bold text-gray-800">{user?.username || 'Guest User'}</div>
+              <div className="text-sm text-gray-600">{user?.phone || '9876543210'}</div>
               <div className="flex items-center space-x-2 mt-2">
                 {user.isVerified ? (
                   <div className="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">

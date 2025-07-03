@@ -84,10 +84,21 @@ export function useSmartBalance() {
     return cache.balance;
   }, []);
   
-  // Debounced balance update
-  const updateBalance = useCallback((amount: number, type: 'add' | 'subtract' = 'subtract') => {
-    const current = parseFloat(balance);
-    const newBalance = type === 'add' ? current + amount : Math.max(0, current - amount);
+  // Debounced balance update with overloads
+  const updateBalance = useCallback((amountOrBalance: number | string, type: 'add' | 'subtract' | 'set' = 'subtract') => {
+    let newBalance: number;
+    
+    if (typeof amountOrBalance === 'string') {
+      // If string is passed, treat as direct balance update
+      newBalance = parseFloat(amountOrBalance) || 0;
+    } else {
+      // If number is passed, treat as amount to add/subtract
+      const current = parseFloat(balance);
+      newBalance = type === 'add' ? current + amountOrBalance : 
+                   type === 'set' ? amountOrBalance :
+                   Math.max(0, current - amountOrBalance);
+    }
+    
     const balanceStr = newBalance.toFixed(2);
     
     setBalance(balanceStr);

@@ -372,7 +372,7 @@ export function Perfect91Club() {
     localStorage.removeItem('authToken');
     setUser(null);
     setShowProfile(false);
-    updateLocalBalance('0.00');
+    updateLocalBalance(0);
     setCurrentTab('home');
   };
 
@@ -390,7 +390,7 @@ export function Perfect91Club() {
       .then(userData => {
         if (userData) {
           setUser(userData);
-          updateLocalBalance(userData.walletBalance);
+          updateLocalBalance(parseFloat(userData.walletBalance) || 10000);
         }
       })
       .catch(() => {
@@ -404,7 +404,7 @@ export function Perfect91Club() {
   React.useEffect(() => {
     if (user) {
       fetchBalance();
-      updateLocalBalance(user.walletBalance);
+      updateLocalBalance(parseFloat(user.walletBalance) || 10000);
     }
   }, [user]);
 
