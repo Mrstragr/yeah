@@ -248,12 +248,13 @@ export const authenticateToken = async (
   const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ error: "Access token required" });
+    return res.status(401).json({ success: false, message: "Access token required" });
   }
 
   try {
     // Handle demo tokens
     if (token.startsWith("demo_token_")) {
+      console.log("🎭 Demo token detected, authenticating demo user");
       req.user = {
         id: 10,
         username: "demo",
@@ -268,13 +269,13 @@ export const authenticateToken = async (
     const decoded = authService.verifyToken(token);
 
     if (!decoded) {
-      return res.status(403).json({ error: "Invalid or expired token" });
+      return res.status(403).json({ success: false, message: "Invalid or expired token" });
     }
 
     // Get user from database
     const user = await storage.getUser(decoded.id);
     if (!user) {
-      return res.status(403).json({ error: "User not found or inactive" });
+      return res.status(403).json({ success: false, message: "User not found or inactive" });
     }
 
     req.user = {
@@ -285,8 +286,9 @@ export const authenticateToken = async (
     };
 
     next();
-  } catch (error) {
-    return res.status(403).json({ error: "Invalid or expired token" });
+  } catch (error: any) {
+    console.log("🚫 Token verification error:", error.message);
+    return res.status(403).json({ success: false, message: "Invalid or expired token" });
   }
 };
 
