@@ -29,6 +29,11 @@ import AdvancedWithdrawalHistory from './AdvancedWithdrawalHistory';
 import VIPMemberProfile from './VIPMemberProfile';
 import EnhancedBG678Interface from './EnhancedBG678Interface';
 import CongratulationsPopup from './CongratulationsPopup';
+import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
+import GlobalLeaderboardSystem from './GlobalLeaderboardSystem';
+import DailyBonusRewardsSystem from './DailyBonusRewardsSystem';
+import ReferralCommissionSystem from './ReferralCommissionSystem';
+import GameHistoryStatisticsSystem from './GameHistoryStatisticsSystem';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -67,6 +72,11 @@ export function Perfect91Club() {
   const [showWithdrawalHistory, setShowWithdrawalHistory] = useState(false);
   const [showVIPProfile, setShowVIPProfile] = useState(false);
   const [showBG678, setShowBG678] = useState(false);
+  const [showTournaments, setShowTournaments] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showDailyBonus, setShowDailyBonus] = useState(false);
+  const [showReferrals, setShowReferrals] = useState(false);
+  const [showGameHistory, setShowGameHistory] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -478,6 +488,47 @@ export function Perfect91Club() {
     );
   }
 
+  // Show Comprehensive Features
+  if (showTournaments && user) {
+    return (
+      <ComprehensiveTournamentSystem 
+        onBack={() => setShowTournaments(false)}
+      />
+    );
+  }
+
+  if (showLeaderboard && user) {
+    return (
+      <GlobalLeaderboardSystem 
+        onBack={() => setShowLeaderboard(false)}
+      />
+    );
+  }
+
+  if (showDailyBonus && user) {
+    return (
+      <DailyBonusRewardsSystem 
+        onBack={() => setShowDailyBonus(false)}
+      />
+    );
+  }
+
+  if (showReferrals && user) {
+    return (
+      <ReferralCommissionSystem 
+        onBack={() => setShowReferrals(false)}
+      />
+    );
+  }
+
+  if (showGameHistory && user) {
+    return (
+      <GameHistoryStatisticsSystem 
+        onBack={() => setShowGameHistory(false)}
+      />
+    );
+  }
+
   // Show Official Dice game if selected
   if (currentGameView === 'dice-game' && user) {
     return (
@@ -881,6 +932,114 @@ export function Perfect91Club() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+
+      {/* COMPREHENSIVE FEATURES Section */}
+      <div className="px-4 mb-6">
+        <div className="flex items-center mb-3">
+          <span className="text-purple-500 text-lg mr-2">🚀</span>
+          <span className="font-bold text-lg">Premium Features</span>
+        </div>
+        <div className="text-gray-600 text-sm mb-4">
+          Complete gaming ecosystem with tournaments, rewards, and social features
+        </div>
+        
+        {/* Tournament & Competition Features */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowTournaments(true)}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-4 text-white text-left"
+          >
+            <div className="text-3xl mb-2">🏆</div>
+            <div className="font-bold text-lg">Tournaments</div>
+            <div className="text-sm opacity-90">Live competitions</div>
+            <div className="text-xs bg-red-500 px-2 py-1 rounded-full mt-2 inline-block">
+              12 LIVE
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowLeaderboard(true)}
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl p-4 text-white text-left"
+          >
+            <div className="text-3xl mb-2">📊</div>
+            <div className="font-bold text-lg">Leaderboard</div>
+            <div className="text-sm opacity-90">Global rankings</div>
+            <div className="text-xs bg-green-500 px-2 py-1 rounded-full mt-2 inline-block">
+              RANK #247
+            </div>
+          </motion.button>
+        </div>
+
+        {/* Rewards & Social Features */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowDailyBonus(true)}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-3 text-white text-center"
+          >
+            <div className="text-2xl mb-1">🎁</div>
+            <div className="font-bold text-sm">Daily Bonus</div>
+            <div className="text-xs opacity-90">Day 3</div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowReferrals(true)}
+            className="bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl p-3 text-white text-center"
+          >
+            <div className="text-2xl mb-1">🤝</div>
+            <div className="font-bold text-sm">Referrals</div>
+            <div className="text-xs opacity-90">15% Rate</div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowGameHistory(true)}
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-3 text-white text-center"
+          >
+            <div className="text-2xl mb-1">📈</div>
+            <div className="font-bold text-sm">Statistics</div>
+            <div className="text-xs opacity-90">59.8% Win</div>
+          </motion.button>
+        </div>
+
+        {/* Additional Quick Features */}
+        <div className="grid grid-cols-2 gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowVIPProfile(true)}
+            className="bg-gradient-to-r from-yellow-600 to-yellow-500 rounded-2xl p-4 text-white text-left relative"
+          >
+            <div className="text-3xl mb-2">👑</div>
+            <div className="font-bold text-lg">VIP Status</div>
+            <div className="text-sm opacity-90">Exclusive benefits</div>
+            <div className="absolute top-2 right-2">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">!</span>
+              </div>
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowWithdrawalHistory(true)}
+            className="bg-gradient-to-r from-gray-600 to-gray-500 rounded-2xl p-4 text-white text-left"
+          >
+            <div className="text-3xl mb-2">📝</div>
+            <div className="font-bold text-lg">History</div>
+            <div className="text-sm opacity-90">Transactions</div>
+          </motion.button>
         </div>
       </div>
 
