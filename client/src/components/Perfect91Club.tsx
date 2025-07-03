@@ -13,6 +13,9 @@ import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
 import OfficialK3 from './OfficialK3';
 import Official5D from './Official5D';
+import FullyPlayableWinGo from './FullyPlayableWinGo';
+import FullyPlayableMines from './FullyPlayableMines';
+import FullyPlayableDragonTiger from './FullyPlayableDragonTiger';
 import OfficialTRXWinGo from './OfficialTRXWinGo';
 import EnhancedPromotion from './EnhancedPromotion';
 import EnhancedWallet from './EnhancedWallet';
@@ -141,28 +144,28 @@ export function Perfect91Club() {
       name: 'AVIATOR',
       bgColor: 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%)',
       icon: '✈️',
-      description: 'CRASH GAME'
+      description: 'FULLY PLAYABLE'
     },
     {
-      id: 'dice-game',
-      name: 'DICE',
+      id: 'mines',
+      name: 'MINES',
       bgColor: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
-      icon: '🎲',
-      description: 'TB GAME'
+      icon: '💎',
+      description: 'FULLY PLAYABLE'
     },
     {
-      id: 'plinko',
-      name: 'PLINKO',
-      bgColor: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-      icon: '🔴',
-      description: 'TB GAME'
+      id: 'dragon-tiger',
+      name: 'DRAGON\nTIGER',
+      bgColor: 'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
+      icon: '🐉',
+      description: 'FULLY PLAYABLE'
     },
     {
-      id: 'hilo',
-      name: 'HILO',
+      id: 'wingo',
+      name: 'WIN GO',
       bgColor: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
       icon: '🎯',
-      description: 'TB GAME'
+      description: 'FULLY PLAYABLE'
     }
   ];
 
@@ -448,13 +451,29 @@ export function Perfect91Club() {
     );
   }
 
-  // Show Official WinGo game if selected
+  // Show Fully Playable WinGo game if selected
   if (currentGameView === 'wingo' && user) {
     return (
-      <OfficialWinGo 
+      <FullyPlayableWinGo 
         onBack={() => setCurrentGameView(null)}
-        user={user}
-        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Fully Playable Mines game if selected
+  if (currentGameView === 'mines' && user) {
+    return (
+      <FullyPlayableMines 
+        onBack={() => setCurrentGameView(null)}
+      />
+    );
+  }
+
+  // Show Fully Playable Dragon Tiger game if selected
+  if (currentGameView === 'dragon-tiger' && user) {
+    return (
+      <FullyPlayableDragonTiger 
+        onBack={() => setCurrentGameView(null)}
       />
     );
   }
@@ -839,6 +858,10 @@ export function Perfect91Club() {
                   setCurrentGameView('wingo');
                 } else if (game.name === 'AVIATOR') {
                   setCurrentGameView('aviator');
+                } else if (game.name === 'MINES') {
+                  setCurrentGameView('mines');
+                } else if (game.name === 'DRAGON\nTIGER') {
+                  setCurrentGameView('dragon-tiger');
                 } else {
                   setSelectedGame(game);
                 }
