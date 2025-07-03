@@ -247,7 +247,11 @@ export const authenticateToken = async (
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
+  console.log("🔍 Auth header:", authHeader);
+  console.log("🎟️ Extracted token:", token);
+
   if (!token) {
+    console.log("❌ No token provided");
     return res.status(401).json({ success: false, message: "Access token required" });
   }
 
@@ -255,10 +259,15 @@ export const authenticateToken = async (
     // Handle demo tokens
     if (token.startsWith("demo_token_")) {
       console.log("🎭 Demo token detected, authenticating demo user");
+      
+      // Ensure demo user exists in storage
+      const demoUser = await storage.getUser(10);
+      console.log("👤 Demo user retrieved:", demoUser ? "Found" : "Not found");
+      
       req.user = {
         id: 10,
         username: "demo",
-        email: "demo@91club.com",
+        email: "demo@91club.com", 
         phone: "9876543210",
       };
       next();

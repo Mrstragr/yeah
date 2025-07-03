@@ -286,6 +286,27 @@ export function authenticateToken(req: any, res: any, next: any) {
     });
   }
 
+  // Handle demo tokens
+  if (token.startsWith('demo_token_')) {
+    storage.getUser(10).then(demoUser => {
+      if (demoUser) {
+        req.user = demoUser;
+        next();
+      } else {
+        res.status(404).json({ 
+          success: false, 
+          message: 'Demo user not found' 
+        });
+      }
+    }).catch(error => {
+      res.status(500).json({ 
+        success: false, 
+        message: 'Authentication error' 
+      });
+    });
+    return;
+  }
+
   jwt.verify(token, process.env.JWT_SECRET || 'default_secret', async (err: any, decoded: any) => {
     if (err) {
       return res.status(403).json({ 
