@@ -29,6 +29,7 @@ import AdvancedWithdrawalHistory from './AdvancedWithdrawalHistory';
 import VIPMemberProfile from './VIPMemberProfile';
 import EnhancedBG678Interface from './EnhancedBG678Interface';
 import { AuthenticBG678WinGo } from './AuthenticBG678WinGo';
+import { MarketLevelWinGo } from './MarketLevelWinGo';
 import CongratulationsPopup from './CongratulationsPopup';
 import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
 import GlobalLeaderboardSystem from './GlobalLeaderboardSystem';
@@ -79,6 +80,7 @@ export function Perfect91Club() {
   const [showReferrals, setShowReferrals] = useState(false);
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showAuthenticBG678, setShowAuthenticBG678] = useState(false);
+  const [showMarketWinGo, setShowMarketWinGo] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -535,6 +537,14 @@ export function Perfect91Club() {
     return (
       <AuthenticBG678WinGo 
         onBack={() => setShowAuthenticBG678(false)}
+      />
+    );
+  }
+
+  if (showMarketWinGo && user) {
+    return (
+      <MarketLevelWinGo 
+        onBack={() => setShowMarketWinGo(false)}
       />
     );
   }
@@ -1053,7 +1063,7 @@ export function Perfect91Club() {
         </div>
 
         {/* Authentic Gaming Experience */}
-        <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-2xl p-4 text-white">
+        <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-2xl p-4 text-white mb-4">
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-xl font-bold">🎯 AUTHENTIC BG678</div>
@@ -1070,6 +1080,27 @@ export function Perfect91Club() {
             className="w-full bg-white text-green-600 py-3 rounded-lg font-bold"
           >
             Play WinGo 30s - Authentic Experience
+          </motion.button>
+        </div>
+
+        {/* Market Level Gaming */}
+        <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-xl font-bold">⚡ MARKET LEVEL WINGO</div>
+              <div className="text-sm opacity-90">Real money, real multipliers, real market logic</div>
+            </div>
+            <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
+              LIVE
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowMarketWinGo(true)}
+            className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
+          >
+            Play Market WinGo - Real Stakes
           </motion.button>
         </div>
       </div>
