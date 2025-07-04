@@ -28,6 +28,7 @@ import AccountSection from './AccountSection';
 import AdvancedWithdrawalHistory from './AdvancedWithdrawalHistory';
 import VIPMemberProfile from './VIPMemberProfile';
 import EnhancedBG678Interface from './EnhancedBG678Interface';
+import { AuthenticBG678WinGo } from './AuthenticBG678WinGo';
 import CongratulationsPopup from './CongratulationsPopup';
 import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
 import GlobalLeaderboardSystem from './GlobalLeaderboardSystem';
@@ -77,6 +78,7 @@ export function Perfect91Club() {
   const [showDailyBonus, setShowDailyBonus] = useState(false);
   const [showReferrals, setShowReferrals] = useState(false);
   const [showGameHistory, setShowGameHistory] = useState(false);
+  const [showAuthenticBG678, setShowAuthenticBG678] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -525,6 +527,14 @@ export function Perfect91Club() {
     return (
       <GameHistoryStatisticsSystem 
         onBack={() => setShowGameHistory(false)}
+      />
+    );
+  }
+
+  if (showAuthenticBG678 && user) {
+    return (
+      <AuthenticBG678WinGo 
+        onBack={() => setShowAuthenticBG678(false)}
       />
     );
   }
@@ -1013,7 +1023,7 @@ export function Perfect91Club() {
         </div>
 
         {/* Additional Quick Features */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -1039,6 +1049,27 @@ export function Perfect91Club() {
             <div className="text-3xl mb-2">📝</div>
             <div className="font-bold text-lg">History</div>
             <div className="text-sm opacity-90">Transactions</div>
+          </motion.button>
+        </div>
+
+        {/* Authentic Gaming Experience */}
+        <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-2xl p-4 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-xl font-bold">🎯 AUTHENTIC BG678</div>
+              <div className="text-sm opacity-90">Exact replica from screenshots</div>
+            </div>
+            <div className="text-xs bg-red-500 px-2 py-1 rounded-full">
+              NEW
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowAuthenticBG678(true)}
+            className="w-full bg-white text-green-600 py-3 rounded-lg font-bold"
+          >
+            Play WinGo 30s - Authentic Experience
           </motion.button>
         </div>
       </div>
