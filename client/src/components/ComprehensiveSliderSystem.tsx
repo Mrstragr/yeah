@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, Gift, Zap, Crown, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Gift, Zap, Crown, Star, Trophy } from 'lucide-react';
 
 interface SliderItem {
   id: string;
