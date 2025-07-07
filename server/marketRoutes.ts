@@ -175,7 +175,7 @@ export function setupMarketGameRoutes(app: Express) {
       const roundId = `aviator_${Date.now()}`;
       
       // Validate user balance first
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(userId.toString());
       if (!user || user.walletBalance < betAmount) {
         return res.status(400).json({ error: 'Insufficient balance' });
       }

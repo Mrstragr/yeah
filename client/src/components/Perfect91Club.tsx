@@ -36,6 +36,9 @@ import GlobalLeaderboardSystem from './GlobalLeaderboardSystem';
 import DailyBonusRewardsSystem from './DailyBonusRewardsSystem';
 import ReferralCommissionSystem from './ReferralCommissionSystem';
 import GameHistoryStatisticsSystem from './GameHistoryStatisticsSystem';
+import ComprehensiveSliderSystem from './ComprehensiveSliderSystem';
+import ComprehensiveAnimationSystem from './ComprehensiveAnimationSystem';
+import ComprehensivePromotionSystem from './ComprehensivePromotionSystem';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -81,6 +84,8 @@ export function Perfect91Club() {
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showAuthenticBG678, setShowAuthenticBG678] = useState(false);
   const [showMarketWinGo, setShowMarketWinGo] = useState(false);
+  const [showPromotions, setShowPromotions] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -549,6 +554,22 @@ export function Perfect91Club() {
     );
   }
 
+  if (showPromotions) {
+    return (
+      <ComprehensivePromotionSystem
+        onClaimReward={(id) => {
+          console.log('Claiming reward:', id);
+          setShowCelebration(true);
+          // Add real reward logic here
+        }}
+        onViewDetails={(id) => {
+          console.log('Viewing details:', id);
+          // Add details modal logic here
+        }}
+      />
+    );
+  }
+
   // Show Official Dice game if selected
   if (currentGameView === 'dice-game' && user) {
     return (
@@ -709,8 +730,35 @@ export function Perfect91Club() {
     );
   }
 
+  // Slider action handler
+  const handleSliderAction = (actionType: string) => {
+    switch (actionType) {
+      case 'claim_bonus':
+        setShowPromotions(true);
+        break;
+      case 'join_tournament':
+        setShowTournaments(true);
+        break;
+      case 'upgrade_vip':
+        setCurrentView('vip');
+        break;
+      case 'daily_bonus':
+        setShowDailyBonus(true);
+        break;
+      case 'deposit_bonus':
+        setCurrentView('wallet');
+        break;
+      default:
+        console.log('Unknown action:', actionType);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
+    <ComprehensiveAnimationSystem 
+      triggerCelebration={showCelebration}
+      onCelebrationEnd={() => setShowCelebration(false)}
+    >
+      <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
       {/* EXACT 91CLUB Header */}
       <div className="bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between">
@@ -1084,7 +1132,7 @@ export function Perfect91Club() {
         </div>
 
         {/* Market Level Gaming */}
-        <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
+        <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white mb-4">
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-xl font-bold">⚡ MARKET LEVEL WINGO</div>
@@ -1101,6 +1149,30 @@ export function Perfect91Club() {
             className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
           >
             Play Market WinGo - Real Stakes
+          </motion.button>
+        </div>
+
+        {/* Comprehensive Slider System */}
+        <ComprehensiveSliderSystem onSliderAction={handleSliderAction} />
+
+        {/* Comprehensive Promotions Access */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-2xl p-4 text-white mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-xl font-bold">🎁 COMPREHENSIVE PROMOTIONS</div>
+              <div className="text-sm opacity-90">Daily rewards, VIP benefits, tournaments & more</div>
+            </div>
+            <div className="text-xs bg-green-500 px-2 py-1 rounded-full">
+              ACTIVE
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowPromotions(true)}
+            className="w-full bg-white text-purple-600 py-3 rounded-lg font-bold"
+          >
+            View All Promotions & Rewards
           </motion.button>
         </div>
       </div>
@@ -1352,7 +1424,10 @@ export function Perfect91Club() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 max-w-md mx-auto">
         <div className="grid grid-cols-5 gap-1">
           <button 
-            onClick={() => setCurrentTab('promotion')}
+            onClick={() => {
+              setCurrentTab('promotion');
+              setShowPromotions(true);
+            }}
             className={`flex flex-col items-center py-3 ${currentTab === 'promotion' ? 'text-red-500' : 'text-gray-400'}`}
           >
             <Gift className="w-5 h-5 mb-1" />
@@ -1393,6 +1468,7 @@ export function Perfect91Club() {
 
       {/* Bottom padding for navigation */}
       <div className="h-20"></div>
-    </div>
+      </div>
+    </ComprehensiveAnimationSystem>
   );
 }

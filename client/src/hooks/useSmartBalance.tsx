@@ -6,8 +6,8 @@ interface BalanceCache {
   isLoading: boolean;
 }
 
-const CACHE_DURATION = 30000; // 30 seconds
-const REQUEST_DEBOUNCE = 1000; // 1 second
+const CACHE_DURATION = 120000; // 2 minutes
+const REQUEST_DEBOUNCE = 10000; // 10 seconds
 
 export function useSmartBalance() {
   const [balance, setBalance] = useState('10000.00');
@@ -43,6 +43,11 @@ export function useSmartBalance() {
     
     // Prevent multiple simultaneous requests
     if (cache.isLoading) {
+      return cache.balance;
+    }
+    
+    // Add throttling - minimum 5 seconds between requests
+    if (cache.timestamp && (now - cache.timestamp) < 5000) {
       return cache.balance;
     }
     

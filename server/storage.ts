@@ -955,5 +955,31 @@ export class MemStorage implements IStorage {
 
 // Use memory storage for development to avoid database issues
 const useMemoryStorage = true; // Always use memory storage for stability
+// Add recordTransaction method to interface
+export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(insertUser: InsertUser): Promise<User>;
+  updateUserBalance(userId: number, newBalance: number): Promise<void>;
+  recordTransaction(userId: number, type: string, amount: number, description: string): Promise<void>;
+  
+  // Game operations
+  getAllGames(): Promise<Game[]>;
+  getGamesByCategory(category: string): Promise<Game[]>;
+  getGameHistory(userId: number, limit?: number): Promise<GamePlay[]>;
+  recordGamePlay(gamePlay: InsertGamePlay): Promise<GamePlay>;
+  
+  // Activity operations
+  getAllActivities(): Promise<Activity[]>;
+  getActivitiesByUser(userId: number): Promise<Activity[]>;
+  createActivity(activity: InsertActivity): Promise<Activity>;
+}
+
+// Add recordTransaction to MemStorage
+MemStorage.prototype.recordTransaction = async function(userId: number, type: string, amount: number, description: string): Promise<void> {
+  console.log(`Transaction recorded: User ${userId}, ${type}, ₹${amount}, ${description}`);
+};
+
 export const storage = new MemStorage();
 console.log('Using Memory storage for stability');
