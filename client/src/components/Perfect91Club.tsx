@@ -39,6 +39,8 @@ import GameHistoryStatisticsSystem from './GameHistoryStatisticsSystem';
 import ComprehensiveSliderSystem from './ComprehensiveSliderSystem';
 import ComprehensiveAnimationSystem from './ComprehensiveAnimationSystem';
 import ComprehensivePromotionSystem from './ComprehensivePromotionSystem';
+import PremiumAnimatedWinGo from './PremiumAnimatedWinGo';
+import PremiumAviatorGame from './PremiumAviatorGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -84,6 +86,8 @@ export function Perfect91Club() {
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showAuthenticBG678, setShowAuthenticBG678] = useState(false);
   const [showMarketWinGo, setShowMarketWinGo] = useState(false);
+  const [showPremiumWinGo, setShowPremiumWinGo] = useState(false);
+  const [showPremiumAviator, setShowPremiumAviator] = useState(false);
   const [showPromotions, setShowPromotions] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -1131,25 +1135,70 @@ export function Perfect91Club() {
           </motion.button>
         </div>
 
-        {/* Market Level Gaming */}
-        <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-xl font-bold">⚡ MARKET LEVEL WINGO</div>
-              <div className="text-sm opacity-90">Real money, real multipliers, real market logic</div>
+        {/* Premium Games Section */}
+        <div className="space-y-4 mb-4">
+          {/* Premium WinGo */}
+          <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">💎 PREMIUM WINGO</div>
+                <div className="text-sm opacity-90">Next-gen animations, premium effects</div>
+              </div>
+              <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
+                NEW
+              </div>
             </div>
-            <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
-              LIVE
-            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowPremiumWinGo(true)}
+              className="w-full bg-white text-purple-600 py-3 rounded-lg font-bold"
+            >
+              Experience Premium Gaming
+            </motion.button>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowMarketWinGo(true)}
-            className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
-          >
-            Play Market WinGo - Real Stakes
-          </motion.button>
+
+          {/* Premium Aviator */}
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">✈️ PREMIUM AVIATOR</div>
+                <div className="text-sm opacity-90">3D graphics, smooth curves, particle effects</div>
+              </div>
+              <div className="text-xs bg-green-500 px-2 py-1 rounded-full text-black font-bold">
+                HOT
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowPremiumAviator(true)}
+              className="w-full bg-white text-blue-600 py-3 rounded-lg font-bold"
+            >
+              Fly Premium Aviator
+            </motion.button>
+          </div>
+
+          {/* Market Level Gaming */}
+          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">⚡ MARKET LEVEL WINGO</div>
+                <div className="text-sm opacity-90">Real money, real multipliers, real market logic</div>
+              </div>
+              <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
+                LIVE
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowMarketWinGo(true)}
+              className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
+            >
+              Play Market WinGo - Real Stakes
+            </motion.button>
+          </div>
         </div>
 
         {/* Comprehensive Slider System */}
@@ -1465,6 +1514,42 @@ export function Perfect91Club() {
           </button>
         </div>
       </div>
+
+      {/* Premium Games Modals */}
+      <AnimatePresence>
+        {showPremiumWinGo && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <PremiumAnimatedWinGo onBack={() => setShowPremiumWinGo(false)} />
+          </motion.div>
+        )}
+        
+        {showPremiumAviator && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <PremiumAviatorGame onBack={() => setShowPremiumAviator(false)} />
+          </motion.div>
+        )}
+        
+        {showMarketWinGo && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <MarketLevelWinGo onBack={() => setShowMarketWinGo(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom padding for navigation */}
       <div className="h-20"></div>
