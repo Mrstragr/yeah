@@ -41,6 +41,8 @@ import ComprehensiveAnimationSystem from './ComprehensiveAnimationSystem';
 import ComprehensivePromotionSystem from './ComprehensivePromotionSystem';
 import PremiumAnimatedWinGo from './PremiumAnimatedWinGo';
 import PremiumAviatorGame from './PremiumAviatorGame';
+import SimpleWorkingWinGo from './SimpleWorkingWinGo';
+import SimpleWorkingAviator from './SimpleWorkingAviator';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -88,6 +90,8 @@ export function Perfect91Club() {
   const [showMarketWinGo, setShowMarketWinGo] = useState(false);
   const [showPremiumWinGo, setShowPremiumWinGo] = useState(false);
   const [showPremiumAviator, setShowPremiumAviator] = useState(false);
+  const [showSimpleWinGo, setShowSimpleWinGo] = useState(false);
+  const [showSimpleAviator, setShowSimpleAviator] = useState(false);
   const [showPromotions, setShowPromotions] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -1135,47 +1139,47 @@ export function Perfect91Club() {
           </motion.button>
         </div>
 
-        {/* Premium Games Section */}
+        {/* Working Games Section */}
         <div className="space-y-4 mb-4">
-          {/* Premium WinGo */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-2xl p-4 text-white">
+          {/* Simple Working WinGo */}
+          <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl p-4 text-white">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-xl font-bold">💎 PREMIUM WINGO</div>
-                <div className="text-sm opacity-90">Next-gen animations, premium effects</div>
+                <div className="text-xl font-bold">✅ SIMPLE WINGO</div>
+                <div className="text-sm opacity-90">Fully functional, clean UI, real betting</div>
               </div>
-              <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
-                NEW
+              <div className="text-xs bg-green-500 px-2 py-1 rounded-full text-black font-bold">
+                WORKING
               </div>
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowPremiumWinGo(true)}
-              className="w-full bg-white text-purple-600 py-3 rounded-lg font-bold"
+              onClick={() => setShowSimpleWinGo(true)}
+              className="w-full bg-white text-green-600 py-3 rounded-lg font-bold"
             >
-              Experience Premium Gaming
+              Play Working WinGo
             </motion.button>
           </div>
 
-          {/* Premium Aviator */}
-          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-4 text-white">
+          {/* Simple Working Aviator */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-4 text-white">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-xl font-bold">✈️ PREMIUM AVIATOR</div>
-                <div className="text-sm opacity-90">3D graphics, smooth curves, particle effects</div>
+                <div className="text-xl font-bold">✈️ SIMPLE AVIATOR</div>
+                <div className="text-sm opacity-90">Functional flight, real cash out, working mechanics</div>
               </div>
-              <div className="text-xs bg-green-500 px-2 py-1 rounded-full text-black font-bold">
-                HOT
+              <div className="text-xs bg-blue-500 px-2 py-1 rounded-full text-white font-bold">
+                STABLE
               </div>
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowPremiumAviator(true)}
+              onClick={() => setShowSimpleAviator(true)}
               className="w-full bg-white text-blue-600 py-3 rounded-lg font-bold"
             >
-              Fly Premium Aviator
+              Fly Working Aviator
             </motion.button>
           </div>
 
@@ -1515,8 +1519,30 @@ export function Perfect91Club() {
         </div>
       </div>
 
-      {/* Premium Games Modals */}
+      {/* Working Games Modals */}
       <AnimatePresence>
+        {showSimpleWinGo && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <SimpleWorkingWinGo onBack={() => setShowSimpleWinGo(false)} />
+          </motion.div>
+        )}
+        
+        {showSimpleAviator && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <SimpleWorkingAviator onBack={() => setShowSimpleAviator(false)} />
+          </motion.div>
+        )}
+        
         {showPremiumWinGo && (
           <motion.div
             className="fixed inset-0 z-50"
