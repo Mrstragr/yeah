@@ -43,6 +43,8 @@ import PremiumAnimatedWinGo from './PremiumAnimatedWinGo';
 import PremiumAviatorGame from './PremiumAviatorGame';
 import SimpleWorkingWinGo from './SimpleWorkingWinGo';
 import SimpleWorkingAviator from './SimpleWorkingAviator';
+import ExactBG678WinGo from './ExactBG678WinGo';
+import ExactAviatorGame from './ExactAviatorGame';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -92,6 +94,8 @@ export function Perfect91Club() {
   const [showPremiumAviator, setShowPremiumAviator] = useState(false);
   const [showSimpleWinGo, setShowSimpleWinGo] = useState(false);
   const [showSimpleAviator, setShowSimpleAviator] = useState(false);
+  const [showExactBG678, setShowExactBG678] = useState(false);
+  const [showExactAviator, setShowExactAviator] = useState(false);
   const [showPromotions, setShowPromotions] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -1139,8 +1143,50 @@ export function Perfect91Club() {
           </motion.button>
         </div>
 
-        {/* Working Games Section */}
+        {/* Exact Official Games Section */}
         <div className="space-y-4 mb-4">
+          {/* Exact BG678 WinGo */}
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">🎯 EXACT BG678 WINGO</div>
+                <div className="text-sm opacity-90">Pixel-perfect replica from official website</div>
+              </div>
+              <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
+                OFFICIAL
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExactBG678(true)}
+              className="w-full bg-white text-green-600 py-3 rounded-lg font-bold"
+            >
+              Play Official BG678 WinGo
+            </motion.button>
+          </div>
+
+          {/* Exact Aviator Game */}
+          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">✈️ EXACT AVIATOR</div>
+                <div className="text-sm opacity-90">Official aviator with red curves and dual betting</div>
+              </div>
+              <div className="text-xs bg-red-500 px-2 py-1 rounded-full text-white font-bold">
+                OFFICIAL
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExactAviator(true)}
+              className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
+            >
+              Fly Official Aviator
+            </motion.button>
+          </div>
+
           {/* Simple Working WinGo */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl p-4 text-white">
             <div className="flex items-center justify-between mb-3">
@@ -1519,8 +1565,30 @@ export function Perfect91Club() {
         </div>
       </div>
 
-      {/* Working Games Modals */}
+      {/* Exact Official Games Modals */}
       <AnimatePresence>
+        {showExactBG678 && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ExactBG678WinGo onBack={() => setShowExactBG678(false)} />
+          </motion.div>
+        )}
+        
+        {showExactAviator && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ExactAviatorGame onBack={() => setShowExactAviator(false)} />
+          </motion.div>
+        )}
+        
         {showSimpleWinGo && (
           <motion.div
             className="fixed inset-0 z-50"
