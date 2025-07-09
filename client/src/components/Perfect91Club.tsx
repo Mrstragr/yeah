@@ -819,6 +819,58 @@ export function Perfect91Club() {
         </div>
       </div>
 
+      {/* ⭐ EXACT OFFICIAL REPLICAS - TOP PRIORITY ⭐ */}
+      <div className="px-4 pt-4 mb-6">
+        <div className="text-center mb-4">
+          <div className="text-2xl font-bold text-red-600 mb-2">🎯 OFFICIAL EXACT REPLICAS</div>
+          <div className="text-sm text-gray-600">Pixel-perfect copies from real Indian gaming sites</div>
+        </div>
+        
+        <div className="space-y-3">
+          {/* Exact BG678 WinGo - TOP */}
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">🎯 EXACT BG678 WINGO</div>
+                <div className="text-sm opacity-90">100% exact copy from your screenshots</div>
+              </div>
+              <div className="text-xs bg-yellow-500 px-3 py-1 rounded-full text-black font-bold animate-pulse">
+                OFFICIAL
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExactBG678(true)}
+              className="w-full bg-white text-green-600 py-4 rounded-lg font-bold text-lg"
+            >
+              🎯 PLAY EXACT BG678 REPLICA
+            </motion.button>
+          </div>
+
+          {/* Exact Aviator Game - TOP */}
+          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">✈️ EXACT AVIATOR</div>
+                <div className="text-sm opacity-90">Red curves, dual betting, exact replica</div>
+              </div>
+              <div className="text-xs bg-yellow-500 px-3 py-1 rounded-full text-black font-bold animate-pulse">
+                OFFICIAL
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExactAviator(true)}
+              className="w-full bg-white text-red-600 py-4 rounded-lg font-bold text-lg"
+            >
+              ✈️ FLY EXACT AVIATOR REPLICA
+            </motion.button>
+          </div>
+        </div>
+      </div>
+
       {/* EXACT Wallet Section */}
       <div className="px-4 pt-4">
         <div className="flex items-center justify-between mb-4">
@@ -1143,49 +1195,8 @@ export function Perfect91Club() {
           </motion.button>
         </div>
 
-        {/* Exact Official Games Section */}
+        {/* Working Games Section */}
         <div className="space-y-4 mb-4">
-          {/* Exact BG678 WinGo */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="text-xl font-bold">🎯 EXACT BG678 WINGO</div>
-                <div className="text-sm opacity-90">Pixel-perfect replica from official website</div>
-              </div>
-              <div className="text-xs bg-yellow-500 px-2 py-1 rounded-full text-black font-bold">
-                OFFICIAL
-              </div>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowExactBG678(true)}
-              className="w-full bg-white text-green-600 py-3 rounded-lg font-bold"
-            >
-              Play Official BG678 WinGo
-            </motion.button>
-          </div>
-
-          {/* Exact Aviator Game */}
-          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-4 text-white">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="text-xl font-bold">✈️ EXACT AVIATOR</div>
-                <div className="text-sm opacity-90">Official aviator with red curves and dual betting</div>
-              </div>
-              <div className="text-xs bg-red-500 px-2 py-1 rounded-full text-white font-bold">
-                OFFICIAL
-              </div>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowExactAviator(true)}
-              className="w-full bg-white text-red-600 py-3 rounded-lg font-bold"
-            >
-              Fly Official Aviator
-            </motion.button>
-          </div>
 
           {/* Simple Working WinGo */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl p-4 text-white">
