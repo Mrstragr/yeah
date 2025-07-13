@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, Shield, Gift, Crown, Phone, Mail, Calendar, Edit3 } from "lucide-react";
+import { User, Settings, Shield, Gift, Crown, Phone, Mail, Calendar, Edit3, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 export default function AccountPage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -81,6 +82,18 @@ export default function AccountPage() {
     <div className="min-h-screen bg-gaming-dark text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-gaming-gold border-gaming-gold hover:bg-gaming-gold hover:text-black"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-4xl font-gaming font-bold text-gaming-gold mb-2">
             Account Management
           </h1>
