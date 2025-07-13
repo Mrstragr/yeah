@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Phone, Lock, Eye, EyeOff, ArrowLeft,
-  Gift, Wallet, Trophy, User, Gamepad2,
+  ArrowLeft, Gift, Wallet, Trophy, User, Gamepad2,
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
@@ -45,6 +44,7 @@ import SimpleWorkingWinGo from './SimpleWorkingWinGo';
 import SimpleWorkingAviator from './SimpleWorkingAviator';
 import ExactBG678WinGo from './ExactBG678WinGo';
 import ExactAviatorGame from './ExactAviatorGame';
+import AuthenticationFlow from './AuthenticationFlow';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -66,12 +66,7 @@ interface Game {
 
 export function Perfect91Club() {
   const [user, setUser] = useState<User | null>(null);
-  const [showAuth, setShowAuth] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [loading, setLoading] = useState(false);
   const [showWallet, setShowWallet] = useState(false);
   const [walletAction, setWalletAction] = useState<'deposit' | 'withdraw' | null>(null);
   const [amount, setAmount] = useState(500);
@@ -224,66 +219,7 @@ export function Perfect91Club() {
     }
   ];
 
-  // Real authentication with backend
-  const handleLogin = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone, password }),
-      });
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Store auth token
-        localStorage.setItem('authToken', data.token);
-        
-        // Fetch user profile
-        const profileResponse = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${data.token}`,
-          },
-        });
-
-        if (profileResponse.ok) {
-          const userData = await profileResponse.json();
-          setUser(userData);
-          setShowAuth(false);
-          setPhone('');
-          setPassword('');
-        } else {
-          alert('Failed to load user profile');
-        }
-      } else {
-        alert(data.message || 'Login failed. Try demo: 9876543210 / demo123');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Connection error. Using demo mode.');
-      
-      // Fallback to demo mode
-      if (phone === '9876543210' && password === 'demo123') {
-        const demoUser = {
-          id: 1,
-          username: 'Demo User',
-          phone: '9876543210',
-          email: 'demo@91club.com',
-          walletBalance: '1000.00',
-          isVerified: true
-        };
-        setUser(demoUser);
-        setShowAuth(false);
-        setPhone('');
-        setPassword('');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Fetch real-time wallet balance
   const fetchBalance = async () => {
@@ -679,66 +615,24 @@ export function Perfect91Club() {
     );
   }
 
-  // Show auth screen if not logged in
+  // Show comprehensive KYC authentication if not logged in
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-orange-500 flex items-center justify-center p-4">
-        <motion.div 
-          className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          {/* EXACT 91CLUB logo */}
-          <div className="text-center mb-8">
-            <div className="text-4xl font-bold text-red-600 mb-2">
-              ⭕91CLUB
-            </div>
-            <div className="text-gray-600">Welcome to 91Club</div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input
-                type="tel"
-                placeholder="Phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-              <button
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-gray-400"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:opacity-50"
-            >
-              {loading ? 'Logging in...' : 'Log In'}
-            </button>
-
-            <div className="text-center text-sm text-gray-600 mt-4">
-              Demo: 9876543210 / demo123
-            </div>
-          </div>
-        </motion.div>
-      </div>
+      <AuthenticationFlow 
+        onAuthSuccess={(authenticatedUser) => {
+          setUser({
+            id: authenticatedUser.id,
+            username: authenticatedUser.username || authenticatedUser.firstName || 'User',
+            phone: authenticatedUser.phone,
+            email: authenticatedUser.email,
+            walletBalance: authenticatedUser.balance,
+            isVerified: authenticatedUser.isVerified
+          });
+        }}
+        onAuthError={(error) => {
+          console.error('Authentication error:', error);
+        }}
+      />
     );
   }
 
