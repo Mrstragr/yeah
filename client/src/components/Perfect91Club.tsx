@@ -44,7 +44,8 @@ import SimpleWorkingWinGo from './SimpleWorkingWinGo';
 import SimpleWorkingAviator from './SimpleWorkingAviator';
 import ExactBG678WinGo from './ExactBG678WinGo';
 import ExactAviatorGame from './ExactAviatorGame';
-import AuthenticationFlow from './AuthenticationFlow';
+import SimpleLoginFlow from './SimpleLoginFlow';
+import KYCVerification from './KYCVerification';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -93,6 +94,7 @@ export function Perfect91Club() {
   const [showExactAviator, setShowExactAviator] = useState(false);
   const [showPromotions, setShowPromotions] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showKYCVerification, setShowKYCVerification] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -300,6 +302,14 @@ export function Perfect91Club() {
 
   // Handle withdrawal
   const handleWithdraw = async () => {
+    // Check if user is KYC verified before allowing withdrawal
+    if (!user?.isVerified) {
+      alert('KYC verification required for withdrawals. Please complete your verification first.');
+      setShowWallet(false);
+      setShowKYCVerification(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -615,14 +625,14 @@ export function Perfect91Club() {
     );
   }
 
-  // Show comprehensive KYC authentication if not logged in
+  // Show simple login/register if not logged in
   if (!user) {
     return (
-      <AuthenticationFlow 
+      <SimpleLoginFlow 
         onAuthSuccess={(authenticatedUser) => {
           setUser({
             id: authenticatedUser.id,
-            username: authenticatedUser.username || authenticatedUser.firstName || 'User',
+            username: authenticatedUser.username,
             phone: authenticatedUser.phone,
             email: authenticatedUser.email,
             walletBalance: authenticatedUser.balance,
@@ -631,6 +641,7 @@ export function Perfect91Club() {
         }}
         onAuthError={(error) => {
           console.error('Authentication error:', error);
+          // Could show toast notification here
         }}
       />
     );
@@ -1348,6 +1359,18 @@ export function Perfect91Club() {
                     Add Money
                   </button>
 
+                  {!user.isVerified && (
+                    <button 
+                      onClick={() => {
+                        setShowProfile(false);
+                        setShowKYCVerification(true);
+                      }}
+                      className="w-full py-3 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600"
+                    >
+                      🆔 Complete KYC Verification
+                    </button>
+                  )}
+
                   <button 
                     onClick={() => {
                       setShowProfile(false);
@@ -1552,6 +1575,19 @@ export function Perfect91Club() {
 
       {/* Bottom padding for navigation */}
       <div className="h-20"></div>
+
+      {/* KYC Verification Modal */}
+      {showKYCVerification && (
+        <KYCVerification
+          onClose={() => setShowKYCVerification(false)}
+          onVerificationComplete={(status) => {
+            if (status === 'verified' && user) {
+              setUser({ ...user, isVerified: true });
+            }
+            setShowKYCVerification(false);
+          }}
+        />
+      )}
       </div>
     </ComprehensiveAnimationSystem>
   );
