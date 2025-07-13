@@ -387,3 +387,80 @@ export type PlayerSession = typeof playerSessions.$inferSelect;
 export type InsertPlayerSession = z.infer<typeof insertPlayerSessionSchema>;
 export type GameEvent = typeof gameEvents.$inferSelect;
 export type InsertGameEvent = z.infer<typeof insertGameEventSchema>;
+
+// Sessions table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: text("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  }
+);
+
+// KYC Personal Details table
+export const kycPersonalDetails = pgTable("kyc_personal_details", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  dateOfBirth: text("date_of_birth").notNull(),
+  gender: text("gender").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  pincode: text("pincode").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// KYC Document Verification table
+export const kycDocumentVerification = pgTable("kyc_document_verification", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  documentType: text("document_type").notNull(), // 'aadhar', 'pan', 'bank', 'identity'
+  documentNumber: text("document_number"),
+  documentName: text("document_name"),
+  documentDob: text("document_dob"),
+  bankAccount: text("bank_account"),
+  ifscCode: text("ifsc_code"),
+  accountHolderName: text("account_holder_name"),
+  accountType: text("account_type"),
+  status: text("status").notNull().default("pending"), // 'pending', 'verified', 'rejected'
+  verificationData: text("verification_data"), // Store API response
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  verifiedAt: timestamp("verified_at"),
+});
+
+// Insert schemas for KYC tables
+export const insertKycPersonalDetailsSchema = createInsertSchema(kycPersonalDetails).pick({
+  userId: true,
+  firstName: true,
+  lastName: true,
+  dateOfBirth: true,
+  gender: true,
+  address: true,
+  city: true,
+  state: true,
+  pincode: true,
+});
+
+export const insertKycDocumentVerificationSchema = createInsertSchema(kycDocumentVerification).pick({
+  userId: true,
+  documentType: true,
+  documentNumber: true,
+  documentName: true,
+  documentDob: true,
+  bankAccount: true,
+  ifscCode: true,
+  accountHolderName: true,
+  accountType: true,
+});
+
+// Types for KYC tables
+export type KycPersonalDetails = typeof kycPersonalDetails.$inferSelect;
+export type InsertKycPersonalDetails = z.infer<typeof insertKycPersonalDetailsSchema>;
+export type KycDocumentVerification = typeof kycDocumentVerification.$inferSelect;
+export type InsertKycDocumentVerification = z.infer<typeof insertKycDocumentVerificationSchema>;

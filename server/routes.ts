@@ -9,6 +9,7 @@ import { asyncHandler } from './errorHandler.js';
 import { validateBetAmount } from './security.js';
 import realAuthRoutes from './real-auth.js';
 import realPaymentRoutes from './real-payments.js';
+import authRoutes from './authRoutes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
@@ -18,6 +19,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Real Authentication Routes
   app.use('/api/auth', realAuthRoutes);
+  
+  // Enhanced Authentication Routes with KYC
+  app.use('/api/auth', authRoutes);
 
   // Real Payment Routes  
   app.use('/api/payments', realPaymentRoutes);

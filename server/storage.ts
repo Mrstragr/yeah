@@ -11,6 +11,8 @@ import {
   gameAnalytics,
   playerSessions,
   gameEvents,
+  kycPersonalDetails,
+  kycDocumentVerification,
   type User,
   type InsertUser,
   type Game,
@@ -29,6 +31,10 @@ import {
   type InsertAchievement,
   type UserAchievement,
   type InsertUserAchievement,
+  type KycPersonalDetails,
+  type InsertKycPersonalDetails,
+  type KycDocumentVerification,
+  type InsertKycDocumentVerification,
 } from "@shared/schema";
 import { tashanwinGames } from "./tashanwin-games";
 import bcrypt from "bcrypt";
@@ -88,6 +94,13 @@ export interface IStorage {
   getUserKycDocuments(userId: number): Promise<KycDocument[]>;
   createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
   updateKycStatus(userId: number, status: string): Promise<User | undefined>;
+  
+  // Enhanced KYC methods for authentication system
+  getUserById(id: number): Promise<User | undefined>;
+  saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails>;
+  getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined>;
+  saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification>;
+  getKycDocuments(userId: number): Promise<KycDocumentVerification[]>;
 
   // Bonus balance methods
   updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined>;
@@ -529,6 +542,66 @@ export class DatabaseStorage implements IStorage {
     // Implementation for achievement checking logic
     return [];
   }
+
+  // Enhanced KYC methods for authentication system
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails> {
+    try {
+      // Check if personal details already exist
+      const existing = await this.getKycPersonalDetails(details.userId);
+      if (existing) {
+        // Update existing record
+        const [updated] = await db
+          .update(kycPersonalDetails)
+          .set({ ...details, updatedAt: new Date() })
+          .where(eq(kycPersonalDetails.userId, details.userId))
+          .returning();
+        return updated;
+      } else {
+        // Create new record
+        const [personalDetail] = await db.insert(kycPersonalDetails).values(details).returning();
+        return personalDetail;
+      }
+    } catch (error) {
+      console.error('Error saving KYC personal details:', error);
+      throw error;
+    }
+  }
+
+  async getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined> {
+    try {
+      const [details] = await db.select().from(kycPersonalDetails)
+        .where(eq(kycPersonalDetails.userId, userId));
+      return details;
+    } catch (error) {
+      console.error('Error getting KYC personal details:', error);
+      return undefined;
+    }
+  }
+
+  async saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification> {
+    try {
+      const [document] = await db.insert(kycDocumentVerification).values(verification).returning();
+      return document;
+    } catch (error) {
+      console.error('Error saving KYC document verification:', error);
+      throw error;
+    }
+  }
+
+  async getKycDocuments(userId: number): Promise<KycDocumentVerification[]> {
+    try {
+      return await db.select().from(kycDocumentVerification)
+        .where(eq(kycDocumentVerification.userId, userId))
+        .orderBy(desc(kycDocumentVerification.createdAt));
+    } catch (error) {
+      console.error('Error getting KYC documents:', error);
+      return [];
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -949,6 +1022,45 @@ export class MemStorage implements IStorage {
   }
 
   async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
+    return [];
+  }
+
+  // Enhanced KYC methods for authentication system
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails> {
+    const personalDetail: KycPersonalDetails = {
+      id: this.currentKycDocumentId++,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...details,
+    };
+    return personalDetail;
+  }
+
+  async getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined> {
+    // Mock implementation for memory storage
+    return undefined;
+  }
+
+  async saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification> {
+    const document: KycDocumentVerification = {
+      id: this.currentKycDocumentId++,
+      status: 'pending',
+      verificationData: null,
+      rejectionReason: null,
+      createdAt: new Date(),
+      verifiedAt: null,
+      ...verification,
+    };
+    return document;
+  }
+
+  async getKycDocuments(userId: number): Promise<KycDocumentVerification[]> {
+    // Mock implementation for memory storage
     return [];
   }
 }
