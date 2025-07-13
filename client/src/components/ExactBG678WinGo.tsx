@@ -110,30 +110,31 @@ export default function ExactBG678WinGo({ onBack }: ExactBG678WinGoProps) {
       } else if (activeBet.betType === 'number' && activeBet.betValue === resultNumber) {
         isWin = true;
         winAmount = totalBet * 9;
-    } else if (activeBet.betType === 'size' && activeBet.betValue === (resultNumber >= 5 ? 'Big' : 'Small')) {
-      isWin = true;
-      winAmount = totalBet * 2;
-    }
+      } else if (activeBet.betType === 'size' && activeBet.betValue === (resultNumber >= 5 ? 'Big' : 'Small')) {
+        isWin = true;
+        winAmount = totalBet * 2;
+      }
 
-    try {
-      await apiRequest('POST', '/api/games/bet', {
-        gameId: 1,
-        betAmount: totalBet,
-        betType: activeBet.betType,
-        betValue: activeBet.betValue,
-        won: isWin,
-        winAmount: winAmount
-      });
-      refreshBalance();
-    } catch (error) {
-      console.error('Bet processing error:', error);
-    }
+      try {
+        await apiRequest('POST', '/api/games/bet', {
+          gameId: 1,
+          betAmount: totalBet,
+          betType: activeBet.betType,
+          betValue: activeBet.betValue,
+          won: isWin,
+          winAmount: winAmount
+        });
+        refreshBalance();
+      } catch (error) {
+        console.error('Bet processing error:', error);
+      }
 
-    setShowResult(true);
-    setTimeout(() => {
-      setShowResult(false);
-      setActiveBet(null);
-    }, 3000);
+      setShowResult(true);
+      setTimeout(() => {
+        setShowResult(false);
+        setActiveBet(null);
+      }, 3000);
+    }
   };
 
   const getNumberColor = (num: number) => {
@@ -501,5 +502,3 @@ export default function ExactBG678WinGo({ onBack }: ExactBG678WinGoProps) {
     </div>
   );
 }
-
-export default ExactBG678WinGo;
