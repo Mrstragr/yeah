@@ -187,14 +187,56 @@ export default function ExactAviatorGame({ onBack }: ExactAviatorGameProps) {
     }, 3000);
   };
 
-  const placeBet1 = () => {
-    if (gameState !== 'waiting' || parseFloat(balance) < betAmount) return;
-    setHasBet1(true);
+  const placeBet1 = async () => {
+    if (gameState !== 'waiting' || parseFloat(balance) < betAmount) {
+      alert('Insufficient balance!');
+      return;
+    }
+    
+    try {
+      const response = await apiRequest('POST', '/api/games/bet', {
+        gameType: 'aviator',
+        betAmount: betAmount,
+        gameId: 2
+      });
+      
+      if (response.success) {
+        setHasBet1(true);
+        await refreshBalance();
+        alert(`✅ Bet 1 placed: ₹${betAmount}`);
+      } else {
+        alert('Failed to place bet. Please try again.');
+      }
+    } catch (error) {
+      console.error('Bet placement error:', error);
+      alert('Error placing bet. Please check your connection.');
+    }
   };
 
-  const placeBet2 = () => {
-    if (gameState !== 'waiting' || parseFloat(balance) < betAmount2) return;
-    setHasBet2(true);
+  const placeBet2 = async () => {
+    if (gameState !== 'waiting' || parseFloat(balance) < betAmount2) {
+      alert('Insufficient balance!');
+      return;
+    }
+    
+    try {
+      const response = await apiRequest('POST', '/api/games/bet', {
+        gameType: 'aviator',
+        betAmount: betAmount2,
+        gameId: 2
+      });
+      
+      if (response.success) {
+        setHasBet2(true);
+        await refreshBalance();
+        alert(`✅ Bet 2 placed: ₹${betAmount2}`);
+      } else {
+        alert('Failed to place bet. Please try again.');
+      }
+    } catch (error) {
+      console.error('Bet placement error:', error);
+      alert('Error placing bet. Please check your connection.');
+    }
   };
 
   const cashOut1 = async () => {

@@ -317,6 +317,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Game Betting Routes
+  app.post('/api/games/bet', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { gameType, betAmount, betType, betValue, gameId } = req.body;
+      const userId = req.user!.id;
+      
+      // Validate bet amount
+      if (!betAmount || betAmount <= 0) {
+        return res.status(400).json({ error: 'Invalid bet amount' });
+      }
+      
+      // Get user and check balance
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const currentBalance = parseFloat(user.walletBalance || '0');
+      if (currentBalance < betAmount) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount from user balance
+      const newBalance = currentBalance - betAmount;
+      await storage.updateUserBalance(userId, newBalance.toString());
+      
+      // Process the bet
+      let result;
+      switch (gameType) {
+        case 'wingo':
+          const wingoResult = Math.floor(Math.random() * 10);
+          const wingoColor = [0, 5].includes(wingoResult) ? 'violet' : 
+                           [1, 3, 7, 9].includes(wingoResult) ? 'green' : 'red';
+          const wingoBigSmall = wingoResult >= 5 ? 'big' : 'small';
+          
+          let wingoIsWin = false;
+          let wingoMultiplier = 0;
+          
+          if (betType === 'color' && betValue === wingoColor) {
+            wingoIsWin = true;
+            wingoMultiplier = wingoColor === 'violet' ? 4.5 : 2;
+          } else if (betType === 'number' && betValue == wingoResult) {
+            wingoIsWin = true;
+            wingoMultiplier = 9;
+          } else if (betType === 'size' && betValue === wingoBigSmall) {
+            wingoIsWin = true;
+            wingoMultiplier = 2;
+          }
+          
+          result = {
+            success: true,
+            isWin: wingoIsWin,
+            winAmount: wingoIsWin ? betAmount * wingoMultiplier : 0,
+            result: {
+              number: wingoResult,
+              color: wingoColor,
+              bigSmall: wingoBigSmall
+            }
+          };
+          
+          // If won, add winnings to balance
+          if (wingoIsWin) {
+            const finalBalance = newBalance + (betAmount * wingoMultiplier);
+            await storage.updateUserBalance(userId, finalBalance.toString());
+          }
+          break;
+          
+        case 'aviator':
+          // For aviator betting
+          if (req.body.won !== undefined) {
+            // This is a cash-out or crash result
+            if (req.body.won) {
+              // Cash out - add winnings to balance
+              const winAmount = req.body.winAmount || betAmount * 2;
+              const finalBalance = newBalance + winAmount;
+              await storage.updateUserBalance(userId, finalBalance.toString());
+              
+              result = {
+                success: true,
+                isWin: true,
+                winAmount: winAmount,
+                message: 'Cash out successful'
+              };
+            } else {
+              // Crashed - no winnings
+              result = {
+                success: true,
+                isWin: false,
+                winAmount: 0,
+                message: 'Flight crashed'
+              };
+            }
+          } else {
+            // Initial bet placement
+            result = {
+              success: true,
+              message: 'Bet placed successfully',
+              betAmount: betAmount
+            };
+          }
+          break;
+          
+        default:
+          result = {
+            success: true,
+            message: 'Bet placed successfully'
+          };
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error('Bet placement error:', error);
+      res.status(500).json({ error: error.message || 'Bet placement failed' });
+    }
+  });
+
   // Wallet Routes
   app.get('/api/wallet/balance', authenticateToken, async (req: AuthRequest, res) => {
     try {

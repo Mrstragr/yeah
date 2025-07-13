@@ -51,28 +51,65 @@ export default function ExactBG678WinGo({ onBack }: ExactBG678WinGoProps) {
   const processGameResult = async () => {
     if (!activeBet) return;
 
-    const resultNumber = Math.floor(Math.random() * 10);
-    const result = {
-      period: currentPeriod,
-      number: resultNumber,
-      result: resultNumber >= 5 ? 'Big' : 'Small'
-    };
+    try {
+      // Call real backend API for game result
+      const response = await apiRequest('POST', '/api/games/wingo/play', {
+        betType: activeBet.betType,
+        betValue: activeBet.betValue,
+        betAmount: activeBet.totalBet,
+        gameType: 'wingo-30s'
+      });
 
-    setLastResult(result);
-    setGameHistory(prev => [result, ...prev.slice(0, 4)]);
+      const result = response.result;
+      const resultNumber = result.number;
+      
+      setLastResult({
+        period: currentPeriod,
+        number: resultNumber,
+        result: resultNumber >= 5 ? 'Big' : 'Small'
+      });
+      
+      setGameHistory(prev => [{
+        period: currentPeriod,
+        number: resultNumber,
+        result: resultNumber >= 5 ? 'Big' : 'Small'
+      }, ...prev.slice(0, 4)]);
 
-    // Check win conditions
-    let isWin = false;
-    let winAmount = 0;
-    const multiplierValue = parseInt(multiplier.replace('X', ''));
-    const totalBet = betAmount * quantity * multiplierValue;
+      // Update balance with real result
+      if (response.isWin) {
+        await refreshBalance();
+        // Show win celebration
+        alert(`🎉 YOU WON! ₹${response.winAmount}`);
+      } else {
+        await refreshBalance();
+        alert(`❌ You lost. Better luck next time!`);
+      }
 
-    if (activeBet.betType === 'color' && activeBet.betValue === getNumberColor(resultNumber)) {
-      isWin = true;
-      winAmount = totalBet * 2;
-    } else if (activeBet.betType === 'number' && activeBet.betValue === resultNumber) {
-      isWin = true;
-      winAmount = totalBet * 9;
+    } catch (error) {
+      console.error('Game error:', error);
+      // Fallback to demo mode
+      const resultNumber = Math.floor(Math.random() * 10);
+      const result = {
+        period: currentPeriod,
+        number: resultNumber,
+        result: resultNumber >= 5 ? 'Big' : 'Small'
+      };
+
+      setLastResult(result);
+      setGameHistory(prev => [result, ...prev.slice(0, 4)]);
+
+      // Check win conditions in demo mode
+      let isWin = false;
+      let winAmount = 0;
+      const multiplierValue = parseInt(multiplier.replace('X', ''));
+      const totalBet = betAmount * quantity * multiplierValue;
+
+      if (activeBet.betType === 'color' && activeBet.betValue === getNumberColor(resultNumber)) {
+        isWin = true;
+        winAmount = totalBet * 2;
+      } else if (activeBet.betType === 'number' && activeBet.betValue === resultNumber) {
+        isWin = true;
+        winAmount = totalBet * 9;
     } else if (activeBet.betType === 'size' && activeBet.betValue === (resultNumber >= 5 ? 'Big' : 'Small')) {
       isWin = true;
       winAmount = totalBet * 2;
@@ -110,22 +147,47 @@ export default function ExactBG678WinGo({ onBack }: ExactBG678WinGoProps) {
     setShowBetModal(true);
   };
 
-  const placeBet = () => {
+  const placeBet = async () => {
     if (!selectedBet || timeRemaining <= 5) return;
     
     const [betType, betValue] = selectedBet.split('-');
     const multiplierValue = parseInt(multiplier.replace('X', ''));
     const totalBet = betAmount * quantity * multiplierValue;
     
-    if (parseFloat(balance) < totalBet) return;
-    
-    setActiveBet({
-      betType,
-      betValue,
-      amount: totalBet,
-      period: currentPeriod
-    });
-    setShowBetModal(false);
+    if (parseFloat(balance) < totalBet) {
+      alert('Insufficient balance!');
+      return;
+    }
+
+    try {
+      // Real bet placement API call
+      const response = await apiRequest('POST', '/api/games/bet', {
+        gameType: 'wingo',
+        betType: betType,
+        betValue: betValue,
+        betAmount: totalBet,
+        gameId: 1
+      });
+
+      if (response.success) {
+        setActiveBet({
+          betType,
+          betValue,
+          amount: totalBet,
+          period: currentPeriod,
+          totalBet: totalBet
+        });
+        
+        await refreshBalance(); // Update balance immediately
+        setShowBetModal(false);
+        alert(`✅ Bet placed: ₹${totalBet} on ${betValue}`);
+      } else {
+        alert('Failed to place bet. Please try again.');
+      }
+    } catch (error) {
+      console.error('Bet placement error:', error);
+      alert('Error placing bet. Please check your connection.');
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -439,3 +501,5 @@ export default function ExactBG678WinGo({ onBack }: ExactBG678WinGoProps) {
     </div>
   );
 }
+
+export default ExactBG678WinGo;
