@@ -386,3 +386,10 @@ TashanWin is a comprehensive Indian real-money gaming platform that provides a c
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+### Business Strategy & Design Philosophy
+- **Market Competition Focus**: Create exact replicas of existing popular games rather than innovative designs
+- **Customer Acquisition Strategy**: Build familiar interfaces that users already know and trust from other platforms
+- **Design Constraint**: Avoid futuristic animations or innovative features - stick to proven, market-tested designs
+- **Target Audience**: Users who already play on existing Indian gaming platforms and expect familiar gameplay
+- **Success Metric**: Games must look and feel identical to what users are accustomed to on competitor platforms
