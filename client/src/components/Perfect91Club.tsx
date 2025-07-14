@@ -730,49 +730,92 @@ export function Perfect91Club() {
       onCelebrationEnd={() => setShowCelebration(false)}
     >
       <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
-      {/* EXACT 91CLUB Header */}
-      <div className="bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-red-600 flex items-center">
-            ⭕91CLUB
-            <div className="ml-2 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">!</span>
+      {/* EXACT FAMILIAR HEADER - Like existing apps */}
+      <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 text-white">
+        {/* Top notification bar exactly like other apps */}
+        <div className="bg-black bg-opacity-20 px-3 py-1 mb-2 rounded text-xs flex items-center">
+          <span className="text-yellow-300 mr-2">🎉</span>
+          <div className="flex-1 overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+              Welcome bonus ₹51 • Daily check-in rewards • VIP benefits • Limited time offer
             </div>
           </div>
-          <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            🔊 If you have not received your withdrawal within 3 days, please contact our service center...
+        </div>
+        
+        <div className="flex items-center justify-between">
+          {/* App logo exactly like other apps */}
+          <div className="flex items-center">
+            <div className="text-2xl font-bold text-yellow-300">91</div>
+            <div className="text-xl font-bold ml-1">CLUB</div>
+          </div>
+          
+          {/* Right side icons exactly like other apps */}
+          <div className="flex items-center space-x-3">
+            <button className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <span className="text-sm">🔍</span>
+            </button>
+            <button className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center relative">
+              <span className="text-sm">🔔</span>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full text-black text-xs flex items-center justify-center font-bold">3</div>
+            </button>
+            <button onClick={() => setCurrentTab('account')} className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <span className="text-lg">👤</span>
+            </button>
+          </div>
+        </div>
+        
+        {/* User info exactly like other apps */}
+        <div className="flex items-center justify-between mt-2">
+          <div>
+            <div className="text-sm opacity-90">Good evening, {user.username}</div>
+            <div className="text-xs opacity-70">ID: {user.id} | Online: 12,847 players</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs opacity-80">Main Wallet</div>
+            <div className="font-bold text-yellow-300 text-lg">₹{balance || user.walletBalance}</div>
           </div>
         </div>
       </div>
 
-      {/* EXACT Special Attendance Bonus Banner */}
+      {/* LIVE STATS TICKER exactly like other apps */}
+      <div className="bg-black px-4 py-2">
+        <div className="flex items-center text-green-400 text-xs">
+          <span className="mr-4">🔴 LIVE</span>
+          <div className="flex-1 overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+              Yesterday Winners: ₹12,54,000 • Today's Top Win: ₹75,600 by user123 • 
+              Online Players: 12,847 • Games Won Today: 45,234 • 
+              Total Payout: ₹2.5 Crores • Happy Winners: 8,923
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EXACT FAMILIAR BONUS BANNER like other apps */}
       <div className="px-4 pt-4">
         <div 
-          className="rounded-2xl p-6 relative overflow-hidden"
+          className="rounded-2xl p-4 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%)',
+            background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%)',
           }}
         >
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
+              <div className="text-yellow-300 text-sm font-bold mb-1">
+                🎁 FIRST DEPOSIT BONUS
+              </div>
               <div className="text-white text-lg font-bold mb-1">
-                SPECIAL ATTENDANCE BONUS
+                Get 100% Bonus
               </div>
               <div className="text-white text-sm mb-2">
-                PROVIDED BY 91CLUB
+                Min deposit ₹100 • Max bonus ₹5,000
               </div>
-              <div className="text-white text-sm">
-                up to
-              </div>
-              <div className="text-yellow-300 text-4xl font-bold">
-                558RS
-              </div>
-              <button className="bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold mt-2">
-                CLAIM IT RIGHT AWAY
+              <button className="bg-yellow-400 text-black px-4 py-2 rounded-full text-xs font-bold">
+                DEPOSIT NOW
               </button>
             </div>
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-4xl">
-              👸
+            <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-2xl">
+              💰
             </div>
           </div>
         </div>
@@ -968,28 +1011,76 @@ export function Perfect91Club() {
           </div>
         </div>
 
-        {/* EXACT Fortune Wheel and VIP Section */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div 
-            className="rounded-2xl p-4 flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)' }}
-          >
-            <div className="text-center text-white">
-              <div className="text-3xl mb-1">🎡</div>
-              <div className="font-bold text-lg">Wheel</div>
-              <div className="text-sm">of fortune</div>
-            </div>
+        {/* EXACT HOT GAMES SECTION like other apps */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <span className="text-red-500 text-lg mr-2">🔥</span>
+            <span className="font-bold text-lg">Hot Games</span>
           </div>
           <button 
-            onClick={() => setShowVIPProfile(true)}
-            className="rounded-2xl p-4 flex items-center justify-center hover:scale-105 transition-transform"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)' }}
+            onClick={() => setShowGameLobby(true)}
+            className="text-red-500 text-sm font-medium"
           >
-            <div className="text-center text-white">
-              <div className="text-3xl mb-1">👑</div>
-              <div className="font-bold text-lg">VIP</div>
-              <div className="text-sm">privileges</div>
+            More →
+          </button>
+        </div>
+        
+        {/* Hot Games Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <button 
+            onClick={() => setShowProductionWinGo(true)}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white text-left relative"
+          >
+            <div className="absolute top-2 right-2 bg-red-500 rounded-full px-2 py-1 text-xs font-bold">HOT</div>
+            <div className="text-2xl mb-2">🎯</div>
+            <div className="font-bold text-sm">Win Go</div>
+            <div className="text-xs opacity-90">Color prediction</div>
+            <div className="text-xs bg-black bg-opacity-20 px-2 py-1 rounded mt-2 inline-block">
+              12,847 playing
             </div>
+          </button>
+          
+          <button 
+            onClick={() => setShowProductionAviator(true)}
+            className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white text-left relative"
+          >
+            <div className="absolute top-2 right-2 bg-yellow-400 rounded-full px-2 py-1 text-xs font-bold text-black">NEW</div>
+            <div className="text-2xl mb-2">✈️</div>
+            <div className="font-bold text-sm">Aviator</div>
+            <div className="text-xs opacity-90">Crash game</div>
+            <div className="text-xs bg-black bg-opacity-20 px-2 py-1 rounded mt-2 inline-block">
+              8,234 playing
+            </div>
+          </button>
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          <button 
+            onClick={() => setShowFeatures(true)}
+            className="bg-white border border-gray-200 rounded-lg p-3 text-center"
+          >
+            <div className="text-xl mb-1">🏆</div>
+            <div className="text-xs font-medium text-gray-600">Events</div>
+          </button>
+          <button 
+            onClick={() => setShowVIPProfile(true)}
+            className="bg-white border border-gray-200 rounded-lg p-3 text-center"
+          >
+            <div className="text-xl mb-1">👑</div>
+            <div className="text-xs font-medium text-gray-600">VIP</div>
+          </button>
+          <button 
+            className="bg-white border border-gray-200 rounded-lg p-3 text-center"
+          >
+            <div className="text-xl mb-1">🎁</div>
+            <div className="text-xs font-medium text-gray-600">Bonus</div>
+          </button>
+          <button 
+            className="bg-white border border-gray-200 rounded-lg p-3 text-center"
+          >
+            <div className="text-xl mb-1">💬</div>
+            <div className="text-xs font-medium text-gray-600">Support</div>
           </button>
         </div>
       </div>
@@ -1734,6 +1825,55 @@ export function Perfect91Club() {
         />
       )}
       </div>
+
+      {/* EXACT BOTTOM NAVIGATION like other gambling apps */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 max-w-md mx-auto z-50">
+        <div className="grid grid-cols-5 py-2">
+          <button 
+            onClick={() => setCurrentTab('home')}
+            className={`flex flex-col items-center py-2 px-1 ${currentTab === 'home' ? 'text-red-600' : 'text-gray-500'}`}
+          >
+            <div className="text-lg mb-1">🏠</div>
+            <div className="text-xs font-medium">Home</div>
+          </button>
+          
+          <button 
+            onClick={() => setShowGameLobby(true)}
+            className="flex flex-col items-center py-2 px-1 text-gray-500 hover:text-red-600"
+          >
+            <div className="text-lg mb-1">🎮</div>
+            <div className="text-xs font-medium">Games</div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">7</div>
+          </button>
+          
+          <button 
+            onClick={() => setCurrentTab('promotion')}
+            className={`flex flex-col items-center py-2 px-1 ${currentTab === 'promotion' ? 'text-red-600' : 'text-gray-500'}`}
+          >
+            <div className="text-lg mb-1">🎁</div>
+            <div className="text-xs font-medium">Promotion</div>
+          </button>
+          
+          <button 
+            onClick={() => setCurrentTab('wallet')}
+            className={`flex flex-col items-center py-2 px-1 ${currentTab === 'wallet' ? 'text-red-600' : 'text-gray-500'}`}
+          >
+            <div className="text-lg mb-1">💰</div>
+            <div className="text-xs font-medium">Wallet</div>
+          </button>
+          
+          <button 
+            onClick={() => setCurrentTab('account')}
+            className={`flex flex-col items-center py-2 px-1 ${currentTab === 'account' ? 'text-red-600' : 'text-gray-500'}`}
+          >
+            <div className="text-lg mb-1">👤</div>
+            <div className="text-xs font-medium">Account</div>
+          </button>
+        </div>
+      </div>
+
+      {/* Add bottom padding to account for fixed navigation */}
+      <div className="h-16"></div>
     </ComprehensiveAnimationSystem>
   );
 }
