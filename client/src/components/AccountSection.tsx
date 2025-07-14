@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Shield, HelpCircle, CreditCard, Gift, LogOut, ChevronRight, Edit, Camera, Phone, Mail, Calendar, MapPin } from 'lucide-react';
+import { User, Settings, Shield, HelpCircle, CreditCard, Gift, LogOut, ChevronRight, Edit, Camera, Phone, Mail, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 
 interface User {
   id: number;
@@ -15,9 +15,10 @@ interface AccountSectionProps {
   user: User;
   balance: string;
   onLogout: () => void;
+  onBack?: () => void;
 }
 
-export default function AccountSection({ user, balance, onLogout }: AccountSectionProps) {
+export default function AccountSection({ user, balance, onLogout, onBack }: AccountSectionProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'help'>('profile');
   const [editing, setEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -73,9 +74,20 @@ export default function AccountSection({ user, balance, onLogout }: AccountSecti
     <div className="min-h-screen bg-gray-50 max-w-md mx-auto pb-20">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-4 text-white">
-        <div className="text-center">
-          <h1 className="text-xl font-bold">Account</h1>
-          <div className="text-sm opacity-90">Profile & Settings</div>
+        <div className="flex items-center justify-between">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+          )}
+          <div className="flex-1 text-center">
+            <h1 className="text-xl font-bold">Account</h1>
+            <div className="text-sm opacity-90">Profile & Settings</div>
+          </div>
+          <div className="w-10"></div> {/* Spacer for centering */}
         </div>
       </div>
 

@@ -46,6 +46,10 @@ import ExactBG678WinGo from './ExactBG678WinGo';
 import ExactAviatorGame from './ExactAviatorGame';
 import SimpleLoginFlow from './SimpleLoginFlow';
 import KYCVerification from './KYCVerification';
+import ProductionReadyWinGo from './ProductionReadyWinGo';
+import ProductionReadyAviator from './ProductionReadyAviator';
+import EnhancedGameLobby from './EnhancedGameLobby';
+import ComprehensiveFeatures from './ComprehensiveFeatures';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -95,6 +99,10 @@ export function Perfect91Club() {
   const [showPromotions, setShowPromotions] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showKYCVerification, setShowKYCVerification] = useState(false);
+  const [showProductionWinGo, setShowProductionWinGo] = useState(false);
+  const [showProductionAviator, setShowProductionAviator] = useState(false);
+  const [showGameLobby, setShowGameLobby] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -585,6 +593,51 @@ export function Perfect91Club() {
     return <EnhancedBG678Interface onBack={() => setShowBG678(false)} balance={balance} updateBalance={updateLocalBalance} />;
   }
 
+  // Show enhanced components
+  if (showProductionWinGo && user) {
+    return (
+      <ProductionReadyWinGo 
+        onBack={() => setShowProductionWinGo(false)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  if (showProductionAviator && user) {
+    return (
+      <ProductionReadyAviator 
+        onBack={() => setShowProductionAviator(false)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  if (showGameLobby && user) {
+    return (
+      <EnhancedGameLobby 
+        onBack={() => setShowGameLobby(false)}
+        user={user}
+        onGameSelect={(gameId) => {
+          setShowGameLobby(false);
+          if (gameId === 'wingo') setShowProductionWinGo(true);
+          else if (gameId === 'aviator') setShowProductionAviator(true);
+          // Add other game handlers here
+        }}
+      />
+    );
+  }
+
+  if (showFeatures && user) {
+    return (
+      <ComprehensiveFeatures 
+        onBack={() => setShowFeatures(false)}
+        user={user}
+      />
+    );
+  }
+
   // Show different sections based on current tab
   if (user && currentTab === 'promotion') {
     return (
@@ -621,6 +674,7 @@ export function Perfect91Club() {
         user={user}
         balance={balance}
         onLogout={handleLogout}
+        onBack={() => setCurrentTab('home')}
       />
     );
   }
@@ -724,11 +778,102 @@ export function Perfect91Club() {
         </div>
       </div>
 
-      {/* ⭐ EXACT OFFICIAL REPLICAS - TOP PRIORITY ⭐ */}
+      {/* ✨ PRODUCTION-READY ENHANCED GAMES - MARKET READY ✨ */}
       <div className="px-4 pt-4 mb-6">
         <div className="text-center mb-4">
-          <div className="text-2xl font-bold text-red-600 mb-2">🎯 OFFICIAL EXACT REPLICAS</div>
-          <div className="text-sm text-gray-600">Pixel-perfect copies from real Indian gaming sites</div>
+          <div className="text-2xl font-bold text-green-600 mb-2">🚀 PRODUCTION-READY GAMES</div>
+          <div className="text-sm text-gray-600">Professional quality games ready for market launch</div>
+        </div>
+        
+        <div className="space-y-3 mb-6">
+          {/* Production WinGo */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">🎯 PRODUCTION WINGO</div>
+                <div className="text-sm opacity-90">Authentic BG678 style with production features</div>
+              </div>
+              <div className="text-xs bg-yellow-400 px-3 py-1 rounded-full text-black font-bold">
+                MARKET READY
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowProductionWinGo(true)}
+              className="w-full bg-white text-green-600 py-4 rounded-lg font-bold text-lg"
+            >
+              🎯 PLAY PRODUCTION WINGO
+            </motion.button>
+          </div>
+
+          {/* Production Aviator */}
+          <div className="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">✈️ PRODUCTION AVIATOR</div>
+                <div className="text-sm opacity-90">Real flight mechanics with canvas animation</div>
+              </div>
+              <div className="text-xs bg-yellow-400 px-3 py-1 rounded-full text-black font-bold">
+                MARKET READY
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowProductionAviator(true)}
+              className="w-full bg-white text-blue-600 py-4 rounded-lg font-bold text-lg"
+            >
+              ✈️ FLY PRODUCTION AVIATOR
+            </motion.button>
+          </div>
+
+          {/* Enhanced Game Lobby */}
+          <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">🎮 ENHANCED GAME LOBBY</div>
+                <div className="text-sm opacity-90">Professional game selection interface</div>
+              </div>
+              <div className="text-xs bg-yellow-400 px-3 py-1 rounded-full text-black font-bold">
+                PREMIUM
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowGameLobby(true)}
+              className="w-full bg-white text-purple-600 py-4 rounded-lg font-bold text-lg"
+            >
+              🎮 ENTER GAME LOBBY
+            </motion.button>
+          </div>
+
+          {/* Comprehensive Features */}
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-xl font-bold">🏆 COMPREHENSIVE FEATURES</div>
+                <div className="text-sm opacity-90">Tournaments, achievements, leaderboards</div>
+              </div>
+              <div className="text-xs bg-yellow-400 px-3 py-1 rounded-full text-black font-bold">
+                FULL SUITE
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowFeatures(true)}
+              className="w-full bg-white text-indigo-600 py-4 rounded-lg font-bold text-lg"
+            >
+              🏆 EXPLORE FEATURES
+            </motion.button>
+          </div>
+        </div>
+
+        <div className="text-center mb-4">
+          <div className="text-lg font-bold text-red-600 mb-2">🎯 EXACT REPLICAS</div>
+          <div className="text-sm text-gray-600">Pixel-perfect copies from screenshots</div>
         </div>
         
         <div className="space-y-3">
