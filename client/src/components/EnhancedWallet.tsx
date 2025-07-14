@@ -3,13 +3,15 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, CreditCard, Smartphone, Building2, 
   Plus, TrendingUp, TrendingDown, Clock, CheckCircle,
-  Copy, Gift, Percent, Users
+  Copy, Gift, Percent, Users, Shield, AlertTriangle
 } from 'lucide-react';
+import KYCVerification from './KYCVerification';
 
 interface User {
   id: number;
   username: string;
   walletBalance: string;
+  isVerified?: boolean;
 }
 
 interface Props {
@@ -35,6 +37,7 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
   const [selectedMethod, setSelectedMethod] = useState<'upi' | 'card' | 'bank'>('upi');
   const [upiId, setUpiId] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showKYCModal, setShowKYCModal] = useState(false);
 
   // Mock transaction history
   const transactions: Transaction[] = [
@@ -88,6 +91,13 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
   };
 
   const handleWithdraw = () => {
+    // Check KYC verification first
+    if (!user.isVerified) {
+      alert('KYC verification required for withdrawals. Please complete your verification first.');
+      setShowKYCModal(true);
+      return;
+    }
+
     if (!withdrawAmount || !upiId) return;
     
     setShowSuccess(true);
@@ -298,6 +308,21 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
           >
             <h3 className="text-lg font-bold mb-4">Withdraw Money</h3>
             
+            {!user.isVerified && (
+              <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-red-400 text-sm">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>KYC verification required for withdrawals</span>
+                </div>
+                <button
+                  onClick={() => setShowKYCModal(true)}
+                  className="mt-2 text-yellow-400 text-sm underline hover:text-yellow-300"
+                >
+                  Complete KYC Verification →
+                </button>
+              </div>
+            )}
+            
             <div className="bg-orange-500/20 border border-orange-500 rounded-lg p-3 mb-4">
               <div className="text-orange-300 text-sm">
                 • Minimum withdrawal: ₹500
@@ -433,6 +458,19 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
             </p>
           </motion.div>
         </motion.div>
+      )}
+
+      {/* KYC Verification Modal */}
+      {showKYCModal && (
+        <KYCVerification
+          onClose={() => setShowKYCModal(false)}
+          onVerificationComplete={(status) => {
+            if (status === 'verified') {
+              user.isVerified = true; // Update user verification status
+            }
+            setShowKYCModal(false);
+          }}
+        />
       )}
     </div>
   );
