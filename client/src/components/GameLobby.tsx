@@ -20,6 +20,7 @@ import {
   Bomb,
   Dice1
 } from 'lucide-react';
+import { GameThumbnails, OfficialAviatorThumbnail } from './GameThumbnails';
 
 interface Game {
   id: string;
@@ -79,6 +80,22 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
       isHot: true,
       isNew: false,
       component: 'ProductionAviator'
+    },
+    {
+      id: 'official-aviator',
+      title: 'Official Aviator',
+      description: 'Authentic Spribe Aviator with exact official graph design',
+      category: 'crash',
+      icon: <GameThumbnails.aviator className="w-8 h-8" />,
+      color: 'text-red-500',
+      bgGradient: 'from-red-500 to-orange-600',
+      players: 15234,
+      minBet: 10,
+      maxMultiplier: 200,
+      rating: 5.0,
+      isHot: true,
+      isNew: true,
+      component: 'OfficialAviator'
     },
     {
       id: 'mines',
@@ -248,7 +265,10 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className={`${game.color}`}>
-                      {game.icon}
+                      {game.id === 'official-aviator' ? 
+                        <OfficialAviatorThumbnail className="w-8 h-8" /> : 
+                        game.icon
+                      }
                     </div>
                     <div className="flex gap-1">
                       <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
@@ -298,7 +318,10 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`${game.color}`}>
-                    {game.icon}
+                    {game.id === 'official-aviator' ? 
+                      <OfficialAviatorThumbnail className="w-8 h-8" /> : 
+                      game.icon
+                    }
                   </div>
                   <div className="flex gap-1">
                     {game.isHot && (
