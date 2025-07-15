@@ -3,6 +3,10 @@ import { Server } from 'http';
 import { authenticateToken, AuthRequest } from './auth.js';
 import { storage } from './storage.js';
 import { gameEngine } from './gameEngine.js';
+
+// Demo balance (in a real app, this would come from a database)
+let demoBalance = 10000;
+
 import { analyticsService } from './analytics.js';
 import { paymentService } from './payments.js';
 import { asyncHandler } from './errorHandler.js';
@@ -16,6 +20,174 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get('/api/test', (req, res) => {
     res.json({ status: 'ok', message: 'API is working' });
+  });
+
+  // Game endpoint for balance
+  app.get('/api/balance', (req, res) => {
+    res.json({ balance: demoBalance });
+  });
+
+  // Game endpoints for the 5 production games
+  app.post('/api/games/wingo', async (req, res) => {
+    try {
+      const { betAmount, betType, betValue } = req.body;
+      
+      // Validate bet amount
+      if (betAmount > demoBalance) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount
+      demoBalance -= betAmount;
+      
+      // Play the game
+      const result = await gameEngine.playWinGo(1, betAmount, betType, betValue);
+      
+      // Add winnings to balance
+      demoBalance += result.winAmount;
+      
+      res.json({
+        success: true,
+        result: result,
+        newBalance: demoBalance
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/games/aviator', async (req, res) => {
+    try {
+      const { betAmount, cashOutMultiplier, crashed, finalMultiplier } = req.body;
+      
+      // Validate bet amount
+      if (betAmount > demoBalance) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount
+      demoBalance -= betAmount;
+      
+      // Play the game
+      const result = await gameEngine.playAviator(1, betAmount, cashOutMultiplier, crashed, finalMultiplier);
+      
+      // Add winnings to balance
+      demoBalance += result.winAmount;
+      
+      res.json({
+        success: true,
+        result: result,
+        newBalance: demoBalance
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/games/mines', async (req, res) => {
+    try {
+      const { betAmount, mineCount, revealedTiles } = req.body;
+      
+      // Validate bet amount
+      if (betAmount > demoBalance) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount
+      demoBalance -= betAmount;
+      
+      // Play the game
+      const result = await gameEngine.playMines(1, betAmount, mineCount, revealedTiles);
+      
+      // Add winnings to balance
+      demoBalance += result.winAmount;
+      
+      res.json({
+        success: true,
+        result: result,
+        newBalance: demoBalance
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/games/dice', async (req, res) => {
+    try {
+      const { betAmount, prediction, targetNumber } = req.body;
+      
+      // Validate bet amount
+      if (betAmount > demoBalance) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount
+      demoBalance -= betAmount;
+      
+      // Play the game
+      const result = await gameEngine.playDice(1, betAmount, prediction, targetNumber);
+      
+      // Add winnings to balance
+      demoBalance += result.winAmount;
+      
+      res.json({
+        success: true,
+        result: result,
+        newBalance: demoBalance
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/games/dragon-tiger', async (req, res) => {
+    try {
+      const { betAmount, betType } = req.body;
+      
+      // Validate bet amount
+      if (betAmount > demoBalance) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+      
+      // Deduct bet amount
+      demoBalance -= betAmount;
+      
+      // Play the game
+      const result = await gameEngine.playDragonTiger(1, betAmount, betType);
+      
+      // Add winnings to balance
+      demoBalance += result.winAmount;
+      
+      res.json({
+        success: true,
+        result: result,
+        newBalance: demoBalance
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Game statistics and history endpoints
+  app.get('/api/games/:gameId/stats', (req, res) => {
+    const { gameId } = req.params;
+    res.json({
+      gameId,
+      totalPlayers: Math.floor(Math.random() * 1000) + 500,
+      totalGames: Math.floor(Math.random() * 10000) + 5000,
+      averageWin: Math.floor(Math.random() * 1000) + 100,
+    });
+  });
+
+  app.get('/api/games/:gameId/history', (req, res) => {
+    const { gameId } = req.params;
+    const history = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      timestamp: new Date(Date.now() - i * 60000).toISOString(),
+      result: Math.floor(Math.random() * 10),
+      multiplier: Math.floor(Math.random() * 10) + 1,
+    }));
+    res.json({ history });
   });
 
   // Real Authentication Routes

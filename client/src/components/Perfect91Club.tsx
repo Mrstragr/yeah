@@ -51,6 +51,7 @@ import ProductionReadyWinGo from './ProductionReadyWinGo';
 import ProductionReadyAviator from './ProductionReadyAviator';
 import EnhancedGameLobby from './EnhancedGameLobby';
 import ComprehensiveFeatures from './ComprehensiveFeatures';
+import GameContainer from './GameContainer';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -110,6 +111,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
   const [showProductionAviator, setShowProductionAviator] = useState(false);
   const [showGameLobby, setShowGameLobby] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
+  const [showGameContainer, setShowGameContainer] = useState(false);
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -645,6 +647,12 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
     );
   }
 
+  if (showGameContainer && user) {
+    return (
+      <GameContainer />
+    );
+  }
+
   // Show different sections based on current tab
   if (user && currentTab === 'promotion') {
     return (
@@ -1027,7 +1035,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             <span className="font-bold text-lg">Hot Games</span>
           </div>
           <button 
-            onClick={() => setShowGameLobby(true)}
+            onClick={() => setShowGameContainer(true)}
             className="text-red-500 text-sm font-medium"
           >
             More →
@@ -1037,7 +1045,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
         {/* Hot Games Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <button 
-            onClick={() => setShowProductionWinGo(true)}
+            onClick={() => setShowGameContainer(true)}
             className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white text-left relative"
           >
             <div className="absolute top-2 right-2 bg-red-500 rounded-full px-2 py-1 text-xs font-bold">HOT</div>
@@ -1050,7 +1058,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
           </button>
           
           <button 
-            onClick={() => setShowProductionAviator(true)}
+            onClick={() => setShowGameContainer(true)}
             className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white text-left relative"
           >
             <div className="absolute top-2 right-2 bg-yellow-400 rounded-full px-2 py-1 text-xs font-bold text-black">NEW</div>
@@ -1187,14 +1195,8 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
-                if (game.name === 'WIN GO') {
-                  setCurrentGameView('wingo');
-                } else if (game.name === 'AVIATOR') {
-                  setCurrentGameView('aviator');
-                } else if (game.name === 'MINES') {
-                  setCurrentGameView('mines');
-                } else if (game.name === 'DRAGON\nTIGER') {
-                  setCurrentGameView('dragon-tiger');
+                if (game.name === 'WIN GO' || game.name === 'AVIATOR' || game.name === 'MINES' || game.name === 'DRAGON\nTIGER') {
+                  setShowGameContainer(true);
                 } else {
                   setSelectedGame(game);
                 }

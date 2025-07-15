@@ -1,58 +1,55 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from 'react';
 
-interface AuthUser {
+export interface User {
   id: number;
   username: string;
-  phone: string;
   email: string;
-  walletBalance: string;
-  bonusBalance: string;
-  kycStatus: string;
-  referralCode: string;
-  vipLevel: number;
-  totalDeposit: string;
-  totalWithdraw: string;
-  totalBet: string;
-  totalWin: string;
+  phone: string;
+  walletBalance: number;
+  isVerified: boolean;
 }
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/user"],
-    queryFn: async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return null;
-      
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('91club_user');
+    const savedToken = localStorage.getItem('91club_token');
+    
+    if (savedUser && savedToken) {
       try {
-        const response = await fetch('/api/auth/user', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('token');
-            return null;
-          }
-          throw new Error('Failed to fetch user');
-        }
-        
-        return response.json();
-      } catch (error) {
-        localStorage.removeItem('token');
-        return null;
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+      } catch (err) {
+        console.error('Error parsing saved user data:', err);
+        localStorage.removeItem('91club_user');
+        localStorage.removeItem('91club_token');
       }
-    },
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+    }
+    
+    setIsLoading(false);
+  }, []);
+
+  const login = (userData: User) => {
+    const token = `demo_token_${Date.now()}`;
+    localStorage.setItem('91club_user', JSON.stringify(userData));
+    localStorage.setItem('91club_token', token);
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('91club_user');
+    localStorage.removeItem('91club_token');
+    setUser(null);
+  };
 
   return {
-    user: user as AuthUser | null,
+    user,
     isLoading,
     isAuthenticated: !!user,
-    error,
+    login,
+    logout,
   };
 }
