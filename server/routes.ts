@@ -10,6 +10,7 @@ import { validateBetAmount } from './security.js';
 import realAuthRoutes from './real-auth.js';
 import realPaymentRoutes from './real-payments.js';
 import authRoutes from './authRoutes.js';
+import { registerProductionRoutes } from './production-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
@@ -22,6 +23,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Enhanced Authentication Routes with KYC
   app.use('/api/auth', authRoutes);
+
+  // Register all production-ready routes
+  registerProductionRoutes(app);
 
   // Real Payment Routes  
   app.use('/api/payments', realPaymentRoutes);

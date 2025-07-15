@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
@@ -26,6 +26,163 @@ export const users = pgTable("users", {
   loginBonus: boolean("login_bonus").notNull().default(false),
   lastLoginAt: timestamp("last_login_at"),
   isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Enhanced tables for production features
+
+// Responsible Gaming Limits
+export const responsibleGamingLimits = pgTable("responsible_gaming_limits", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  dailyDepositLimit: decimal("daily_deposit_limit", { precision: 10, scale: 2 }),
+  weeklyDepositLimit: decimal("weekly_deposit_limit", { precision: 10, scale: 2 }),
+  monthlyDepositLimit: decimal("monthly_deposit_limit", { precision: 10, scale: 2 }),
+  dailyBetLimit: decimal("daily_bet_limit", { precision: 10, scale: 2 }),
+  weeklyBetLimit: decimal("weekly_bet_limit", { precision: 10, scale: 2 }),
+  monthlyBetLimit: decimal("monthly_bet_limit", { precision: 10, scale: 2 }),
+  dailyTimeLimit: integer("daily_time_limit"), // in minutes
+  sessionTimeLimit: integer("session_time_limit"), // in minutes
+  weeklyTimeLimit: integer("weekly_time_limit"), // in minutes
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Self Exclusion Records
+export const selfExclusions = pgTable("self_exclusions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // 'temporary' | 'permanent'
+  reason: text("reason"),
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  endDate: timestamp("end_date"), // null for permanent exclusions
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: text("created_by").notNull().default('self'), // 'self' | 'admin' | 'system'
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Security Alerts and Monitoring
+export const securityAlerts = pgTable("security_alerts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  alertType: text("alert_type").notNull(),
+  severity: text("severity").notNull(), // 'low' | 'medium' | 'high' | 'critical'
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"),
+  status: text("status").notNull().default('active'), // 'active' | 'resolved' | 'dismissed'
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  resolvedBy: integer("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Compliance Reports
+export const complianceReports = pgTable("compliance_reports", {
+  id: serial("id").primaryKey(),
+  reportType: text("report_type").notNull(), // 'daily' | 'weekly' | 'monthly' | 'regulatory'
+  reportPeriodStart: timestamp("report_period_start").notNull(),
+  reportPeriodEnd: timestamp("report_period_end").notNull(),
+  reportData: jsonb("report_data").notNull(),
+  generatedBy: integer("generated_by").references(() => users.id),
+  status: text("status").notNull().default('generated'), // 'generated' | 'submitted' | 'approved'
+  submittedTo: text("submitted_to"), // regulatory authority
+  submittedAt: timestamp("submitted_at"),
+  approvedAt: timestamp("approved_at"),
+  filePath: text("file_path"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Enhanced KYC Document Verification
+export const kycDocumentVerificationEnhanced = pgTable("kyc_document_verification_enhanced", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  documentType: text("document_type").notNull(), // 'aadhar' | 'pan' | 'bank_statement' | 'selfie' | 'address_proof'
+  documentNumber: text("document_number"),
+  documentUrl: text("document_url"),
+  ocrData: jsonb("ocr_data"), // Extracted data from OCR
+  verificationData: jsonb("verification_data"), // Government API response
+  verificationStatus: text("verification_status").notNull().default('pending'), // 'pending' | 'verified' | 'failed' | 'rejected'
+  verificationScore: decimal("verification_score", { precision: 3, scale: 2 }), // 0.00 to 1.00
+  verifiedBy: text("verified_by"), // 'system' | 'manual' | 'government_api'
+  verifiedAt: timestamp("verified_at"),
+  expiryDate: timestamp("expiry_date"),
+  riskAssessment: jsonb("risk_assessment"),
+  manualReviewRequired: boolean("manual_review_required").notNull().default(false),
+  reviewNotes: text("review_notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Age Verification Records
+export const ageVerifications = pgTable("age_verifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  dateOfBirth: timestamp("date_of_birth").notNull(),
+  verificationMethod: text("verification_method").notNull(), // 'aadhar' | 'pan' | 'passport' | 'driving_license'
+  documentReference: text("document_reference"),
+  verificationStatus: text("verification_status").notNull().default('pending'),
+  verifiedAge: integer("verified_age"),
+  verificationData: jsonb("verification_data"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Problem Gambling Assessments
+export const problemGamblingAssessments = pgTable("problem_gambling_assessments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  riskLevel: text("risk_level").notNull(), // 'low' | 'medium' | 'high'
+  riskFactors: jsonb("risk_factors").notNull(),
+  assessmentScore: decimal("assessment_score", { precision: 5, scale: 2 }),
+  recommendedActions: jsonb("recommended_actions"),
+  interventionsTriggered: jsonb("interventions_triggered"),
+  followUpRequired: boolean("follow_up_required").notNull().default(false),
+  followUpDate: timestamp("follow_up_date"),
+  assessmentType: text("assessment_type").notNull().default('automatic'), // 'automatic' | 'manual' | 'self_assessment'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Payment Gateway Logs
+export const paymentGatewayLogs = pgTable("payment_gateway_logs", {
+  id: serial("id").primaryKey(),
+  transactionId: integer("transaction_id").references(() => walletTransactions.id),
+  gateway: text("gateway").notNull(), // 'razorpay' | 'stripe' | 'paypal'
+  gatewayTransactionId: text("gateway_transaction_id"),
+  gatewayOrderId: text("gateway_order_id"),
+  eventType: text("event_type").notNull(), // 'order_created' | 'payment_captured' | 'payment_failed' | 'refund_processed'
+  requestData: jsonb("request_data"),
+  responseData: jsonb("response_data"),
+  webhookData: jsonb("webhook_data"),
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+  processingTime: integer("processing_time"), // in milliseconds
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Regulatory Compliance Tracking
+export const regulatoryCompliance = pgTable("regulatory_compliance", {
+  id: serial("id").primaryKey(),
+  complianceType: text("compliance_type").notNull(), // 'aml' | 'kyc' | 'tax_reporting' | 'player_protection'
+  userId: integer("user_id").references(() => users.id),
+  transactionId: integer("transaction_id").references(() => walletTransactions.id),
+  complianceStatus: text("compliance_status").notNull(), // 'compliant' | 'flagged' | 'under_review' | 'reported'
+  flaggedReason: text("flagged_reason"),
+  complianceData: jsonb("compliance_data"),
+  reportedTo: text("reported_to"), // regulatory authority
+  reportedAt: timestamp("reported_at"),
+  resolvedAt: timestamp("resolved_at"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
