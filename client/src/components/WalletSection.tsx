@@ -15,6 +15,7 @@ interface WalletSectionProps {
   user: User;
   balance: string;
   onBalanceUpdate: () => void;
+  onShowVerification?: () => void;
 }
 
 interface Transaction {
@@ -27,7 +28,7 @@ interface Transaction {
   orderId?: string;
 }
 
-export default function WalletSection({ user, balance, onBalanceUpdate }: WalletSectionProps) {
+export default function WalletSection({ user, balance, onBalanceUpdate, onShowVerification }: WalletSectionProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'history'>('overview');
   const [showBalance, setShowBalance] = useState(true);
   const [amount, setAmount] = useState(500);
@@ -94,6 +95,15 @@ export default function WalletSection({ user, balance, onBalanceUpdate }: Wallet
   };
 
   const handleWithdraw = async () => {
+    // Check KYC verification first
+    if (!user.isVerified) {
+      alert('KYC verification required for withdrawals. Please complete your verification first.');
+      if (onShowVerification) {
+        onShowVerification();
+      }
+      return;
+    }
+
     setLoading(true);
     try {
       // Simulate withdrawal process
@@ -400,6 +410,25 @@ export default function WalletSection({ user, balance, onBalanceUpdate }: Wallet
       {/* Withdraw Tab */}
       {activeTab === 'withdraw' && (
         <div className="px-4 space-y-4">
+          {/* KYC Verification Warning */}
+          {!user.isVerified && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="text-yellow-600">⚠️</div>
+                <div>
+                  <div className="font-semibold text-yellow-800">KYC Verification Required</div>
+                  <div className="text-sm text-yellow-700">Complete your verification to enable withdrawals</div>
+                </div>
+              </div>
+              <button
+                onClick={() => onShowVerification && onShowVerification()}
+                className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium"
+              >
+                Complete Verification
+              </button>
+            </div>
+          )}
+          
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="text-lg font-bold mb-4">Withdraw Money</div>
             
@@ -462,11 +491,15 @@ export default function WalletSection({ user, balance, onBalanceUpdate }: Wallet
 
             {/* Withdraw Button */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: user.isVerified ? 1.02 : 1 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleWithdraw}
-              disabled={loading || withdrawAmount > parseFloat(balance)}
-              className="w-full py-4 bg-blue-500 text-white font-bold rounded-xl shadow-lg disabled:opacity-50"
+              disabled={loading || withdrawAmount > parseFloat(balance) || !user.isVerified}
+              className={`w-full py-4 font-bold rounded-xl shadow-lg disabled:opacity-50 ${
+                user.isVerified 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              }`}
             >
               {loading ? 'Processing...' : `Withdraw ₹${withdrawAmount}`}
             </motion.button>

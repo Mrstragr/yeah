@@ -46,6 +46,7 @@ import ExactBG678WinGo from './ExactBG678WinGo';
 import ExactAviatorGame from './ExactAviatorGame';
 import SimpleLoginFlow from './SimpleLoginFlow';
 import KYCVerification from './KYCVerification';
+import { VerificationProcess } from './VerificationProcess';
 import ProductionReadyWinGo from './ProductionReadyWinGo';
 import ProductionReadyAviator from './ProductionReadyAviator';
 import EnhancedGameLobby from './EnhancedGameLobby';
@@ -69,8 +70,14 @@ interface Game {
   description: string;
 }
 
-export function Perfect91Club() {
-  const [user, setUser] = useState<User | null>(null);
+interface Perfect91ClubProps {
+  user?: any;
+  onLogout?: () => void;
+}
+
+export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps = {}) {
+  const [user, setUser] = useState<User | null>(propUser || null);
+  const [showVerificationProcess, setShowVerificationProcess] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [showWallet, setShowWallet] = useState(false);
   const [walletAction, setWalletAction] = useState<'deposit' | 'withdraw' | null>(null);
@@ -664,6 +671,7 @@ export function Perfect91Club() {
         onBack={() => setCurrentTab('home')}
         user={user}
         onBalanceUpdate={fetchBalance}
+        onShowVerification={() => setShowVerificationProcess(true)}
       />
     );
   }
@@ -675,6 +683,7 @@ export function Perfect91Club() {
         balance={balance}
         onLogout={handleLogout}
         onBack={() => setCurrentTab('home')}
+        onShowVerification={() => setShowVerificationProcess(true)}
       />
     );
   }
@@ -1823,6 +1832,23 @@ export function Perfect91Club() {
             setShowKYCVerification(false);
           }}
         />
+      )}
+
+      {/* Verification Process Modal */}
+      {showVerificationProcess && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <VerificationProcess
+              onClose={() => setShowVerificationProcess(false)}
+              onComplete={(status) => {
+                if (status === 'verified' && user) {
+                  setUser({ ...user, isVerified: true });
+                }
+                setShowVerificationProcess(false);
+              }}
+            />
+          </div>
+        </div>
       )}
       </div>
 

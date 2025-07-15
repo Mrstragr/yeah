@@ -16,9 +16,10 @@ interface AccountSectionProps {
   balance: string;
   onLogout: () => void;
   onBack?: () => void;
+  onShowVerification?: () => void;
 }
 
-export default function AccountSection({ user, balance, onLogout, onBack }: AccountSectionProps) {
+export default function AccountSection({ user, balance, onLogout, onBack, onShowVerification }: AccountSectionProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'help'>('profile');
   const [editing, setEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -113,10 +114,13 @@ export default function AccountSection({ user, balance, onLogout, onBack }: Acco
                     <span>Verified</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">
+                  <button
+                    onClick={() => onShowVerification && onShowVerification()}
+                    className="flex items-center space-x-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold hover:bg-yellow-200 transition-colors"
+                  >
                     <Shield className="w-3 h-3" />
-                    <span>Pending Verification</span>
-                  </div>
+                    <span>Complete Verification</span>
+                  </button>
                 )}
                 <div className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
                   VIP Level 2

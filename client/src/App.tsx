@@ -1,4 +1,5 @@
 import { Perfect91Club } from './components/Perfect91Club';
+import { LoginPage } from './components/LoginPage';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -7,8 +8,26 @@ import { useState, useEffect } from 'react';
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('91club_user');
+    const savedToken = localStorage.getItem('91club_token');
+    
+    if (savedUser && savedToken) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Error parsing saved user data:', err);
+        localStorage.removeItem('91club_user');
+        localStorage.removeItem('91club_token');
+      }
+    }
+
     // Test API connectivity
     fetch('/api/test', { method: 'GET' })
       .then(res => {
@@ -21,6 +40,25 @@ export default function App() {
         setIsReady(true); // Still show app even if API fails
       });
   }, []);
+
+  const handleLogin = (userData: any) => {
+    // Generate demo token for authentication
+    const token = `demo_token_${Date.now()}`;
+    
+    // Save user data and token
+    localStorage.setItem('91club_user', JSON.stringify(userData));
+    localStorage.setItem('91club_token', token);
+    
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('91club_user');
+    localStorage.removeItem('91club_token');
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   if (!isReady) {
     return (
@@ -46,7 +84,11 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Perfect91Club />
+      {isAuthenticated ? (
+        <Perfect91Club user={user} onLogout={handleLogout} />
+      ) : (
+        <LoginPage onLogin={handleLogin} />
+      )}
       <Toaster />
     </QueryClientProvider>
   );

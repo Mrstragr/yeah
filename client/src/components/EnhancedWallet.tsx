@@ -18,6 +18,7 @@ interface Props {
   onBack: () => void;
   user: User;
   onBalanceUpdate: () => void;
+  onShowVerification?: () => void;
 }
 
 interface Transaction {
@@ -30,7 +31,7 @@ interface Transaction {
   gameType?: string;
 }
 
-export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props) {
+export default function EnhancedWallet({ onBack, user, onBalanceUpdate, onShowVerification }: Props) {
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw' | 'history'>('deposit');
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -94,7 +95,11 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
     // Check KYC verification first
     if (!user.isVerified) {
       alert('KYC verification required for withdrawals. Please complete your verification first.');
-      setShowKYCModal(true);
+      if (onShowVerification) {
+        onShowVerification();
+      } else {
+        setShowKYCModal(true);
+      }
       return;
     }
 
@@ -315,7 +320,7 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
                   <span>KYC verification required for withdrawals</span>
                 </div>
                 <button
-                  onClick={() => setShowKYCModal(true)}
+                  onClick={() => onShowVerification ? onShowVerification() : setShowKYCModal(true)}
                   className="mt-2 text-yellow-400 text-sm underline hover:text-yellow-300"
                 >
                   Complete KYC Verification →
@@ -355,10 +360,14 @@ export default function EnhancedWallet({ onBack, user, onBalanceUpdate }: Props)
 
             <button
               onClick={handleWithdraw}
-              disabled={!withdrawAmount || !upiId || parseInt(withdrawAmount) < 500}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 py-3 rounded-lg font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!withdrawAmount || !upiId || parseInt(withdrawAmount) < 500 || !user.isVerified}
+              className={`w-full py-3 rounded-lg font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed ${
+                user.isVerified 
+                  ? 'bg-gradient-to-r from-orange-500 to-red-600' 
+                  : 'bg-gray-600 cursor-not-allowed'
+              }`}
             >
-              Withdraw ₹{withdrawAmount || '0'}
+              {!user.isVerified ? 'Complete KYC to Withdraw' : `Withdraw ₹${withdrawAmount || '0'}`}
             </button>
           </motion.div>
         )}
