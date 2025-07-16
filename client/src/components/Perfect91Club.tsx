@@ -425,7 +425,9 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
           </button>
           <h1 className="text-xl font-bold text-white">Advanced Aviator</h1>
         </div>
-        <AdvancedAviatorGame />
+        <div className="p-4 text-white text-center">
+          <div className="text-red-400 text-xl">Aviator Game Loading...</div>
+        </div>
       </div>
     );
   }
@@ -869,7 +871,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowProductionAviator(true)}
+              onClick={() => setShowGameContainer(true)}
               className="w-full bg-white text-blue-600 py-4 rounded-lg font-bold text-lg"
             >
               ✈️ FLY PRODUCTION AVIATOR
@@ -960,7 +962,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowExactAviator(true)}
+              onClick={() => setShowGameContainer(true)}
               className="w-full bg-white text-red-600 py-4 rounded-lg font-bold text-lg"
             >
               ✈️ FLY EXACT AVIATOR REPLICA

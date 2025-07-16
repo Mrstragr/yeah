@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { AnimatedWinGoGame } from './AnimatedWinGoGame';
 import { SimpleWinGoGame } from './SimpleWinGoGame';
-import { AnimatedAviatorGame } from './AnimatedAviatorGame';
-import { SimpleAviatorGame } from './SimpleAviatorGame';
+// Aviator imports removed
 import { BasicGameModal } from './BasicGameModal';
 import { AnimatedMinesGame } from './AnimatedMinesGame';
 import { AnimatedDragonTigerGame } from './AnimatedDragonTigerGame';
@@ -119,7 +118,12 @@ export const ModernGameModal = ({ gameType, onClose, refreshBalance }: ModernGam
       case 'wingo':
         return <SimpleWinGoGame {...commonProps} />;
       case 'aviator':
-        return <SimpleAviatorGame {...commonProps} />;
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-red-900 to-black p-4 text-white">
+            <h2 className="text-4xl font-bold mb-4">✈️ AVIATOR</h2>
+            <div className="text-center">Aviator game loading...</div>
+          </div>
+        );
       case 'mines':
         return <AnimatedMinesGame {...commonProps} />;
       case 'dragon-tiger':
