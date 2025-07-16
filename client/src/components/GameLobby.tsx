@@ -79,7 +79,7 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
       rating: 5.0,
       isHot: true,
       isNew: false,
-      component: 'OfficialAviator'
+      component: 'AuthenticAviator'
     },
     {
       id: 'mines',

@@ -5,8 +5,7 @@ import {
   Plus, Minus, Play
 } from 'lucide-react';
 import WinGoGame from './WinGoGame';
-import AuthenticAviatorGame from './AuthenticAviatorGame';
-import AdvancedAviatorGame from './AdvancedAviatorGame';
+
 import BG678ColorPrediction from './BG678ColorPrediction';
 import OfficialWinGo from './OfficialWinGo';
 import OfficialDice from './OfficialDice';
@@ -39,16 +38,13 @@ import ComprehensiveSliderSystem from './ComprehensiveSliderSystem';
 import ComprehensiveAnimationSystem from './ComprehensiveAnimationSystem';
 import ComprehensivePromotionSystem from './ComprehensivePromotionSystem';
 import PremiumAnimatedWinGo from './PremiumAnimatedWinGo';
-import PremiumAviatorGame from './PremiumAviatorGame';
 import SimpleWorkingWinGo from './SimpleWorkingWinGo';
-import SimpleWorkingAviator from './SimpleWorkingAviator';
 import ExactBG678WinGo from './ExactBG678WinGo';
-import ExactAviatorGame from './ExactAviatorGame';
 import SimpleLoginFlow from './SimpleLoginFlow';
 import KYCVerification from './KYCVerification';
 import { VerificationProcess } from './VerificationProcess';
 import ProductionReadyWinGo from './ProductionReadyWinGo';
-import ProductionReadyAviator from './ProductionReadyAviator';
+
 import EnhancedGameLobby from './EnhancedGameLobby';
 import ComprehensiveFeatures from './ComprehensiveFeatures';
 import GameContainer from './GameContainer';
@@ -613,15 +609,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
     );
   }
 
-  if (showProductionAviator && user) {
-    return (
-      <ProductionReadyAviator 
-        onBack={() => setShowProductionAviator(false)}
-        user={user}
-        onBalanceUpdate={fetchBalance}
-      />
-    );
-  }
+
 
   if (showGameLobby && user) {
     return (
@@ -631,7 +619,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
         onGameSelect={(gameId) => {
           setShowGameLobby(false);
           if (gameId === 'wingo') setShowProductionWinGo(true);
-          else if (gameId === 'aviator') setShowProductionAviator(true);
+
           // Add other game handlers here
         }}
       />
