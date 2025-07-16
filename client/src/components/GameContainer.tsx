@@ -14,8 +14,7 @@ const ProductionDragonTiger = React.lazy(() => import('./games/ProductionDragonT
 
 const gameComponents = {
   'wingo': ProductionWinGo,
-  'aviator': ProductionAviator,
-  'official-aviator': OfficialAviator,
+  'aviator': OfficialAviator,
   'mines': ProductionMines,
   'dice': ProductionDice,
   'dragon-tiger': ProductionDragonTiger,
@@ -24,7 +23,6 @@ const gameComponents = {
 const gameNames = {
   'wingo': 'WinGo',
   'aviator': 'Aviator',
-  'official-aviator': 'Official Aviator',
   'mines': 'Mines',
   'dice': 'Dice',
   'dragon-tiger': 'Dragon Tiger',

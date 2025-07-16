@@ -52,9 +52,9 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
     {
       id: 'wingo',
       title: 'WinGo',
-      description: 'Color and number prediction game with 30-second rounds',
+      description: 'Official BG678-style color prediction with 30-second periods',
       category: 'lottery',
-      icon: <Target className="w-8 h-8" />,
+      icon: <GameThumbnails.wingo className="w-8 h-8" />,
       color: 'text-green-500',
       bgGradient: 'from-green-400 to-emerald-600',
       players: 12847,
@@ -68,23 +68,7 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
     {
       id: 'aviator',
       title: 'Aviator',
-      description: 'Crash game with real-time multipliers and cash-out system',
-      category: 'crash',
-      icon: <Plane className="w-8 h-8" />,
-      color: 'text-blue-500',
-      bgGradient: 'from-blue-400 to-purple-600',
-      players: 8934,
-      minBet: 10,
-      maxMultiplier: 100,
-      rating: 4.9,
-      isHot: true,
-      isNew: false,
-      component: 'ProductionAviator'
-    },
-    {
-      id: 'official-aviator',
-      title: 'Official Aviator',
-      description: 'Authentic Spribe Aviator with exact official graph design',
+      description: 'Official Spribe crash game with authentic red curve and vintage biplane',
       category: 'crash',
       icon: <GameThumbnails.aviator className="w-8 h-8" />,
       color: 'text-red-500',
@@ -94,7 +78,7 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
       maxMultiplier: 200,
       rating: 5.0,
       isHot: true,
-      isNew: true,
+      isNew: false,
       component: 'OfficialAviator'
     },
     {
@@ -265,8 +249,10 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className={`${game.color}`}>
-                      {game.id === 'official-aviator' ? 
+                      {game.id === 'aviator' ? 
                         <OfficialAviatorThumbnail className="w-8 h-8" /> : 
+                        game.id === 'wingo' ?
+                        <GameThumbnails.wingo className="w-8 h-8" /> :
                         game.icon
                       }
                     </div>
@@ -318,8 +304,10 @@ export default function GameLobby({ onSelectGame }: GameLobbyProps) {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`${game.color}`}>
-                    {game.id === 'official-aviator' ? 
+                    {game.id === 'aviator' ? 
                       <OfficialAviatorThumbnail className="w-8 h-8" /> : 
+                      game.id === 'wingo' ?
+                      <GameThumbnails.wingo className="w-8 h-8" /> :
                       game.icon
                     }
                   </div>

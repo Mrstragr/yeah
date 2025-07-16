@@ -107,7 +107,7 @@ export default function OfficialAviator({ onBack }: { onBack: () => void }) {
     }
   }, []);
 
-  // Official Aviator graph drawing function
+  // Official Aviator graph drawing function - exactly matching Spribe design
   const drawOfficialFlightPath = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -115,79 +115,87 @@ export default function OfficialAviator({ onBack }: { onBack: () => void }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas with official dark background
-    ctx.fillStyle = '#0F1B0C'; // Official Aviator dark background
+    // Official Spribe Aviator dark background
+    ctx.fillStyle = '#0A0B0D'; // Exact dark background from official game
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw gradient sky background (changes with multiplier)
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    if (currentMultiplier < 2) {
-      gradient.addColorStop(0, '#1a1a2e');
-      gradient.addColorStop(1, '#0f0f1a');
-    } else if (currentMultiplier < 5) {
-      gradient.addColorStop(0, '#2d1b69');
-      gradient.addColorStop(1, '#11101d');
-    } else {
-      gradient.addColorStop(0, '#5533ff');
-      gradient.addColorStop(1, '#1a1a2e');
-    }
-    ctx.fillStyle = gradient;
+    // Official gradient background (subtle space-like effect)
+    const bgGradient = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, 0,
+      canvas.width / 2, canvas.height / 2, canvas.width / 2
+    );
+    bgGradient.addColorStop(0, 'rgba(20, 25, 35, 0.8)');
+    bgGradient.addColorStop(1, 'rgba(10, 11, 13, 1)');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid lines (subtle)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    // Official grid pattern (very subtle)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
     ctx.lineWidth = 1;
-    for (let i = 0; i < canvas.width; i += 50) {
+    const gridSize = 40;
+    for (let i = 0; i <= canvas.width; i += gridSize) {
       ctx.beginPath();
       ctx.moveTo(i, 0);
       ctx.lineTo(i, canvas.height);
       ctx.stroke();
     }
-    for (let i = 0; i < canvas.height; i += 50) {
+    for (let i = 0; i <= canvas.height; i += gridSize) {
       ctx.beginPath();
       ctx.moveTo(0, i);
       ctx.lineTo(canvas.width, i);
       ctx.stroke();
     }
 
-    // Draw the official red ascending curve
+    // Official Spribe red curve - exactly like the real game
     if (flightPath.length > 1) {
-      ctx.strokeStyle = '#FF4444'; // Official Aviator red color
-      ctx.lineWidth = 4;
+      // Main red curve
+      ctx.strokeStyle = '#E53E3E'; // Official Spribe red
+      ctx.lineWidth = 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       
-      // Add glow effect to the curve
-      ctx.shadowColor = '#FF4444';
-      ctx.shadowBlur = 10;
+      // Subtle glow effect
+      ctx.shadowColor = '#E53E3E';
+      ctx.shadowBlur = 8;
       
       ctx.beginPath();
       ctx.moveTo(flightPath[0].x, flightPath[0].y);
       
-      // Use quadratic curves for smooth official Aviator trajectory
+      // Smooth curve exactly like official Aviator
       for (let i = 1; i < flightPath.length; i++) {
-        const currentPoint = flightPath[i];
-        const prevPoint = flightPath[i - 1];
-        
-        if (i === flightPath.length - 1) {
-          ctx.lineTo(currentPoint.x, currentPoint.y);
+        if (i === 1) {
+          ctx.lineTo(flightPath[i].x, flightPath[i].y);
         } else {
-          const nextPoint = flightPath[i + 1];
-          const cpx = (prevPoint.x + currentPoint.x) / 2;
-          const cpy = (prevPoint.y + currentPoint.y) / 2;
-          ctx.quadraticCurveTo(cpx, cpy, currentPoint.x, currentPoint.y);
+          const prev = flightPath[i - 1];
+          const curr = flightPath[i];
+          const cpx = (prev.x + curr.x) / 2;
+          const cpy = (prev.y + curr.y) / 2;
+          ctx.quadraticCurveTo(prev.x, prev.y, cpx, cpy);
         }
       }
       ctx.stroke();
+      
+      // Add curve fill under line (official effect)
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = '#E53E3E';
+      ctx.beginPath();
+      ctx.moveTo(flightPath[0].x, canvas.height);
+      for (let i = 0; i < flightPath.length; i++) {
+        ctx.lineTo(flightPath[i].x, flightPath[i].y);
+      }
+      ctx.lineTo(flightPath[flightPath.length - 1].x, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
       
       // Reset shadow
       ctx.shadowBlur = 0;
     }
 
-    // Draw the vintage biplane (official Aviator style)
+    // Draw official Spribe plane
     drawOfficialPlane(ctx, planePosition.x, planePosition.y);
 
-    // Draw multiplier display (official style)
+    // Draw official multiplier display
     drawOfficialMultiplierDisplay(ctx);
 
   }, [flightPath, planePosition, currentMultiplier]);
@@ -195,47 +203,67 @@ export default function OfficialAviator({ onBack }: { onBack: () => void }) {
   const drawOfficialPlane = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
     ctx.save();
     
-    // Plane body (vintage biplane style)
-    ctx.fillStyle = '#FFD700'; // Golden yellow for visibility
-    ctx.strokeStyle = '#FFA500';
-    ctx.lineWidth = 2;
+    // Official Spribe plane design - red/orange theme
+    const planeColor = '#E53E3E';
+    const accentColor = '#FFA500';
     
-    // Main fuselage
-    ctx.fillRect(x - 15, y - 3, 30, 6);
-    ctx.strokeRect(x - 15, y - 3, 30, 6);
+    // Main fuselage (sleeker design)
+    ctx.fillStyle = planeColor;
+    ctx.fillRect(x - 12, y - 2, 24, 4);
     
-    // Wings
-    ctx.fillRect(x - 10, y - 8, 20, 3);
-    ctx.strokeRect(x - 10, y - 8, 20, 3);
-    ctx.fillRect(x - 8, y + 5, 16, 3);
-    ctx.strokeRect(x - 8, y + 5, 16, 3);
-    
-    // Propeller
-    ctx.fillStyle = '#888888';
+    // Nose cone
     ctx.beginPath();
-    ctx.arc(x + 15, y, 3, 0, Math.PI * 2);
+    ctx.moveTo(x + 12, y - 2);
+    ctx.lineTo(x + 18, y);
+    ctx.lineTo(x + 12, y + 2);
+    ctx.closePath();
     ctx.fill();
     
-    // Propeller blades (spinning effect)
-    const time = Date.now() * 0.02;
-    ctx.strokeStyle = '#666666';
-    ctx.lineWidth = 1;
+    // Wings (more realistic proportions)
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(x - 8, y - 6, 16, 2);
+    ctx.fillRect(x - 6, y + 4, 12, 2);
+    
+    // Tail
+    ctx.fillRect(x - 12, y - 4, 4, 8);
+    
+    // Engine/propeller hub
+    ctx.fillStyle = '#666666';
+    ctx.beginPath();
+    ctx.arc(x + 18, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Spinning propeller (more realistic)
+    const time = Date.now() * 0.03;
+    ctx.strokeStyle = 'rgba(200, 200, 200, 0.7)';
+    ctx.lineWidth = 2;
     for (let i = 0; i < 3; i++) {
       const angle = (time + i * (Math.PI * 2 / 3)) % (Math.PI * 2);
-      const bladeX = x + 15 + Math.cos(angle) * 8;
-      const bladeY = y + Math.sin(angle) * 8;
+      const length = 12;
       ctx.beginPath();
-      ctx.moveTo(x + 15, y);
-      ctx.lineTo(bladeX, bladeY);
+      ctx.moveTo(x + 18, y);
+      ctx.lineTo(
+        x + 18 + Math.cos(angle) * length, 
+        y + Math.sin(angle) * length
+      );
       ctx.stroke();
     }
     
-    // Plane trail/exhaust
+    // Exhaust trail (official style)
     if (gamePhase === 'flying') {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      for (let i = 0; i < 5; i++) {
+      const trailLength = 8;
+      for (let i = 0; i < trailLength; i++) {
+        const alpha = (trailLength - i) / trailLength * 0.4;
+        const size = (trailLength - i) / trailLength * 2;
+        ctx.fillStyle = `rgba(255, 100, 50, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(x - 20 - i * 5, y + Math.sin(time + i) * 2, 3 - i * 0.5, 0, Math.PI * 2);
+        ctx.arc(
+          x - 15 - i * 3, 
+          y + Math.sin(time * 2 + i * 0.5) * 1, 
+          size, 
+          0, 
+          Math.PI * 2
+        );
         ctx.fill();
       }
     }
@@ -247,20 +275,58 @@ export default function OfficialAviator({ onBack }: { onBack: () => void }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Large multiplier display (official Aviator style)
-    ctx.font = 'bold 48px Arial';
-    ctx.fillStyle = gamePhase === 'crashed' ? '#FF4444' : '#00FF00';
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 3;
+    // Official Spribe multiplier display
+    const centerX = canvas.width / 2;
+    const centerY = 100;
+    
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     
-    const multiplierText = gamePhase === 'crashed' ? 
-      `${crashMultiplier.toFixed(2)}x FLEW AWAY!` : 
-      `${currentMultiplier.toFixed(2)}x`;
-    
-    // Text shadow for visibility
-    ctx.strokeText(multiplierText, canvas.width / 2, 80);
-    ctx.fillText(multiplierText, canvas.width / 2, 80);
+    if (gamePhase === 'crashed') {
+      // "FLEW AWAY" display
+      ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#E53E3E';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.lineWidth = 2;
+      
+      const crashText = `${crashMultiplier.toFixed(2)}x`;
+      ctx.strokeText(crashText, centerX, centerY - 10);
+      ctx.fillText(crashText, centerX, centerY - 10);
+      
+      ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#FF6B6B';
+      ctx.strokeText('FLEW AWAY!', centerX, centerY + 20);
+      ctx.fillText('FLEW AWAY!', centerX, centerY + 20);
+    } else {
+      // Current multiplier display
+      ctx.font = 'bold 44px -apple-system, BlinkMacSystemFont, sans-serif';
+      
+      // Color changes based on multiplier
+      if (currentMultiplier < 2) {
+        ctx.fillStyle = '#00C851'; // Green
+      } else if (currentMultiplier < 5) {
+        ctx.fillStyle = '#ffbb33'; // Orange
+      } else if (currentMultiplier < 10) {
+        ctx.fillStyle = '#ff4444'; // Red
+      } else {
+        ctx.fillStyle = '#aa66cc'; // Purple for high multipliers
+      }
+      
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.lineWidth = 3;
+      
+      const multiplierText = `${currentMultiplier.toFixed(2)}x`;
+      
+      // Add subtle glow effect
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 10;
+      
+      ctx.strokeText(multiplierText, centerX, centerY);
+      ctx.fillText(multiplierText, centerX, centerY);
+      
+      // Reset shadow
+      ctx.shadowBlur = 0;
+    }
   };
 
   const startWaitingPhase = () => {
