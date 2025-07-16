@@ -6,15 +6,14 @@ import GameLobby from './GameLobby';
 
 // Lazy load game components
 const ProductionWinGo = React.lazy(() => import('./games/ProductionWinGo'));
-const ProductionAviator = React.lazy(() => import('./games/ProductionAviator'));
-const OfficialAviator = React.lazy(() => import('./games/OfficialAviator'));
+const AuthenticAviator = React.lazy(() => import('./games/AuthenticAviator'));
 const ProductionMines = React.lazy(() => import('./games/ProductionMines'));
 const ProductionDice = React.lazy(() => import('./games/ProductionDice'));
 const ProductionDragonTiger = React.lazy(() => import('./games/ProductionDragonTiger'));
 
 const gameComponents = {
   'wingo': ProductionWinGo,
-  'aviator': OfficialAviator,
+  'aviator': AuthenticAviator,
   'mines': ProductionMines,
   'dice': ProductionDice,
   'dragon-tiger': ProductionDragonTiger,
