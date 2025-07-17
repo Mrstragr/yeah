@@ -1,5 +1,5 @@
 import { Perfect91Club } from './components/Perfect91Club';
-import { LoginPage } from './components/LoginPage';
+import ProductionLoginPage from './components/ProductionLoginPage';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -87,7 +87,7 @@ export default function App() {
       {isAuthenticated ? (
         <Perfect91Club user={user} onLogout={handleLogout} />
       ) : (
-        <LoginPage onLogin={handleLogin} />
+        <ProductionLoginPage onLoginSuccess={handleLogin} />
       )}
       <Toaster />
     </QueryClientProvider>
