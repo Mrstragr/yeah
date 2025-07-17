@@ -50,8 +50,9 @@ import OfficialAviatorGame from './OfficialAviatorGame';
 import EnhancedGameLobby from './EnhancedGameLobby';
 import ComprehensiveFeatures from './ComprehensiveFeatures';
 import GameContainer from './GameContainer';
-import { AnimatedAchievementNotification, useAchievementNotifications } from './AnimatedAchievementNotification';
-import { RewardPreviewModal } from './RewardPreviewModal';
+// Achievement notifications temporarily disabled
+// import { AnimatedAchievementNotification, useAchievementNotifications } from './AnimatedAchievementNotification';
+// import { RewardPreviewModal } from './RewardPreviewModal';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -1980,32 +1981,6 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
       <div className="h-16"></div>
 
       {/* Achievement Notification System - Temporarily disabled for app stability */}
-      {/* 
-      {currentNotification && (
-        <AnimatedAchievementNotification
-          achievement={currentNotification}
-          isVisible={!!currentNotification}
-          onClose={closeNotification}
-          onRewardPreview={handleRewardPreview}
-        />
-      )}
-
-      <RewardPreviewModal
-        achievement={selectedAchievement}
-        isVisible={showRewardPreview}
-        onClose={() => setShowRewardPreview(false)}
-        onClaim={handleClaimReward}
-      />
-
-      {process.env.NODE_ENV === 'development' && (
-        <button
-          onClick={triggerRandomAchievement}
-          className="fixed top-4 right-4 z-50 bg-yellow-500 text-black px-3 py-2 rounded-lg font-bold text-sm shadow-lg"
-        >
-          🏆 Test Achievement
-        </button>
-      )}
-      */
     </ComprehensiveAnimationSystem>
   );
 }
