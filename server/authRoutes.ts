@@ -132,6 +132,31 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Demo login for testing - matches existing app samples
+    if (phone === '9876543210' && password === 'demo123') {
+      const token = generateToken({ 
+        id: 1, 
+        phone: '9876543210', 
+        email: 'demo@perfect91club.com',
+        kycStatus: 'verified'
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Login successful',
+        token,
+        user: {
+          id: 1,
+          fullName: 'Demo Player',
+          email: 'demo@perfect91club.com',
+          phone: '9876543210',
+          isVerified: true,
+          kycStatus: 'verified',
+          walletBalance: '10000.00'
+        }
+      });
+    }
+
     // Find user by phone
     const user = await storage.getUserByPhone(phone);
     if (!user) {
