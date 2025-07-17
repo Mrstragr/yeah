@@ -1,4 +1,4 @@
-import { Perfect91Club } from './components/Perfect91Club';
+import CleanPlatform from './components/CleanPlatform';
 import ProductionLoginPage from './components/ProductionLoginPage';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
@@ -85,7 +85,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       {isAuthenticated ? (
-        <Perfect91Club user={user} onLogout={handleLogout} />
+        <CleanPlatform />
       ) : (
         <ProductionLoginPage onLoginSuccess={handleLogin} />
       )}

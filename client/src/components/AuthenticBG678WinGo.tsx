@@ -18,7 +18,13 @@ interface BetSelection {
   amount: number;
 }
 
-export function AuthenticBG678WinGo({ onBack }: { onBack: () => void }) {
+interface Props {
+  onBack: () => void;
+  user?: any;
+  onBalanceUpdate?: (newBalance: number) => void;
+}
+
+export function AuthenticBG678WinGo({ onBack, user, onBalanceUpdate }: Props) {
   const { balance, updateBalance } = useSmartBalance();
   const [timeRemaining, setTimeRemaining] = useState(30);
   const [currentPeriod, setCurrentPeriod] = useState('');
@@ -479,3 +485,5 @@ export function AuthenticBG678WinGo({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
+
+export default AuthenticBG678WinGo;
