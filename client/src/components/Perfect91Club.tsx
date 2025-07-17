@@ -44,10 +44,14 @@ import SimpleLoginFlow from './SimpleLoginFlow';
 import KYCVerification from './KYCVerification';
 import { VerificationProcess } from './VerificationProcess';
 import ProductionReadyWinGo from './ProductionReadyWinGo';
+import ProductionReadyAviator from './ProductionReadyAviator';
+import OfficialAviatorGame from './OfficialAviatorGame';
 
 import EnhancedGameLobby from './EnhancedGameLobby';
 import ComprehensiveFeatures from './ComprehensiveFeatures';
 import GameContainer from './GameContainer';
+import { AnimatedAchievementNotification, useAchievementNotifications } from './AnimatedAchievementNotification';
+import { RewardPreviewModal } from './RewardPreviewModal';
 
 // EXACT 91CLUB REPLICA - Same colors, same UI, same everything
 interface User {
@@ -108,6 +112,86 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
   const [showGameLobby, setShowGameLobby] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [showGameContainer, setShowGameContainer] = useState(false);
+
+  // Achievement Notification System
+  const { currentNotification, showAchievement, closeNotification, hasNotifications } = useAchievementNotifications();
+  const [showRewardPreview, setShowRewardPreview] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
+
+  // Sample Achievements Data from your existing app samples
+  const sampleAchievements = [
+    {
+      id: 'first_win',
+      title: 'First Victory',
+      description: 'Win your first game',
+      reward: '₹100',
+      icon: '🏆',
+      rarity: 'common' as const,
+      category: 'gaming',
+      xpGained: 50
+    },
+    {
+      id: 'daily_player',
+      title: 'Daily Player',
+      description: 'Play games for 7 consecutive days',
+      reward: '₹500',
+      icon: '📅',
+      rarity: 'rare' as const,
+      category: 'streak',
+      xpGained: 200
+    },
+    {
+      id: 'big_winner',
+      title: 'Big Winner',
+      description: 'Win ₹10,000 in total',
+      reward: '₹1000',
+      icon: '💎',
+      rarity: 'epic' as const,
+      category: 'milestone',
+      xpGained: 500
+    },
+    {
+      id: 'jackpot_hunter',
+      title: 'Jackpot Hunter',
+      description: 'Hit the jackpot in any game',
+      reward: '₹2500',
+      icon: '🎯',
+      rarity: 'legendary' as const,
+      category: 'jackpot',
+      xpGained: 1000
+    },
+    {
+      id: 'aviator_expert',
+      title: 'Aviator Expert',
+      description: 'Win 50 times in Aviator',
+      reward: '₹750',
+      icon: '✈️',
+      rarity: 'epic' as const,
+      category: 'gaming',
+      xpGained: 300
+    }
+  ];
+
+  // Achievement Functions
+  const handleRewardPreview = (achievement) => {
+    setSelectedAchievement(achievement);
+    setShowRewardPreview(true);
+  };
+
+  const handleClaimReward = (achievement) => {
+    // Update balance with reward
+    const rewardAmount = parseInt(achievement.reward.replace('₹', ''));
+    updateLocalBalance(balance + rewardAmount);
+    
+    console.log(`Claimed reward: ${achievement.reward} for ${achievement.title}`);
+    setShowRewardPreview(false);
+  };
+
+  // Demo function to trigger achievement notifications
+  const triggerRandomAchievement = () => {
+    const randomAchievement = sampleAchievements[Math.floor(Math.random() * sampleAchievements.length)];
+    showAchievement(randomAchievement);
+  };
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -1750,7 +1834,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <ExactAviatorGame onBack={() => setShowExactAviator(false)} />
+            <OfficialAviatorGame onBack={() => setShowExactAviator(false)} />
           </motion.div>
         )}
         
@@ -1772,7 +1856,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <SimpleWorkingAviator onBack={() => setShowSimpleAviator(false)} />
+            <OfficialAviatorGame onBack={() => setShowSimpleAviator(false)} />
           </motion.div>
         )}
         
@@ -1794,7 +1878,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <PremiumAviatorGame onBack={() => setShowPremiumAviator(false)} />
+            <ProductionReadyAviator onBack={() => setShowPremiumAviator(false)} />
           </motion.div>
         )}
         
@@ -1892,6 +1976,32 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
 
       {/* Add bottom padding to account for fixed navigation */}
       <div className="h-16"></div>
+
+      {/* Achievement Notification System */}
+      <AnimatedAchievementNotification
+        achievement={currentNotification}
+        isVisible={!!currentNotification}
+        onClose={closeNotification}
+        onRewardPreview={handleRewardPreview}
+      />
+
+      {/* Reward Preview Modal */}
+      <RewardPreviewModal
+        achievement={selectedAchievement}
+        isVisible={showRewardPreview}
+        onClose={() => setShowRewardPreview(false)}
+        onClaim={handleClaimReward}
+      />
+
+      {/* Demo Achievement Trigger Button (for testing) */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={triggerRandomAchievement}
+          className="fixed top-4 right-4 z-50 bg-yellow-500 text-black px-3 py-2 rounded-lg font-bold text-sm shadow-lg"
+        >
+          🏆 Test Achievement
+        </button>
+      )}
     </ComprehensiveAnimationSystem>
   );
 }
