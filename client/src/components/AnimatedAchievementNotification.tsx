@@ -58,6 +58,12 @@ export const AnimatedAchievementNotification: React.FC<AchievementNotificationPr
   onRewardPreview
 }) => {
   const [showFireworks, setShowFireworks] = useState(false);
+  
+  // Safety check for achievement
+  if (!achievement) {
+    return null;
+  }
+  
   const colors = rarityColors[achievement.rarity];
 
   useEffect(() => {

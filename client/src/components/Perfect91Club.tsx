@@ -113,10 +113,10 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
   const [showFeatures, setShowFeatures] = useState(false);
   const [showGameContainer, setShowGameContainer] = useState(false);
 
-  // Achievement Notification System
-  const { currentNotification, showAchievement, closeNotification, hasNotifications } = useAchievementNotifications();
-  const [showRewardPreview, setShowRewardPreview] = useState(false);
-  const [selectedAchievement, setSelectedAchievement] = useState(null);
+  // Achievement Notification System (temporarily disabled for stability)
+  // const { currentNotification, showAchievement, closeNotification, hasNotifications } = useAchievementNotifications();
+  // const [showRewardPreview, setShowRewardPreview] = useState(false);
+  // const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   // Sample Achievements Data from your existing app samples
   const sampleAchievements = [
@@ -172,7 +172,8 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
     }
   ];
 
-  // Achievement Functions
+  // Achievement Functions (temporarily disabled)
+  /*
   const handleRewardPreview = (achievement) => {
     setSelectedAchievement(achievement);
     setShowRewardPreview(true);
@@ -192,6 +193,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
     const randomAchievement = sampleAchievements[Math.floor(Math.random() * sampleAchievements.length)];
     showAchievement(randomAchievement);
   };
+  */
 
   // EXACT 91CLUB games with same colors and names
   const lotteryGames: Game[] = [
@@ -1977,15 +1979,17 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
       {/* Add bottom padding to account for fixed navigation */}
       <div className="h-16"></div>
 
-      {/* Achievement Notification System */}
-      <AnimatedAchievementNotification
-        achievement={currentNotification}
-        isVisible={!!currentNotification}
-        onClose={closeNotification}
-        onRewardPreview={handleRewardPreview}
-      />
+      {/* Achievement Notification System - Temporarily disabled for app stability */}
+      {/* 
+      {currentNotification && (
+        <AnimatedAchievementNotification
+          achievement={currentNotification}
+          isVisible={!!currentNotification}
+          onClose={closeNotification}
+          onRewardPreview={handleRewardPreview}
+        />
+      )}
 
-      {/* Reward Preview Modal */}
       <RewardPreviewModal
         achievement={selectedAchievement}
         isVisible={showRewardPreview}
@@ -1993,7 +1997,6 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
         onClaim={handleClaimReward}
       />
 
-      {/* Demo Achievement Trigger Button (for testing) */}
       {process.env.NODE_ENV === 'development' && (
         <button
           onClick={triggerRandomAchievement}
@@ -2002,6 +2005,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
           🏆 Test Achievement
         </button>
       )}
+      */
     </ComprehensiveAnimationSystem>
   );
 }
