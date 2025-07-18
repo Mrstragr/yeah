@@ -7,6 +7,7 @@ import {
   InsertKycPersonalDetails, 
   InsertKycDocumentVerification 
 } from '@shared/schema';
+import { otpService } from './otpService';
 
 const router = express.Router();
 
@@ -427,4 +428,231 @@ router.get('/kyc/status', authenticateToken, async (req: any, res) => {
   }
 });
 
-export default router;
+// Send OTP
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { phone, purpose, tempUserData } = req.body;
+
+    if (!phone || !purpose) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number and purpose are required'
+      });
+    }
+
+    // Validate purpose
+    if (!['signup', 'login', 'forgot-password'].includes(purpose)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid purpose'
+      });
+    }
+
+    // For forgot-password, check if user exists
+    if (purpose === 'forgot-password') {
+      const existingUser = await storage.getUserByPhone(phone);
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User with this phone number does not exist'
+        });
+      }
+    }
+
+    const result = await otpService.sendOTP(phone, purpose, tempUserData);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send OTP'
+    });
+  }
+});
+
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { phone, otp, purpose, tempUserData } = req.body;
+
+    if (!phone || !otp || !purpose) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number, OTP, and purpose are required'
+      });
+    }
+
+    const result = otpService.verifyOTP(phone, otp, purpose);
+    
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+    // Handle different purposes
+    switch (purpose) {
+      case 'signup':
+        // Complete user registration
+        if (!tempUserData) {
+          return res.status(400).json({
+            success: false,
+            message: 'User data not found'
+          });
+        }
+
+        // Create user
+        const hashedPassword = await bcrypt.hash(tempUserData.password, 10);
+        const referralCode = 'RF' + Math.random().toString(36).substr(2, 8).toUpperCase();
+
+        const userData: InsertUser = {
+          username: tempUserData.fullName.toLowerCase().replace(/\s+/g, ''),
+          email: tempUserData.email,
+          phone: tempUserData.phone,
+          password: hashedPassword,
+          firstName: tempUserData.fullName.split(' ')[0],
+          lastName: tempUserData.fullName.split(' ').slice(1).join(' ') || '',
+          referralCode,
+          kycStatus: 'pending'
+        };
+
+        const newUser = await storage.createUser(userData);
+        const token = generateToken(newUser);
+
+        res.status(201).json({
+          success: true,
+          message: 'Registration successful',
+          token,
+          user: {
+            id: newUser.id,
+            fullName: tempUserData.fullName,
+            email: newUser.email,
+            phone: newUser.phone,
+            isVerified: false,
+            kycStatus: 'pending',
+            walletBalance: newUser.walletBalance
+          }
+        });
+        break;
+
+      case 'login':
+        // Login user
+        const user = await storage.getUserByPhone(phone);
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
+        }
+
+        await storage.updateUserLastLogin(user.id);
+        const loginToken = generateToken(user);
+
+        res.json({
+          success: true,
+          message: 'Login successful',
+          token: loginToken,
+          user: {
+            id: user.id,
+            fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            email: user.email,
+            phone: user.phone,
+            isVerified: user.kycStatus === 'verified',
+            kycStatus: user.kycStatus,
+            walletBalance: user.walletBalance
+          }
+        });
+        break;
+
+      case 'forgot-password':
+        // Return reset token
+        res.json({
+          success: true,
+          message: 'OTP verified successfully',
+          resetToken: result.data?.resetToken
+        });
+        break;
+
+      default:
+        res.status(400).json({
+          success: false,
+          message: 'Invalid purpose'
+        });
+    }
+
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify OTP'
+    });
+  }
+});
+
+// Reset password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { phone, newPassword, resetToken } = req.body;
+
+    if (!phone || !newPassword || !resetToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number, new password, and reset token are required'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    // Verify reset token
+    const isValidToken = otpService.verifyResetToken(phone, resetToken);
+    if (!isValidToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updated = await storage.updateUserPassword(phone, hashedPassword);
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Password reset successful'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset password'
+    });
+  }
+});
+
+export { router as authRoutes };

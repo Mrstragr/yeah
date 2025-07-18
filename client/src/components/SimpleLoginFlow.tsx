@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Lock, Eye, EyeOff, Mail, User } from 'lucide-react';
+
+// Lazy load OTP and ForgotPassword components
+const OTPVerification = React.lazy(() => import('./OTPVerification'));
+const ForgotPassword = React.lazy(() => import('./ForgotPassword'));
 
 interface User {
   id: number;
@@ -17,6 +21,7 @@ interface SimpleLoginFlowProps {
 }
 
 export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLoginFlowProps) {
+  const [currentView, setCurrentView] = useState<'auth' | 'otp' | 'forgot-password'>('auth');
   const [isLogin, setIsLogin] = useState(true);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +30,8 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpPurpose, setOtpPurpose] = useState<'signup' | 'login' | 'forgot-password'>('signup');
+  const [tempUserData, setTempUserData] = useState<any>(null);
 
   const handleLogin = async () => {
     if (!phone || !password) {
@@ -34,6 +41,7 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
 
     setLoading(true);
     try {
+      // First verify password
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -45,28 +53,36 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Store auth token
+        // Store auth token temporarily
         localStorage.setItem('authToken', data.token);
         
-        // Fetch user profile
-        const profileResponse = await fetch('/api/auth/profile', {
+        // Send OTP for additional security
+        const otpResponse = await fetch('/api/auth/send-otp', {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${data.token}`,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            phone,
+            purpose: 'login'
+          }),
         });
 
-        if (profileResponse.ok) {
-          const userData = await profileResponse.json();
-          onAuthSuccess({
-            id: userData.id,
-            username: userData.username || userData.fullName || userData.firstName || 'User',
-            phone: userData.phone,
-            email: userData.email,
-            balance: userData.walletBalance || '10000.00',
-            isVerified: userData.isVerified || false
-          });
+        const otpData = await otpResponse.json();
+        
+        if (otpData.success) {
+          setOtpPurpose('login');
+          setCurrentView('otp');
         } else {
-          onAuthError('Failed to load user profile');
+          // Fallback to direct login if OTP fails
+          onAuthSuccess({
+            id: data.user.id,
+            username: data.user.fullName || data.user.firstName || 'User',
+            phone: data.user.phone,
+            email: data.user.email,
+            balance: data.user.walletBalance || '10000.00',
+            isVerified: data.user.isVerified || false
+          });
         }
       } else {
         onAuthError(data.message || 'Login failed');
@@ -97,36 +113,37 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
 
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
+      // Check if user already exists
+      const checkResponse = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           phone,
-          password,
-          email,
-          fullName: firstName + (lastName ? ' ' + lastName : '')
+          purpose: 'signup',
+          tempUserData: {
+            phone,
+            password,
+            email,
+            fullName: firstName + (lastName ? ' ' + lastName : '')
+          }
         }),
       });
 
-      const data = await response.json();
-      console.log('Registration response:', data);
+      const data = await checkResponse.json();
 
-      if (response.ok && data.success) {
-        // Store auth token
-        localStorage.setItem('authToken', data.token);
-        
-        onAuthSuccess({
-          id: data.user.id,
-          username: data.user.fullName || data.user.firstName || 'User',
-          phone: data.user.phone,
-          email: data.user.email,
-          balance: data.user.walletBalance || '10000.00',
-          isVerified: data.user.isVerified || false
+      if (checkResponse.ok && data.success) {
+        // Store temp user data
+        setTempUserData({
+          phone,
+          password,
+          email,
+          fullName: firstName + (lastName ? ' ' + lastName : '')
         });
+        setOtpPurpose('signup');
+        setCurrentView('otp');
       } else {
-        console.error('Registration failed:', data);
         onAuthError(data.message || 'Registration failed');
       }
     } catch (error) {
@@ -136,6 +153,62 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
       setLoading(false);
     }
   };
+
+  // Handle OTP verification success
+  const handleOTPSuccess = (data: any) => {
+    if (otpPurpose === 'signup' || otpPurpose === 'login') {
+      onAuthSuccess({
+        id: data.user.id,
+        username: data.user.fullName || data.user.firstName || 'User',
+        phone: data.user.phone,
+        email: data.user.email,
+        balance: data.user.walletBalance || '10000.00',
+        isVerified: data.user.isVerified || false
+      });
+    }
+  };
+
+  // Handle forgot password success
+  const handleForgotPasswordSuccess = () => {
+    setCurrentView('auth');
+    setIsLogin(true);
+    onAuthError('Password reset successful! Please login with your new password.');
+  };
+
+  // Handle back to auth
+  const handleBackToAuth = () => {
+    setCurrentView('auth');
+    setTempUserData(null);
+  };
+
+  // Show OTP screen
+  if (currentView === 'otp') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-orange-500 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+        <OTPVerification
+          phoneNumber={phone}
+          purpose={otpPurpose}
+          onVerificationSuccess={handleOTPSuccess}
+          onVerificationError={onAuthError}
+          onBack={handleBackToAuth}
+          tempUserData={tempUserData}
+        />
+      </Suspense>
+    );
+  }
+
+  // Show forgot password screen
+  if (currentView === 'forgot-password') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-orange-500 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+        <ForgotPassword
+          onBack={handleBackToAuth}
+          onSuccess={handleForgotPasswordSuccess}
+          onError={onAuthError}
+        />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-orange-500 flex items-center justify-center p-4">
@@ -256,8 +329,20 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
             disabled={loading}
             className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Please wait...' : (isLogin ? 'Log In' : 'Create Account')}
+            {loading ? 'Please wait...' : (isLogin ? 'Login with OTP' : 'Register with OTP')}
           </button>
+
+          {/* Forgot Password Link */}
+          {isLogin && (
+            <div className="text-center mt-4">
+              <button
+                onClick={() => setCurrentView('forgot-password')}
+                className="text-red-600 text-sm font-medium hover:text-red-700 transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
 
           {/* KYC Notice for registration */}
           {!isLogin && (
@@ -267,12 +352,16 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
             </div>
           )}
 
-          {/* Demo credentials for login */}
-          {isLogin && (
-            <div className="text-center text-sm text-gray-600 mt-4">
-              Demo: 9876543210 / demo123
-            </div>
-          )}
+          {/* Demo info */}
+          <div className="text-center text-sm text-gray-600 mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="font-medium text-blue-800">📱 Demo Mode</p>
+            <p className="mt-1">
+              {isLogin 
+                ? 'Use any 10-digit phone + password. OTP will be 123456'
+                : 'Use any valid details. OTP will be 123456'
+              }
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>

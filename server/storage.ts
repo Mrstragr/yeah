@@ -52,6 +52,7 @@ export interface IStorage {
   updateUserBalance(userId: number, newBalance: string): Promise<User | undefined>;
   updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined>;
   updateUserLastLogin(userId: number): Promise<User | undefined>;
+  updateUserPassword(phone: string, hashedPassword: string): Promise<boolean>;
 
   // Transaction methods
   createTransaction(transaction: any): Promise<any>;
@@ -213,6 +214,19 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error updating user last login:', error);
       return undefined;
+    }
+  }
+
+  async updateUserPassword(phone: string, hashedPassword: string): Promise<boolean> {
+    try {
+      const result = await db
+        .update(users)
+        .set({ password: hashedPassword, updatedAt: new Date() })
+        .where(eq(users.phone, phone));
+      return result.length > 0;
+    } catch (error) {
+      console.error('Error updating user password:', error);
+      return false;
     }
   }
 
@@ -792,6 +806,18 @@ export class MemStorage implements IStorage {
       return user;
     }
     return undefined;
+  }
+
+  async updateUserPassword(phone: string, hashedPassword: string): Promise<boolean> {
+    for (const [id, user] of this.users.entries()) {
+      if (user.phone === phone) {
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        this.users.set(id, user);
+        return true;
+      }
+    }
+    return false;
   }
 
   async getAllGames(): Promise<Game[]> {

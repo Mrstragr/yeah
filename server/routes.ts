@@ -13,7 +13,7 @@ import { asyncHandler } from './errorHandler.js';
 import { validateBetAmount } from './security.js';
 import realAuthRoutes from './real-auth.js';
 import realPaymentRoutes from './real-payments.js';
-import authRoutes from './authRoutes.js';
+import { authRoutes } from './authRoutes.js';
 import { registerProductionRoutes } from './production-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
