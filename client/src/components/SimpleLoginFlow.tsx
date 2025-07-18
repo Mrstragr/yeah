@@ -59,10 +59,10 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
           const userData = await profileResponse.json();
           onAuthSuccess({
             id: userData.id,
-            username: userData.username || userData.firstName || 'User',
+            username: userData.username || userData.fullName || userData.firstName || 'User',
             phone: userData.phone,
             email: userData.email,
-            balance: userData.balance,
+            balance: userData.walletBalance || '10000.00',
             isVerified: userData.isVerified || false
           });
         } else {
@@ -111,6 +111,7 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
       });
 
       const data = await response.json();
+      console.log('Registration response:', data);
 
       if (response.ok && data.success) {
         // Store auth token
@@ -118,13 +119,14 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
         
         onAuthSuccess({
           id: data.user.id,
-          username: data.user.firstName || 'User',
+          username: data.user.fullName || data.user.firstName || 'User',
           phone: data.user.phone,
           email: data.user.email,
-          balance: data.user.balance,
-          isVerified: false
+          balance: data.user.walletBalance || '10000.00',
+          isVerified: data.user.isVerified || false
         });
       } else {
+        console.error('Registration failed:', data);
         onAuthError(data.message || 'Registration failed');
       }
     } catch (error) {

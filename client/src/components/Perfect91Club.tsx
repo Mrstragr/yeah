@@ -859,7 +859,7 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
         }}
         onAuthError={(error) => {
           console.error('Authentication error:', error);
-          // Could show toast notification here
+          alert(error); // Show error to user
         }}
       />
     );
