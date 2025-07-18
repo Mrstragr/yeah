@@ -50,6 +50,10 @@ import OfficialAviatorGame from './OfficialAviatorGame';
 import EnhancedGameLobby from './EnhancedGameLobby';
 import ComprehensiveFeatures from './ComprehensiveFeatures';
 import GameContainer from './GameContainer';
+// Enhanced authentic games
+import AuthenticWinGoGame from './AuthenticWinGoGame';
+import AuthenticAviatorGame from './AuthenticAviatorGame';
+import AuthenticGameLobby from './AuthenticGameLobby';
 // Achievement notifications temporarily disabled
 // import { AnimatedAchievementNotification, useAchievementNotifications } from './AnimatedAchievementNotification';
 // import { RewardPreviewModal } from './RewardPreviewModal';
@@ -113,6 +117,39 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
   const [showGameLobby, setShowGameLobby] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [showGameContainer, setShowGameContainer] = useState(false);
+  
+  // Enhanced authentic game states
+  const [showAuthenticWinGo, setShowAuthenticWinGo] = useState(false);
+  const [showAuthenticAviator, setShowAuthenticAviator] = useState(false);
+  const [showAuthenticGameLobby, setShowAuthenticGameLobby] = useState(false);
+
+  // Enhanced game selection handler
+  const handleEnhancedGameSelect = (gameId: string) => {
+    // Reset all game states first
+    setShowAuthenticGameLobby(false);
+    setShowGameLobby(false);
+    setCurrentGameView(null);
+    
+    // Show the selected enhanced game
+    switch (gameId) {
+      case 'authentic-wingo':
+        setShowAuthenticWinGo(true);
+        break;
+      case 'authentic-aviator':
+        setShowAuthenticAviator(true);
+        break;
+      case 'wingo':
+        setShowProductionWinGo(true);
+        break;
+      case 'aviator':
+        setShowProductionAviator(true);
+        break;
+      default:
+        // Handle other games through currentGameView
+        setCurrentGameView(gameId);
+        break;
+    }
+  };
 
   // Achievement Notification System (temporarily disabled for stability)
   // const { currentNotification, showAchievement, closeNotification, hasNotifications } = useAchievementNotifications();
@@ -488,6 +525,28 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
     }
   }, [user]);
 
+  // Show Enhanced Authentic WinGo Game
+  if (showAuthenticWinGo && user) {
+    return (
+      <AuthenticWinGoGame 
+        onBack={() => setShowAuthenticWinGo(false)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
+  // Show Enhanced Authentic Aviator Game
+  if (showAuthenticAviator && user) {
+    return (
+      <AuthenticAviatorGame 
+        onBack={() => setShowAuthenticAviator(false)}
+        user={user}
+        onBalanceUpdate={fetchBalance}
+      />
+    );
+  }
+
   // Show WinGo game if selected
   if (currentGameView === 'wingo' && user) {
     return (
@@ -699,6 +758,17 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
   }
 
 
+
+  // Show Enhanced Authentic Game Lobby
+  if (showAuthenticGameLobby && user) {
+    return (
+      <AuthenticGameLobby 
+        onBack={() => setShowAuthenticGameLobby(false)}
+        user={user}
+        onGameSelect={handleEnhancedGameSelect}
+      />
+    );
+  }
 
   if (showGameLobby && user) {
     return (
@@ -979,10 +1049,10 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowGameLobby(true)}
+              onClick={() => setShowAuthenticGameLobby(true)}
               className="w-full bg-white text-purple-600 py-4 rounded-lg font-bold text-lg"
             >
-              🎮 ENTER GAME LOBBY
+              🎮 ENHANCED GAME LOBBY
             </motion.button>
           </div>
 
@@ -1943,12 +2013,12 @@ export function Perfect91Club({ user: propUser, onLogout }: Perfect91ClubProps =
           </button>
           
           <button 
-            onClick={() => setShowGameLobby(true)}
+            onClick={() => setShowAuthenticGameLobby(true)}
             className="flex flex-col items-center py-2 px-1 text-gray-500 hover:text-red-600"
           >
             <div className="text-lg mb-1">🎮</div>
             <div className="text-xs font-medium">Games</div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">7</div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">10</div>
           </button>
           
           <button 
