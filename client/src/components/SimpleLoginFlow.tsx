@@ -81,7 +81,17 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
 
   const handleRegister = async () => {
     if (!phone || !password || !email || !firstName) {
-      onAuthError('Please fill all required fields');
+      onAuthError('Please fill all required fields: phone, password, email, and name');
+      return;
+    }
+
+    if (phone.length < 10) {
+      onAuthError('Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    if (password.length < 6) {
+      onAuthError('Password must be at least 6 characters');
       return;
     }
 
@@ -96,8 +106,7 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
           phone,
           password,
           email,
-          firstName,
-          lastName
+          fullName: firstName + (lastName ? ' ' + lastName : '')
         }),
       });
 
@@ -211,9 +220,12 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
             <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="tel"
-              placeholder="Phone number"
+              placeholder="Phone number (10 digits)"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setPhone(value);
+              }}
               className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
@@ -223,7 +235,7 @@ export default function SimpleLoginFlow({ onAuthSuccess, onAuthError }: SimpleLo
             <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
+              placeholder="Password (min 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
