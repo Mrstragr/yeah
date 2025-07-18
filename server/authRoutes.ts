@@ -430,6 +430,7 @@ router.get('/kyc/status', authenticateToken, async (req: any, res) => {
 
 // Send OTP
 router.post('/send-otp', async (req, res) => {
+  console.log('📱 OTP Send Request:', req.body);
   try {
     const { phone, purpose, tempUserData } = req.body;
 
@@ -437,6 +438,14 @@ router.post('/send-otp', async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Phone number and purpose are required'
+      });
+    }
+
+    // Basic phone validation (should be numeric and reasonable length)
+    if (!phone || phone.length < 10 || !/^\d+$/.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid phone number'
       });
     }
 

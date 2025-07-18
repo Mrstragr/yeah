@@ -190,11 +190,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ history });
   });
 
-  // Real Authentication Routes
-  app.use('/api/auth', realAuthRoutes);
-  
-  // Enhanced Authentication Routes with KYC
+  // Enhanced Authentication Routes with KYC and OTP features
   app.use('/api/auth', authRoutes);
+  
+  // Real Authentication Routes (disabled for now - conflicts with OTP)
+  // app.use('/api/auth', realAuthRoutes);
 
   // Register all production-ready routes
   registerProductionRoutes(app);
