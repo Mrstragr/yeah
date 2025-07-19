@@ -11,7 +11,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showGameLauncher, setShowGameLauncher] = useState(false);
+
 
   useEffect(() => {
     // Check if user is already logged in
@@ -28,6 +28,22 @@ export default function App() {
         localStorage.removeItem('91club_user');
         localStorage.removeItem('91club_token');
       }
+    } else {
+      // Create demo user for easier game access
+      const demoUser = {
+        id: 1,
+        username: 'Demo Player',
+        phone: '9876543210',
+        email: 'demo@example.com',
+        walletBalance: '10000',
+        isVerified: true
+      };
+      const demoToken = `demo_token_${Date.now()}`;
+      
+      localStorage.setItem('91club_user', JSON.stringify(demoUser));
+      localStorage.setItem('91club_token', demoToken);
+      setUser(demoUser);
+      setIsAuthenticated(true);
     }
 
     // Test API connectivity
@@ -86,19 +102,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Quick Game Access Button */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setShowGameLauncher(!showGameLauncher)}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-red-700 transition-all text-sm font-semibold"
-        >
-          {showGameLauncher ? 'Back to App' : '🎮 Quick Games'}
-        </button>
-      </div>
-      
-      {showGameLauncher ? (
-        <QuickGameLauncher />
-      ) : isAuthenticated ? (
+      {isAuthenticated ? (
         <Perfect91Club user={user} onLogout={handleLogout} />
       ) : (
         <ProductionLoginPage onLoginSuccess={handleLogin} />
