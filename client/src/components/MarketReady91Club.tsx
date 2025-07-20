@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { RefreshCw, Bell, Settings, Wallet, TrendingUp, Trophy, User } from 'lucide-react';
 import AuthenticWinGoGame from './AuthenticWinGoGame';
 import AuthenticAviatorGame from './AuthenticAviatorGame';
+import AuthenticK3Game from './AuthenticK3Game';
+import Authentic5DGame from './Authentic5DGame';
 
 interface User {
   id: number;
@@ -40,6 +42,14 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
 
   if (currentGame === 'aviator') {
     return <AuthenticAviatorGame onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'k3') {
+    return <AuthenticK3Game onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === '5d') {
+    return <Authentic5DGame onBack={() => setCurrentGame(null)} />;
   }
 
   return (
@@ -217,6 +227,7 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('k3')}
               className="bg-gradient-to-br from-pink-500 via-rose-600 to-red-600 rounded-2xl p-6 text-white text-left relative overflow-hidden h-32 group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent group-hover:from-white/30 transition-all"></div>
@@ -237,6 +248,7 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('5d')}
               className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl p-6 text-white text-left relative overflow-hidden h-32 group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent group-hover:from-white/30 transition-all"></div>
