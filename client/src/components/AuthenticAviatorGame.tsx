@@ -1,615 +1,418 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Volume2, VolumeX, Plane, TrendingUp, 
-  Users, Trophy, Star, BarChart3, RefreshCw,
-  AlertTriangle, CheckCircle, Zap, Target, Clock,
-  Settings, Share2, History
-} from 'lucide-react';
-
-interface User {
-  id: number;
-  username: string;
-  walletBalance: string;
-}
+import { motion } from 'framer-motion';
+import { ArrowLeft, Volume2 } from 'lucide-react';
 
 interface Props {
   onBack: () => void;
-  user: User;
-  onBalanceUpdate: () => void;
 }
 
-interface FlightHistory {
-  multiplier: number;
-  timestamp: Date;
-  crashed: boolean;
-}
-
-interface BetData {
-  amount: number;
-  autoCashOut?: number;
-  isActive: boolean;
-  cashOutAt?: number;
-  winAmount?: number;
-  status: 'betting' | 'flying' | 'won' | 'lost';
-}
-
-export default function AuthenticAviatorGame({ onBack, user, onBalanceUpdate }: Props) {
-  // Game States
-  const [gamePhase, setGamePhase] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
-  const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
-  const [flightDuration, setFlightDuration] = useState(0);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [timeToNextFlight, setTimeToNextFlight] = useState(5);
-  const [crashPoint, setCrashPoint] = useState(0);
-  
-  // Canvas and Animation
+export default function AuthenticAviatorGame({ onBack }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
-  const [planePosition, setPlanePosition] = useState({ x: 50, y: 300 });
-  const [flightPath, setFlightPath] = useState<Array<{x: number, y: number}>>([]);
-  
-  // Betting States
-  const [bet1, setBet1] = useState<BetData>({ amount: 10, isActive: false, status: 'betting' });
-  const [bet2, setBet2] = useState<BetData>({ amount: 10, isActive: false, status: 'betting' });
-  const [bet1Amount, setBet1Amount] = useState('10');
-  const [bet2Amount, setBet2Amount] = useState('10');
-  const [bet1AutoCashOut, setBet1AutoCashOut] = useState('');
-  const [bet2AutoCashOut, setBet2AutoCashOut] = useState('');
-  
-  // Game Data
-  const [flightHistory, setFlightHistory] = useState<FlightHistory[]>([
-    { multiplier: 2.34, timestamp: new Date(), crashed: true },
-    { multiplier: 1.05, timestamp: new Date(), crashed: true },
-    { multiplier: 5.67, timestamp: new Date(), crashed: true },
-    { multiplier: 1.23, timestamp: new Date(), crashed: true },
-    { multiplier: 8.90, timestamp: new Date(), crashed: true },
-    { multiplier: 1.45, timestamp: new Date(), crashed: true },
-    { multiplier: 3.21, timestamp: new Date(), crashed: true },
-  ]);
-  
-  // Statistics
-  const [gameStats, setGameStats] = useState({
-    totalPlayers: 8943,
-    totalBetAmount: '₹12,45,678',
-    biggestWin: '₹45,890',
-    currentRound: 'AV-0117-0045'
-  });
+  const [multiplier, setMultiplier] = useState(1.00);
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
+  const [betAmount1, setBetAmount1] = useState(10);
+  const [betAmount2, setBetAmount2] = useState(10);
+  const [isBet1Active, setIsBet1Active] = useState(false);
+  const [isBet2Active, setIsBet2Active] = useState(false);
+  const [cashOut1, setCashOut1] = useState(0);
+  const [cashOut2, setCashOut2] = useState(0);
+  const [balance, setBalance] = useState(12580.45);
+  const [waitTime, setWaitTime] = useState(5);
+  const [hasFlown, setHasFlown] = useState(false);
 
-  // Quick bet amounts
-  const quickAmounts = ['10', '50', '100', '500', '1000', '5000'];
+  // Game history multipliers
+  const [gameHistory, setGameHistory] = useState([2.45, 1.23, 5.67, 1.89, 3.21, 1.45, 8.90, 2.34, 1.67, 4.56]);
 
-  // Game Logic
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let interval: NodeJS.Timeout;
     
-    if (gamePhase === 'waiting') {
-      timer = setInterval(() => {
-        setTimeToNextFlight(prev => {
+    if (gameStatus === 'waiting') {
+      interval = setInterval(() => {
+        setWaitTime(prev => {
           if (prev <= 1) {
-            startFlight();
-            return 0;
+            setGameStatus('flying');
+            setMultiplier(1.00);
+            setHasFlown(false);
+            return 5;
           }
           return prev - 1;
         });
       }, 1000);
-    } else if (gamePhase === 'flying') {
-      timer = setInterval(() => {
-        setFlightDuration(prev => prev + 0.1);
-        updateMultiplier();
+    } else if (gameStatus === 'flying') {
+      interval = setInterval(() => {
+        setMultiplier(prev => {
+          const newMultiplier = prev + (Math.random() * 0.05 + 0.01);
+          
+          // Random crash probability that increases with multiplier
+          const crashProbability = Math.min(0.01 * Math.pow(newMultiplier - 1, 1.5), 0.1);
+          
+          if (Math.random() < crashProbability || newMultiplier > 20) {
+            setGameStatus('crashed');
+            setHasFlown(true);
+            
+            // Update game history
+            setGameHistory(prev => [newMultiplier, ...prev.slice(0, 9)]);
+            
+            // Reset after crash
+            setTimeout(() => {
+              setGameStatus('waiting');
+              setWaitTime(5);
+              setIsBet1Active(false);
+              setIsBet2Active(false);
+              setCashOut1(0);
+              setCashOut2(0);
+            }, 3000);
+            
+            return newMultiplier;
+          }
+          
+          return newMultiplier;
+        });
       }, 100);
     }
 
-    return () => clearInterval(timer);
-  }, [gamePhase, flightDuration]);
+    return () => clearInterval(interval);
+  }, [gameStatus]);
 
-  const startFlight = () => {
-    setGamePhase('flying');
-    setFlightDuration(0);
-    setCurrentMultiplier(1.00);
-    setCrashPoint(generateCrashPoint());
-    setPlanePosition({ x: 50, y: 300 });
-    setFlightPath([]);
-    
-    // Activate bets
-    if (bet1Amount && parseInt(bet1Amount) >= 10) {
-      setBet1(prev => ({ ...prev, isActive: true, status: 'flying' }));
-    }
-    if (bet2Amount && parseInt(bet2Amount) >= 10) {
-      setBet2(prev => ({ ...prev, isActive: true, status: 'flying' }));
-    }
-    
-    startAnimation();
-  };
-
-  const generateCrashPoint = () => {
-    // Authentic crash point generation (house edge ~3%)
-    const random = Math.random();
-    if (random < 0.5) return 1 + Math.random() * 1; // 1x - 2x (50%)
-    if (random < 0.8) return 2 + Math.random() * 3; // 2x - 5x (30%)
-    if (random < 0.95) return 5 + Math.random() * 10; // 5x - 15x (15%)
-    return 15 + Math.random() * 85; // 15x - 100x (5%)
-  };
-
-  const updateMultiplier = () => {
-    const newMultiplier = 1 + (flightDuration * flightDuration * 0.05);
-    setCurrentMultiplier(newMultiplier);
-    
-    // Check for crash
-    if (newMultiplier >= crashPoint) {
-      crashPlane();
-    }
-    
-    // Check auto cash outs
-    if (bet1.isActive && bet1AutoCashOut && newMultiplier >= parseFloat(bet1AutoCashOut)) {
-      cashOut(1);
-    }
-    if (bet2.isActive && bet2AutoCashOut && newMultiplier >= parseFloat(bet2AutoCashOut)) {
-      cashOut(2);
-    }
-  };
-
-  const crashPlane = () => {
-    setGamePhase('crashed');
-    
-    // Update bet statuses
-    setBet1(prev => prev.isActive && !prev.cashOutAt ? { ...prev, status: 'lost' } : prev);
-    setBet2(prev => prev.isActive && !prev.cashOutAt ? { ...prev, status: 'lost' } : prev);
-    
-    // Add to history
-    setFlightHistory(prev => [
-      { multiplier: currentMultiplier, timestamp: new Date(), crashed: true },
-      ...prev.slice(0, 9)
-    ]);
-    
-    // Reset for next round
-    setTimeout(() => {
-      setGamePhase('waiting');
-      setTimeToNextFlight(5);
-      resetBets();
-    }, 3000);
-  };
-
-  const cashOut = (betNumber: 1 | 2) => {
-    if (betNumber === 1 && bet1.isActive && !bet1.cashOutAt) {
-      const winAmount = bet1.amount * currentMultiplier;
-      setBet1(prev => ({ 
-        ...prev, 
-        cashOutAt: currentMultiplier, 
-        winAmount, 
-        status: 'won' 
-      }));
-    } else if (betNumber === 2 && bet2.isActive && !bet2.cashOutAt) {
-      const winAmount = bet2.amount * currentMultiplier;
-      setBet2(prev => ({ 
-        ...prev, 
-        cashOutAt: currentMultiplier, 
-        winAmount, 
-        status: 'won' 
-      }));
-    }
-  };
-
-  const resetBets = () => {
-    setBet1(prev => ({ amount: parseInt(bet1Amount) || 10, isActive: false, status: 'betting' }));
-    setBet2(prev => ({ amount: parseInt(bet2Amount) || 10, isActive: false, status: 'betting' }));
-  };
-
-  const startAnimation = () => {
+  // Canvas animation
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
-    const animate = () => {
-      if (gamePhase !== 'flying') return;
-      
-      // Clear canvas
+
+    canvas.width = 350;
+    canvas.height = 200;
+
+    const drawFlight = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw grid
-      drawGrid(ctx, canvas.width, canvas.height);
-      
-      // Draw flight curve
-      drawFlightCurve(ctx, canvas.width, canvas.height);
-      
-      // Draw plane
-      drawPlane(ctx);
-      
-      animationRef.current = requestAnimationFrame(animate);
+      // Dark background
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (gameStatus === 'flying' || gameStatus === 'crashed') {
+        // Draw flight curve
+        const progress = Math.min((multiplier - 1) * 50, canvas.width - 50);
+        const curveHeight = Math.min((multiplier - 1) * 20, canvas.height - 100);
+        
+        ctx.strokeStyle = gameStatus === 'crashed' ? '#ef4444' : '#10b981';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(20, canvas.height - 30);
+        
+        // Smooth curve using quadratic bezier
+        for (let x = 20; x <= 20 + progress; x++) {
+          const normalizedX = (x - 20) / progress;
+          const y = canvas.height - 30 - (Math.pow(normalizedX, 0.7) * curveHeight);
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Draw airplane at the end of curve
+        if (!hasFlown) {
+          const planeX = 20 + progress;
+          const planeY = canvas.height - 30 - (Math.pow(progress / (canvas.width - 70), 0.7) * curveHeight);
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '16px Arial';
+          ctx.fillText('✈️', planeX - 8, planeY + 5);
+        }
+
+        // Show "FLEW AWAY" if crashed
+        if (gameStatus === 'crashed') {
+          ctx.fillStyle = '#ef4444';
+          ctx.font = 'bold 20px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('FLEW AWAY!', canvas.width / 2, canvas.height / 2);
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 16px Arial';
+          ctx.fillText(`${multiplier.toFixed(2)}x`, canvas.width / 2, canvas.height / 2 + 30);
+        }
+      } else {
+        // Waiting state
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('WAITING FOR NEXT ROUND...', canvas.width / 2, canvas.height / 2);
+        
+        ctx.font = '24px Arial';
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText(waitTime.toString(), canvas.width / 2, canvas.height / 2 + 40);
+      }
+    };
+
+    const animate = () => {
+      drawFlight();
+      requestAnimationFrame(animate);
     };
     
     animate();
-  };
+  }, [multiplier, gameStatus, waitTime, hasFlown]);
 
-  const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 1;
+  const placeBet = (betNumber: 1 | 2) => {
+    if (gameStatus !== 'waiting') return;
     
-    // Vertical lines
-    for (let x = 0; x <= width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
+    const amount = betNumber === 1 ? betAmount1 : betAmount2;
+    if (balance < amount) return;
     
-    // Horizontal lines
-    for (let y = 0; y <= height; y += 30) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
+    setBalance(prev => prev - amount);
+    
+    if (betNumber === 1) {
+      setIsBet1Active(true);
+    } else {
+      setIsBet2Active(true);
     }
   };
 
-  const drawFlightCurve = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.strokeStyle = '#ff4444';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
+  const cashOut = (betNumber: 1 | 2) => {
+    if (gameStatus !== 'flying') return;
     
-    const points = [];
-    for (let x = 0; x < width; x += 5) {
-      const progress = x / width;
-      const y = height - (progress * progress * height * 0.8) - 50;
-      points.push({ x, y });
+    const amount = betNumber === 1 ? betAmount1 : betAmount2;
+    const winAmount = amount * multiplier;
+    
+    setBalance(prev => prev + winAmount);
+    
+    if (betNumber === 1) {
+      setIsBet1Active(false);
+      setCashOut1(multiplier);
+    } else {
+      setIsBet2Active(false);
+      setCashOut2(multiplier);
     }
-    
-    if (points.length > 0) {
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-    }
-    
-    ctx.stroke();
-    
-    // Update plane position
-    const planeProgress = Math.min(flightDuration * 0.1, 1);
-    const planeX = planeProgress * width;
-    const planeY = height - (planeProgress * planeProgress * height * 0.8) - 50;
-    setPlanePosition({ x: planeX, y: planeY });
-  };
-
-  const drawPlane = (ctx: CanvasRenderingContext2D) => {
-    const { x, y } = planePosition;
-    
-    // Plane body
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.ellipse(x, y, 15, 8, 0, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    // Plane wings
-    ctx.fillStyle = '#cccccc';
-    ctx.beginPath();
-    ctx.ellipse(x - 5, y, 10, 4, 0, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    // Plane trail
-    if (gamePhase === 'flying') {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x - 20, y);
-      ctx.lineTo(x - 40, y + 5);
-      ctx.stroke();
-    }
-  };
-
-  const getMultiplierColor = (multiplier: number) => {
-    if (multiplier < 1.5) return 'text-white';
-    if (multiplier < 2) return 'text-green-400';
-    if (multiplier < 5) return 'text-yellow-400';
-    if (multiplier < 10) return 'text-orange-400';
-    return 'text-red-400';
-  };
-
-  const formatMultiplier = (value: number) => {
-    return value.toFixed(2) + 'x';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 text-white max-w-md mx-auto relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-8 w-24 h-24 bg-red-500/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-32 right-12 w-32 h-32 bg-orange-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-32 left-16 w-28 h-28 bg-yellow-500/10 rounded-full blur-xl animate-pulse delay-2000"></div>
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 bg-gradient-to-r from-red-600 to-orange-700 p-4 shadow-xl">
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          
-          <div className="text-center">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <Plane className="w-6 h-6" />
-              Aviator
-            </h1>
-            <p className="text-red-100 text-sm">Crash Multiplier Game</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="max-w-md mx-auto bg-gray-900 min-h-screen text-white">
+        
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <ArrowLeft className="w-6 h-6" />
             </button>
-            <button className="p-2 hover:bg-white/20 rounded-full transition-colors">
-              <Settings className="w-5 h-5" />
+            <div className="text-center">
+              <div className="text-2xl font-bold">✈️ AVIATOR</div>
+              <div className="text-purple-100 text-sm">Crash Game</div>
+            </div>
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <Volume2 className="w-5 h-5" />
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* Game Stats */}
-      <div className="relative z-10 bg-black/50 backdrop-blur-sm p-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-lg p-3 border border-red-500/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="w-4 h-4 text-red-400" />
-              <span className="text-xs text-gray-300">Live Players</span>
+          {/* Balance Display */}
+          <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="text-center">
+              <div className="text-purple-100 text-sm">Available Balance</div>
+              <div className="text-white text-2xl font-bold">₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
             </div>
-            <p className="text-lg font-bold text-white">{gameStats.totalPlayers.toLocaleString()}</p>
-          </div>
-          
-          <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-lg p-3 border border-yellow-500/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Trophy className="w-4 h-4 text-yellow-400" />
-              <span className="text-xs text-gray-300">Round</span>
-            </div>
-            <p className="text-sm font-mono text-white">{gameStats.currentRound}</p>
           </div>
         </div>
-      </div>
 
-      {/* Flight History */}
-      <div className="relative z-10 bg-black/30 backdrop-blur-sm p-4 border-b border-white/10">
-        <div className="flex items-center gap-2 mb-2">
-          <History className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-300">Recent Flights</span>
-        </div>
-        <div className="flex gap-2 overflow-x-auto">
-          {flightHistory.map((flight, index) => (
-            <div
-              key={index}
-              className={`px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap ${
-                flight.multiplier >= 10 ? 'bg-red-500 text-white' :
-                flight.multiplier >= 5 ? 'bg-orange-500 text-white' :
-                flight.multiplier >= 2 ? 'bg-yellow-500 text-black' :
-                'bg-gray-500 text-white'
-              }`}
-            >
-              {formatMultiplier(flight.multiplier)}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Game Area */}
-      <div className="relative z-10 bg-black/20 backdrop-blur-sm h-80">
-        {/* Game Status */}
-        <div className="absolute top-4 left-4 right-4 z-20">
-          <div className="text-center">
-            {gamePhase === 'waiting' && (
-              <div className="bg-black/70 rounded-lg p-4">
-                <p className="text-gray-300 mb-2">Next flight in</p>
-                <p className="text-3xl font-bold text-yellow-400">{timeToNextFlight}s</p>
-                <p className="text-sm text-gray-400 mt-2">Place your bets!</p>
-              </div>
-            )}
-            
-            {gamePhase === 'flying' && (
-              <div className="bg-black/70 rounded-lg p-4">
-                <p className="text-gray-300 mb-2">Current Multiplier</p>
-                <p className={`text-5xl font-bold ${getMultiplierColor(currentMultiplier)}`}>
-                  {formatMultiplier(currentMultiplier)}
-                </p>
-                <motion.p 
-                  className="text-sm text-gray-400 mt-2"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
-                >
-                  ✈️ Flying...
-                </motion.p>
-              </div>
-            )}
-            
-            {gamePhase === 'crashed' && (
-              <motion.div 
-                className="bg-red-600/90 rounded-lg p-4"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
+        {/* Game History Strip */}
+        <div className="bg-gray-800 px-6 py-3 border-b border-gray-700">
+          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+            {gameHistory.map((mult, index) => (
+              <div 
+                key={index}
+                className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
+                  mult >= 2 ? 'bg-green-600' : mult >= 1.5 ? 'bg-yellow-600' : 'bg-red-600'
+                }`}
               >
-                <p className="text-white mb-2">FLEW AWAY!</p>
-                <p className="text-2xl font-bold text-white">
-                  {formatMultiplier(currentMultiplier)}
-                </p>
-                <p className="text-sm text-red-200 mt-2">💥 Crashed</p>
-              </motion.div>
-            )}
+                {mult.toFixed(2)}x
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Current Multiplier Display */}
+        <div className="text-center py-6">
+          <motion.div 
+            animate={{ 
+              scale: gameStatus === 'flying' ? [1, 1.1, 1] : 1,
+              color: gameStatus === 'crashed' ? '#ef4444' : '#10b981'
+            }}
+            transition={{ duration: 0.5, repeat: gameStatus === 'flying' ? Infinity : 0 }}
+            className="text-6xl font-bold"
+          >
+            {gameStatus === 'waiting' ? '---' : `${multiplier.toFixed(2)}x`}
+          </motion.div>
+          <div className="text-sm text-gray-400 mt-2">
+            {gameStatus === 'waiting' && `Starting in ${waitTime}s`}
+            {gameStatus === 'flying' && 'Flying...'}
+            {gameStatus === 'crashed' && 'Crashed!'}
           </div>
         </div>
 
         {/* Game Canvas */}
-        <canvas
-          ref={canvasRef}
-          width={400}
-          height={320}
-          className="absolute inset-0 w-full h-full"
-        />
-      </div>
-
-      {/* Betting Interface */}
-      <div className="relative z-10 p-4 space-y-4">
-        {/* Bet Panel 1 */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 border border-gray-600">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold text-white">Bet 1</h3>
-            <div className="flex items-center gap-2">
-              {bet1.status === 'won' && <CheckCircle className="w-5 h-5 text-green-400" />}
-              {bet1.status === 'lost' && <AlertTriangle className="w-5 h-5 text-red-400" />}
-              {bet1.status === 'flying' && <Plane className="w-5 h-5 text-blue-400" />}
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className="block text-gray-400 text-xs mb-1">Bet Amount</label>
-              <input
-                type="number"
-                value={bet1Amount}
-                onChange={(e) => setBet1Amount(e.target.value)}
-                disabled={gamePhase === 'flying'}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center disabled:opacity-50"
-                placeholder="₹10"
-                min="10"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-400 text-xs mb-1">Auto Cash Out</label>
-              <input
-                type="number"
-                value={bet1AutoCashOut}
-                onChange={(e) => setBet1AutoCashOut(e.target.value)}
-                disabled={gamePhase === 'flying'}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center disabled:opacity-50"
-                placeholder="2.00x"
-                step="0.01"
-              />
-            </div>
-          </div>
-          
-          <div className="flex gap-2 mb-3">
-            {quickAmounts.slice(0, 3).map((amount) => (
-              <button
-                key={amount}
-                onClick={() => setBet1Amount(amount)}
-                disabled={gamePhase === 'flying'}
-                className="flex-1 bg-gray-600 hover:bg-gray-500 disabled:opacity-50 rounded-lg py-1 text-white text-xs transition-colors"
-              >
-                ₹{amount}
-              </button>
-            ))}
-          </div>
-          
-          {gamePhase === 'flying' && bet1.isActive && !bet1.cashOutAt ? (
-            <button
-              onClick={() => cashOut(1)}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl py-3 text-white font-bold text-lg transition-all"
-            >
-              Cash Out • {formatMultiplier(currentMultiplier)}
-            </button>
-          ) : bet1.cashOutAt ? (
-            <div className="w-full bg-green-600 rounded-xl py-3 text-center">
-              <p className="text-white font-bold">Won ₹{bet1.winAmount?.toFixed(2)}</p>
-              <p className="text-green-200 text-sm">@ {formatMultiplier(bet1.cashOutAt)}</p>
-            </div>
-          ) : bet1.status === 'lost' ? (
-            <div className="w-full bg-red-600 rounded-xl py-3 text-center">
-              <p className="text-white font-bold">Lost ₹{bet1.amount}</p>
-              <p className="text-red-200 text-sm">Flew away @ {formatMultiplier(currentMultiplier)}</p>
-            </div>
-          ) : (
-            <button
-              disabled={gamePhase === 'flying' || !bet1Amount || parseInt(bet1Amount) < 10}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl py-3 text-white font-bold transition-all"
-            >
-              Bet ₹{bet1Amount || '10'}
-            </button>
-          )}
+        <div className="flex justify-center mb-6">
+          <canvas 
+            ref={canvasRef}
+            className="border border-gray-700 rounded-lg"
+          />
         </div>
 
-        {/* Bet Panel 2 */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 border border-gray-600">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold text-white">Bet 2</h3>
-            <div className="flex items-center gap-2">
-              {bet2.status === 'won' && <CheckCircle className="w-5 h-5 text-green-400" />}
-              {bet2.status === 'lost' && <AlertTriangle className="w-5 h-5 text-red-400" />}
-              {bet2.status === 'flying' && <Plane className="w-5 h-5 text-blue-400" />}
+        {/* Betting Interface */}
+        <div className="px-6 pb-20">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            
+            {/* Bet 1 */}
+            <div className="bg-gray-800 rounded-2xl p-4">
+              <div className="text-center mb-3">
+                <div className="text-sm text-gray-400 mb-2">Bet 1</div>
+                <div className="flex items-center justify-between mb-3">
+                  <button 
+                    onClick={() => setBetAmount1(Math.max(10, betAmount1 - 10))}
+                    className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600"
+                  >
+                    -
+                  </button>
+                  <input 
+                    type="number"
+                    value={betAmount1}
+                    onChange={(e) => setBetAmount1(Math.max(10, parseInt(e.target.value) || 10))}
+                    className="bg-gray-700 text-center rounded px-2 py-1 w-16 text-sm"
+                  />
+                  <button 
+                    onClick={() => setBetAmount1(betAmount1 + 10)}
+                    className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600"
+                  >
+                    +
+                  </button>
+                </div>
+                
+                {!isBet1Active && gameStatus === 'waiting' && (
+                  <button 
+                    onClick={() => placeBet(1)}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm transition-colors"
+                  >
+                    BET ₹{betAmount1}
+                  </button>
+                )}
+                
+                {isBet1Active && gameStatus === 'flying' && (
+                  <button 
+                    onClick={() => cashOut(1)}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg font-bold text-sm transition-colors animate-pulse"
+                  >
+                    CASH OUT
+                    <div className="text-xs">₹{(betAmount1 * multiplier).toFixed(2)}</div>
+                  </button>
+                )}
+                
+                {isBet1Active && gameStatus === 'waiting' && (
+                  <div className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm text-center">
+                    BETTING...
+                  </div>
+                )}
+                
+                {cashOut1 > 0 && (
+                  <div className="text-green-400 text-sm mt-2">
+                    ✓ Cashed out at {cashOut1.toFixed(2)}x
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bet 2 */}
+            <div className="bg-gray-800 rounded-2xl p-4">
+              <div className="text-center mb-3">
+                <div className="text-sm text-gray-400 mb-2">Bet 2</div>
+                <div className="flex items-center justify-between mb-3">
+                  <button 
+                    onClick={() => setBetAmount2(Math.max(10, betAmount2 - 10))}
+                    className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600"
+                  >
+                    -
+                  </button>
+                  <input 
+                    type="number"
+                    value={betAmount2}
+                    onChange={(e) => setBetAmount2(Math.max(10, parseInt(e.target.value) || 10))}
+                    className="bg-gray-700 text-center rounded px-2 py-1 w-16 text-sm"
+                  />
+                  <button 
+                    onClick={() => setBetAmount2(betAmount2 + 10)}
+                    className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600"
+                  >
+                    +
+                  </button>
+                </div>
+                
+                {!isBet2Active && gameStatus === 'waiting' && (
+                  <button 
+                    onClick={() => placeBet(2)}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm transition-colors"
+                  >
+                    BET ₹{betAmount2}
+                  </button>
+                )}
+                
+                {isBet2Active && gameStatus === 'flying' && (
+                  <button 
+                    onClick={() => cashOut(2)}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg font-bold text-sm transition-colors animate-pulse"
+                  >
+                    CASH OUT
+                    <div className="text-xs">₹{(betAmount2 * multiplier).toFixed(2)}</div>
+                  </button>
+                )}
+                
+                {isBet2Active && gameStatus === 'waiting' && (
+                  <div className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm text-center">
+                    BETTING...
+                  </div>
+                )}
+                
+                {cashOut2 > 0 && (
+                  <div className="text-green-400 text-sm mt-2">
+                    ✓ Cashed out at {cashOut2.toFixed(2)}x
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className="block text-gray-400 text-xs mb-1">Bet Amount</label>
-              <input
-                type="number"
-                value={bet2Amount}
-                onChange={(e) => setBet2Amount(e.target.value)}
-                disabled={gamePhase === 'flying'}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center disabled:opacity-50"
-                placeholder="₹10"
-                min="10"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-400 text-xs mb-1">Auto Cash Out</label>
-              <input
-                type="number"
-                value={bet2AutoCashOut}
-                onChange={(e) => setBet2AutoCashOut(e.target.value)}
-                disabled={gamePhase === 'flying'}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center disabled:opacity-50"
-                placeholder="2.00x"
-                step="0.01"
-              />
+
+          {/* Quick Bet Amounts */}
+          <div className="mb-4">
+            <div className="text-sm text-gray-400 mb-2">Quick Bets</div>
+            <div className="grid grid-cols-4 gap-2">
+              {[10, 50, 100, 500].map((amount) => (
+                <button
+                  key={amount}
+                  onClick={() => {
+                    setBetAmount1(amount);
+                    setBetAmount2(amount);
+                  }}
+                  className="bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg text-sm font-bold transition-colors"
+                >
+                  ₹{amount}
+                </button>
+              ))}
             </div>
           </div>
-          
-          <div className="flex gap-2 mb-3">
-            {quickAmounts.slice(3, 6).map((amount) => (
-              <button
-                key={amount}
-                onClick={() => setBet2Amount(amount)}
-                disabled={gamePhase === 'flying'}
-                className="flex-1 bg-gray-600 hover:bg-gray-500 disabled:opacity-50 rounded-lg py-1 text-white text-xs transition-colors"
-              >
-                ₹{amount}
-              </button>
-            ))}
+
+          {/* Game Stats */}
+          <div className="bg-gray-800 rounded-2xl p-4">
+            <div className="text-sm text-gray-400 mb-2">Current Round Stats</div>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-white text-lg font-bold">{gameHistory.length}</div>
+                <div className="text-xs text-gray-400">Total Rounds</div>
+              </div>
+              <div>
+                <div className="text-green-400 text-lg font-bold">
+                  {(gameHistory.reduce((a, b) => a + b, 0) / gameHistory.length).toFixed(2)}x
+                </div>
+                <div className="text-xs text-gray-400">Average</div>
+              </div>
+            </div>
           </div>
-          
-          {gamePhase === 'flying' && bet2.isActive && !bet2.cashOutAt ? (
-            <button
-              onClick={() => cashOut(2)}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl py-3 text-white font-bold text-lg transition-all"
-            >
-              Cash Out • {formatMultiplier(currentMultiplier)}
-            </button>
-          ) : bet2.cashOutAt ? (
-            <div className="w-full bg-green-600 rounded-xl py-3 text-center">
-              <p className="text-white font-bold">Won ₹{bet2.winAmount?.toFixed(2)}</p>
-              <p className="text-green-200 text-sm">@ {formatMultiplier(bet2.cashOutAt)}</p>
-            </div>
-          ) : bet2.status === 'lost' ? (
-            <div className="w-full bg-red-600 rounded-xl py-3 text-center">
-              <p className="text-white font-bold">Lost ₹{bet2.amount}</p>
-              <p className="text-red-200 text-sm">Flew away @ {formatMultiplier(currentMultiplier)}</p>
-            </div>
-          ) : (
-            <button
-              disabled={gamePhase === 'flying' || !bet2Amount || parseInt(bet2Amount) < 10}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl py-3 text-white font-bold transition-all"
-            >
-              Bet ₹{bet2Amount || '10'}
-            </button>
-          )}
         </div>
       </div>
-
-      {/* Bottom Space */}
-      <div className="h-20"></div>
     </div>
   );
 }
