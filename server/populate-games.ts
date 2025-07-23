@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { games, gameCategories } from "@shared/schema";
+import { users } from "@shared/schema";
 
 const gameData = [
   {

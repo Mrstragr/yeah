@@ -15,6 +15,7 @@ import realAuthRoutes from './real-auth.js';
 import realPaymentRoutes from './real-payments.js';
 import { authRoutes } from './authRoutes.js';
 import { registerProductionRoutes } from './production-routes.js';
+import { registerRealMoneyRoutes } from './realMoney-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
@@ -794,5 +795,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  return app as any; // Return app, server will be started in index.ts
+  // Register real money gaming routes
+  return await registerRealMoneyRoutes(app);
 }

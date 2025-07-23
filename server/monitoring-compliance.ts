@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from './db';
-import { users, walletTransactions, userGameHistory } from '@shared/schema';
+import { users, transactions, gameResults } from '@shared/schema';
 import { eq, gte, lte, desc, sql } from 'drizzle-orm';
 
 // Real-time monitoring service for compliance and security

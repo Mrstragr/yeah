@@ -1,1123 +1,241 @@
-import {
-  users,
-  games,
-  gameCategories,
-  userGameHistory,
-  walletTransactions,
-  kycDocuments,
-  promotions,
-  achievements,
-  userAchievements,
-  gameAnalytics,
-  playerSessions,
-  gameEvents,
-  kycPersonalDetails,
-  kycDocumentVerification,
-  type User,
-  type InsertUser,
-  type Game,
-  type InsertGame,
-  type GameCategory,
-  type InsertGameCategory,
-  type UserGameHistory,
-  type InsertUserGameHistory,
-  type Promotion,
-  type InsertPromotion,
-  type WalletTransaction,
-  type InsertWalletTransaction,
-  type KycDocument,
-  type InsertKycDocument,
-  type Achievement,
-  type InsertAchievement,
-  type UserAchievement,
-  type InsertUserAchievement,
-  type KycPersonalDetails,
-  type InsertKycPersonalDetails,
-  type KycDocumentVerification,
-  type InsertKycDocumentVerification,
-} from "@shared/schema";
-import { tashanwinGames } from "./tashanwin-games";
-import bcrypt from "bcrypt";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sql, like } from "drizzle-orm";
+import { 
+  users, 
+  transactions, 
+  gameResults, 
+  userBets, 
+  gamePeriods, 
+  kycDocuments,
+  type User, 
+  type InsertUser,
+  type Transaction,
+  type InsertTransaction,
+  type GameResult,
+  type InsertGameResult,
+  type UserBet,
+  type InsertUserBet,
+  type GamePeriod,
+  type KycDocument,
+  type InsertKycDocument
+} from "@shared/schema";
+import { eq, desc, and, sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
-// Interface for storage operations
-export interface IStorage {
-  // User methods
+interface IStorage {
+  // User management
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUserBalance(userId: number, newBalance: string): Promise<User | undefined>;
-  updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined>;
-  updateUserLastLogin(userId: number): Promise<User | undefined>;
-  updateUserPassword(phone: string, hashedPassword: string): Promise<boolean>;
-
-  // Transaction methods
-  createTransaction(transaction: any): Promise<any>;
-  getTransactionByOrderId(orderId: string): Promise<any>;
-  updateTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<any>;
-  getUserTransactions(userId: number, page: number, limit: number, type?: string): Promise<any[]>;
+  updateUserBalance(userId: number, amount: string, operation: 'add' | 'subtract'): Promise<User>;
   
-  // Wallet transaction methods
-  createWalletTransaction(transaction: any): Promise<any>;
-  getWalletTransactions(userId: number, page: number, limit: number): Promise<any[]>;
-
-  // Game methods
-  getAllGames(): Promise<Game[]>;
-  getGamesByCategory(category: string): Promise<Game[]>;
-  getGame(id: number): Promise<Game | undefined>;
-  getRecommendedGames(limit?: number): Promise<Game[]>;
-  createGame(game: InsertGame): Promise<Game>;
-
-  // Game category methods
-  getAllGameCategories(): Promise<GameCategory[]>;
-  getGameCategory(slug: string): Promise<GameCategory | undefined>;
-  createGameCategory(category: InsertGameCategory): Promise<GameCategory>;
-
-  // User game history methods
-  getUserGameHistory(userId: number): Promise<UserGameHistory[]>;
-  getTodaysTopEarners(limit?: number): Promise<(UserGameHistory & { username: string, gameTitle: string })[]>;
-  addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory>;
-
-  // Promotion methods
-  getActivePromotions(): Promise<Promotion[]>;
-  getPromotion(id: number): Promise<Promotion | undefined>;
-  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
-
-  // Wallet methods
-  getUserWalletTransactions(userId: number, limit?: number): Promise<WalletTransaction[]>;
-  createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction>;
-  updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined>;
+  // Transaction management
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
+  updateTransactionStatus(transactionId: string, status: string): Promise<Transaction | undefined>;
   
-  // KYC methods
-  getUserKycDocuments(userId: number): Promise<KycDocument[]>;
+  // Game management
+  createGameResult(gameResult: InsertGameResult): Promise<GameResult>;
+  getUserGameHistory(userId: number, gameType?: string, limit?: number): Promise<GameResult[]>;
+  
+  // Betting system
+  createUserBet(bet: InsertUserBet): Promise<UserBet>;
+  getUserActiveBets(userId: number, gameType: string): Promise<UserBet[]>;
+  getCurrentGamePeriod(gameType: string): Promise<GamePeriod | undefined>;
+  createGamePeriod(gameType: string, period: string): Promise<GamePeriod>;
+  
+  // KYC management
   createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
-  updateKycStatus(userId: number, status: string): Promise<User | undefined>;
-  
-  // Enhanced KYC methods for authentication system
-  getUserById(id: number): Promise<User | undefined>;
-  saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails>;
-  getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined>;
-  saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification>;
-  getKycDocuments(userId: number): Promise<KycDocumentVerification[]>;
-
-  // Bonus balance methods
-  updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined>;
-
-  // Achievement methods
-  getAllAchievements(): Promise<Achievement[]>;
-  getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]>;
-  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
-  unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement>;
-  updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined>;
-  checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]>;
+  getUserKycStatus(userId: number): Promise<string>;
 }
 
-export class DatabaseStorage implements IStorage {
+class DatabaseStorage implements IStorage {
+  
+  // User management
   async getUser(id: number): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user;
-    } catch (error) {
-      console.error('Error getting user:', error);
-      return undefined;
-    }
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.username, username));
-      return user;
-    } catch (error) {
-      console.error('Error getting user by username:', error);
-      return undefined;
-    }
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
-      return user;
-    } catch (error) {
-      console.error('Error getting user by email:', error);
-      return undefined;
-    }
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async getUserByPhone(phone: string): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.phone, phone));
-      return user;
-    } catch (error) {
-      console.error('Error getting user by phone:', error);
-      return undefined;
-    }
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    try {
-      const hashedPassword = await bcrypt.hash(insertUser.password, 10);
-      const [user] = await db.insert(users).values({
+    // Hash password before storing
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    
+    const [user] = await db
+      .insert(users)
+      .values({
         ...insertUser,
         password: hashedPassword,
-        referralCode: insertUser.referralCode || this.generateReferralCode(),
-      }).returning();
-      return user;
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw error;
-    }
-  }
-
-  private generateReferralCode(): string {
-    return 'P91' + Math.random().toString(36).substring(2, 8).toUpperCase();
-  }
-
-  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .update(users)
-        .set({ balance: newBalance, updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .returning();
-      return user;
-    } catch (error) {
-      console.error('Error updating user balance:', error);
-      return undefined;
-    }
-  }
-
-  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .update(users)
-        .set({ walletBalance: newBalance, updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .returning();
-      return user;
-    } catch (error) {
-      console.error('Error updating user wallet balance:', error);
-      return undefined;
-    }
-  }
-
-  async updateUserLastLogin(userId: number): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .update(users)
-        .set({ lastLoginAt: new Date(), updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .returning();
-      return user;
-    } catch (error) {
-      console.error('Error updating user last login:', error);
-      return undefined;
-    }
-  }
-
-  async updateUserPassword(phone: string, hashedPassword: string): Promise<boolean> {
-    try {
-      const result = await db
-        .update(users)
-        .set({ password: hashedPassword, updatedAt: new Date() })
-        .where(eq(users.phone, phone));
-      return result.length > 0;
-    } catch (error) {
-      console.error('Error updating user password:', error);
-      return false;
-    }
-  }
-
-  async getAllGames(): Promise<Game[]> {
-    try {
-      return await db.select().from(games).where(eq(games.isActive, true));
-    } catch (error) {
-      console.error('Error getting all games:', error);
-      return [];
-    }
-  }
-
-  async getGamesByCategory(category: string): Promise<Game[]> {
-    try {
-      return await db.select().from(games).where(
-        and(eq(games.isActive, true), eq(games.category, category))
-      );
-    } catch (error) {
-      console.error('Error getting games by category:', error);
-      return [];
-    }
-  }
-
-  async getGame(id: number): Promise<Game | undefined> {
-    try {
-      const [game] = await db.select().from(games).where(eq(games.id, id));
-      return game;
-    } catch (error) {
-      console.error('Error getting game:', error);
-      return undefined;
-    }
-  }
-
-  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
-    try {
-      return await db.select().from(games).where(eq(games.isActive, true)).limit(limit);
-    } catch (error) {
-      console.error('Error getting recommended games:', error);
-      return [];
-    }
-  }
-
-  async createGame(insertGame: InsertGame): Promise<Game> {
-    try {
-      const [game] = await db.insert(games).values(insertGame).returning();
-      return game;
-    } catch (error) {
-      console.error('Error creating game:', error);
-      throw error;
-    }
-  }
-
-  async getAllGameCategories(): Promise<GameCategory[]> {
-    try {
-      return await db.select().from(gameCategories).where(eq(gameCategories.isActive, true));
-    } catch (error) {
-      console.error('Error getting game categories:', error);
-      return [];
-    }
-  }
-
-  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
-    try {
-      const [category] = await db.select().from(gameCategories).where(eq(gameCategories.slug, slug));
-      return category;
-    } catch (error) {
-      console.error('Error getting game category:', error);
-      return undefined;
-    }
-  }
-
-  async createGameCategory(insertCategory: InsertGameCategory): Promise<GameCategory> {
-    try {
-      const [category] = await db.insert(gameCategories).values(insertCategory).returning();
-      return category;
-    } catch (error) {
-      console.error('Error creating game category:', error);
-      throw error;
-    }
-  }
-
-  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
-    try {
-      return await db.select().from(userGameHistory)
-        .where(eq(userGameHistory.userId, userId))
-        .orderBy(desc(userGameHistory.playedAt));
-    } catch (error) {
-      console.error('Error getting user game history:', error);
-      return [];
-    }
-  }
-
-  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const results = await db
-        .select({
-          id: userGameHistory.id,
-          userId: userGameHistory.userId,
-          gameId: userGameHistory.gameId,
-          betAmount: userGameHistory.betAmount,
-          winAmount: userGameHistory.winAmount,
-          playedAt: userGameHistory.playedAt,
-          username: users.username,
-          gameTitle: games.title,
-        })
-        .from(userGameHistory)
-        .innerJoin(users, eq(userGameHistory.userId, users.id))
-        .innerJoin(games, eq(userGameHistory.gameId, games.id))
-        .where(gte(userGameHistory.playedAt, today))
-        .orderBy(desc(userGameHistory.winAmount))
-        .limit(limit);
-
-      return results;
-    } catch (error) {
-      console.error('Error getting top earners:', error);
-      return [];
-    }
-  }
-
-  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
-    try {
-      const [gameHistory] = await db.insert(userGameHistory).values(history).returning();
-      return gameHistory;
-    } catch (error) {
-      console.error('Error adding game history:', error);
-      throw error;
-    }
-  }
-
-  async getActivePromotions(): Promise<Promotion[]> {
-    try {
-      const now = new Date();
-      return await db.select().from(promotions).where(
-        and(
-          eq(promotions.isActive, true),
-          lte(promotions.startDate, now),
-          gte(promotions.endDate, now)
-        )
-      );
-    } catch (error) {
-      console.error('Error getting active promotions:', error);
-      return [];
-    }
-  }
-
-  async getPromotion(id: number): Promise<Promotion | undefined> {
-    try {
-      const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
-      return promotion;
-    } catch (error) {
-      console.error('Error getting promotion:', error);
-      return undefined;
-    }
-  }
-
-  async createPromotion(insertPromotion: InsertPromotion): Promise<Promotion> {
-    try {
-      const [promotion] = await db.insert(promotions).values(insertPromotion).returning();
-      return promotion;
-    } catch (error) {
-      console.error('Error creating promotion:', error);
-      throw error;
-    }
-  }
-
-  async getUserWalletTransactions(userId: number, limit: number = 10): Promise<WalletTransaction[]> {
-    try {
-      return await db.select().from(walletTransactions)
-        .where(eq(walletTransactions.userId, userId))
-        .orderBy(desc(walletTransactions.createdAt))
-        .limit(limit);
-    } catch (error) {
-      console.error('Error getting wallet transactions:', error);
-      return [];
-    }
-  }
-
-  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
-    try {
-      const [walletTransaction] = await db.insert(walletTransactions).values(transaction).returning();
-      return walletTransaction;
-    } catch (error) {
-      console.error('Error creating wallet transaction:', error);
-      throw error;
-    }
-  }
-
-  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
-    try {
-      const updateData: any = { status, updatedAt: new Date() };
-      if (paymentId) updateData.razorpayPaymentId = paymentId;
-      
-      const [transaction] = await db
-        .update(walletTransactions)
-        .set(updateData)
-        .where(eq(walletTransactions.id, transactionId))
-        .returning();
-      return transaction;
-    } catch (error) {
-      console.error('Error updating wallet transaction status:', error);
-      return undefined;
-    }
-  }
-
-  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
-    try {
-      return await db.select().from(kycDocuments)
-        .where(eq(kycDocuments.userId, userId))
-        .orderBy(desc(kycDocuments.createdAt));
-    } catch (error) {
-      console.error('Error getting KYC documents:', error);
-      return [];
-    }
-  }
-
-  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
-    try {
-      const [kycDoc] = await db.insert(kycDocuments).values(document).returning();
-      return kycDoc;
-    } catch (error) {
-      console.error('Error creating KYC document:', error);
-      throw error;
-    }
-  }
-
-  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .update(users)
-        .set({ kycStatus: status, updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .returning();
-      return user;
-    } catch (error) {
-      console.error('Error updating KYC status:', error);
-      return undefined;
-    }
-  }
-
-  async updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .update(users)
-        .set({ bonusBalance: newBalance, updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .returning();
-      return user;
-    } catch (error) {
-      console.error('Error updating user bonus balance:', error);
-      return undefined;
-    }
-  }
-
-  async getAllAchievements(): Promise<Achievement[]> {
-    try {
-      return await db.select().from(achievements).where(eq(achievements.isActive, true));
-    } catch (error) {
-      console.error('Error getting achievements:', error);
-      return [];
-    }
-  }
-
-  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
-    try {
-      const results = await db
-        .select()
-        .from(userAchievements)
-        .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
-        .where(eq(userAchievements.userId, userId));
-      
-      return results.map(result => ({
-        ...result.user_achievements,
-        achievement: result.achievements
-      }));
-    } catch (error) {
-      console.error('Error getting user achievements:', error);
-      return [];
-    }
-  }
-
-  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
-    try {
-      const [newAchievement] = await db.insert(achievements).values(achievement).returning();
-      return newAchievement;
-    } catch (error) {
-      console.error('Error creating achievement:', error);
-      throw error;
-    }
-  }
-
-  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
-    try {
-      const [userAchievement] = await db.insert(userAchievements).values({
-        userId,
-        achievementId,
-        isCompleted: true,
-        progress: 100
-      }).returning();
-      return userAchievement;
-    } catch (error) {
-      console.error('Error unlocking achievement:', error);
-      throw error;
-    }
-  }
-
-  async updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
-    try {
-      const [userAchievement] = await db
-        .update(userAchievements)
-        .set({ progress, isCompleted: progress >= 100 })
-        .where(and(
-          eq(userAchievements.userId, userId),
-          eq(userAchievements.achievementId, achievementId)
-        ))
-        .returning();
-      return userAchievement;
-    } catch (error) {
-      console.error('Error updating achievement progress:', error);
-      return undefined;
-    }
-  }
-
-  async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
-    // Implementation for achievement checking logic
-    return [];
-  }
-
-  // Enhanced KYC methods for authentication system
-  async getUserById(id: number): Promise<User | undefined> {
-    return this.getUser(id);
-  }
-
-  async saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails> {
-    try {
-      // Check if personal details already exist
-      const existing = await this.getKycPersonalDetails(details.userId);
-      if (existing) {
-        // Update existing record
-        const [updated] = await db
-          .update(kycPersonalDetails)
-          .set({ ...details, updatedAt: new Date() })
-          .where(eq(kycPersonalDetails.userId, details.userId))
-          .returning();
-        return updated;
-      } else {
-        // Create new record
-        const [personalDetail] = await db.insert(kycPersonalDetails).values(details).returning();
-        return personalDetail;
-      }
-    } catch (error) {
-      console.error('Error saving KYC personal details:', error);
-      throw error;
-    }
-  }
-
-  async getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined> {
-    try {
-      const [details] = await db.select().from(kycPersonalDetails)
-        .where(eq(kycPersonalDetails.userId, userId));
-      return details;
-    } catch (error) {
-      console.error('Error getting KYC personal details:', error);
-      return undefined;
-    }
-  }
-
-  async saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification> {
-    try {
-      const [document] = await db.insert(kycDocumentVerification).values(verification).returning();
-      return document;
-    } catch (error) {
-      console.error('Error saving KYC document verification:', error);
-      throw error;
-    }
-  }
-
-  async getKycDocuments(userId: number): Promise<KycDocumentVerification[]> {
-    try {
-      return await db.select().from(kycDocumentVerification)
-        .where(eq(kycDocumentVerification.userId, userId))
-        .orderBy(desc(kycDocumentVerification.createdAt));
-    } catch (error) {
-      console.error('Error getting KYC documents:', error);
-      return [];
-    }
-  }
-}
-
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private games: Map<number, Game>;
-  private gameCategories: Map<number, GameCategory>;
-  private userGameHistory: Map<number, UserGameHistory>;
-  private promotions: Map<number, Promotion>;
-  private walletTransactions: Map<number, WalletTransaction>;
-  private kycDocuments: Map<number, KycDocument>;
-  private achievements: Map<number, Achievement>;
-  private userAchievements: Map<number, UserAchievement>;
-  private transactions: Map<number, any>;
-  private walletHistory: Map<number, any>;
-  private currentUserId: number;
-  private currentGameId: number;
-  private currentCategoryId: number;
-  private currentHistoryId: number;
-  private currentPromotionId: number;
-  private currentTransactionId: number;
-  private currentKycDocumentId: number;
-  private currentAchievementId: number;
-  private currentUserAchievementId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.games = new Map();
-    this.gameCategories = new Map();
-    this.userGameHistory = new Map();
-    this.promotions = new Map();
-    this.walletTransactions = new Map();
-    this.kycDocuments = new Map();
-    this.achievements = new Map();
-    this.userAchievements = new Map();
-    this.transactions = new Map();
-    this.walletHistory = new Map();
-    this.currentUserId = 1;
-    this.currentGameId = 1;
-    this.currentCategoryId = 1;
-    this.currentHistoryId = 1;
-    this.currentPromotionId = 1;
-    this.currentTransactionId = 1;
-    this.currentKycDocumentId = 1;
-    this.currentAchievementId = 1;
-    this.currentUserAchievementId = 1;
-    
-    this.initializeData();
-  }
-
-  private initializeData() {
-    // Initialize categories with TashanWin structure
-    const categories: InsertGameCategory[] = [
-      { name: "Lobby", slug: "lobby", description: "Main Hub", icon: "fas fa-home", color: "from-gaming-gold to-gaming-amber" },
-      { name: "Lottery", slug: "lottery", description: "Lucky Numbers", icon: "fas fa-ticket-alt", color: "from-emerald-500 to-green-600" },
-      { name: "Popular", slug: "popular", description: "Trending", icon: "fas fa-fire", color: "from-red-500 to-pink-600" },
-      { name: "Mini Games", slug: "minigames", description: "Quick Play", icon: "fas fa-puzzle-piece", color: "from-purple-500 to-indigo-600" },
-      { name: "Casino", slug: "casino", description: "Table Games", icon: "fas fa-dice", color: "from-gaming-gold to-yellow-600" },
-      { name: "Slots", slug: "slots", description: "Spin & Win", icon: "fas fa-coins", color: "from-blue-500 to-cyan-600" },
-      { name: "Sports", slug: "sports", description: "Live Betting", icon: "fas fa-football-ball", color: "from-orange-500 to-red-600" },
-      { name: "PVC", slug: "pvc", description: "Premium Live Casino", icon: "fas fa-video", color: "from-pink-500 to-purple-600" },
-      { name: "Rummy", slug: "rummy", description: "Card Games", icon: "fas fa-layer-group", color: "from-teal-500 to-green-600" },
-      { name: "Fishing", slug: "fishing", description: "Arcade", icon: "fas fa-fish", color: "from-cyan-500 to-blue-600" },
-      { name: "Crash", slug: "crash", description: "Multiplier Games", icon: "fas fa-plane", color: "from-red-500 to-orange-600" },
-    ];
-
-    categories.forEach(category => this.createGameCategory(category));
-
-    // Initialize authentic TashanWin games
-    const initialGames: InsertGame[] = tashanwinGames;
-    initialGames.forEach(game => this.createGame(game));
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    // Create demo user if requested
-    if (id === 10 && !this.users.has(10)) {
-      const demoUser: User = {
-        id: 10,
-        username: 'demo',
-        email: 'demo@91club.com',
-        password: 'demo123',
-        phone: '9876543210',
-        firstName: 'Demo',
-        lastName: 'User',
-        balance: '0.00',
-        walletBalance: '10000.00',
-        bonusBalance: '500.00',
-        kycStatus: 'verified',
-        avatar: null,
-        referralCode: 'DEMO91',
-        referredBy: null,
-        vipLevel: 1,
-        totalDeposit: '0.00',
-        totalWithdraw: '0.00',
-        totalBet: '0.00',
-        totalWin: '0.00',
-        loginBonus: true,
-        lastLoginAt: new Date(),
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      this.users.set(10, demoUser);
-      return demoUser;
-    }
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    for (const user of Array.from(this.users.values())) {
-      if (user.username === username) return user;
-    }
-    return undefined;
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    for (const user of Array.from(this.users.values())) {
-      if (user.email === email) return user;
-    }
-    return undefined;
-  }
-
-  async getUserByPhone(phone: string): Promise<User | undefined> {
-    for (const user of Array.from(this.users.values())) {
-      if (user.phone === phone) return user;
-    }
-    return undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const user: User = {
-      id: this.currentUserId++,
-      username: insertUser.username,
-      email: insertUser.email,
-      password: insertUser.password,
-      phone: insertUser.phone,
-      firstName: insertUser.firstName ?? null,
-      lastName: insertUser.lastName ?? null,
-      balance: insertUser.balance || "0.00",
-      walletBalance: insertUser.walletBalance || "0.00",
-      bonusBalance: insertUser.bonusBalance || "0.00",
-      kycStatus: insertUser.kycStatus || "pending",
-      avatar: insertUser.avatar || null,
-      referralCode: insertUser.referralCode || null,
-      referredBy: insertUser.referredBy || null,
-      vipLevel: insertUser.vipLevel || 0,
-      totalDeposit: insertUser.totalDeposit || "0.00",
-      totalWithdraw: insertUser.totalWithdraw || "0.00",
-      totalBet: insertUser.totalBet || "0.00",
-      totalWin: insertUser.totalWin || "0.00",
-      loginBonus: insertUser.loginBonus || false,
-      lastLoginAt: insertUser.lastLoginAt || null,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.users.set(user.id, user);
+        referralCode: this.generateReferralCode(),
+      })
+      .returning();
     return user;
   }
 
-  async updateUserBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.balance = newBalance;
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-      return user;
+  async updateUserBalance(userId: number, amount: string, operation: 'add' | 'subtract'): Promise<User> {
+    const query = operation === 'add' 
+      ? sql`${users.balance} + ${amount}`
+      : sql`${users.balance} - ${amount}`;
+      
+    const [user] = await db
+      .update(users)
+      .set({ 
+        balance: query,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Transaction management
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const [newTransaction] = await db
+      .insert(transactions)
+      .values({
+        ...transaction,
+        transactionId: this.generateTransactionId(),
+      })
+      .returning();
+    return newTransaction;
+  }
+
+  async getUserTransactions(userId: number, limit: number = 50): Promise<Transaction[]> {
+    return await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.createdAt))
+      .limit(limit);
+  }
+
+  async updateTransactionStatus(transactionId: string, status: string): Promise<Transaction | undefined> {
+    const [transaction] = await db
+      .update(transactions)
+      .set({ 
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(transactions.transactionId, transactionId))
+      .returning();
+    return transaction || undefined;
+  }
+
+  // Game management
+  async createGameResult(gameResult: InsertGameResult): Promise<GameResult> {
+    const [result] = await db
+      .insert(gameResults)
+      .values(gameResult)
+      .returning();
+    return result;
+  }
+
+  async getUserGameHistory(userId: number, gameType?: string, limit: number = 50): Promise<GameResult[]> {
+    let query = db
+      .select()
+      .from(gameResults)
+      .where(eq(gameResults.userId, userId))
+      .orderBy(desc(gameResults.createdAt))
+      .limit(limit);
+
+    if (gameType) {
+      query = query.where(and(
+        eq(gameResults.userId, userId),
+        eq(gameResults.gameType, gameType)
+      ));
     }
-    return undefined;
+
+    return await query;
   }
 
-  async updateUserWalletBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.walletBalance = newBalance;
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-      return user;
-    }
-    return undefined;
+  // Betting system
+  async createUserBet(bet: InsertUserBet): Promise<UserBet> {
+    const [newBet] = await db
+      .insert(userBets)
+      .values(bet)
+      .returning();
+    return newBet;
   }
 
-  async updateUserLastLogin(userId: number): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.lastLoginAt = new Date();
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-      return user;
-    }
-    return undefined;
+  async getUserActiveBets(userId: number, gameType: string): Promise<UserBet[]> {
+    return await db
+      .select()
+      .from(userBets)
+      .where(and(
+        eq(userBets.userId, userId),
+        eq(userBets.gameType, gameType),
+        eq(userBets.status, 'active')
+      ));
   }
 
-  async updateUserPassword(phone: string, hashedPassword: string): Promise<boolean> {
-    for (const [id, user] of this.users.entries()) {
-      if (user.phone === phone) {
-        user.password = hashedPassword;
-        user.updatedAt = new Date();
-        this.users.set(id, user);
-        return true;
-      }
-    }
-    return false;
+  async getCurrentGamePeriod(gameType: string): Promise<GamePeriod | undefined> {
+    const [period] = await db
+      .select()
+      .from(gamePeriods)
+      .where(and(
+        eq(gamePeriods.gameType, gameType),
+        eq(gamePeriods.status, 'active')
+      ))
+      .orderBy(desc(gamePeriods.startTime))
+      .limit(1);
+    return period || undefined;
   }
 
-  async getAllGames(): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(game => game.isActive);
+  async createGamePeriod(gameType: string, period: string): Promise<GamePeriod> {
+    const [newPeriod] = await db
+      .insert(gamePeriods)
+      .values({
+        gameType,
+        period,
+        status: 'active',
+      })
+      .returning();
+    return newPeriod;
   }
 
-  async getGamesByCategory(category: string): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(
-      game => game.isActive && game.category === category
-    );
-  }
-
-  async getGame(id: number): Promise<Game | undefined> {
-    return this.games.get(id);
-  }
-
-  async getRecommendedGames(limit: number = 4): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(game => game.isActive).slice(0, limit);
-  }
-
-  async createGame(insertGame: InsertGame): Promise<Game> {
-    const game: Game = {
-      id: this.currentGameId++,
-      isActive: true,
-      jackpot: "0.00",
-      ...insertGame,
-    };
-    this.games.set(game.id, game);
-    return game;
-  }
-
-  async getAllGameCategories(): Promise<GameCategory[]> {
-    return Array.from(this.gameCategories.values()).filter(cat => cat.isActive);
-  }
-
-  async getGameCategory(slug: string): Promise<GameCategory | undefined> {
-    for (const category of Array.from(this.gameCategories.values())) {
-      if (category.slug === slug) return category;
-    }
-    return undefined;
-  }
-
-  async createGameCategory(insertCategory: InsertGameCategory): Promise<GameCategory> {
-    const category: GameCategory = {
-      id: this.currentCategoryId++,
-      isActive: true,
-      ...insertCategory,
-    };
-    this.gameCategories.set(category.id, category);
-    return category;
-  }
-
-  async getUserGameHistory(userId: number): Promise<UserGameHistory[]> {
-    return Array.from(this.userGameHistory.values()).filter(h => h.userId === userId);
-  }
-
-  async getTodaysTopEarners(limit: number = 3): Promise<(UserGameHistory & { username: string, gameTitle: string })[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const todaysHistory = Array.from(this.userGameHistory.values())
-      .filter(h => h.playedAt >= today && parseFloat(h.winAmount) > 0)
-      .sort((a, b) => parseFloat(b.winAmount) - parseFloat(a.winAmount))
-      .slice(0, limit);
-
-    return todaysHistory.map(history => {
-      const user = this.users.get(history.userId);
-      const game = this.games.get(history.gameId);
-      return {
-        ...history,
-        username: user?.username || 'Unknown',
-        gameTitle: game?.title || 'Unknown Game'
-      };
-    });
-  }
-
-  async addGameHistory(history: InsertUserGameHistory): Promise<UserGameHistory> {
-    const gameHistory: UserGameHistory = {
-      id: this.currentHistoryId++,
-      playedAt: new Date(),
-      ...history,
-    };
-    this.userGameHistory.set(gameHistory.id, gameHistory);
-    return gameHistory;
-  }
-
-  async getActivePromotions(): Promise<Promotion[]> {
-    const now = new Date();
-    return Array.from(this.promotions.values()).filter(p => 
-      p.isActive && p.startDate <= now && p.endDate >= now
-    );
-  }
-
-  async getPromotion(id: number): Promise<Promotion | undefined> {
-    return this.promotions.get(id);
-  }
-
-  async createPromotion(insertPromotion: InsertPromotion): Promise<Promotion> {
-    const promotion: Promotion = {
-      id: this.currentPromotionId++,
-      ...insertPromotion,
-    };
-    this.promotions.set(promotion.id, promotion);
-    return promotion;
-  }
-
-  async getUserWalletTransactions(userId: number, limit: number = 10): Promise<WalletTransaction[]> {
-    return Array.from(this.walletTransactions.values())
-      .filter(t => t.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, limit);
-  }
-
-  async createWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
-    const walletTransaction: WalletTransaction = {
-      id: this.currentTransactionId++,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ...transaction,
-    };
-    this.walletTransactions.set(walletTransaction.id, walletTransaction);
-    return walletTransaction;
-  }
-
-  async updateWalletTransactionStatus(transactionId: number, status: string, paymentId?: string): Promise<WalletTransaction | undefined> {
-    const transaction = this.walletTransactions.get(transactionId);
-    if (transaction) {
-      transaction.status = status;
-      transaction.updatedAt = new Date();
-      if (paymentId) transaction.razorpayPaymentId = paymentId;
-      this.walletTransactions.set(transactionId, transaction);
-      return transaction;
-    }
-    return undefined;
-  }
-
-  async getUserKycDocuments(userId: number): Promise<KycDocument[]> {
-    return Array.from(this.kycDocuments.values())
-      .filter(doc => doc.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
+  // KYC management
   async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
-    const kycDoc: KycDocument = {
-      id: this.currentKycDocumentId++,
-      createdAt: new Date(),
-      verifiedAt: null,
-      rejectionReason: null,
-      ...document,
-    };
-    this.kycDocuments.set(kycDoc.id, kycDoc);
-    return kycDoc;
+    const [newDocument] = await db
+      .insert(kycDocuments)
+      .values(document)
+      .returning();
+    return newDocument;
   }
 
-  async updateKycStatus(userId: number, status: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.kycStatus = status;
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-      return user;
-    }
-    return undefined;
-  }
-
-  async updateUserBonusBalance(userId: number, newBalance: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.bonusBalance = newBalance;
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-      return user;
-    }
-    return undefined;
-  }
-
-  async getAllAchievements(): Promise<Achievement[]> {
-    return Array.from(this.achievements.values());
-  }
-
-  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
-    const userAchievements = Array.from(this.userAchievements.values())
-      .filter(ua => ua.userId === userId);
+  async getUserKycStatus(userId: number): Promise<string> {
+    const documents = await db
+      .select()
+      .from(kycDocuments)
+      .where(eq(kycDocuments.userId, userId));
     
-    return userAchievements.map(ua => {
-      const achievement = this.achievements.get(ua.achievementId);
-      return { ...ua, achievement: achievement! };
-    });
-  }
-
-  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
-    const achievement: Achievement = {
-      id: this.currentAchievementId++,
-      createdAt: new Date(),
-      isActive: true,
-      ...insertAchievement,
-    };
-    this.achievements.set(achievement.id, achievement);
-    return achievement;
-  }
-
-  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
-    const userAchievement: UserAchievement = {
-      id: this.currentUserAchievementId++,
-      userId,
-      achievementId,
-      unlockedAt: new Date(),
-      progress: 100,
-      isCompleted: true,
-    };
-    this.userAchievements.set(userAchievement.id, userAchievement);
-    return userAchievement;
-  }
-
-  async updateAchievementProgress(userId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
-    const existingUA = Array.from(this.userAchievements.values())
-      .find(ua => ua.userId === userId && ua.achievementId === achievementId);
+    if (documents.length === 0) return 'pending';
     
-    if (existingUA) {
-      existingUA.progress = progress;
-      if (progress >= 100) {
-        existingUA.isCompleted = true;
-      }
-      this.userAchievements.set(existingUA.id, existingUA);
-      return existingUA;
-    }
-    return undefined;
+    const hasApproved = documents.some(doc => doc.status === 'approved');
+    const hasRejected = documents.some(doc => doc.status === 'rejected');
+    
+    if (hasApproved) return 'approved';
+    if (hasRejected) return 'rejected';
+    return 'pending';
   }
 
-  async checkAndUnlockAchievements(userId: number, action: string, value?: any): Promise<UserAchievement[]> {
-    return [];
+  // Helper methods
+  private generateReferralCode(): string {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
-  // Enhanced KYC methods for authentication system
-  async getUserById(id: number): Promise<User | undefined> {
-    return this.getUser(id);
-  }
-
-  async saveKycPersonalDetails(details: InsertKycPersonalDetails): Promise<KycPersonalDetails> {
-    const personalDetail: KycPersonalDetails = {
-      id: this.currentKycDocumentId++,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ...details,
-    };
-    return personalDetail;
-  }
-
-  async getKycPersonalDetails(userId: number): Promise<KycPersonalDetails | undefined> {
-    // Mock implementation for memory storage
-    return undefined;
-  }
-
-  async saveKycDocumentVerification(verification: InsertKycDocumentVerification): Promise<KycDocumentVerification> {
-    const document: KycDocumentVerification = {
-      id: this.currentKycDocumentId++,
-      status: 'pending',
-      verificationData: null,
-      rejectionReason: null,
-      createdAt: new Date(),
-      verifiedAt: null,
-      ...verification,
-    };
-    return document;
-  }
-
-  async getKycDocuments(userId: number): Promise<KycDocumentVerification[]> {
-    // Mock implementation for memory storage
-    return [];
+  private generateTransactionId(): string {
+    return 'TXN' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 }
 
-// Use memory storage for development to avoid database issues
-const useMemoryStorage = true; // Always use memory storage for stability
-// Add recordTransaction method to interface
-export interface IStorage {
-  // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(insertUser: InsertUser): Promise<User>;
-  updateUserBalance(userId: number, newBalance: number): Promise<void>;
-  recordTransaction(userId: number, type: string, amount: number, description: string): Promise<void>;
-  
-  // Game operations
-  getAllGames(): Promise<Game[]>;
-  getGamesByCategory(category: string): Promise<Game[]>;
-  getGameHistory(userId: number, limit?: number): Promise<GamePlay[]>;
-  recordGamePlay(gamePlay: InsertGamePlay): Promise<GamePlay>;
-  
-  // Activity operations
-  getAllActivities(): Promise<Activity[]>;
-  getActivitiesByUser(userId: number): Promise<Activity[]>;
-  createActivity(activity: InsertActivity): Promise<Activity>;
-}
-
-// Add recordTransaction to MemStorage
-MemStorage.prototype.recordTransaction = async function(userId: number, type: string, amount: number, description: string): Promise<void> {
-  console.log(`Transaction recorded: User ${userId}, ${type}, ₹${amount}, ${description}`);
-};
-
-export const storage = new MemStorage();
-console.log('Using Memory storage for stability');
+export const storage = new DatabaseStorage();

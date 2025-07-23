@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from './db';
-import { users, kycPersonalDetails, kycDocumentVerification } from '@shared/schema';
+import { users, kycDocuments } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import crypto from 'crypto';
 import fs from 'fs/promises';

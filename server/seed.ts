@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, games, gameCategories, userGameHistory, promotions } from "@shared/schema";
-import type { InsertUser, InsertGame, InsertGameCategory, InsertUserGameHistory, InsertPromotion } from "@shared/schema";
+import type { InsertUser } from "@shared/schema";
 
 async function seedDatabase() {
   try {

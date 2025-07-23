@@ -2,7 +2,7 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { db } from './db';
-import { users, walletTransactions } from '@shared/schema';
+import { users, transactions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { ComplianceService } from './security-enhanced';
 

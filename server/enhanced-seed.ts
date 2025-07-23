@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { games, gameCategories, achievements, promotions, gameMetrics, users } from "@shared/schema";
+import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 const allGames = [

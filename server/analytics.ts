@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { gameAnalytics, playerSessions, gameEvents, users, games } from "@shared/schema";
+import { users, gameResults } from "@shared/schema";
 import { eq, sql, desc, and, gte, lte } from "drizzle-orm";
 
 export class AnalyticsService {
