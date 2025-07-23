@@ -438,6 +438,202 @@ export async function registerRealMoneyRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mines game endpoints
+  app.post('/api/games/mines/bet', authenticateToken, async (req, res) => {
+    try {
+      const { amount, mines } = req.body;
+      const userId = req.user.userId;
+
+      // Validate bet amount
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: 'Invalid bet amount' });
+      }
+
+      // Check user balance
+      const user = await storage.getUser(userId);
+      if (!user || parseFloat(user.balance || '0') < amount) {
+        return res.status(400).json({ message: 'Insufficient balance' });
+      }
+
+      // Deduct bet amount
+      await storage.updateUserBalance(userId, amount.toString(), 'subtract');
+
+      // Record bet using storage interface
+      await storage.createUserBet({
+        userId,
+        gameType: 'mines',
+        betAmount: amount.toString(),
+        betType: 'mines',
+        betValue: mines.toString(),
+        multiplier: '1.0',
+        status: 'pending'
+      });
+
+      res.json({ success: true, message: 'Bet placed successfully' });
+    } catch (error) {
+      console.error('Mines bet error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/games/mines/cashout', authenticateToken, async (req, res) => {
+    try {
+      const { amount, gems, multiplier } = req.body;
+      const userId = req.user.userId;
+
+      // Add winnings to balance
+      await db.update(users)
+        .set({ balance: sql`balance + ${amount}` })
+        .where(eq(users.id, userId));
+
+      // Record win using storage interface
+      await storage.createGameResult({
+        userId,
+        gameType: 'mines',
+        betAmount: (amount / multiplier).toString(),
+        winAmount: amount.toString(),
+        result: JSON.stringify({ gems, multiplier })
+      });
+
+      res.json({ success: true, winAmount: amount });
+    } catch (error) {
+      console.error('Mines cashout error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Dragon Tiger game endpoints
+  app.post('/api/games/dragon-tiger/bet', authenticateToken, async (req, res) => {
+    try {
+      const { type, amount, roundId } = req.body;
+      const userId = req.user.userId;
+
+      // Validate bet
+      if (!amount || amount <= 0 || !['dragon', 'tiger', 'tie'].includes(type)) {
+        return res.status(400).json({ message: 'Invalid bet' });
+      }
+
+      // Check user balance
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!user.length || user[0].balance < amount) {
+        return res.status(400).json({ message: 'Insufficient balance' });      
+      }
+
+      // Deduct bet amount
+      await db.update(users)
+        .set({ balance: sql`balance - ${amount}` })
+        .where(eq(users.id, userId));
+
+      // Record bet using storage interface
+      await storage.createUserBet({
+        userId,
+        gameType: 'dragon-tiger',
+        betAmount: amount.toString(),
+        betType: type,
+        betValue: roundId || '',
+        multiplier: type === 'tie' ? '8.0' : '1.95',
+        status: 'pending'
+      });
+
+      res.json({ success: true, message: 'Bet placed successfully' });
+    } catch (error) {
+      console.error('Dragon Tiger bet error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/games/dragon-tiger/win', authenticateToken, async (req, res) => {
+    try {
+      const { amount, result, roundId } = req.body;
+      const userId = req.user.userId;
+
+      // Add winnings to balance
+      await db.update(users)
+        .set({ balance: sql`balance + ${amount}` })
+        .where(eq(users.id, userId));
+
+      // Record win using storage interface
+      await storage.createGameResult({
+        userId,
+        gameType: 'dragon-tiger',
+        betAmount: (result === 'tie' ? amount / 8 : amount / 1.95).toString(),
+        winAmount: amount.toString(),
+        result: JSON.stringify({ winner: result, roundId })
+      });
+
+      res.json({ success: true, winAmount: amount });
+    } catch (error) {
+      console.error('Dragon Tiger win error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Teen Patti game endpoints
+  app.post('/api/games/teen-patti/bet', authenticateToken, async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const userId = req.user.userId;
+
+      // Validate bet amount
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: 'Invalid bet amount' });
+      }
+
+      // Check user balance
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!user.length || user[0].balance < amount) {
+        return res.status(400).json({ message: 'Insufficient balance' });
+      }
+
+      // Deduct bet amount
+      await db.update(users)
+        .set({ balance: sql`balance - ${amount}` })
+        .where(eq(users.id, userId));
+
+      // Record bet using storage interface
+      await storage.createUserBet({
+        userId,
+        gameType: 'teen-patti',
+        betAmount: amount.toString(),
+        betType: 'player',
+        betValue: 'vs-dealer',
+        multiplier: '1.9',
+        status: 'pending'
+      });
+
+      res.json({ success: true, message: 'Bet placed successfully' });
+    } catch (error) {
+      console.error('Teen Patti bet error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/games/teen-patti/win', authenticateToken, async (req, res) => {
+    try {
+      const { amount, result } = req.body;
+      const userId = req.user.userId;
+
+      // Add winnings to balance
+      await db.update(users)
+        .set({ balance: sql`balance + ${amount}` })
+        .where(eq(users.id, userId));
+
+      // Record win using storage interface
+      await storage.createGameResult({
+        userId,
+        gameType: 'teen-patti',
+        betAmount: (result === 'tie' ? amount : amount / 1.9).toString(),
+        winAmount: amount.toString(),
+        result: JSON.stringify({ winner: result })
+      });
+
+      res.json({ success: true, winAmount: amount });
+    } catch (error) {
+      console.error('Teen Patti win error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
