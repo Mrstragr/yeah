@@ -10,6 +10,7 @@ import RealMoneyWinGo from './RealMoneyWinGo';
 import RealMoneyMines from './RealMoneyMines';
 import RealMoneyDragonTiger from './RealMoneyDragonTiger';
 import RealMoneyTeenPatti from './RealMoneyTeenPatti';
+import AuthenticationSystem from './AuthenticationSystem';
 
 interface User {
   id: number;

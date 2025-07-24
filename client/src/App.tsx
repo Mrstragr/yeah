@@ -4,7 +4,7 @@ import ExactIndian91Club from './components/ExactIndian91Club';
 import Perfect91ClubReplica from './components/Perfect91ClubReplica';
 import MarketReady91Club from './components/MarketReady91Club';
 import QuickGameLauncher from './components/QuickGameLauncher';
-import ProductionLoginPage from './components/ProductionLoginPage';
+import AuthenticationSystem from './components/AuthenticationSystem';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -32,22 +32,6 @@ export default function App() {
         localStorage.removeItem('91club_user');
         localStorage.removeItem('91club_token');
       }
-    } else {
-      // Create demo user for easier game access
-      const demoUser = {
-        id: 1,
-        username: 'Demo Player',
-        phone: '9876543210',
-        email: 'demo@example.com',
-        walletBalance: '10000',
-        isVerified: true
-      };
-      const demoToken = `demo_token_${Date.now()}`;
-      
-      localStorage.setItem('91club_user', JSON.stringify(demoUser));
-      localStorage.setItem('91club_token', demoToken);
-      setUser(demoUser);
-      setIsAuthenticated(true);
     }
 
     // Test API connectivity
@@ -109,7 +93,7 @@ export default function App() {
       {isAuthenticated ? (
         <MarketReady91Club user={user} onLogout={handleLogout} />
       ) : (
-        <ProductionLoginPage onLoginSuccess={handleLogin} />
+        <AuthenticationSystem onSuccess={handleLogin} />
       )}
       <Toaster />
     </QueryClientProvider>
