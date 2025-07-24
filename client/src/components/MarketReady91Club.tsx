@@ -11,6 +11,12 @@ import RealMoneyMines from './RealMoneyMines';
 import RealMoneyDragonTiger from './RealMoneyDragonTiger';
 import RealMoneyTeenPatti from './RealMoneyTeenPatti';
 import AuthenticationSystem from './AuthenticationSystem';
+import RealMoneyRoulette from './RealMoneyRoulette';
+import RealMoneyBaccarat from './RealMoneyBaccarat';
+import RealMoneyAndarBahar from './RealMoneyAndarBahar';
+import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
+import EnhancedWalletSystem from './EnhancedWalletSystem';
+import SocialFeaturesSystem from './SocialFeaturesSystem';
 
 interface User {
   id: number;
@@ -43,7 +49,15 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
   };
 
   if (currentTab === 'wallet') {
-    return <RealWalletSystem />;
+    return <EnhancedWalletSystem onBack={() => setCurrentTab('home')} />;
+  }
+
+  if (currentTab === 'activity') {
+    return <ComprehensiveTournamentSystem onBack={() => setCurrentTab('home')} />;
+  }
+
+  if (currentTab === 'community') {
+    return <SocialFeaturesSystem onBack={() => setCurrentTab('home')} />;
   }
 
   if (currentGame === 'real-wingo') {
@@ -60,6 +74,18 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
 
   if (currentGame === 'real-teen-patti') {
     return <RealMoneyTeenPatti onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'real-roulette') {
+    return <RealMoneyRoulette onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'real-baccarat') {
+    return <RealMoneyBaccarat onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'real-andarbahar') {
+    return <RealMoneyAndarBahar onBack={() => setCurrentGame(null)} />;
   }
 
   if (currentGame === 'wingo') {
@@ -528,6 +554,135 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
                   <div className="text-xs">
                     <div className="text-yellow-300 font-bold">🃏 3 Cards</div>
                     <div className="text-green-300 font-bold">🎯 Classic Game</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
+                    <div className="text-green-300 text-xs font-bold flex items-center">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                      HOT
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Real Money Roulette Game */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('real-roulette')}
+              className="relative bg-gradient-to-br from-red-600 via-orange-600 to-yellow-700 rounded-3xl overflow-hidden shadow-2xl group h-40"
+            >
+              <div className="absolute inset-0">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+              </div>
+              
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-gradient-to-r from-yellow-500 to-red-600 text-white text-xs px-2 py-1 rounded-full font-black shadow-lg border border-white/30">
+                  🎰 CASINO
+                </div>
+              </div>
+              
+              <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-yellow-400 to-red-500 rounded-2xl flex items-center justify-center shadow-lg rotate-12 group-hover:rotate-6 transition-transform">
+                <span className="text-2xl">🎯</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                <div className="mb-3">
+                  <div className="text-white text-xl font-black mb-1">ROULETTE</div>
+                  <div className="text-orange-100 text-sm font-semibold">European Style</div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <div className="text-yellow-300 font-bold">🎰 36x Payout</div>
+                    <div className="text-green-300 font-bold">⚡ Live Wheel</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
+                    <div className="text-green-300 text-xs font-bold flex items-center">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                      LIVE
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Real Money Baccarat Game */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('real-baccarat')}
+              className="relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 rounded-3xl overflow-hidden shadow-2xl group h-40"
+            >
+              <div className="absolute inset-0">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+              </div>
+              
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full font-black shadow-lg border border-white/30">
+                  🃏 CARDS
+                </div>
+              </div>
+              
+              <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg rotate-12 group-hover:rotate-6 transition-transform">
+                <span className="text-2xl">♠️</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                <div className="mb-3">
+                  <div className="text-white text-xl font-black mb-1">BACCARAT</div>
+                  <div className="text-emerald-100 text-sm font-semibold">Player vs Banker</div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <div className="text-yellow-300 font-bold">🎯 9:1 Tie</div>
+                    <div className="text-green-300 font-bold">⚡ Fast Deals</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
+                    <div className="text-green-300 text-xs font-bold flex items-center">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                      LIVE
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Real Money Andar Bahar Game */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('real-andarbahar')}
+              className="relative bg-gradient-to-br from-orange-600 via-red-600 to-pink-700 rounded-3xl overflow-hidden shadow-2xl group h-40"
+            >
+              <div className="absolute inset-0">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+              </div>
+              
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs px-2 py-1 rounded-full font-black shadow-lg border border-white/30">
+                  🇮🇳 DESI
+                </div>
+              </div>
+              
+              <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center shadow-lg rotate-12 group-hover:rotate-6 transition-transform">
+                <span className="text-2xl">🎲</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                <div className="mb-3">
+                  <div className="text-white text-xl font-black mb-1">ANDAR BAHAR</div>
+                  <div className="text-orange-100 text-sm font-semibold">Indian Classic</div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <div className="text-yellow-300 font-bold">🎯 2:1 Payout</div>
+                    <div className="text-green-300 font-bold">⚡ Quick Game</div>
                   </div>
                   <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
                     <div className="text-green-300 text-xs font-bold flex items-center">

@@ -1,149 +1,138 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Trophy, Users, Timer, Star, Crown, Gift } from 'lucide-react';
+import { Trophy, Users, Clock, DollarSign, Star, Crown, ArrowLeft, Target, Medal, Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+
+interface Props {
+  onBack: () => void;
+}
 
 interface Tournament {
   id: string;
   name: string;
   game: string;
-  prizePool: string;
+  prizePool: number;
+  entryFee: number;
   participants: number;
   maxParticipants: number;
-  entryFee: string;
-  status: 'upcoming' | 'live' | 'ended';
   startTime: string;
-  endTime: string;
-  description: string;
-  icon: string;
-  bgColor: string;
-  vipOnly: boolean;
-  currentRound?: number;
-  totalRounds?: number;
+  duration: number;
+  status: 'upcoming' | 'live' | 'completed';
+  prizes: { position: string; amount: number }[];
+  isVip: boolean;
 }
 
-interface TournamentProps {
-  onBack: () => void;
-}
-
-export default function ComprehensiveTournamentSystem({ onBack }: TournamentProps) {
-  const [selectedTab, setSelectedTab] = useState<'all' | 'live' | 'upcoming' | 'my-tournaments'>('all');
-  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+export default function ComprehensiveTournamentSystem({ onBack }: Props) {
+  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'history' | 'leaderboard'>('live');
+  const [balance, setBalance] = useState(12580.45);
   const [userTournaments, setUserTournaments] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const tournaments: Tournament[] = [
     {
-      id: 'mega-wingo-championship',
-      name: 'Mega WinGo Championship',
-      game: 'WinGo 3Min',
-      prizePool: '₹50,000',
+      id: 'wingo-mega',
+      name: 'WinGo Mega Championship',
+      game: 'WinGo',
+      prizePool: 250000,
+      entryFee: 500,
       participants: 1247,
       maxParticipants: 2000,
-      entryFee: '₹100',
+      startTime: '2025-07-24T15:00:00',
+      duration: 120,
       status: 'live',
-      startTime: '2025-07-03T14:00:00Z',
-      endTime: '2025-07-03T18:00:00Z',
-      description: 'Ultimate color prediction tournament with massive prizes',
-      icon: '🎯',
-      bgColor: 'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
-      vipOnly: false,
-      currentRound: 3,
-      totalRounds: 10
+      prizes: [
+        { position: '1st', amount: 100000 },
+        { position: '2nd', amount: 50000 },
+        { position: '3rd', amount: 25000 },
+        { position: '4th-10th', amount: 5000 },
+        { position: '11th-50th', amount: 1000 }
+      ],
+      isVip: false
     },
     {
-      id: 'aviator-masters',
-      name: 'Aviator Masters Cup',
+      id: 'aviator-elite',
+      name: 'Aviator Elite Cup',
       game: 'Aviator',
-      prizePool: '₹75,000',
+      prizePool: 150000,
+      entryFee: 1000,
+      participants: 456,
+      maxParticipants: 500,
+      startTime: '2025-07-24T18:00:00',
+      duration: 90,
+      status: 'upcoming',
+      prizes: [
+        { position: '1st', amount: 60000 },
+        { position: '2nd', amount: 30000 },
+        { position: '3rd', amount: 15000 },
+        { position: '4th-20th', amount: 2500 }
+      ],
+      isVip: true
+    },
+    {
+      id: 'roulette-royal',
+      name: 'Royal Roulette Tournament',
+      game: 'Roulette',
+      prizePool: 300000,
+      entryFee: 750,
       participants: 892,
       maxParticipants: 1500,
-      entryFee: '₹150',
+      startTime: '2025-07-24T20:00:00',
+      duration: 180,
       status: 'upcoming',
-      startTime: '2025-07-03T20:00:00Z',
-      endTime: '2025-07-03T23:59:00Z',
-      description: 'High-stakes crash game tournament for skilled players',
-      icon: '✈️',
-      bgColor: 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%)',
-      vipOnly: false
-    },
-    {
-      id: 'vip-diamond-series',
-      name: 'VIP Diamond Series',
-      game: 'Dragon Tiger',
-      prizePool: '₹1,00,000',
-      participants: 234,
-      maxParticipants: 500,
-      entryFee: '₹500',
-      status: 'upcoming',
-      startTime: '2025-07-04T10:00:00Z',
-      endTime: '2025-07-04T22:00:00Z',
-      description: 'Exclusive VIP tournament with premium rewards',
-      icon: '👑',
-      bgColor: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-      vipOnly: true
-    },
-    {
-      id: 'mines-mayhem',
-      name: 'Mines Mayhem Challenge',
-      game: 'Mines',
-      prizePool: '₹25,000',
-      participants: 567,
-      maxParticipants: 1000,
-      entryFee: '₹50',
-      status: 'live',
-      startTime: '2025-07-03T12:00:00Z',
-      endTime: '2025-07-03T16:00:00Z',
-      description: 'Strategic minefield tournament for tacticians',
-      icon: '💎',
-      bgColor: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
-      vipOnly: false,
-      currentRound: 7,
-      totalRounds: 12
-    },
-    {
-      id: 'daily-quick-draw',
-      name: 'Daily Quick Draw',
-      game: 'Multiple Games',
-      prizePool: '₹5,000',
-      participants: 1834,
-      maxParticipants: 3000,
-      entryFee: '₹10',
-      status: 'live',
-      startTime: '2025-07-03T00:00:00Z',
-      endTime: '2025-07-03T23:59:00Z',
-      description: '24-hour open tournament for all skill levels',
-      icon: '⚡',
-      bgColor: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
-      vipOnly: false,
-      currentRound: 1,
-      totalRounds: 1
+      prizes: [
+        { position: '1st', amount: 120000 },
+        { position: '2nd', amount: 60000 },
+        { position: '3rd', amount: 30000 },
+        { position: '4th-25th', amount: 4000 }
+      ],
+      isVip: false
     }
   ];
 
-  const filteredTournaments = tournaments.filter(tournament => {
-    switch (selectedTab) {
-      case 'live':
-        return tournament.status === 'live';
-      case 'upcoming':
-        return tournament.status === 'upcoming';
-      case 'my-tournaments':
-        return userTournaments.includes(tournament.id);
-      default:
-        return true;
-    }
-  });
+  const leaderboard = [
+    { rank: 1, username: 'ProGamer91', score: 125500, avatar: '👑' },
+    { rank: 2, username: 'LuckyWinner', score: 118200, avatar: '🎯' },
+    { rank: 3, username: 'ChampionX', score: 112800, avatar: '⭐' },
+    { rank: 4, username: 'MegaPlayer', score: 108400, avatar: '🔥' },
+    { rank: 5, username: 'EliteGamer', score: 104500, avatar: '💎' },
+    { rank: 6, username: 'YOU', score: 98750, avatar: '🎮' }
+  ];
 
-  const joinTournament = (tournamentId: string) => {
-    if (!userTournaments.includes(tournamentId)) {
-      setUserTournaments(prev => [...prev, tournamentId]);
+  const joinTournament = (tournamentId: string, entryFee: number) => {
+    if (entryFee > balance) {
+      toast({
+        title: "Insufficient Balance",
+        description: "Not enough funds to join this tournament",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (userTournaments.includes(tournamentId)) {
+      toast({
+        title: "Already Joined",
+        description: "You're already registered for this tournament",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setBalance(prev => prev - entryFee);
+    setUserTournaments(prev => [...prev, tournamentId]);
+    
+    toast({
+      title: "Tournament Joined!",
+      description: `Successfully registered for tournament`,
+    });
   };
 
-  const formatTimeLeft = (endTime: string) => {
-    const now = new Date().getTime();
-    const end = new Date(endTime).getTime();
-    const diff = end - now;
+  const getTimeRemaining = (startTime: string) => {
+    const now = new Date();
+    const start = new Date(startTime);
+    const diff = start.getTime() - now.getTime();
     
-    if (diff <= 0) return "Ended";
+    if (diff <= 0) return 'Started';
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -151,277 +140,300 @@ export default function ComprehensiveTournamentSystem({ onBack }: TournamentProp
     return `${hours}h ${minutes}m`;
   };
 
-  if (selectedTournament) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Tournament Detail Header */}
-        <div 
-          className="relative pt-12 pb-6 px-4 text-white"
-          style={{ background: selectedTournament.bgColor }}
-        >
-          <button
-            onClick={() => setSelectedTournament(null)}
-            className="absolute top-4 left-4 p-2 rounded-full bg-black bg-opacity-20"
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          
-          <div className="text-center">
-            <div className="text-6xl mb-4">{selectedTournament.icon}</div>
-            <h1 className="text-2xl font-bold mb-2">{selectedTournament.name}</h1>
-            <p className="text-lg opacity-90">{selectedTournament.game}</p>
-            
-            {selectedTournament.vipOnly && (
-              <div className="mt-2 inline-flex items-center bg-yellow-500 bg-opacity-20 px-3 py-1 rounded-full">
-                <Crown className="w-4 h-4 mr-1" />
-                <span className="text-sm font-bold">VIP ONLY</span>
-              </div>
-            )}
-          </div>
+  const TournamentCard = ({ tournament }: { tournament: Tournament }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`bg-gradient-to-br ${
+        tournament.isVip 
+          ? 'from-yellow-600 to-orange-600' 
+          : 'from-purple-600 to-blue-600'
+      } rounded-xl p-4 mb-4 text-white relative overflow-hidden`}
+    >
+      {tournament.isVip && (
+        <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">
+          VIP
         </div>
-
-        {/* Tournament Stats */}
-        <div className="px-4 py-6 bg-white">
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{selectedTournament.prizePool}</div>
-              <div className="text-sm text-gray-600">Prize Pool</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{selectedTournament.participants}</div>
-              <div className="text-sm text-gray-600">Participants</div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-lg font-bold text-purple-600">{selectedTournament.entryFee}</div>
-              <div className="text-sm text-gray-600">Entry Fee</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-red-600">
-                {selectedTournament.status === 'live' ? formatTimeLeft(selectedTournament.endTime) : 'Upcoming'}
-              </div>
-              <div className="text-sm text-gray-600">Time Left</div>
-            </div>
-          </div>
-
-          {selectedTournament.status === 'live' && selectedTournament.currentRound && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Tournament Progress</span>
-                <span className="text-sm text-gray-600">
-                  Round {selectedTournament.currentRound}/{selectedTournament.totalRounds}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((selectedTournament.currentRound || 1) / (selectedTournament.totalRounds || 1)) * 100}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="mb-6">
-            <h3 className="font-bold mb-2">Tournament Description</h3>
-            <p className="text-gray-600">{selectedTournament.description}</p>
-          </div>
-
-          {/* Join Tournament Button */}
-          <div className="space-y-3">
-            {userTournaments.includes(selectedTournament.id) ? (
-              <div className="w-full bg-green-100 text-green-800 py-4 rounded-xl text-center font-bold">
-                ✅ Already Joined
-              </div>
-            ) : (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => joinTournament(selectedTournament.id)}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg"
-              >
-                Join Tournament - {selectedTournament.entryFee}
-              </motion.button>
-            )}
-            
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-gray-200 text-gray-800 py-3 rounded-xl font-medium"
-            >
-              View Leaderboard
-            </motion.button>
-          </div>
+      )}
+      
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="font-bold text-lg">{tournament.name}</h3>
+          <div className="text-sm opacity-90">{tournament.game}</div>
         </div>
-
-        {/* Prize Distribution */}
-        <div className="px-4 py-6 bg-white mt-2">
-          <h3 className="font-bold mb-4 flex items-center">
-            <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
-            Prize Distribution
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
-                <span className="ml-3 font-medium">1st Place</span>
-              </div>
-              <span className="font-bold text-yellow-600">₹25,000</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
-                <span className="ml-3 font-medium">2nd Place</span>
-              </div>
-              <span className="font-bold text-gray-600">₹15,000</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
-                <span className="ml-3 font-medium">3rd Place</span>
-              </div>
-              <span className="font-bold text-orange-600">₹10,000</span>
-            </div>
-            <div className="text-center text-sm text-gray-600 mt-2">
-              + Prizes for top 50 players
-            </div>
-          </div>
+        <div className="text-right">
+          <div className="text-xs opacity-75">Prize Pool</div>
+          <div className="font-bold text-xl">₹{tournament.prizePool.toLocaleString()}</div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Tournament Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 pt-12 pb-6 px-4 text-white">
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 p-2 rounded-full bg-black bg-opacity-20"
-        >
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </button>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="text-center">
+          <div className="flex items-center justify-center text-green-300 mb-1">
+            <DollarSign className="w-4 h-4 mr-1" />
+          </div>
+          <div className="text-xs opacity-75">Entry Fee</div>
+          <div className="font-bold">₹{tournament.entryFee}</div>
+        </div>
         
         <div className="text-center">
-          <div className="text-5xl mb-4">🏆</div>
-          <h1 className="text-2xl font-bold mb-2">Tournaments</h1>
-          <p className="text-lg opacity-90">Compete for massive prizes</p>
+          <div className="flex items-center justify-center text-blue-300 mb-1">
+            <Users className="w-4 h-4 mr-1" />
+          </div>
+          <div className="text-xs opacity-75">Players</div>
+          <div className="font-bold">{tournament.participants}/{tournament.maxParticipants}</div>
+        </div>
+        
+        <div className="text-center">
+          <div className="flex items-center justify-center text-orange-300 mb-1">
+            <Clock className="w-4 h-4 mr-1" />
+          </div>
+          <div className="text-xs opacity-75">Starts In</div>
+          <div className="font-bold text-sm">{getTimeRemaining(tournament.startTime)}</div>
         </div>
       </div>
 
-      {/* Tournament Stats Banner */}
-      <div className="bg-white mx-4 -mt-4 rounded-2xl p-4 shadow-lg">
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-xl font-bold text-green-600">₹2.5L+</div>
-            <div className="text-xs text-gray-600">Total Prizes</div>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-blue-600">4,572</div>
-            <div className="text-xs text-gray-600">Active Players</div>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-purple-600">12</div>
-            <div className="text-xs text-gray-600">Live Events</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tournament Tabs */}
-      <div className="px-4 py-4">
-        <div className="flex space-x-1 bg-gray-200 rounded-lg p-1">
-          {[
-            { key: 'all', label: 'All', icon: '🎮' },
-            { key: 'live', label: 'Live', icon: '🔴' },
-            { key: 'upcoming', label: 'Upcoming', icon: '⏰' },
-            { key: 'my-tournaments', label: 'Joined', icon: '⭐' }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setSelectedTab(tab.key as any)}
-              className={`flex-1 py-2 px-1 rounded-lg text-xs font-bold transition-all ${
-                selectedTab === tab.key
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
-            >
-              {tab.icon} {tab.label}
-            </button>
+      <div className="mb-4">
+        <div className="text-sm font-bold mb-2">Prize Distribution:</div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {tournament.prizes.slice(0, 4).map((prize, index) => (
+            <div key={index} className="bg-black/20 rounded-lg p-2">
+              <div className="font-bold">{prize.position}</div>
+              <div className="text-yellow-300">₹{prize.amount.toLocaleString()}</div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Tournament List */}
-      <div className="px-4 pb-6 space-y-3">
-        <AnimatePresence>
-          {filteredTournaments.map((tournament) => (
+      {tournament.status === 'upcoming' && (
+        <Button
+          onClick={() => joinTournament(tournament.id, tournament.entryFee)}
+          disabled={userTournaments.includes(tournament.id)}
+          className={`w-full ${
+            userTournaments.includes(tournament.id)
+              ? 'bg-green-600 text-white'
+              : 'bg-white text-gray-900 hover:bg-gray-100'
+          } font-bold`}
+        >
+          {userTournaments.includes(tournament.id) ? (
+            <>
+              <Trophy className="w-4 h-4 mr-2" />
+              JOINED
+            </>
+          ) : (
+            'JOIN TOURNAMENT'
+          )}
+        </Button>
+      )}
+      
+      {tournament.status === 'live' && (
+        <div className="bg-red-500 text-white text-center py-2 rounded-lg font-bold">
+          <div className="flex items-center justify-center">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></div>
+            LIVE NOW
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+
+  const LeaderboardRow = ({ player, index }: { player: any; index: number }) => (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={`flex items-center justify-between p-4 rounded-xl mb-3 ${
+        player.username === 'YOU' 
+          ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white' 
+          : 'bg-gray-800 text-white'
+      }`}
+    >
+      <div className="flex items-center">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold mr-3 ${
+          player.rank === 1 ? 'bg-yellow-500 text-black' :
+          player.rank === 2 ? 'bg-gray-300 text-black' :
+          player.rank === 3 ? 'bg-orange-600 text-white' :
+          'bg-gray-600 text-white'
+        }`}>
+          {player.rank <= 3 ? (
+            player.rank === 1 ? <Crown className="w-5 h-5" /> :
+            player.rank === 2 ? <Medal className="w-5 h-5" /> :
+            <Award className="w-5 h-5" />
+          ) : (
+            player.rank
+          )}
+        </div>
+        <div>
+          <div className="font-bold">{player.username}</div>
+          <div className="text-sm opacity-75">Rank #{player.rank}</div>
+        </div>
+      </div>
+      <div className="text-right">
+        <div className="font-bold text-lg">₹{player.score.toLocaleString()}</div>
+        <div className="text-sm opacity-75">Total Winnings</div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="max-w-md mx-auto bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-yellow-600 to-orange-600 p-4 flex items-center justify-between">
+        <button onClick={onBack} className="text-white">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-xl font-bold">Tournaments</h1>
+          <div className="text-sm opacity-90">Balance: ₹{balance.toFixed(2)}</div>
+        </div>
+        <div className="w-6 h-6" />
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex bg-black/30">
+        {[
+          { key: 'live', label: 'Live', icon: Target },
+          { key: 'upcoming', label: 'Upcoming', icon: Clock },
+          { key: 'leaderboard', label: 'Rankings', icon: Trophy },
+          { key: 'history', label: 'History', icon: Award }
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as any)}
+            className={`flex-1 py-3 px-2 text-center transition-colors ${
+              activeTab === tab.key
+                ? 'bg-yellow-500 text-black'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            <tab.icon className="w-4 h-4 mx-auto mb-1" />
+            <div className="text-xs font-bold">{tab.label}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        <AnimatePresence mode="wait">
+          {activeTab === 'live' && (
             <motion.div
-              key={tournament.id}
+              key="live"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedTournament(tournament)}
-              className="bg-white rounded-2xl p-4 cursor-pointer shadow-sm"
             >
-              <div className="flex items-start space-x-4">
-                <div 
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl text-white"
-                  style={{ background: tournament.bgColor }}
-                >
-                  {tournament.icon}
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">{tournament.name}</h3>
-                      <p className="text-sm text-gray-600">{tournament.game}</p>
+              <div className="mb-4">
+                <h2 className="text-xl font-bold mb-2">Live Tournaments</h2>
+                <div className="text-sm text-gray-300">Currently running competitions</div>
+              </div>
+              {tournaments.filter(t => t.status === 'live').map(tournament => (
+                <TournamentCard key={tournament.id} tournament={tournament} />
+              ))}
+            </motion.div>
+          )}
+
+          {activeTab === 'upcoming' && (
+            <motion.div
+              key="upcoming"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <div className="mb-4">
+                <h2 className="text-xl font-bold mb-2">Upcoming Tournaments</h2>
+                <div className="text-sm text-gray-300">Register now to compete</div>
+              </div>
+              {tournaments.filter(t => t.status === 'upcoming').map(tournament => (
+                <TournamentCard key={tournament.id} tournament={tournament} />
+              ))}
+            </motion.div>
+          )}
+
+          {activeTab === 'leaderboard' && (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <div className="mb-4">
+                <h2 className="text-xl font-bold mb-2">Global Rankings</h2>
+                <div className="text-sm text-gray-300">Top players this week</div>
+              </div>
+              
+              {/* Top 3 Podium */}
+              <div className="bg-gradient-to-br from-yellow-600 to-orange-600 rounded-xl p-4 mb-6">
+                <div className="flex justify-center items-end space-x-4">
+                  {/* 2nd Place */}
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center text-black font-bold text-2xl mb-2">
+                      🥈
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">{tournament.prizePool}</div>
-                      <div className="text-xs text-gray-600">Prize Pool</div>
-                    </div>
+                    <div className="font-bold text-sm">{leaderboard[1].username}</div>
+                    <div className="text-xs">₹{leaderboard[1].score.toLocaleString()}</div>
                   </div>
                   
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center text-xs text-gray-600">
-                        <Users className="w-3 h-3 mr-1" />
-                        {tournament.participants}/{tournament.maxParticipants}
-                      </div>
-                      <div className="flex items-center text-xs text-gray-600">
-                        <Timer className="w-3 h-3 mr-1" />
-                        {tournament.status === 'live' ? formatTimeLeft(tournament.endTime) : 'Upcoming'}
-                      </div>
+                  {/* 1st Place */}
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-3xl mb-2">
+                      👑
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      {tournament.vipOnly && (
-                        <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold">
-                          VIP
-                        </div>
-                      )}
-                      <div className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        tournament.status === 'live' ? 'bg-red-100 text-red-800' :
-                        tournament.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {tournament.status.toUpperCase()}
-                      </div>
-                      {userTournaments.includes(tournament.id) && (
-                        <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">
-                          JOINED
-                        </div>
-                      )}
+                    <div className="font-bold">{leaderboard[0].username}</div>
+                    <div className="text-sm">₹{leaderboard[0].score.toLocaleString()}</div>
+                  </div>
+                  
+                  {/* 3rd Place */}
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-2">
+                      🥉
                     </div>
+                    <div className="font-bold text-sm">{leaderboard[2].username}</div>
+                    <div className="text-xs">₹{leaderboard[2].score.toLocaleString()}</div>
                   </div>
                 </div>
               </div>
+
+              {/* Full Leaderboard */}
+              {leaderboard.map((player, index) => (
+                <LeaderboardRow key={index} player={player} index={index} />
+              ))}
             </motion.div>
-          ))}
+          )}
+
+          {activeTab === 'history' && (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <div className="mb-4">
+                <h2 className="text-xl font-bold mb-2">Tournament History</h2>
+                <div className="text-sm text-gray-300">Your past tournament results</div>
+              </div>
+              
+              <div className="space-y-4">
+                {[
+                  { name: 'WinGo Championship', position: '12th', prize: 2500, date: '2025-07-20' },
+                  { name: 'Aviator Elite Cup', position: '8th', prize: 5000, date: '2025-07-18' },
+                  { name: 'Mines Tournament', position: '3rd', prize: 15000, date: '2025-07-15' }
+                ].map((result, index) => (
+                  <div key={index} className="bg-gray-800 rounded-xl p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold">{result.name}</div>
+                        <div className="text-sm text-gray-300">{result.date}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-yellow-400">{result.position}</div>
+                        <div className="text-green-400">+₹{result.prize.toLocaleString()}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>
