@@ -17,6 +17,9 @@ import RealMoneyAndarBahar from './RealMoneyAndarBahar';
 import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
 import EnhancedWalletSystem from './EnhancedWalletSystem';
 import SocialFeaturesSystem from './SocialFeaturesSystem';
+import RealMoneySicBo from './RealMoneySicBo';
+import ColorTradingSystem from './ColorTradingSystem';
+import AdvancedSecuritySystem from './AdvancedSecuritySystem';
 
 interface User {
   id: number;
@@ -86,6 +89,18 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
 
   if (currentGame === 'real-andarbahar') {
     return <RealMoneyAndarBahar onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'real-sicbo') {
+    return <RealMoneySicBo onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === 'color-trading') {
+    return <ColorTradingSystem onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentTab === 'security') {
+    return <AdvancedSecuritySystem onBack={() => setCurrentTab('home')} />;
   }
 
   if (currentGame === 'wingo') {
@@ -683,6 +698,92 @@ export default function MarketReady91Club({ user, onLogout }: Props) {
                   <div className="text-xs">
                     <div className="text-yellow-300 font-bold">🎯 2:1 Payout</div>
                     <div className="text-green-300 font-bold">⚡ Quick Game</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
+                    <div className="text-green-300 text-xs font-bold flex items-center">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                      HOT
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Real Money Sic Bo Game */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('real-sicbo')}
+              className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-700 rounded-3xl overflow-hidden shadow-2xl group h-40"
+            >
+              <div className="absolute inset-0">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+              </div>
+              
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs px-2 py-1 rounded-full font-black shadow-lg border border-white/30">
+                  🎲 DICE
+                </div>
+              </div>
+              
+              <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg rotate-12 group-hover:rotate-6 transition-transform">
+                <span className="text-2xl">🎲</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                <div className="mb-3">
+                  <div className="text-white text-xl font-black mb-1">SIC BO</div>
+                  <div className="text-purple-100 text-sm font-semibold">Three Dice Game</div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <div className="text-yellow-300 font-bold">🎯 60:1 Max</div>
+                    <div className="text-green-300 font-bold">⚡ Fast Game</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
+                    <div className="text-green-300 text-xs font-bold flex items-center">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                      NEW
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Color Trading System */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentGame('color-trading')}
+              className="relative bg-gradient-to-br from-yellow-600 via-orange-600 to-red-700 rounded-3xl overflow-hidden shadow-2xl group h-40"
+            >
+              <div className="absolute inset-0">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+              </div>
+              
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white text-xs px-2 py-1 rounded-full font-black shadow-lg border border-white/30">
+                  📈 TRADING
+                </div>
+              </div>
+              
+              <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg rotate-12 group-hover:rotate-6 transition-transform">
+                <span className="text-2xl">📊</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                <div className="mb-3">
+                  <div className="text-white text-xl font-black mb-1">COLOR TRADING</div>
+                  <div className="text-orange-100 text-sm font-semibold">Market Trading</div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <div className="text-yellow-300 font-bold">💰 High Returns</div>
+                    <div className="text-green-300 font-bold">📈 Live Market</div>
                   </div>
                   <div className="bg-green-500/20 rounded-full px-2 py-1 border border-green-400/30">
                     <div className="text-green-300 text-xs font-bold flex items-center">
