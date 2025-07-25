@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   phone: text("phone").unique().notNull(),
   password: text("password").notNull(),
   balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00"),
+  walletBalance: text("wallet_balance").default("0.00"),
   isVerified: boolean("is_verified").default(false),
   kycStatus: text("kyc_status").default("pending"), // pending, approved, rejected
   vipLevel: integer("vip_level").default(1),
@@ -22,6 +23,33 @@ export const users = pgTable("users", {
   totalWon: decimal("total_won", { precision: 12, scale: 2 }).default("0.00"),
   gamesPlayed: integer("games_played").default(0),
   winRate: decimal("win_rate", { precision: 5, scale: 2 }).default("0.00"),
+});
+
+// Game transactions for real money betting
+export const gameTransactions = pgTable("game_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  gameId: text("game_id").notNull(),
+  type: text("type").notNull(), // bet, win, loss
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  betType: text("bet_type").notNull(),
+  betDetails: text("bet_details"),
+  status: text("status").default("completed"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Wallet transactions for deposits/withdrawals
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  type: text("type").notNull(), // deposit, withdrawal, game_bet, game_win
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("pending"),
+  description: text("description"),
+  transactionId: text("transaction_id"),
+  razorpayOrderId: text("razorpay_order_id"),
+  accountDetails: text("account_details"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Game sessions and results

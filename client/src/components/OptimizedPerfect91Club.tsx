@@ -9,6 +9,8 @@ import RealMoneySicBo from './RealMoneySicBo';
 import ColorTradingSystem from './ColorTradingSystem';
 import AdvancedSecuritySystem from './AdvancedSecuritySystem';
 import EnhancedWalletSystem from './EnhancedWalletSystem';
+import RealMoneyPaymentSystem from './RealMoneyPaymentSystem';
+import RealMoneyWithdrawal from './RealMoneyWithdrawal';
 import ComprehensiveTournamentSystem from './ComprehensiveTournamentSystem';
 import SocialFeaturesSystem from './SocialFeaturesSystem';
 
@@ -50,6 +52,7 @@ interface GameData {
 export default function OptimizedPerfect91Club({ user, onLogout }: Props) {
   const [currentTab, setCurrentTab] = useState('home');
   const [currentGame, setCurrentGame] = useState<string | null>(null);
+  const [currentPaymentView, setCurrentPaymentView] = useState<'wallet' | 'deposit' | 'withdraw' | null>(null);
   const [balance, setBalance] = useState(12580.45);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
@@ -207,6 +210,17 @@ export default function OptimizedPerfect91Club({ user, onLogout }: Props) {
     return GameComponent ? <GameComponent onBack={() => setCurrentGame(null)} /> : null;
   }, [currentGame]);
 
+  // Payment system handlers
+  const handleDepositSuccess = useCallback((amount: number, method: string) => {
+    setBalance(prev => prev + amount);
+    setCurrentPaymentView(null);
+    setCurrentTab('wallet');
+    toast({
+      title: "Deposit Successful",
+      description: `₹${amount} added via ${method}`,
+    });
+  }, [toast]);
+
   // Tab component renderer
   const renderTabComponent = useCallback(() => {
     const tabComponents: { [key: string]: React.ComponentType<{ onBack: () => void }> } = {
@@ -223,6 +237,24 @@ export default function OptimizedPerfect91Club({ user, onLogout }: Props) {
   // Early returns for better performance
   if (currentGame) {
     return renderGameComponent();
+  }
+
+  if (currentPaymentView === 'deposit') {
+    return (
+      <RealMoneyPaymentSystem 
+        onBack={() => setCurrentPaymentView(null)} 
+        onPaymentSuccess={handleDepositSuccess}
+      />
+    );
+  }
+
+  if (currentPaymentView === 'withdraw') {
+    return (
+      <RealMoneyWithdrawal 
+        onBack={() => setCurrentPaymentView(null)} 
+        userBalance={balance}
+      />
+    );
   }
 
   if (currentTab !== 'home') {
@@ -280,9 +312,23 @@ export default function OptimizedPerfect91Club({ user, onLogout }: Props) {
                 <div className="text-sm text-pink-100 mb-1">Total Balance</div>
                 <div className="text-2xl font-black">₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
               </div>
-              <div className="text-right">
+              <div className="text-right space-y-2">
                 <div className="text-sm text-green-200 mb-1">Today's Profit</div>
                 <div className="text-lg font-bold text-green-300">+₹2,340.75</div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setCurrentPaymentView('deposit')}
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold transition-colors"
+                  >
+                    Add Money
+                  </button>
+                  <button
+                    onClick={() => setCurrentPaymentView('withdraw')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold transition-colors"
+                  >
+                    Withdraw
+                  </button>
+                </div>
               </div>
             </div>
           </div>
