@@ -2,7 +2,7 @@ import { Perfect91Club } from './components/Perfect91Club';
 import Authentic91Club from './components/Authentic91Club';
 import ExactIndian91Club from './components/ExactIndian91Club';
 import Perfect91ClubReplica from './components/Perfect91ClubReplica';
-import MarketReady91Club from './components/MarketReady91Club';
+import OptimizedPerfect91Club from './components/OptimizedPerfect91Club';
 import QuickGameLauncher from './components/QuickGameLauncher';
 import AuthenticationSystem from './components/AuthenticationSystem';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -91,7 +91,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       {isAuthenticated ? (
-        <MarketReady91Club user={user} onLogout={handleLogout} />
+        <OptimizedPerfect91Club user={user} onLogout={handleLogout} />
       ) : (
         <AuthenticationSystem onSuccess={handleLogin} />
       )}
