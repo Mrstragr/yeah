@@ -1,14 +1,14 @@
 import type { Express } from 'express';
 import { realMoneyEngine } from './real-money-engine';
-import { AuthRequest } from './auth';
+import { AuthRequest, authenticateToken } from './auth';
 
 export function registerRealMoneyRoutes(app: Express) {
   
   // Place a bet in any game
-  app.post('/api/games/place-bet', async (req: AuthRequest, res) => {
+  app.post('/api/games/place-bet', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { gameId, betAmount, betType, betDetails, multiplier } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       // Validate bet amount
       if (!betAmount || betAmount <= 0) {
@@ -55,7 +55,7 @@ export function registerRealMoneyRoutes(app: Express) {
   app.post('/api/games/process-win', authenticateToken, async (req, res) => {
     try {
       const { gameId, betTransactionId, winAmount, multiplier } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       if (!winAmount || winAmount <= 0) {
         return res.status(400).json({ success: false, error: 'Invalid win amount' });
@@ -83,7 +83,7 @@ export function registerRealMoneyRoutes(app: Express) {
   app.post('/api/wallet/create-deposit-order', authenticateToken, async (req, res) => {
     try {
       const { amount } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       // Validate amount
       if (!amount || amount < 100) {
@@ -118,7 +118,7 @@ export function registerRealMoneyRoutes(app: Express) {
   app.post('/api/wallet/verify-deposit', authenticateToken, async (req, res) => {
     try {
       const { orderId, paymentId, signature, amount } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       const result = await realMoneyEngine.verifyAndProcessDeposit(orderId, paymentId, signature, userId, amount);
 
@@ -142,7 +142,7 @@ export function registerRealMoneyRoutes(app: Express) {
   app.post('/api/wallet/withdraw', authenticateToken, async (req, res) => {
     try {
       const { amount, accountDetails } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       // Validate amount
       if (!amount || amount < 500) {
@@ -179,7 +179,7 @@ export function registerRealMoneyRoutes(app: Express) {
   // Get user balance
   app.get('/api/wallet/balance', authenticateToken, async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const result = await realMoneyEngine.getUserBalance(userId);
 
       if (result.success) {
@@ -200,7 +200,7 @@ export function registerRealMoneyRoutes(app: Express) {
   // Get transaction history
   app.get('/api/wallet/transactions', authenticateToken, async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const limit = parseInt(req.query.limit as string) || 50;
 
       const result = await realMoneyEngine.getTransactionHistory(userId, limit);
@@ -224,7 +224,7 @@ export function registerRealMoneyRoutes(app: Express) {
   app.post('/api/wallet/verify-upi', authenticateToken, async (req, res) => {
     try {
       const { upiId, amount, transactionRef } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
 
       // In production, integrate with UPI gateway for verification
       // For now, we'll simulate verification
@@ -267,7 +267,7 @@ export function registerRealMoneyRoutes(app: Express) {
   // Get game statistics
   app.get('/api/games/stats', authenticateToken, async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       
       // In production, calculate real statistics from database
       const stats = {

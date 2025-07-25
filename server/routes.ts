@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { Server } from 'http';
+import { Server, createServer } from 'http';
 import { authenticateToken, AuthRequest } from './auth.js';
 import { storage } from './storage.js';
 import { gameEngine } from './gameEngine.js';
@@ -797,5 +797,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Register real money gaming routes
-  return await registerRealMoneyRoutes(app);
+  registerRealMoneyRoutes(app);
+  
+  // Create and return HTTP server
+  return createServer(app);
 }
