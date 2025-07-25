@@ -26,8 +26,10 @@ interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: number, amount: string, operation: 'add' | 'subtract'): Promise<User>;
+  updateUserLastLogin(userId: number): Promise<void>;
   
   // Transaction management
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -67,6 +69,11 @@ class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
@@ -96,6 +103,16 @@ class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async updateUserLastLogin(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        lastLoginAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   // Transaction management
