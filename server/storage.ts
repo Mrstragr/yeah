@@ -3,7 +3,7 @@ import {
   users, 
   transactions, 
   gameResults, 
-  userBets, 
+  userChallenges, 
   gamePeriods, 
   kycDocuments,
   type User, 
@@ -12,8 +12,8 @@ import {
   type InsertTransaction,
   type GameResult,
   type InsertGameResult,
-  type UserBet,
-  type InsertUserBet,
+  type UserChallenge,
+  type InsertUserChallenge,
   type GamePeriod,
   type KycDocument,
   type InsertKycDocument
@@ -40,9 +40,9 @@ interface IStorage {
   createGameResult(gameResult: InsertGameResult): Promise<GameResult>;
   getUserGameHistory(userId: number, gameType?: string, limit?: number): Promise<GameResult[]>;
   
-  // Betting system
-  createUserBet(bet: InsertUserBet): Promise<UserBet>;
-  getUserActiveBets(userId: number, gameType: string): Promise<UserBet[]>;
+  // Challenge system (skill-based gaming)
+  createUserChallenge(challenge: InsertUserChallenge): Promise<UserChallenge>;
+  getUserActiveChallenges(userId: number, gameType: string): Promise<UserChallenge[]>;
   getCurrentGamePeriod(gameType: string): Promise<GamePeriod | undefined>;
   createGamePeriod(gameType: string, period: string): Promise<GamePeriod>;
   
@@ -175,23 +175,23 @@ class DatabaseStorage implements IStorage {
     return await query;
   }
 
-  // Betting system
-  async createUserBet(bet: InsertUserBet): Promise<UserBet> {
-    const [newBet] = await db
-      .insert(userBets)
-      .values(bet)
+  // Challenge system (skill-based gaming)
+  async createUserChallenge(challenge: InsertUserChallenge): Promise<UserChallenge> {
+    const [newChallenge] = await db
+      .insert(userChallenges)
+      .values(challenge)
       .returning();
-    return newBet;
+    return newChallenge;
   }
 
-  async getUserActiveBets(userId: number, gameType: string): Promise<UserBet[]> {
+  async getUserActiveChallenges(userId: number, gameType: string): Promise<UserChallenge[]> {
     return await db
       .select()
-      .from(userBets)
+      .from(userChallenges)
       .where(and(
-        eq(userBets.userId, userId),
-        eq(userBets.gameType, gameType),
-        eq(userBets.status, 'active')
+        eq(userChallenges.userId, userId),
+        eq(userChallenges.gameType, gameType),
+        eq(userChallenges.status, 'active')
       ));
   }
 

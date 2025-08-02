@@ -32,8 +32,8 @@ export const gameTransactions = pgTable("game_transactions", {
   gameId: text("game_id").notNull(),
   type: text("type").notNull(), // bet, win, loss
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  betType: text("bet_type").notNull(),
-  betDetails: text("bet_details"),
+  challengeType: text("challenge_type").notNull(),
+  challengeDetails: text("challenge_details"),
   status: text("status").default("completed"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -42,7 +42,7 @@ export const gameTransactions = pgTable("game_transactions", {
 export const walletTransactions = pgTable("wallet_transactions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  type: text("type").notNull(), // deposit, withdrawal, game_bet, game_win
+  type: text("type").notNull(), // deposit, withdrawal, skill_challenge, challenge_win
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   status: text("status").default("pending"),
   description: text("description"),
@@ -57,7 +57,7 @@ export const gameResults = pgTable("game_results", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
   gameType: text("game_type").notNull(), // wingo, aviator, k3, 5d
-  betAmount: decimal("bet_amount", { precision: 10, scale: 2 }).notNull(),
+  challengeAmount: decimal("challenge_amount", { precision: 10, scale: 2 }).notNull(),
   winAmount: decimal("win_amount", { precision: 10, scale: 2 }).default("0.00"),
   multiplier: decimal("multiplier", { precision: 8, scale: 2 }).default("0.00"),
   gameData: json("game_data"), // Store game-specific data
@@ -91,19 +91,19 @@ export const gamePeriods = pgTable("game_periods", {
   status: text("status").default("active"), // active, completed
   startTime: timestamp("start_time").defaultNow(),
   endTime: timestamp("end_time"),
-  totalBets: integer("total_bets").default(0),
+  totalChallenges: integer("total_challenges").default(0),
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).default("0.00"),
 });
 
 // User bets for current periods
-export const userBets = pgTable("user_bets", {
+export const userChallenges = pgTable("user_challenges", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
   periodId: integer("period_id").references(() => gamePeriods.id),
   gameType: text("game_type").notNull(),
-  betType: text("bet_type").notNull(), // color, number, size, etc.
-  betValue: text("bet_value").notNull(), // green, red, violet, 0-9, big, small
-  betAmount: decimal("bet_amount", { precision: 10, scale: 2 }).notNull(),
+  challengeType: text("challenge_type").notNull(), // color, number, size, etc.
+  challengeValue: text("challenge_value").notNull(), // green, red, violet, 0-9, big, small
+  challengeAmount: decimal("challenge_amount", { precision: 10, scale: 2 }).notNull(),
   multiplier: decimal("multiplier", { precision: 8, scale: 2 }).notNull(),
   status: text("status").default("active"), // active, won, lost
   winAmount: decimal("win_amount", { precision: 10, scale: 2 }).default("0.00"),
@@ -163,7 +163,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   updatedAt: true,
 });
 
-export const insertUserBetSchema = createInsertSchema(userBets).omit({
+export const insertUserChallengeSchema = createInsertSchema(userChallenges).omit({
   id: true,
   createdAt: true,
 });
@@ -181,8 +181,8 @@ export type GameResult = typeof gameResults.$inferSelect;
 export type InsertGameResult = z.infer<typeof insertGameResultSchema>;
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
-export type UserBet = typeof userBets.$inferSelect;
-export type InsertUserBet = z.infer<typeof insertUserBetSchema>;
+export type UserChallenge = typeof userChallenges.$inferSelect;
+export type InsertUserChallenge = z.infer<typeof insertUserChallengeSchema>;
 export type KycDocument = typeof kycDocuments.$inferSelect;
 export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
 export type GamePeriod = typeof gamePeriods.$inferSelect;
