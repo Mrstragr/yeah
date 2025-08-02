@@ -109,7 +109,6 @@ class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({ 
-        lastLoginAt: new Date(),
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -158,21 +157,24 @@ class DatabaseStorage implements IStorage {
   }
 
   async getUserGameHistory(userId: number, gameType?: string, limit: number = 50): Promise<GameResult[]> {
-    let query = db
+    if (gameType) {
+      return await db
+        .select()
+        .from(gameResults)
+        .where(and(
+          eq(gameResults.userId, userId),
+          eq(gameResults.gameType, gameType)
+        ))
+        .orderBy(desc(gameResults.createdAt))
+        .limit(limit);
+    }
+
+    return await db
       .select()
       .from(gameResults)
       .where(eq(gameResults.userId, userId))
       .orderBy(desc(gameResults.createdAt))
       .limit(limit);
-
-    if (gameType) {
-      query = query.where(and(
-        eq(gameResults.userId, userId),
-        eq(gameResults.gameType, gameType)
-      ));
-    }
-
-    return await query;
   }
 
   // Challenge system (skill-based gaming)

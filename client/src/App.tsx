@@ -5,6 +5,9 @@ import Perfect91ClubReplica from './components/Perfect91ClubReplica';
 import OptimizedPerfect91Club from './components/OptimizedPerfect91Club';
 import QuickGameLauncher from './components/QuickGameLauncher';
 import AuthenticationSystem from './components/AuthenticationSystem';
+import { StateRestrictionChecker } from './components/compliance/StateRestrictionChecker';
+import { ResponsibleGamingTools } from './components/compliance/ResponsibleGamingTools';
+import { LegalComplianceDashboard } from './components/compliance/LegalComplianceDashboard';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { queryClient } from '@/lib/queryClient';
@@ -15,6 +18,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [stateVerified, setStateVerified] = useState(false);
+  const [userState, setUserState] = useState<string>('');
+  const [showComplianceDashboard, setShowComplianceDashboard] = useState(false);
 
 
   useEffect(() => {
@@ -66,6 +72,15 @@ export default function App() {
     setIsAuthenticated(false);
   };
 
+  const handleStateVerification = (isAllowed: boolean, state: string) => {
+    setUserState(state);
+    setStateVerified(isAllowed);
+    if (!isAllowed) {
+      // User is in restricted state, they cannot proceed
+      console.log(`Access denied for state: ${state}`);
+    }
+  };
+
   if (!isReady) {
     return (
       <div style={{ 
@@ -90,11 +105,37 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isAuthenticated ? (
-        <OptimizedPerfect91Club user={user} onLogout={handleLogout} />
-      ) : (
+      {!stateVerified && (
+        <StateRestrictionChecker onStateVerified={handleStateVerification} />
+      )}
+      
+      {stateVerified && !isAuthenticated && (
         <AuthenticationSystem onSuccess={handleLogin} />
       )}
+      
+      {stateVerified && isAuthenticated && (
+        <div>
+          {showComplianceDashboard ? (
+            <LegalComplianceDashboard />
+          ) : (
+            <OptimizedPerfect91Club 
+              user={user} 
+              onLogout={handleLogout}
+            />
+          )}
+          
+          {/* Compliance Dashboard Toggle */}
+          <div className="fixed top-4 right-4 z-50">
+            <button
+              onClick={() => setShowComplianceDashboard(!showComplianceDashboard)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+            >
+              {showComplianceDashboard ? 'Back to Games' : 'Legal Compliance'}
+            </button>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </QueryClientProvider>
   );
