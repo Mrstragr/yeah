@@ -446,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Deduct bet amount from user balance
       const newBalance = currentBalance - betAmount;
-      await storage.updateUserBalance(userId, newBalance.toString());
+      await storage.updateUserBalance(userId, newBalance.toString(), 'subtract');
       
       // Process the bet
       let result;
@@ -485,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // If won, add winnings to balance
           if (wingoIsWin) {
             const finalBalance = newBalance + (betAmount * wingoMultiplier);
-            await storage.updateUserBalance(userId, finalBalance.toString());
+            await storage.updateUserBalance(userId, finalBalance.toString(), 'add');
           }
           break;
           
@@ -497,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Cash out - add winnings to balance
               const winAmount = req.body.winAmount || betAmount * 2;
               const finalBalance = newBalance + winAmount;
-              await storage.updateUserBalance(userId, finalBalance.toString());
+              await storage.updateUserBalance(userId, finalBalance.toString(), 'add');
               
               result = {
                 success: true,
@@ -548,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         balance: user.balance || '0.00',
         walletBalance: user.walletBalance || '10814.00',
-        bonusBalance: user.bonusBalance || '100.00'
+        bonusBalance: '100.00' // Demo bonus balance
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -558,7 +558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/wallet/transactions', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
-      const transactions = await storage.getUserWalletTransactions(req.user!.id, limit);
+      const transactions = await storage.getUserTransactions(req.user!.id, limit);
       res.json({ transactions });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -635,11 +635,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { amount, method } = req.body;
       const user = await storage.getUser(req.user!.id);
       
-      if (!user || parseFloat(user.walletBalance) < amount) {
+      if (!user || parseFloat(user.walletBalance || '0') < amount) {
         return res.status(400).json({ error: 'Insufficient balance' });
       }
       
-      const transaction = await storage.createWalletTransaction({
+      const transaction = await storage.createTransaction({
         userId: req.user!.id,
         type: 'withdrawal',
         amount: amount.toString(),
@@ -647,8 +647,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod: method || 'demo'
       });
       
-      const newBalance = parseFloat(user.walletBalance) - amount;
-      await storage.updateUserWalletBalance(req.user!.id, newBalance.toString());
+      const newBalance = parseFloat(user.walletBalance || '0') - amount;
+      await storage.updateUserBalance(req.user!.id, newBalance.toString(), 'subtract');
       
       res.json({ success: true, transaction });
     } catch (error: any) {
