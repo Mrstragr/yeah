@@ -2,7 +2,7 @@ import { Perfect91Club } from './components/Perfect91Club';
 import Authentic91Club from './components/Authentic91Club';
 import ExactIndian91Club from './components/ExactIndian91Club';
 import Perfect91ClubReplica from './components/Perfect91ClubReplica';
-import OptimizedPerfect91Club from './components/OptimizedPerfect91Club';
+import TashanWinMain from './pages/tashanwin-main-clean';
 import QuickGameLauncher from './components/QuickGameLauncher';
 import AuthenticationSystem from './components/AuthenticationSystem';
 import { StateRestrictionChecker } from './components/compliance/StateRestrictionChecker';
@@ -118,7 +118,7 @@ export default function App() {
           {showComplianceDashboard ? (
             <LegalComplianceDashboard />
           ) : (
-            <OptimizedPerfect91Club 
+            <TashanWinMain 
               user={user} 
               onLogout={handleLogout}
             />
